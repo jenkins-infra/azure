@@ -1,0 +1,10 @@
+= Azure Resources
+
+
+== Tools
+
+* link:https://www.terraform.io/docs/providers/azurerm/index.html[Terraform ARM provider]
+
+== Reference
+
+* link:https://github.com/Azure/azure-quickstart-templates[ARM Quick-start Templates]

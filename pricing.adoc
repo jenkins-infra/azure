@@ -1,0 +1,71 @@
+= Azure Pricing
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+
+
+[NOTE]
+====
+This is a collection of pricing notes collected by link:/rtyler[rtyler] to help
+scope out the appropriate machine sizes and other resources on Azure for the
+Jenkins project. if you find this information useful for non-Jenkins purposes,
+all the better.
+====
+
+
+== Compute
+
+.Pricing
+|===
+| Size | Price per month |   Region   | Cores |  RAM  | Notes
+
+|  A0  |       $13       |   West US  |   1   |  0.75 | Basic tier
+|  A0  |       $13       |   East US  |   1   |  0.75 | Basic tier
+|  A0  |       $15       |   West US  |   1   |  0.75 |
+|  A1  |       $35       |   West US  |   1   |  1.75 | Basic tier
+|  A1  |       $33       |   East US  |   1   |  1.75 | Basic tier
+|  A1  |       $45       |   West US  |   1   |  1.75 |
+|  A2  |       $70       |   West US  |   2   |  3.5  | Basic tier
+|  A2  |       $65       |   East US  |   2   |  3.5  | Basic tier
+|  A2  |       $89       |   West US  |   2   |  3.5  |
+|  A3  |       $140      |   West US  |   4   |  7    | Basic tier
+|  A3  |       $131      |   East US  |   4   |  7    | Basic tier
+|  A3  |       $179      |   West US  |   4   |  7    |
+|  A4  |       $280      |   West US  |   8   |  14   | Basic tier
+|  A4  |       $262      |   East US  |   8   |  14   | Basic tier
+|  A4  |       $357      |   West US  |   8   |  14   |
+|  A5  |       $186      |   West US  |   2   |  14   |
+|  A6  |       $372      |   West US  |   4   |  28   |
+|  A7  |       $744      |   West US  |   8   |  56   |
+|  D1  |       $57       |   West US  |   1   |  3.5  |
+|  D1  |       $50       |  East US 2 |   1   |  3.5  |
+|  D2  |       $115      |   West US  |   2   |  7    |
+|  D2  |       $100      |  East US 2 |   2   |  7    |
+|  D3  |       $229      |   West US  |   4   |  14   |
+|  D3  |       $199      |  East US 2 |   4   |  14   |
+|  D4  |       $458      |   West US  |   8   |  28   |
+|  D4  |       $399      |  East US 2 |   8   |  28   |
+|  D11 |       $145      |   West US  |   2   |  14   |
+|  D11 |       $130      |  East US 2 |   2   |  14   |
+|  D12 |       $290      |   West US  |   4   |  28   |
+|  D12 |       $260      |  East US 2 |   4   |  28   |
+|  D13 |       $580      |   West US  |   8   |  56   |
+|  D13 |       $521      |  East US 2 |   8   |  56   |
+|  D14 |       $1147     |   West US  |   16  |  112  |
+|  D14 |       $1032     |  East US 2 |   16  |  112  |
+|===
+
+*General purpose compute: Basic*
+
+West US is priced identically, from what I have seen, with: Central US, North
+Central US, South Central US
+
+East US and East US 2 are priced identically.
+
+
+*Optimized compute*
+
+West US is priced identically with all (US) regions *except* East US 2 and
+South Central US.
