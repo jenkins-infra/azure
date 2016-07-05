@@ -1,0 +1,78 @@
+= Jenkins infra on Azure
+
+:toc:
+
+This repository is meant to hold documentation, tooling and other resources
+related to the link:https://jenkins.io[Jenkins] project's migration to
+link:https://azure.com[Azure].
+
+
+
+== Migration Plan
+
+This migration plan is for the
+link:https://jenkins.io/blog/2016/05/18/announcing-azure-partnership/[partnership
+with Microsoft] to run Jenkins project infrastructure on Azure.
+
+=== Resources
+
+* link:https://github.com/jenkins-infra/jenkins-infra[Puppet repository]
+* link:https://p.datadoghq.com/sb/0Igb9a-a5ff8c4199[Public Datadog Dashboard]
+* link:https://ci.jenkins.io[Jenkins-on-Jenkins server]
+
+
+=== Project Milestones
+
+==== Proof-of-concept with Azure provisioned infrastructure
+
+Spin up resources connected to the existing Jenkins puppet master
+(puppet.jenkins.io) in Azure.
+
+* Basic proof of concept of Puppet/ARM integration, make sure we can manage these Azure resources effectively.
+* Some candidates for the purpose of these resources (all non-critical in project infra): Windows build machines for ci.j.o, javadocs site, opengrok installation
+
+===== Scoped Work
+
+The main areas of work for this milestone would be:
+
+* Deciding on a strategy for provisioning resources (virtual machines, load
+  balancers, etc) in Azure. This could entail using Terraform, Azure Resource
+  Manager, the puppetlabs/azure module or some combination thereof.
+* Define the Azure Virtual Network (VPC equivalent) for production machines in
+  Azure to be deployed into
+* Define pattern for a "base" virtual machine, based off of Ubuntu 14.04 LTS
+  with Datadog, Docker, and other basic tools installed. This could take the
+  form of a custom image, or something more stock, depending on what works out
+  best on Azure
+* Provision staging resources for the service, whether attached to
+  puppet.jenkins.io or not is yet to be determined.
+
+Estimated time to complete: 2 man-weeks
+
+==== Provision jenkins.io static site
+
+* High visibility but low overhead since it's just a static site
+* Just jenkins.io, none of the supporting applications in the namespace
+
+
+==== Provision alternate Jenkins distribution architecture with Azure CDN
+
+* Yum repository driven through Azure
+* Apt repository driven through Azure
+* Basic .war and update center (how plugins are delivered)
+* This would be alternate so not quite handling production traffic yet, but would allow for beta testing of the release pipeline on the project side and identifying potential issues with end-to-end SSL distribution
+
+
+==== Migrate primary Jenkins distribution to Azure
+
+==== Provision new ci.jenkins.io on Azure
+
+* Dynamically provisioning Jenkins build nodes via the Azure plugin
+* Jenkins master running on Azure
+
+==== Migrate JIRA/Confluence to Azure
+
+* Big for project contributors, and a huge pain in the ass but otherwise not very
+  note-worthy
+
+==== Migrate remaining stragglers
