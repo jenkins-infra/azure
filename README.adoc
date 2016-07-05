@@ -1,5 +1,9 @@
 = Jenkins infra on Azure
-
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
 :toc:
 
 This repository is meant to hold documentation, tooling and other resources
