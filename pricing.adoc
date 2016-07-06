@@ -15,7 +15,14 @@ all the better.
 ====
 
 
+== Overall Infra Costs
+
+Most of the cost analysis and planning is being performed in
+link:https://docs.google.com/spreadsheets/d/1JY9IjP6gHMLaZma3SGtcgQbfIt6E-E9AjbfdJjvVjPw/edit?usp=sharing[this spreadsheet].
+
+
 == Compute
+
 
 .Pricing
 |===
