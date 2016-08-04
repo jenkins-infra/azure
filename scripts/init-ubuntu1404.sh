@@ -1,7 +1,7 @@
 #!/bin/sh
 
 ### USAGE
-# curl -O https://raw.githubusercontent.com/jenkins-infra/azure/master/scripts/init-ubuntu1404.sh && sudo bash ./init-ubuntu1404.sh && newgrp docker
+# curl -O https://raw.githubusercontent.com/jenkins-infra/azure/master/scripts/init-ubuntu1404.sh && sudo bash ./init-ubuntu1404.sh
 ###
 
 # This script is designed to be used via the "Init Script" facility in the Azure cloud plugin for Jenkins.
