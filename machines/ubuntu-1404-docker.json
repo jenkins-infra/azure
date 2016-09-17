@@ -28,7 +28,7 @@
       "inline": [
         "sudo apt-get update",
         "curl -O https://raw.githubusercontent.com/jenkins-infra/azure/master/scripts/init-ubuntu1404.sh && sudo bash ./init-ubuntu1404.sh",
-        "sudo /usr/sbin/useradd --home-dir /home/azureuser --groups admin docker --create-home azureuser"
+        "sudo /usr/sbin/useradd --home-dir /home/azureuser --groups admin,docker --create-home azureuser"
 
       ],
       "inline_shebang": "/bin/sh -x",
