@@ -3,9 +3,14 @@
 require 'set'
 require 'azure/storage'
 
+# NOTE: Be sure to set the environment variables:
+# export AZURE_STORAGE_ACCOUNT = <your azure storage account name>
+# export AZURE_STORAGE_KEY = <your azure storage access key>
+
 BASE_DIR = '/srv/releases/jenkins/'
 
-client = Azure::Storage::Client.create
+client = Azure::Storage::Client.create(:storage_account_name => ENV['AZURE_STORAGE_ACCOUNT'],
+                                       :storage_access_key => ENV['AZURE_STORAGE_KEY'])
 blobs = client.blob_client
 
 blobs.list_containers.each do |container|
