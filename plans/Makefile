@@ -7,7 +7,10 @@ plan: validate
 	$(TERRAFORM) plan --var-file=$(VARFILE) .
 
 validate: 
-	$(TERRAFORM) validate --var-file=$(VARFILE) *.tf
+	$(TERRAFORM) validate *.tf
+
+apply: validate
+	$(TERRAFORM) apply --var-file=$(VARFILE) .
 
 
-.PHONY: validate plan
+.PHONY: validate plan apply
