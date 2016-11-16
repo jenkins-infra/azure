@@ -1,0 +1,70 @@
+= Azure tooling setup
+
+This document is meant to outline how you can set up your local environment for
+hacking on the Azure tooling for the Jenkins project infrastructure.
+
+
+All examples below for setting up Azure resources are done with the
+link:https://github.com/azure/azure-cli[azure-cli].
+
+
+== Setting up Terraform
+
+link:http://terraform.io[Terraform]
+can be used via the
+link:https://www.terraform.io/docs/providers/azurerm/index.html[AzureRM provider]
+which comes built in with recent versions of Terraform.
+
+In order to authenticate against Azure, you must create some Azure Active
+Directory and other related authentication and authorization objects.
+
+
+*Generate an authentication token*
+
+[source]
+----
+openssl rand -base64 24
+----
+
+This will be needed later, so don't lose it!
+
+
+*Creating an OAuth Application*
+
+[source]
+----
+az ad app create --display-name jenkins-terraform \
+                    --homepage http://example.com/jenkins-terraform \
+                    --identifier-uris http://example.com/jenkins-terraform \
+                    --password $GENERATED_TOKEN
+----
+
+
+We can then retrieve the Application's ID, this assumes the
+link:https://stedolan.github.io/jq/[jq]
+tool is installed:
+
+[source]
+----
+az ad app list -o json | jq -r '.[] | select(.displayName | contains("jenkins-terraform")) | .appId'
+----
+
+
+Since permissions cannot be directly granted to an application, we must create a
+Service Principle associated with the application and grant permissions to that.
+
+*Creating a Service Principle*
+
+[source]
+----
+az ad sp create --id $(az ad app list -o json | jq -r '.[] | select(.displayName | contains("jenkins-terraform")) | .appId')
+----
+
+
+Once a Service Principle exists, we can grant the permissions on it:
+
+
+[source]
+----
+
+----
