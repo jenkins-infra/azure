@@ -80,6 +80,7 @@ containing:
 [source, json]
 ----
 {
+    "prefix"          : "yourusername",
     "subscription_id" : "",
     "client_id"       : "",
     "client_secret"   : "",
@@ -89,6 +90,7 @@ containing:
 
 Where (assuming your subscription is named "Pay-As-You-Go"):
 
+* `prefix` is your username, or some unique token to avoid namespace collisions in Azure
 * `subscription_id` is the output of: `az account list -o tsv --query "[?name=='Pay-As-You-Go'].id"`
 * `client_id` is the output of: `az ad app list -o tsv --query "[?displayName=='jenkins-terraform'].appId"`
 * `client_secret` is the `$GENERATED_TOKEN` you created with `openssl` previously
