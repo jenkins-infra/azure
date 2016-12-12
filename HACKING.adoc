@@ -1,0 +1,97 @@
+= Azure tooling setup
+
+This document is meant to outline how you can set up your local environment for
+hacking on the Azure tooling for the Jenkins project infrastructure.
+
+
+All examples below for setting up Azure resources are done with the
+link:https://github.com/azure/azure-cli[azure-cli].
+
+
+== Setting up Terraform
+
+link:http://terraform.io[Terraform]
+can be used via the
+link:https://www.terraform.io/docs/providers/azurerm/index.html[AzureRM provider]
+which comes built in with recent versions of Terraform.
+
+In order to authenticate against Azure, you must create some Azure Active
+Directory and other related authentication and authorization objects.
+
+
+*Generate an authentication token*
+
+[source]
+----
+openssl rand -base64 24
+----
+
+This will be needed later, so don't lose it!
+
+
+*Creating an OAuth Application*
+
+[source]
+----
+az ad app create --display-name jenkins-terraform \
+                    --homepage http://example.com/jenkins-terraform \
+                    --identifier-uris http://example.com/jenkins-terraform \
+                    --password $GENERATED_TOKEN
+----
+
+
+We can then retrieve the Application's ID via:
+
+[source]
+----
+az ad app list -o tsv --query "[?displayName=='jenkins-terraform'].appId"`
+----
+
+
+Since permissions cannot be directly granted to an application, we must create a
+Service Principle associated with the application and grant permissions to that.
+
+*Creating a Service Principle*
+
+[source]
+----
+az ad sp create --id $(az ad app list -o tsv --query "[?displayName=='jenkins-terraform'].appId"`)
+----
+
+
+Once a Service Principle exists, we can grant the permissions on it:
+
+
+[source]
+----
+az role assignment create --assignee http://example.com/jenkins-terraform \
+                            --role Owner \
+                            --scope /subscriptions/be53081d-a3a2-499c-b355-8f5c3d4126e5
+----
+
+
+
+=== Creating the variables file
+
+
+Create `.azure-terraform.json` in the root directory of this repository
+containing:
+
+[source, json]
+----
+{
+    "prefix"          : "yourusername",
+    "subscription_id" : "",
+    "client_id"       : "",
+    "client_secret"   : "",
+    "tenant_id"       : ""
+}
+----
+
+Where (assuming your subscription is named "Pay-As-You-Go"):
+
+* `prefix` is your username, or some unique token to avoid namespace collisions in Azure
+* `subscription_id` is the output of: `az account list -o tsv --query "[?name=='Pay-As-You-Go'].id"`
+* `client_id` is the output of: `az ad app list -o tsv --query "[?displayName=='jenkins-terraform'].appId"`
+* `client_secret` is the `$GENERATED_TOKEN` you created with `openssl` previously
+* `tenant_id` is the output of: `az account list -o tsv --query "[?name=='Pay-As-You-Go'].tenantId"`

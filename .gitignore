@@ -3,3 +3,5 @@
 *.tfstate.backup
 *.html
 .ruby-*
+*.sw*
+.*.json
