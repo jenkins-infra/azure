@@ -3,9 +3,9 @@
 stage('Plan') {
     node('docker') {
         checkout scm
-        docker.image('hashicorp/terraform').inside('--rm') {
-            sh 'which terraform'
-            sh 'terraform --version'
+
+        withEnv(['PATH+TF=./scripts']) {
+            sh 'terraform version'
         }
     }
 }
