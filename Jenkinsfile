@@ -1,5 +1,8 @@
 #!/usr/bin/env groovy
 
+def tfPrefix = "jenkins${env.CHANGE_ID ?: ''}"
+def tfVarFile = '.azure-terraform.json'
+
 try {
     stage('Plan') {
         node('docker') {
@@ -9,7 +12,7 @@ try {
             /* Create an empty terraform variables file so that everything can
                 * be overridden in the environment
                 */
-            sh "echo '{\"prefix\":\"jenkins\"}' > .azure-terraform.json"
+            sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
             tfsh {
                 sh 'make'
             }
@@ -46,7 +49,7 @@ finally {
                 unstash 'tf'
 
                 tfsh {
-                    sh 'make init && ./scripts/terraform destroy --force --var-file=.azure-terraform.json'
+                    sh "make init && ./scripts/terraform destroy --force --var-file=${tfVarFile}"
                 }
             }
         }
