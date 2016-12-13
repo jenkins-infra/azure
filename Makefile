@@ -15,6 +15,7 @@ deploy: terraform
 
 init: $(TFSTATE_REMOTE_STATE)
 	@echo ">> Remote state enabled"
+	(cd plans && terraform remote pull)
 
 # Before creating remote state, we need to first prepare our storage container for
 # remote state
