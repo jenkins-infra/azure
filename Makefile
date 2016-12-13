@@ -17,6 +17,7 @@ validate: init
 
 deploy: init
 	$(TERRAFORM) apply --var-file=$(VARFILE) plans
+	$(TERRAFORM) remote push
 
 
 init: $(TFSTATE_REMOTE_STATE)
