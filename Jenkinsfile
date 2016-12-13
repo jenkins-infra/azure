@@ -1,7 +1,27 @@
 #!/usr/bin/env groovy
 
-def tfPrefix = "jenkins${env.CHANGE_ID ?: ''}"
 def tfVarFile = '.azure-terraform.json'
+String tfPrefix
+
+/* Depending on our environment, adjust the prefix for all Terraform resources */
+if (env.TF_VAR_PREFIX) {
+    /** For production environments, something outside this code will define
+     * the prefix
+     */
+    tfPrefix = env.TF_VAR_PREFIX
+}
+else if (env.CHANGE_ID) {
+    /* When handling pull requests, ensure everything is denoted by the pull
+     * request
+     */
+    tfPrefix = "pr${env.CHANGE_ID}"
+}
+else {
+    /* Any branches or anything else that might execute this Pipeline should
+     * still have a unique prefix
+     */
+    tfPrefix = "jenkins${env.BUILD_ID}"
+}
 
 try {
     stage('Plan') {
