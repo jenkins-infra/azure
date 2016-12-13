@@ -9,15 +9,8 @@ stage('Plan') {
             * be overridden in the environment
             */
         sh "echo '{\"prefix\":\"jenkins\"}' > .azure-terraform.json"
-        withCredentials([
-            string(credentialsId: 'azure-client-id', variable: 'TF_VAR_client_id'),
-            string(credentialsId: 'azure-client-secret', variable: 'TF_VAR_client_secret'),
-            string(credentialsId: 'azure-subscription-id', variable: 'TF_VAR_subscription_id'),
-            string(credentialsId: 'azure-tenant-id', variable: 'TF_VAR_tenant_id')]) {
-
-            ansiColor('xterm') {
-                sh 'make'
-            }
+        tfsh {
+            sh 'make'
         }
 
         stash includes: '**', name: 'tf'
@@ -35,15 +28,28 @@ stage('Apply') {
         deleteDir()
         unstash 'tf'
 
-        withCredentials([
-            string(credentialsId: 'azure-client-id', variable: 'TF_VAR_client_id'),
-            string(credentialsId: 'azure-client-secret', variable: 'TF_VAR_client_secret'),
-            string(credentialsId: 'azure-subscription-id', variable: 'TF_VAR_subscription_id'),
-            string(credentialsId: 'azure-tenant-id', variable: 'TF_VAR_tenant_id')]) {
+        tfsh {
+            sh 'make deploy'
+        }
+    }
+}
 
-            ansiColor('xterm') {
-                sh 'make deploy'
-            }
+
+/**
+ * tfsh is a simple function which will wrap whatever block is passed in with
+ * the appropriate credentials loaded into the environment for invoking Terraform
+ */
+Object tfsh(Closure body) {
+    body.resolveStrategy = Closure.DELEGATE_FIRST
+
+    withCredentials([
+        string(credentialsId: 'azure-client-id', variable: 'TF_VAR_client_id'),
+        string(credentialsId: 'azure-client-secret', variable: 'TF_VAR_client_secret'),
+        string(credentialsId: 'azure-subscription-id', variable: 'TF_VAR_subscription_id'),
+        string(credentialsId: 'azure-tenant-id', variable: 'TF_VAR_tenant_id')]) {
+
+        ansiColor('xterm') {
+            body.call()
         }
     }
 }
