@@ -24,14 +24,33 @@ else {
 }
 
 try {
+    stage('Prepare') {
+        /* When planning and applying changes for a pull request, the Pipeline
+         * should first use the master branch which will create a remote state
+         * that can be continued from later, more accurately simulating an
+         * execution of terraform plans on an existing production
+         * infrastructure
+         */
+        if (env.CHANGE_ID) {
+            node('docker') {
+                deleteDir()
+                git 'https://github.com/jenkins-infra/azure.git'
+                sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
+                tfsh {
+                    sh 'make deploy'
+                }
+            }
+        }
+    }
+
     stage('Plan') {
         node('docker') {
             deleteDir()
             checkout scm
 
             /* Create an empty terraform variables file so that everything can
-                * be overridden in the environment
-                */
+             * be overridden in the environment
+             */
             sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
             tfsh {
                 sh 'make'
