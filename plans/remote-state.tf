@@ -4,12 +4,12 @@
 # <https://www.terraform.io/docs/state/remote/azure.html>
 
 resource "azurerm_resource_group" "tfstate" {
-    name     = "${var.prefix}jenkinsinfra-tfstate"
+    name     = "${var.prefix}tfstate"
     location = "East US 2"
 }
 
 resource "azurerm_storage_account" "tfstate" {
-    name                = "${var.prefix}jenkinstfstate"
+    name                = "${var.prefix}tfstate"
     resource_group_name = "${azurerm_resource_group.tfstate.name}"
     location            = "East US 2"
     account_type        = "Standard_GRS"
