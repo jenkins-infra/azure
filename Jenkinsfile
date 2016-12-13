@@ -1,35 +1,54 @@
 #!/usr/bin/env groovy
 
-stage('Plan') {
-    node('docker') {
-        deleteDir()
-        checkout scm
+try {
+    stage('Plan') {
+        node('docker') {
+            deleteDir()
+            checkout scm
 
-        /* Create an empty terraform variables file so that everything can
-            * be overridden in the environment
-            */
-        sh "echo '{\"prefix\":\"jenkins\"}' > .azure-terraform.json"
-        tfsh {
-            sh 'make'
+            /* Create an empty terraform variables file so that everything can
+                * be overridden in the environment
+                */
+            sh "echo '{\"prefix\":\"jenkins\"}' > .azure-terraform.json"
+            tfsh {
+                sh 'make'
+            }
+
+            stash includes: '**', name: 'tf'
         }
+    }
 
-        stash includes: '**', name: 'tf'
+    stage('Review') {
+        timeout(30) {
+            input message: 'Apply the planned updates?', ok: 'Apply'
+        }
+    }
+
+    stage('Apply') {
+        node('docker') {
+            deleteDir()
+            unstash 'tf'
+
+            tfsh {
+                sh 'make deploy'
+            }
+        }
     }
 }
+finally {
+    /* If Pipeline is executing with a pull request, the infrastructure should
+     * be destroyed at the end
+     */
+    if (env.CHANGE_ID) {
+        stage('Destroy') {
+            node('docker') {
+                deleteDir()
+                unstash 'tf'
 
-stage('Review') {
-    timeout(30) {
-        input message: 'Apply the planned updates?', ok: 'Apply'
-    }
-}
-
-stage('Apply') {
-    node('docker') {
-        deleteDir()
-        unstash 'tf'
-
-        tfsh {
-            sh 'make deploy'
+                tfsh {
+                    sh 'make init && ./scripts/terraform destroy --force --var-file=.azure-terraform.json'
+                }
+            }
         }
     }
 }
