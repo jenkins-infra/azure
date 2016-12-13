@@ -5,3 +5,5 @@
 .ruby-*
 *.sw*
 .*.json
+.tf-prepare/
+.tf-remote-state-enabled
