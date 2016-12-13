@@ -12,10 +12,10 @@ stage('Plan') {
              */
             sh "echo '{\"prefix\":\"jenkins\"}' > .azure-terraform.json"
             withCredentials([
-                string(credentialsId: 'azure-client-id', variable: 'TF_VAR_CLIENT_ID'),
-                string(credentialsId: 'azure-client-secret', variable: 'TF_VAR_CLIENT_SECRET'),
-                string(credentialsId: 'azure-subscription-id', variable: 'TF_VAR_SUBSCRIPTION_ID'),
-                string(credentialsId: 'azure-tenant-id', variable: 'TF_VAR_TENANT_ID')]) {
+                string(credentialsId: 'azure-client-id', variable: 'TF_VAR_client_id'),
+                string(credentialsId: 'azure-client-secret', variable: 'TF_VAR_client_secret'),
+                string(credentialsId: 'azure-subscription-id', variable: 'TF_VAR_subscription_id'),
+                string(credentialsId: 'azure-tenant-id', variable: 'TF_VAR_tenant_id')]) {
 
                 sh 'make'
             }
