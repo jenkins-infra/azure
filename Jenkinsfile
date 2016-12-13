@@ -22,8 +22,13 @@ try {
     }
 
     stage('Review') {
-        timeout(30) {
-            input message: 'Apply the planned updates?', ok: 'Apply'
+        /* When inside of a pull request, Terraform is working with ephemeral
+         * resources anyways, so automatically apply the planned changes
+         */
+        if (!env.CHANGE_ID) {
+            timeout(30) {
+                input message: 'Apply the planned updates?', ok: 'Apply'
+            }
         }
     }
 
@@ -49,7 +54,7 @@ finally {
                 unstash 'tf'
 
                 tfsh {
-                    sh "make init && ./scripts/terraform destroy --force --var-file=${tfVarFile}"
+                    sh "make init && ./scripts/terraform destroy --force --var-file=${tfVarFile} plans"
                 }
             }
         }
