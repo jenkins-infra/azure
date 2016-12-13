@@ -54,7 +54,13 @@ finally {
                 unstash 'tf'
 
                 tfsh {
-                    sh "make init && ./scripts/terraform destroy --force --var-file=${tfVarFile} plans || true"
+                    /* `make init` ensures we have synced state from the remote
+                     * state before doing anything
+                     */
+                    sh 'make init'
+                    echo 'Turning off remote state before destroying'
+                    sh './scripts/terraform remote config --disable'
+                    sh "./scripts/terraform destroy --force --var-file=${tfVarFile} plans"
                 }
             }
         }
