@@ -1,5 +1,7 @@
 
 
+VARFILE=.azure-terraform.json
+TERRAFORM=./scripts/terraform
 # Grab our configured prefix from the .azure-terraform.json file
 TF_VAR_PREFIX:=$(shell python -c "import json; print json.load(file('.azure-terraform.json'))['prefix']")
 # Directory to use for local preparatory state
@@ -8,19 +10,23 @@ TFSTATE_PREPARE_DIR=.tf-prepare
 TFSTATE_REMOTE_STATE=.tf-remote-state-enabled
 
 terraform: init
-	$(MAKE) -C plans
+	$(TERRAFORM) plan --var-file=$(VARFILE) plans
 
-deploy: terraform
-	$(MAKE) -C plans apply
+validate: init
+	$(TERRAFORM) validate plans/*.tf
+
+deploy: init
+	$(TERRAFORM) apply --var-file=$(VARFILE) plans
+
 
 init: $(TFSTATE_REMOTE_STATE)
 	@echo ">> Remote state enabled"
-	(cd plans && terraform remote pull)
+	$(TERRAFORM) remote pull
 
 # Before creating remote state, we need to first prepare our storage container for
 # remote state
 $(TFSTATE_REMOTE_STATE): $(TFSTATE_PREPARE_DIR)/terraform.tfstate
-	@terraform remote config \
+	@$(TERRAFORM) remote config \
 		-backend=azure \
 		-backend-config="resource_group=$(TF_VAR_PREFIX)jenkinsinfra-tfstate" \
 		-backend-config="storage_account_name=$(TF_VAR_PREFIX)jenkinstfstate" \
@@ -36,15 +42,16 @@ $(TFSTATE_REMOTE_STATE): $(TFSTATE_PREPARE_DIR)/terraform.tfstate
 #
 # This should only need to run once per host that's applying terraform plans
 $(TFSTATE_PREPARE_DIR)/terraform.tfstate:
-	terraform remote config -disable || true
+	$(TERRAFORM) remote config -disable || true
 	mkdir -p $(TFSTATE_PREPARE_DIR)
 	for f in provider remote-state variables; do \
 		cp plans/$$f.tf $(TFSTATE_PREPARE_DIR) ; \
 	done;
-	(cd $(TFSTATE_PREPARE_DIR) && terraform apply --var-file=../.azure-terraform.json .)
+	$(TERRAFORM) apply --var-file=$(VARFILE) --state=$(TFSTATE_PREPARE_DIR)/terraform.tfstate $(TFSTATE_PREPARE_DIR)
 
 
 clean:
+	rm -f $(TFSTATE_REMOTE_STATE)
 	@echo "For safety, remove $(TFSTATE_PREPARE_DIR) yourself"
 
-.PHONY: terraform deploy init clean
+.PHONY: terraform deploy init clean validate
