@@ -18,4 +18,10 @@ if [ $? -eq 0 ]; then
     TTY_ARGS="-ti"
 fi;
 
-exec docker run --rm  -u $(id -u):$(id -u) ${TTY_ARGS} -v $PWD:/data --workdir=/data ${CONTAINER_NAME} $@
+set -x
+exec docker run --rm  -u $(id -u):$(id -u) \
+    ${TTY_ARGS} \
+    -v $PWD:/data \
+    --workdir=/data \
+    $(printenv | grep -i \^tf | awk '{ print "-e", $1 }') \
+    ${CONTAINER_NAME} $@

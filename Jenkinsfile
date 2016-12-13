@@ -2,6 +2,7 @@
 
 stage('Plan') {
     node('docker') {
+        deleteDir()
         checkout scm
 
         /* Create an empty terraform variables file so that everything can
