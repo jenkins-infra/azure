@@ -29,8 +29,8 @@ init: $(TFSTATE_REMOTE_STATE)
 $(TFSTATE_REMOTE_STATE): $(TFSTATE_PREPARE_DIR)/terraform.tfstate
 	@$(TERRAFORM) remote config \
 		-backend=azure \
-		-backend-config="resource_group=$(TF_VAR_PREFIX)jenkinsinfra-tfstate" \
-		-backend-config="storage_account_name=$(TF_VAR_PREFIX)jenkinstfstate" \
+		-backend-config="resource_group=$(TF_VAR_PREFIX)tfstate" \
+		-backend-config="storage_account_name=$(TF_VAR_PREFIX)tfstate" \
 		-backend-config="container_name=tfstate" \
 		-backend-config="key=terraform.tfstate" \
 		-backend-config="access_key=$(shell python -c "import json; ms=json.load(file('.tf-prepare/terraform.tfstate'))['modules']; print ms[0]['resources']['azurerm_storage_account.tfstate']['primary']['attributes']['primary_access_key']")"
