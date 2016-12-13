@@ -54,7 +54,7 @@ finally {
                 unstash 'tf'
 
                 tfsh {
-                    sh "make init && ./scripts/terraform destroy --force --var-file=${tfVarFile} plans"
+                    sh "make init && ./scripts/terraform destroy --force --var-file=${tfVarFile} plans || true"
                 }
             }
         }
