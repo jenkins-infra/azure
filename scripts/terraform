@@ -18,7 +18,6 @@ if [ $? -eq 0 ]; then
     TTY_ARGS="-ti"
 fi;
 
-set -x
 exec docker run --rm  -u $(id -u):$(id -u) \
     ${TTY_ARGS} \
     -v $PWD:/data \

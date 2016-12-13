@@ -1,17 +1,56 @@
 #!/usr/bin/env groovy
 
-def tfPrefix = "jenkins${env.CHANGE_ID ?: ''}"
 def tfVarFile = '.azure-terraform.json'
+String tfPrefix
+
+/* Depending on our environment, adjust the prefix for all Terraform resources */
+if (env.TF_VAR_PREFIX) {
+    /** For production environments, something outside this code will define
+     * the prefix
+     */
+    tfPrefix = env.TF_VAR_PREFIX
+}
+else if (env.CHANGE_ID) {
+    /* When handling pull requests, ensure everything is denoted by the pull
+     * request
+     */
+    tfPrefix = "pr${env.CHANGE_ID}"
+}
+else {
+    /* Any branches or anything else that might execute this Pipeline should
+     * still have a unique prefix
+     */
+    tfPrefix = "jenkins${env.BUILD_ID}"
+}
 
 try {
+    stage('Prepare') {
+        /* When planning and applying changes for a pull request, the Pipeline
+         * should first use the master branch which will create a remote state
+         * that can be continued from later, more accurately simulating an
+         * execution of terraform plans on an existing production
+         * infrastructure
+         */
+        if (env.CHANGE_ID) {
+            node('docker') {
+                deleteDir()
+                git 'https://github.com/jenkins-infra/azure.git'
+                sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
+                tfsh {
+                    sh 'make deploy'
+                }
+            }
+        }
+    }
+
     stage('Plan') {
         node('docker') {
             deleteDir()
             checkout scm
 
             /* Create an empty terraform variables file so that everything can
-                * be overridden in the environment
-                */
+             * be overridden in the environment
+             */
             sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
             tfsh {
                 sh 'make'
@@ -22,8 +61,13 @@ try {
     }
 
     stage('Review') {
-        timeout(30) {
-            input message: 'Apply the planned updates?', ok: 'Apply'
+        /* When inside of a pull request, Terraform is working with ephemeral
+         * resources anyways, so automatically apply the planned changes
+         */
+        if (!env.CHANGE_ID) {
+            timeout(30) {
+                input message: 'Apply the planned updates?', ok: 'Apply'
+            }
         }
     }
 
@@ -49,7 +93,13 @@ finally {
                 unstash 'tf'
 
                 tfsh {
-                    sh "make init && ./scripts/terraform destroy --force --var-file=${tfVarFile}"
+                    /* `make init` ensures we have synced state from the remote
+                     * state before doing anything
+                     */
+                    sh 'make init'
+                    echo 'Turning off remote state before destroying'
+                    sh './scripts/terraform remote config --disable'
+                    sh "./scripts/terraform destroy --force --var-file=${tfVarFile} plans"
                 }
             }
         }

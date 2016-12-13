@@ -17,6 +17,7 @@ validate: init
 
 deploy: init
 	$(TERRAFORM) apply --var-file=$(VARFILE) plans
+	$(TERRAFORM) remote push
 
 
 init: $(TFSTATE_REMOTE_STATE)
@@ -48,6 +49,9 @@ $(TFSTATE_PREPARE_DIR)/terraform.tfstate:
 		cp plans/$$f.tf $(TFSTATE_PREPARE_DIR) ; \
 	done;
 	$(TERRAFORM) apply --var-file=$(VARFILE) --state=$(TFSTATE_PREPARE_DIR)/terraform.tfstate $(TFSTATE_PREPARE_DIR)
+	# Allow Azure some time to replicate state across regions and register our
+	# containers and storage accounts
+	sleep 60
 
 
 clean:
