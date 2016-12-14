@@ -4,7 +4,7 @@
 # <https://www.terraform.io/docs/state/remote/azure.html>
 
 resource "azurerm_resource_group" "tfstate" {
-    name     = "${var.prefix}tfstate"
+    name     = "${var.prefix}-tfstate"
     location = "East US 2"
 }
 

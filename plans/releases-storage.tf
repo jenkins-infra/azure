@@ -6,12 +6,12 @@
 # this plan represents the enforcement of those resources.
 
 resource "azurerm_resource_group" "releases" {
-    name     = "${var.prefix}-releases"
+    name     = "${var.prefix}-core-releases"
     location = "East US 2"
 }
 
 resource "azurerm_storage_account" "releases" {
-    name                = "${var.prefix}releases"
+    name                = "${var.prefix}jenkinsreleases"
     resource_group_name = "${azurerm_resource_group.releases.name}"
     location            = "East US 2"
     account_type        = "Standard_GRS"
