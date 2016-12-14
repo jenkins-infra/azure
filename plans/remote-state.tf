@@ -5,13 +5,13 @@
 
 resource "azurerm_resource_group" "tfstate" {
     name     = "${var.prefix}tfstate"
-    location = "East US 2"
+    location = "${var.location}"
 }
 
 resource "azurerm_storage_account" "tfstate" {
     name                = "${var.prefix}tfstate"
     resource_group_name = "${azurerm_resource_group.tfstate.name}"
-    location            = "East US 2"
+    location            = "${var.location}"
     account_type        = "Standard_GRS"
 }
 
