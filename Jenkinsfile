@@ -27,7 +27,7 @@ else {
     /* Any branches or anything else that might execute this Pipeline should
      * still have a unique prefix
      */
-    tfPrefix = 'jenkinsinfra'
+    tfPrefix = 'infraci'
 }
 
 try {
