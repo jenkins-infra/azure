@@ -12,15 +12,14 @@ TFSTATE_REMOTE_STATE=.tf-remote-state-enabled
 terraform: init
 	$(TERRAFORM) plan --var-file=$(VARFILE) plans
 
-validate: init
-	$(TERRAFORM) validate plans/*.tf
+validate:
+	$(TERRAFORM) validate plans
 
 deploy: init
 	$(TERRAFORM) apply --var-file=$(VARFILE) plans
 	$(TERRAFORM) remote push
 
-
-init: $(TFSTATE_REMOTE_STATE)
+init: validate $(TFSTATE_REMOTE_STATE)
 	@echo ">> Remote state enabled"
 	$(TERRAFORM) remote pull
 
