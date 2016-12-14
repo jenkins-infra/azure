@@ -5,6 +5,11 @@
  */
 @Library('pipeline-library@master') _
 
+properties([
+    [$class: 'jenkins.model.BuildDiscarderProperty', strategy: [$class: 'LogRotator', numToKeepStr: '96']],
+    pipelineTriggers([[$class:"SCMTrigger", scmpoll_spec:"H/10 * * * *"]]),
+])
+
 String tfVarFile = '.azure-terraform.json'
 String tfPrefix
 
@@ -68,7 +73,7 @@ try {
          * infrastructure. Inside our trusted.ci infrastructure the production
          * Pipeline will be using a non-Multibranch Pipeline
          */
-        if ((!env.CHANGE_ID) && (!env.BRANCH_NAME)) {
+        if (infra.isTrusted()) {
             timeout(30) {
                 input message: "Apply the planned updates to ${tfPrefix}?", ok: 'Apply'
             }
