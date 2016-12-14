@@ -61,12 +61,14 @@ try {
     }
 
     stage('Review') {
-        /* When inside of a pull request, Terraform is working with ephemeral
-         * resources anyways, so automatically apply the planned changes
+        /* Inside of a pull request or if executing a Multibranch Pipeline it
+         * is acceptable to proceed without any review of the planned
+         * infrastructure. Inside our trusted.ci infrastructure the production
+         * Pipeline will be using a non-Multibranch Pipeline
          */
-        if (!env.CHANGE_ID) {
+        if ((!env.CHANGE_ID) && (!env.BRANCH_NAME)) {
             timeout(30) {
-                input message: 'Apply the planned updates?', ok: 'Apply'
+                input message: "Apply the planned updates to ${tfPrefix}?", ok: 'Apply'
             }
         }
     }
