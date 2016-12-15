@@ -11,6 +11,7 @@ resource "azurerm_storage_account" "k8s" {
     resource_group_name = "${azurerm_resource_group.releases.name}"
     location            = "${var.location}"
     account_type        = "Standard_GRS"
+    depends_on          = ["azurerm_resource_group.k8s"]
     tags {
         env = "${var.prefix}"
     }
@@ -19,6 +20,7 @@ resource "azurerm_storage_account" "k8s" {
 resource "azurerm_template_deployment" "k8s"{
   name  = "${var.prefix}k8s"
   resource_group_name = "${ azurerm_resource_group.k8s.name }"
+  depends_on          = ["azurerm_resource_group.k8s"]
   parameters = {
         sshRSAPublicKey = "${file("${var.ssh_pubkey_path}")}"
         dnsNamePrefix = "${var.prefix}"
