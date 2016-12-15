@@ -26,7 +26,6 @@ resource "azurerm_template_deployment" "dockerregistry"{
  	registryLocation = "${var.location}"
 	registryApiVersion = "2016-06-27-preview"
 	storageAccountName = "${ azurerm_storage_account.dockerregistry.name }"
-	storageAccountType = "${ azurerm_storage_account.dockerregistry.account_type }"
 	#adminUserEnabled = true	
   }
   deployment_mode = "Incremental"
