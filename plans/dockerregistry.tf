@@ -30,5 +30,5 @@ resource "azurerm_template_deployment" "dockerregistry"{
 	#adminUserEnabled = true	
   }
   deployment_mode = "Incremental"
-  template_body = "${file("./arm_templates/dockerregistry")}"
+  template_body = "${file("./arm_templates/dockerregistry.json")}"
 }
