@@ -27,13 +27,6 @@
                 "description": "Name of the storage account"
             }
         },
-        "storageAccountType": {
-            "defaultValue": "Standard_LRS",
-            "type": "String",
-            "metadata": {
-                "description": "Type of the storage account"
-            }
-        },
         "adminUserEnabled": {
             "defaultValue": false,
             "type": "Bool",
@@ -43,29 +36,6 @@
         }
     },
     "resources": [
-        {
-            "type": "Microsoft.Storage/storageAccounts",
-            "sku": {
-                "name": "[parameters('storageAccountType')]"
-            },
-            "kind": "Storage",
-            "name": "[parameters('storageAccountName')]",
-            "apiVersion": "2016-01-01",
-            "location": "[parameters('registryLocation')]",
-            "tags": {
-                "containerregistry": "[parameters('registryName')]"
-            },
-            "properties": {
-                "encryption": {
-                    "services": {
-                        "blob": {
-                            "enabled": true
-                        }
-                    },
-                    "keySource": "Microsoft.Storage"
-                }
-            }
-        },
         {
             "type": "Microsoft.ContainerRegistry/registries",
             "name": "[parameters('registryName')]",
@@ -77,10 +47,7 @@
                     "name": "[parameters('storageAccountName')]",
                     "accessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2016-01-01').keys[0].value]"
                 }
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
-            ]
+            }
         }
     ]
 }
