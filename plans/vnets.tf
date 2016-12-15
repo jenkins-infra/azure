@@ -31,6 +31,30 @@ resource "azurerm_virtual_network" "public_prod" {
   resource_group_name = "${azurerm_resource_group.public_prod.name}"
   address_space       = ["10.0.0.0/16"]
   location            = "${var.location}"
+
+  # "app-tier" hosts should expect to be accessible from the public internet
+  subnet {
+    name           = "app-tier"
+    address_prefix = "10.0.1.0/24"
+  }
+
+  # The "data-tier" subnet is for data services which we might choose to run
+  # ourselves that shouldn't have public IP addresses but accessible from within
+  # the Public Production network
+  subnet {
+    name           = "data-tier"
+    address_prefix = "10.0.2.0/24"
+  }
+
+  # The "dmz-tier" subnet is intended for resources which need to be
+  # provisioned in the Public Production network but don't need to be
+  # accessible from the public internet. Such as dynamically provisioned VMs for
+  # Jenkins masters, or other untrusted workloads which should be in the Public
+  # Production VNet
+  subnet {
+    name           = "dmz-tier"
+    address_prefix = "10.0.99.0/24"
+  }
 }
 
 # The Private Production VNet is where all management and highly classified
@@ -45,6 +69,16 @@ resource "azurerm_virtual_network" "private_prod" {
   resource_group_name = "${azurerm_resource_group.private_prod.name}"
   address_space       = ["10.1.0.0/16"]
   location            = "${var.location}"
+
+  subnet {
+    name           = "management-tier"
+    address_prefix = "10.1.1.0/24"
+  }
+
+  subnet {
+    name           = "data-tier"
+    address_prefix = "10.1.2.0/24"
+  }
 }
 
 # Peer the Public and Private Production networks, using the Private Production
