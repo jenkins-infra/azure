@@ -22,10 +22,26 @@
 #                        +----------------+
 #
 
+
+## RESOURCE GROUPS
+################################################################################
 resource "azurerm_resource_group" "public_prod" {
     name     = "${var.prefix}-jenkins-public-prod"
     location = "${var.location}"
 }
+resource "azurerm_resource_group" "private_prod" {
+    name     = "${var.prefix}-jenkins-private-prod"
+    location = "${var.location}"
+}
+resource "azurerm_resource_group" "development" {
+    name     = "${var.prefix}-jenkins-development"
+    location = "${var.location}"
+}
+################################################################################
+
+
+## VIRTUAL NETWORKS
+################################################################################
 resource "azurerm_virtual_network" "public_prod" {
   name                = "${var.prefix}-jenkins-public-prod"
   resource_group_name = "${azurerm_resource_group.public_prod.name}"
@@ -36,6 +52,7 @@ resource "azurerm_virtual_network" "public_prod" {
   subnet {
     name           = "app-tier"
     address_prefix = "10.0.1.0/24"
+    security_group = "${azurerm_network_security_group.public_app_tier.id}"
   }
 
   # The "data-tier" subnet is for data services which we might choose to run
@@ -44,6 +61,7 @@ resource "azurerm_virtual_network" "public_prod" {
   subnet {
     name           = "data-tier"
     address_prefix = "10.0.2.0/24"
+    security_group = "${azurerm_network_security_group.public_data_tier.id}"
   }
 
   # The "dmz-tier" subnet is intended for resources which need to be
@@ -54,16 +72,13 @@ resource "azurerm_virtual_network" "public_prod" {
   subnet {
     name           = "dmz-tier"
     address_prefix = "10.0.99.0/24"
+    security_group = "${azurerm_network_security_group.public_dmz_tier.id}"
   }
 }
 
 # The Private Production VNet is where all management and highly classified
 # resources should be provisioned. It should never have its resources exposed
 # to the public internet but is peered with Public Production
-resource "azurerm_resource_group" "private_prod" {
-    name     = "${var.prefix}-jenkins-private-prod"
-    location = "${var.location}"
-}
 resource "azurerm_virtual_network" "private_prod" {
   name                = "${var.prefix}-jenkins-private-prod"
   resource_group_name = "${azurerm_resource_group.private_prod.name}"
@@ -73,11 +88,13 @@ resource "azurerm_virtual_network" "private_prod" {
   subnet {
     name           = "management-tier"
     address_prefix = "10.1.1.0/24"
+    security_group = "${azurerm_network_security_group.private_mgmt_tier.id}"
   }
 
   subnet {
     name           = "data-tier"
     address_prefix = "10.1.2.0/24"
+    security_group = "${azurerm_network_security_group.private_dmz_tier.id}"
   }
 }
 
@@ -90,52 +107,9 @@ resource "azurerm_virtual_network_peering" "pub_to_priv_peer" {
     remote_virtual_network_id = "${azurerm_virtual_network.public_prod.id}"
 }
 
-# Traffic should, in essence be unidirectional from Private to Public
-# Production VNets. This means hosts inside of Public Production should not be
-# able to access resources in Private Production unless there has been an
-# explicit Network Security Group (NSG) rule provided for that (for example,
-# allowing access to LDAPS or Puppet's agent channel)
-resource "azurerm_network_security_group" "pub_to_priv_nsg" {
-    name                = "${var.prefix}-public-to-private-nsg"
-    location            = "${var.location}"
-    resource_group_name = "${azurerm_resource_group.private_prod.name}"
-
-    security_rule {
-        name                       = "priv-to-public-prod"
-        priority                   = 100
-        direction                  = "inbound"
-        access                     = "allow"
-        protocol                   = "*"
-        source_port_range          = "*"
-        destination_port_range     = "*"
-        source_address_prefix      = "${element(azurerm_virtual_network.private_prod.address_space, 0)}"
-        destination_address_prefix = "${element(azurerm_virtual_network.public_prod.address_space, 0)}"
-    }
-
-    security_rule {
-        name                       = "public-to-priv-prod"
-        priority                   = 200
-        direction                  = "inbound"
-        access                     = "deny"
-        protocol                   = "*"
-        source_port_range          = "*"
-        destination_port_range     = "*"
-        source_address_prefix      = "${element(azurerm_virtual_network.public_prod.address_space, 0)}"
-        destination_address_prefix = "${element(azurerm_virtual_network.private_prod.address_space, 0)}"
-    }
-}
-
-
-################################################################################
-
 # The development VNet should be largely considered entirely on its own and
 # almost like the wild-west. Nothing sensitive should live there, nor should it
 # be peered with the other networks
-resource "azurerm_resource_group" "development" {
-    name     = "${var.prefix}-jenkins-development"
-    location = "${var.location}"
-}
-
 resource "azurerm_virtual_network" "development" {
   name                = "${var.prefix}-jenkins-development"
   resource_group_name = "${azurerm_resource_group.development.name}"
@@ -147,5 +121,7 @@ resource "azurerm_virtual_network" "development" {
   subnet {
     name           = "dmz-tier"
     address_prefix = "10.2.99.0/24"
+    security_group = "${azurerm_network_security_group.development_dmz.id}"
   }
 }
+################################################################################
