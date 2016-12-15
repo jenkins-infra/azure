@@ -17,9 +17,8 @@ variable "k8s_agent_size" {
     type = "string"
     default = "Standard_A2"
 }
-
 # Define default ssh public key used to provision new kubernetes agent
-variable "ssh_pubkey_path" {
+variable "ssh_pubkey" {
     type = "string"
-    default = "~/.ssh/id_rsa.pub"
+    default = "Insert your publich ssh key here"
 }

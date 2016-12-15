@@ -22,7 +22,7 @@ resource "azurerm_template_deployment" "k8s"{
   resource_group_name = "${ azurerm_resource_group.k8s.name }"
   depends_on          = ["azurerm_resource_group.k8s"]
   parameters = {
-        sshRSAPublicKey = "${file("${var.ssh_pubkey_path}")}"
+        sshRSAPublicKey = "${var.ssh_pubkey}"
         dnsNamePrefix = "${var.prefix}"
 # Bug with integer
 #        agentCount = 1
@@ -34,5 +34,5 @@ resource "azurerm_template_deployment" "k8s"{
         servicePrincipalClientSecret = "${var.client_secret}"
   }
   deployment_mode = "Incremental"
-  template_body = "${file("./arm_templates/k8s")}"
+  template_body = "${file("./arm_templates/k8s.json")}"
 }
