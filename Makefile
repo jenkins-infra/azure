@@ -47,10 +47,10 @@ $(TFSTATE_PREPARE_DIR)/terraform.tfstate:
 	for f in provider remote-state variables; do \
 		cp plans/$$f.tf $(TFSTATE_PREPARE_DIR) ; \
 	done;
-	$(TERRAFORM) apply --var-file=$(VARFILE) --state=$(TFSTATE_PREPARE_DIR)/terraform.tfstate $(TFSTATE_PREPARE_DIR)
+	$(TERRAFORM) apply --parallelism=1 --var-file=$(VARFILE) --state=$(TFSTATE_PREPARE_DIR)/terraform.tfstate $(TFSTATE_PREPARE_DIR)
 	# Allow Azure some time to replicate state across regions and register our
 	# containers and storage accounts
-	sleep 60
+	sleep 90
 
 
 clean:
