@@ -59,11 +59,11 @@ try {
              * be overridden in the environment
              */
             sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
+            stash includes: '**', name: 'tf'
+
             tfsh {
                 sh 'make'
             }
-
-            stash includes: '**', name: 'tf'
         }
     }
 
