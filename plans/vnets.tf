@@ -141,4 +141,11 @@ resource "azurerm_virtual_network" "development" {
   resource_group_name = "${azurerm_resource_group.development.name}"
   address_space       = ["10.2.0.0/16"]
   location            = "${var.location}"
+
+  # Pretty much everything in the development VNet should be considered
+  # untrusted and almost like the wild west
+  subnet {
+    name           = "dmz-tier"
+    address_prefix = "10.2.99.0/24"
+  }
 }
