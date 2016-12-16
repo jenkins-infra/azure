@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# This script is meant to be added to the PATH so the latest azure-cli is
+# always ready to use
+
+CONTAINER_NAME=azuresdk/azure-cli-python:latest
+
+# Pull down the container if we don't already have it
+docker inspect ${CONTAINER_NAME} 2>&1 > /dev/null
+if [ $? -ne 0 ]; then
+    pull_container
+fi;
+
+# This is some really silly python hacking to ask the Docker about when the
+# container was last pulled. If we're more than a day out of date then it
+# should exit non-zero and we should try to pull the container
+# http://stackoverflow.com/questions/127803/how-to-parse-an-iso-8601-formatted-date-in-python#15228038
+docker inspect ${CONTAINER_NAME} 2>&1 | python -c "import json,sys,datetime; c=json.loads(sys.stdin.read()); t=c[0]['Created'].split('.')[0]; t=datetime.datetime.strptime(t, '%Y-%m-%dT%H:%M:%S'); sys.exit(int(datetime.datetime.utcnow() > (t + datetime.timedelta(days=1))))"
+if [ $? -ne 0 ]; then
+    pull_container
+fi;
+
+exec docker run --rm  -u $(id -u):$(id -u) \
+    -ti \
+    -v ${HOME}/.azure:/.azure \
+    -v $PWD:/data \
+    --workdir=/data \
+    ${CONTAINER_NAME} /usr/local/bin/az $@
+
+
+pull_container() {
+    docker pull ${CONTAINER_NAME}
+}
