@@ -54,7 +54,6 @@ $(TFSTATE_PREPARE_DIR)/terraform.tfstate:
 
 
 clean:
-	rm -f $(TFSTATE_REMOTE_STATE)
-	@echo "For safety, remove $(TFSTATE_PREPARE_DIR) yourself"
+	rm -f $(TFSTATE_REMOTE_STATE) ${TFSTATE_PREPARE_DIR}/terraform.tfstate
 
 .PHONY: terraform deploy init clean validate
