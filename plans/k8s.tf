@@ -8,7 +8,7 @@ resource "azurerm_resource_group" "k8s" {
 
 resource "azurerm_storage_account" "k8s" {
     name                = "${var.prefix}k8s"
-    resource_group_name = "${azurerm_resource_group.releases.name}"
+    resource_group_name = "${azurerm_resource_group.k8s.name}"
     location            = "${var.location}"
     account_type        = "Standard_GRS"
     depends_on          = ["azurerm_resource_group.k8s"]
