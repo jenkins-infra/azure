@@ -1,6 +1,6 @@
 resource "azurerm_resource_group" "dockerregistry" {
   name     = "${var.prefix}dockerregistry"
-  location = "${var.location}"
+  location = "${var.dockerregistrylocation}"
   tags {
     "env" = "${var.prefix}"
   }
@@ -9,7 +9,7 @@ resource "azurerm_resource_group" "dockerregistry" {
 resource "azurerm_storage_account" "dockerregistry" {
     name                = "${var.prefix}dockerregistry"
     resource_group_name = "${azurerm_resource_group.dockerregistry.name}"
-    location            = "${var.location}"
+    location            = "${var.dockerregistrylocation}"
     depends_on          = ["azurerm_resource_group.dockerregistry"]
     account_type        = "Standard_GRS"
     tags {
@@ -23,7 +23,7 @@ resource "azurerm_template_deployment" "dockerregistry"{
   depends_on          = ["azurerm_resource_group.dockerregistry"]
   parameters = {
 	registryName = "${var.prefix}registry"
- 	registryLocation = "${var.location}"
+ 	registryLocation = "${var.dockerregistrylocation}"
 	registryApiVersion = "2016-06-27-preview"
 	storageAccountName = "${ azurerm_storage_account.dockerregistry.name }"
 	#adminUserEnabled = true	
