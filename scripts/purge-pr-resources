@@ -1,0 +1,23 @@
+#!/bin/sh
+
+GROUPS=$(az resource group list -o tsv | awk '{print $3 }' | grep -P "^pr(\d+)")
+
+echo "> Planning to delete:"
+
+for g in $GROUPS; do
+    echo ">> ${g}"
+done;
+
+read -p "Procees? (yes): " CONFIRM
+
+if [ ! "${CONFIRM}" = "yes" ]; then
+    exit 1
+fi;
+
+echo "> Deleting.."
+set -xe
+
+for g in $GROUPS; do
+    echo "> ${g}"
+    az resource group delete -n $g
+done;
