@@ -10,6 +10,7 @@ if (env.CHANGE_ID) {
     properties([
         buildDiscarder(logRotator(numToKeepStr: '10')),
     ])
+}
 else {
     properties([
         buildDiscarder(logRotator(numToKeepStr: '96')),
