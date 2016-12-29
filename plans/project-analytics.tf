@@ -17,7 +17,7 @@ resource "azurerm_resource_group" "project_analytics" {
 }
 
 resource "azurerm_eventhub_namespace" "project_analytics" {
-    name                = "project-analytics"
+    name                = "${var.prefix}-jenkins-project-analytics"
     location            = "${azurerm_resource_group.project_analytics.location}"
     resource_group_name = "${azurerm_resource_group.project_analytics.name}"
     sku                 = "Standard"
