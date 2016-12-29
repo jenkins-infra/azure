@@ -30,7 +30,7 @@ else if (env.CHANGE_ID) {
     /* When handling pull requests, ensure everything is denoted by the pull
      * request
      */
-    tfPrefix = "pr${env.BUILD_NUMBER}"
+    tfPrefix = "pr${env.CHANGE_ID}${env.BUILD_NUMBER}"
 }
 else {
     /* Any branches or anything else that might execute this Pipeline should
