@@ -5,6 +5,10 @@
 
 CONTAINER_NAME=azuresdk/azure-cli-python:latest
 
+pull_container() {
+    docker pull ${CONTAINER_NAME}
+}
+
 # Pull down the container if we don't already have it
 docker inspect ${CONTAINER_NAME} 2>&1 > /dev/null
 if [ $? -ne 0 ]; then
@@ -27,7 +31,3 @@ exec docker run --rm  -u $(id -u):$(id -u) \
     --workdir=/data \
     ${CONTAINER_NAME} /usr/local/bin/az $@
 
-
-pull_container() {
-    docker pull ${CONTAINER_NAME}
-}
