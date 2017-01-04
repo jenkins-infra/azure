@@ -34,7 +34,7 @@ resource "azurerm_template_deployment" "logs"{
         omsRegion = "${var.location}"
         existingStorageAccountName = "${azurerm_storage_account.logs.name}"
         existingStorageAccountResourceGroupName = "${azurerm_resource_group.logs.name}"
-        table = "WADServiceFabric*EventTable"
+        table = "WADWindowsEventLogsTable"
     }
     deployment_mode = "Incremental"
     template_body = "${file("./arm_templates/logs.json")}"
