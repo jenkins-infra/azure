@@ -18,7 +18,7 @@ variable "puppet_master_port" {
 # Define kubernetes agent instance size
 variable "k8s_agent_size" {
     type = "string"
-    default = "Standard_A2"
+    default = "Standard_D2_V2"
 }
 # Define default ssh public key used to provision new kubernetes agent
 variable "ssh_pubkey" {
