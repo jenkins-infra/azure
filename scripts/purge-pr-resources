@@ -1,6 +1,6 @@
 #!/bin/sh
 
-GROUPS=$(az resource group list -o tsv | awk '{print $3 }' | grep -P "^pr(\d+)")
+GROUPS=$(az group list -o tsv | awk '{ print $4 }' | grep -P "^pr(\d+)")
 
 echo "> Planning to delete:"
 
@@ -19,5 +19,5 @@ set -xe
 
 for g in $GROUPS; do
     echo "> ${g}"
-    az resource group delete -n $g
+    az group delete -n $g
 done;
