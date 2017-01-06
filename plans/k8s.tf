@@ -22,7 +22,7 @@ resource "azurerm_template_deployment" "k8s"{
   resource_group_name = "${ azurerm_resource_group.k8s.name }"
   depends_on          = ["azurerm_resource_group.k8s"]
   parameters = {
-        sshRSAPublicKey = "${var.ssh_pubkey}"
+        sshRSAPublicKey = "${file("${var.ssh_pubkey_path}")}"
         dnsNamePrefix = "${var.prefix}"
 # Bug with integer
 #        agentCount = 1

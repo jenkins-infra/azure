@@ -20,8 +20,8 @@ variable "k8s_agent_size" {
     type = "string"
     default = "Standard_D2_v2"
 }
-# Define default ssh public key used to provision new kubernetes agent
-variable "ssh_pubkey" {
+# Define default ssh public key path used to provision new kubernetes agent
+variable "ssh_pubkey_path"{
     type = "string"
-    default = "ssh-rsa AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA example@sshpublickey"
+    default = "./ssh_key/dummyk8s_rsa.pub"
 }
