@@ -12,8 +12,11 @@ TFSTATE_REMOTE_STATE=.tf-remote-state-enabled
 terraform: init
 	$(TERRAFORM) plan --var-file=$(VARFILE) plans
 
-validate:
+validate: generate
 	$(TERRAFORM) validate plans
+
+generate:
+	$(MAKE) -C arm_templates
 
 deploy: init
 	$(TERRAFORM) apply --var-file=$(VARFILE) plans
@@ -56,4 +59,4 @@ $(TFSTATE_PREPARE_DIR)/terraform.tfstate:
 clean:
 	rm -f $(TFSTATE_REMOTE_STATE) ${TFSTATE_PREPARE_DIR}/terraform.tfstate
 
-.PHONY: terraform deploy init clean validate
+.PHONY: terraform deploy init clean validate generate
