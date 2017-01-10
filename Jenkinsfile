@@ -5,10 +5,19 @@
  */
 @Library('pipeline-library@master') _
 
-properties([
-    [$class: 'jenkins.model.BuildDiscarderProperty', strategy: [$class: 'LogRotator', numToKeepStr: '96']],
-    pipelineTriggers([[$class:"SCMTrigger", scmpoll_spec:"H/10 * * * *"]]),
-])
+
+if (env.CHANGE_ID) {
+    properties([
+        buildDiscarder(logRotator(numToKeepStr: '10')),
+    ])
+}
+else {
+    properties([
+        buildDiscarder(logRotator(numToKeepStr: '96')),
+        pipelineTriggers([[$class:"SCMTrigger", scmpoll_spec:"H/10 * * * *"]]),
+    ])
+}
+
 
 String tfVarFile = '.azure-terraform.json'
 String tfPrefix
@@ -21,7 +30,7 @@ else if (env.CHANGE_ID) {
     /* When handling pull requests, ensure everything is denoted by the pull
      * request
      */
-    tfPrefix = "pr${env.BUILD_NUMBER}"
+    tfPrefix = "pr${env.CHANGE_ID}${env.BUILD_NUMBER}"
 }
 else {
     /* Any branches or anything else that might execute this Pipeline should
