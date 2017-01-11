@@ -1,6 +1,8 @@
 #!/bin/sh
 
-GROUPS=$(az group list -o tsv | awk '{ print $4 }' | grep -P "^pr(\d+)")
+AZ=$(dirname $0)/az
+
+GROUPS=$(${AZ} group list -o tsv | awk '{ print $4 }' | grep -P "^pr(\d+)")
 
 echo "> Planning to delete:"
 
@@ -19,5 +21,5 @@ set -xe
 
 for g in $GROUPS; do
     echo "> ${g}"
-    az group delete -n $g
+    ${AZ} group delete -n $g
 done;
