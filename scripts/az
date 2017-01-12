@@ -3,7 +3,7 @@
 # This script is meant to be added to the PATH so the latest azure-cli is
 # always ready to use
 
-CONTAINER_NAME=azuresdk/azure-cli-python:0c50603a3e7e
+CONTAINER_NAME=azuresdk/azure-cli-python:0.1.5
 
 pull_container() {
     docker pull ${CONTAINER_NAME}
