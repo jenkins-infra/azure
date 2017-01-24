@@ -25,3 +25,8 @@ variable "ssh_pubkey_path"{
     type = "string"
     default = "./ssh_key/dummyk8s_rsa.pub"
 }
+
+variable "logslocation" {
+    type    = "string"
+    default = "East US"
+}
