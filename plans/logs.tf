@@ -7,7 +7,7 @@ resource "azurerm_resource_group" "logs" {
 }
 
 resource "azurerm_storage_account" "logs" {
-    name                = "${var.prefix}logs"
+    name                = "${var.prefix}jenkinslogs"
     resource_group_name = "${azurerm_resource_group.logs.name}"
     location            = "${var.logslocation}"
     account_type        = "Standard_GRS"
