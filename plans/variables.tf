@@ -23,7 +23,7 @@ variable "k8s_agent_size" {
 # Define default ssh public key path used to provision new kubernetes agent
 variable "ssh_pubkey_path"{
     type = "string"
-    default = "./ssh_key/dummyk8s_rsa.pub"
+    default = "./ssh_key/id_rsa.pub"
 }
 
 variable "logslocation" {
