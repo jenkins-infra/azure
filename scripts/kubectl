@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# This script is meant to be added to the PATH so the latest azure-cli is
+# always ready to use
+
+CONTAINER_NAME=lachlanevenson/k8s-kubectl:v1.5.2
+REPO_DIR=$(realpath $(dirname $0)/../)
+
+pull_container() {
+    docker pull ${CONTAINER_NAME}
+}
+
+# Pull down the container if we don't already have it
+docker inspect ${CONTAINER_NAME} 2>&1 > /dev/null
+if [ $? -ne 0 ]; then
+    pull_container
+fi;
+
+# http://blog.dscpl.com.au/2015/12/unknown-user-when-running-docker.html
+# Passing LOGNAME and USER because the acs component in the azure-cli does some
+# user lookup
+exec docker run --rm  -u $(id -u):$(id -u) \
+    -ti \
+    -v ${PWD}/.kube:/.kube \
+    -v ${REPO_DIR}/ssh_key:/.ssh \
+    -e LOGNAME=$LOGNAME \
+    -e USER=$USER \
+    -v $PWD:/data \
+    --workdir=/data \
+    ${CONTAINER_NAME} $@
