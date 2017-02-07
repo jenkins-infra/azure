@@ -19,8 +19,10 @@ fi;
 # http://blog.dscpl.com.au/2015/12/unknown-user-when-running-docker.html
 # Passing LOGNAME and USER because the acs component in the azure-cli does some
 # user lookup
+
+# Disabling --tty because of :
+# https://github.com/docker/docker/issues/8513#issuecomment-90715369
 exec docker run --rm  -u $(id -u):$(id -u) \
-    -ti \
     -v ${HOME}/.azure:/.azure \
     -v ${REPO_DIR}/ssh_key:/.ssh \
     -e LOGNAME=$LOGNAME \
