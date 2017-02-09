@@ -57,6 +57,7 @@ $(TFSTATE_PREPARE_DIR)/terraform.tfstate:
 
 
 clean:
+	$(MAKE) -C arm_templates clean
 	rm -f $(TFSTATE_REMOTE_STATE) ${TFSTATE_PREPARE_DIR}/terraform.tfstate
 
 .PHONY: terraform deploy init clean validate generate

@@ -20,11 +20,11 @@ fi;
 # Passing LOGNAME and USER because the acs component in the azure-cli does some
 # user lookup
 exec docker run --rm  -u $(id -u):$(id -u) \
-    -ti \
     -v ${PWD}/.kube:/.kube \
     -v ${REPO_DIR}/ssh_key:/.ssh \
     -e LOGNAME=$LOGNAME \
     -e USER=$USER \
     -v $PWD:/data \
+    -p 8001:8001 \
     --workdir=/data \
     ${CONTAINER_NAME} $@
