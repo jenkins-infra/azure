@@ -3,7 +3,7 @@
 # This script is meant to be added to the PATH so the latest terraform
 # container is always in use
 
-CONTAINER_NAME=hashicorp/terraform
+CONTAINER_NAME=hashicorp/terraform:0.8.8
 
 # Pull down the container if we don't already have it
 docker inspect -f . ${CONTAINER_NAME} 2>&1 > /dev/null
