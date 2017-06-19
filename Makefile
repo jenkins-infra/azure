@@ -9,26 +9,29 @@ TFSTATE_PREPARE_DIR=.tf-prepare
 # Indicator to indicate that we should be using remote state now
 TFSTATE_REMOTE_STATE=.tf-remote-state-enabled
 
-terraform: init
+check:
+	@python -c "import sys; sys.exit(0) if sys.version_info < (3,0) else sys.exit('\n\nPython 2 required \n\n')"
+
+terraform: check init
 	$(TERRAFORM) plan --var-file=$(VARFILE) plans
 
-validate: generate
+validate: check generate
 	$(TERRAFORM) validate plans
 
-generate:
+generate: check
 	$(MAKE) -C arm_templates
 
-deploy: init
+deploy: check init
 	$(TERRAFORM) apply --var-file=$(VARFILE) plans
 	$(TERRAFORM) remote push
 
-init: validate $(TFSTATE_REMOTE_STATE)
+init: check validate $(TFSTATE_REMOTE_STATE)
 	@echo ">> Remote state enabled"
 	$(TERRAFORM) remote pull
 
 # Before creating remote state, we need to first prepare our storage container for
 # remote state
-$(TFSTATE_REMOTE_STATE): $(TFSTATE_PREPARE_DIR)/terraform.tfstate
+$(TFSTATE_REMOTE_STATE): check $(TFSTATE_PREPARE_DIR)/terraform.tfstate
 	@$(TERRAFORM) remote config \
 		-backend=azure \
 		-backend-config="resource_group=$(TF_VAR_PREFIX)tfstate" \
