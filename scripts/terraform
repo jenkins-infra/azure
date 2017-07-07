@@ -5,6 +5,8 @@
 
 CONTAINER_NAME=hashicorp/terraform:0.8.8
 
+set -x
+
 # Pull down the container if we don't already have it
 docker inspect -f . ${CONTAINER_NAME} 2>&1 > /dev/null
 if [ $? -ne 0 ]; then
