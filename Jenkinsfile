@@ -136,8 +136,9 @@ Object tfsh(Closure body) {
         string(credentialsId: 'azure-client-id', variable: 'TF_VAR_client_id'),
         string(credentialsId: 'azure-client-secret', variable: 'TF_VAR_client_secret'),
         string(credentialsId: 'azure-subscription-id', variable: 'TF_VAR_subscription_id'),
-        string(credentialsId: 'azure-tenant-id', variable: 'TF_VAR_tenant_id')]) {
-
+        string(credentialsId: 'azure-tenant-id', variable: 'TF_VAR_tenant_id'),
+        file(credentialsId: 'azure-k8s-management-pubkey', variable: 'TF_VAR_ssh_pubkey_path'),
+        ]) {
         ansiColor('xterm') {
             body.call()
         }
