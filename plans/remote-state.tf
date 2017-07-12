@@ -21,15 +21,3 @@ resource "azurerm_storage_container" "tfstate" {
     storage_account_name  = "${azurerm_storage_account.tfstate.name}"
     container_access_type = "private"
 }
-
-
-# Configure the Azure store as our remote state backend
-data "terraform_remote_state" "azure_tfstate" {
-  backend = "azure"
-  config {
-    storage_account_name = "${azurerm_storage_account.tfstate.name}"
-    container_name       = "${azurerm_storage_container.tfstate.name}"
-    access_key           = "${azurerm_storage_account.tfstate.primary_access_key}"
-    key                  = "terraform.tfstate"
-  }
-}

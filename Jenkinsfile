@@ -51,7 +51,24 @@ try {
             node('docker') {
                 deleteDir()
                 git 'https://github.com/jenkins-infra/azure.git'
+                /* Create an empty terraform variables file so that everything can
+                 * be overridden in the environment
+                 */
                 sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
+
+                /*
+                 * Three following actions must be remove once terraform is greater than 0.8
+                 * Cfr INFRA-1288
+                 */
+
+                sh 'rm plans/k8s.tf'
+                sh 'rm plans/logs.tf'
+                sh 'rm plans/dockerregistry.tf'
+
+                /*
+                 *INFRA-1288 end
+                 */
+
                 tfsh {
                     sh 'make deploy'
                 }
@@ -59,19 +76,42 @@ try {
         }
     }
 
+    /*
+     * In order to migrate to the new backend mechanism, we need to pull
+     * the remote state with a terraform version < 0.9 then run terraform init with terraform 0.9.
+     * Terraform will detect that a legacy tfstate exist and will migrate it automatically.
+     * stage('Pull remote') can be deleted once  tfstate is migrated.
+     * It seems that the jenkinsfile git method do not  work with commit_id (instead of branch).
+     */
+
+    stage('Pull remote') {
+        node('docker') {
+            deleteDir()
+            git url: 'https://github.com/olblak/azure.git', branch: '0.8.8'
+            sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
+            tfsh {
+                sh 'make init'
+            }
+            stash includes: '.terraform/*', name: 'legacy-tfstate'
+        }
+    }
+    /*
+     * END
+     */
+
     stage('Plan') {
         node('docker') {
             deleteDir()
             checkout scm
-
-            /* Create an empty terraform variables file so that everything can
-             * be overridden in the environment
-             */
             sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
-            stash includes: '**', name: 'tf'
+
+            /* unstash 'legacy-tfstate' can be deleted once remote state is migrate
+             * to the new backend mechanism
+             */
+            unstash 'legacy-tfstate'
 
             tfsh {
-                sh 'make'
+                sh 'make terraform'
             }
         }
     }
@@ -92,8 +132,8 @@ try {
     stage('Apply') {
         node('docker') {
             deleteDir()
-            unstash 'tf'
-
+            checkout scm
+            sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
             tfsh {
                 sh 'make deploy'
             }
@@ -108,16 +148,21 @@ finally {
         stage('Destroy') {
             node('docker') {
                 deleteDir()
-                unstash 'tf'
+                checkout scm
+                sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
 
                 tfsh {
                     /* `make init` ensures we have synced state from the remote
                      * state before doing anything
                      */
                     sh 'make init'
-                    echo 'Turning off remote state before destroying'
-                    sh './scripts/terraform remote config --disable'
-                    sh "./scripts/terraform destroy --force --var-file=${tfVarFile} plans"
+                    /*
+                     * Remove backend configuration in order to use the default local backend
+                     * instead of azure
+                     */
+                    sh "sed -i 's/azure/local/g' backend.tf plans/backend.tf"
+                    sh "./scripts/terraform init -force-copy"
+                    sh "./scripts/terraform destroy -force -var-file=${tfVarFile} plans"
                 }
             }
         }
