@@ -8,3 +8,4 @@
 .tf-prepare/
 # .tf-remote-state-enabled Deprecated since terraform 0.9 upgrade
 .tf-remote-state-enabled
+.terraform
