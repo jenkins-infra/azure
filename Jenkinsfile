@@ -56,19 +56,6 @@ try {
                  */
                 sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
 
-                /*
-                 * Three following actions must be remove once terraform is greater than 0.8
-                 * Cfr INFRA-1288
-                 */
-
-                sh 'rm plans/k8s.tf'
-                sh 'rm plans/logs.tf'
-                sh 'rm plans/dockerregistry.tf'
-
-                /*
-                 *INFRA-1288 end
-                 */
-
                 tfsh {
                     sh 'make deploy'
                 }
@@ -76,39 +63,11 @@ try {
         }
     }
 
-    /*
-     * In order to migrate to the new backend mechanism, we need to pull
-     * the remote state with a terraform version < 0.9 then run terraform init with terraform 0.9.
-     * Terraform will detect that a legacy tfstate exist and will migrate it automatically.
-     * stage('Pull remote') can be deleted once  tfstate is migrated.
-     * It seems that the jenkinsfile git method do not  work with commit_id (instead of branch).
-     */
-
-    stage('Pull remote') {
-        node('docker') {
-            deleteDir()
-            git url: 'https://github.com/olblak/azure.git', branch: '0.8.8'
-            sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
-            tfsh {
-                sh 'make init'
-            }
-            stash includes: '.terraform/*', name: 'legacy-tfstate'
-        }
-    }
-    /*
-     * END
-     */
-
     stage('Plan') {
         node('docker') {
             deleteDir()
             checkout scm
             sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
-
-            /* unstash 'legacy-tfstate' can be deleted once remote state is migrate
-             * to the new backend mechanism
-             */
-            unstash 'legacy-tfstate'
 
             tfsh {
                 sh 'make terraform'
