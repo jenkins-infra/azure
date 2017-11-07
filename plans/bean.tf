@@ -41,7 +41,7 @@ resource "azurerm_container_service" "bean" {
 
   agent_pool_profile {
     name       = "bean"
-    count      = 3
+    count      = 5
     dns_prefix = "agent${azurerm_resource_group.bean.name}"
     vm_size    = "Standard_D8_v3"
   }
