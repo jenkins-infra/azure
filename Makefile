@@ -13,23 +13,23 @@ check:
 terraform: check init
 	$(TERRAFORM) plan -var-file=$(VARFILE) plans
 
-validate: check generate
+validate: check init
 	$(TERRAFORM) validate plans
 
 generate: check
 	$(MAKE) -C arm_templates
 
 deploy: check init
-	$(TERRAFORM) apply -var-file=$(VARFILE) plans
+	$(TERRAFORM) apply -var-file=$(VARFILE) -auto-approve=true plans
 
-init: check prepare validate
-	# terraform init must be done inside the directory containing tf files
+init: check prepare generate
 	$(TERRAFORM) init \
 		-backend-config="storage_account_name=$(TF_VAR_PREFIX)tfstate" \
 		-backend-config="container_name=tfstate" \
 		-backend-config="key=terraform.tfstate" \
 		-backend-config="access_key=$(shell python -c "import json; ms=json.load(file('$(TFSTATE_PREPARE_DIR)/terraform.tfstate'))['modules']; print ms[0]['resources']['azurerm_storage_account.tfstate']['primary']['attributes']['primary_access_key']")" \
-		-force-copy
+		-force-copy \
+		plans
 
 clean:
 	$(MAKE) -C arm_templates clean
@@ -48,5 +48,6 @@ prepare:
 	for file in variables provider remote-state; do \
 		cp plans/$$file.tf $(TFSTATE_PREPARE_DIR); \
 	done;
-	cd $(TFSTATE_PREPARE_DIR) && ../$(TERRAFORM) apply -var-file=$(VARFILE)
+	cd $(TFSTATE_PREPARE_DIR) && ../$(TERRAFORM) init &&  ../$(TERRAFORM) apply -var-file=$(VARFILE)
 	sleep 90
+

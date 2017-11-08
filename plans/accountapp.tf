@@ -10,11 +10,12 @@ resource "azurerm_resource_group" "accountapp" {
 }
 
 resource "azurerm_storage_account" "accountapp" {
-    name                = "${var.prefix}accountapp"
-    resource_group_name = "${azurerm_resource_group.accountapp.name}"
-    location            = "${var.location}"
-    account_type        = "Standard_GRS"
-    depends_on          = ["azurerm_resource_group.accountapp"]
+    name                      = "${var.prefix}accountapp"
+    resource_group_name       = "${azurerm_resource_group.accountapp.name}"
+    location                  = "${var.location}"
+    account_tier              = "Standard"
+    account_replication_type  = "GRS"
+    depends_on                = ["azurerm_resource_group.accountapp"]
     tags {
         env = "${var.prefix}"
     }

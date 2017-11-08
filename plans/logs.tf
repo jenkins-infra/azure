@@ -7,11 +7,12 @@ resource "azurerm_resource_group" "logs" {
 }
 
 resource "azurerm_storage_account" "logs" {
-    name                = "${var.prefix}jenkinslogs"
-    resource_group_name = "${azurerm_resource_group.logs.name}"
-    location            = "${var.location}"
-    account_type        = "Standard_GRS"
-    depends_on          = ["azurerm_resource_group.logs"]
+    name                     = "${var.prefix}jenkinslogs"
+    resource_group_name      = "${azurerm_resource_group.logs.name}"
+    location                 = "${var.location}"
+    depends_on               = ["azurerm_resource_group.logs"]
+    account_tier              = "Standard"
+    account_replication_type = "GRS"
     tags {
         env = "${var.prefix}"
     }

@@ -7,11 +7,12 @@ resource "azurerm_resource_group" "dockerregistry" {
 }
 
 resource "azurerm_storage_account" "dockerregistry" {
-    name                = "${var.prefix}dockerregistry"
-    resource_group_name = "${azurerm_resource_group.dockerregistry.name}"
-    location            = "${var.dockerregistrylocation}"
-    depends_on          = ["azurerm_resource_group.dockerregistry"]
-    account_type        = "Standard_GRS"
+    name                     = "${var.prefix}dockerregistry"
+    resource_group_name      = "${azurerm_resource_group.dockerregistry.name}"
+    location                 = "${var.dockerregistrylocation}"
+    depends_on               = ["azurerm_resource_group.dockerregistry"]
+    account_tier              = "Standard"
+    account_replication_type = "GRS"
     tags {
         "env" = "${var.prefix}"
     }
