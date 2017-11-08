@@ -43,7 +43,7 @@ resource "azurerm_container_service" "bean" {
     name       = "bean"
     count      = 5
     dns_prefix = "agent${azurerm_resource_group.bean.name}"
-    vm_size    = "Standard_D8_v3"
+    vm_size    = "Standard_DS4_v2"
   }
 
   service_principal {
