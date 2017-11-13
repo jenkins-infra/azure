@@ -15,7 +15,7 @@ resource "azurerm_storage_account" "repo-proxy" {
     name                     = "${var.prefix}repoproxy"
     resource_group_name      = "${azurerm_resource_group.repo-proxy.name}"
     location                 = "${var.location}"
-    account_tier              = "Standard"
+    account_tier             = "Standard"
     account_replication_type = "GRS"
     depends_on               = ["azurerm_resource_group.repo-proxy"]
     tags {

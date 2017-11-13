@@ -14,7 +14,7 @@ resource "azurerm_storage_account" "releases" {
     name                     = "${var.prefix}jenkinsreleases"
     resource_group_name      = "${azurerm_resource_group.releases.name}"
     location                 = "${var.location}"
-    account_tier              = "Standard"
+    account_tier             = "Standard"
     account_replication_type = "GRS"
 }
 
