@@ -7,11 +7,12 @@ resource "azurerm_resource_group" "logs" {
 }
 
 resource "azurerm_storage_account" "logs" {
-    name                = "${var.prefix}jenkinslogs"
-    resource_group_name = "${azurerm_resource_group.logs.name}"
-    location            = "${var.location}"
-    account_type        = "Standard_GRS"
-    depends_on          = ["azurerm_resource_group.logs"]
+    name                     = "${var.prefix}jenkinslogs"
+    resource_group_name      = "${azurerm_resource_group.logs.name}"
+    location                 = "${var.location}"
+    depends_on               = ["azurerm_resource_group.logs"]
+    account_tier             = "Standard"
+    account_replication_type = "GRS"
     tags {
         env = "${var.prefix}"
     }
@@ -27,16 +28,16 @@ resource "azurerm_storage_share" "logs" {
 }
 
 resource "azurerm_template_deployment" "logs"{
-    name  = "${var.prefix}logs"
+    name                = "${var.prefix}logs"
     resource_group_name = "${ azurerm_resource_group.logs.name }"
     depends_on          = ["azurerm_resource_group.logs"]
-    parameters = {
-        omsWorkspaceName = "${var.prefix}logs"
-        omsRegion = "${var.logslocation}"
-        existingStorageAccountName = "${azurerm_storage_account.logs.name}"
+    parameters          = {
+        omsWorkspaceName                        = "${var.prefix}logs"
+        omsRegion                               = "${var.logslocation}"
+        existingStorageAccountName              = "${azurerm_storage_account.logs.name}"
         existingStorageAccountResourceGroupName = "${azurerm_resource_group.logs.name}"
-        table = "WADWindowsEventLogsTable"
+        table                                   = "WADWindowsEventLogsTable"
     }
-    deployment_mode = "Incremental"
-    template_body = "${file("./arm_templates/logs.json")}"
+    deployment_mode     = "Incremental"
+    template_body       = "${file("./arm_templates/logs.json")}"
 }

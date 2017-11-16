@@ -7,11 +7,12 @@ resource "azurerm_resource_group" "pea" {
 }
 
 resource "azurerm_storage_account" "pea" {
-    name                = "${azurerm_resource_group.pea.name}"
-    resource_group_name = "${azurerm_resource_group.pea.name}"
-    location            = "${var.location}"
-    account_type        = "Standard_GRS"
-    depends_on          = ["azurerm_resource_group.pea"]
+    name                     = "${azurerm_resource_group.pea.name}"
+    resource_group_name      = "${azurerm_resource_group.pea.name}"
+    location                 = "${var.location}"
+    account_tier             = "Standard"
+    account_replication_type = "GRS"
+    depends_on               = ["azurerm_resource_group.pea"]
     tags {
         env = "${var.prefix}"
     }
