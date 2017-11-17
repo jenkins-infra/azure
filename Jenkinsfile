@@ -119,7 +119,7 @@ finally {
                      * Remove backend configuration in order to use the default local backend
                      * instead of azure
                      */
-                    sh "sed -i 's/azure/local/g' backend.tf plans/backend.tf"
+                    sh "sed -i 's/azurerm/local/g' backend.tf plans/backend.tf"
                     sh "./scripts/terraform init -force-copy"
                     sh "./scripts/terraform destroy -force -var-file=${tfVarFile} plans"
                 }
