@@ -14,7 +14,7 @@ terraform: check init
 	$(TERRAFORM) plan -var-file=$(VARFILE) plans
 
 validate: check init
-	$(TERRAFORM) validate plans
+	$(TERRAFORM) validate --var-file=$(VARFILE) plans
 
 generate: check
 	$(MAKE) -C arm_templates
