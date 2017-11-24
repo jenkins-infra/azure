@@ -10,5 +10,5 @@
 # https://github.com/hashicorp/terraform/blob/master/CHANGELOG.md#0100-beta1-june-22-2017
 
 terraform {
-  backend "azure" {}
+  backend "azurerm" {}
 }

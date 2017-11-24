@@ -8,6 +8,18 @@ resource "azurerm_resource_group" "bean" {
   }
 }
 
+# Public IP used by Default ingress resource on Kubernetes cluster
+resource "azurerm_public_ip" "bean" {
+  name                         = "${var.prefix}nginxbean"
+  location                     = "${var.location}"
+  resource_group_name          = "${azurerm_resource_group.bean.name}"
+  public_ip_address_allocation = "Static"
+  idle_timeout_in_minutes      = 30
+  tags {
+    environment = "${var.prefix}"
+  }
+}
+
 resource "azurerm_storage_account" "bean" {
     name                     = "${azurerm_resource_group.bean.name}"
     resource_group_name      = "${azurerm_resource_group.bean.name}"
