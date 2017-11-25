@@ -10,7 +10,10 @@ TFSTATE_PREPARE_DIR=.tf-prepare
 check:
 	@python -c "import sys; sys.exit(0) if sys.version_info < (3,0) else sys.exit('\n\nPython 2 required \n\n')"
 
-terraform: check init
+refresh: check init
+	$(TERRAFORM) refresh -var-file=$(VARFILE) plans
+
+terraform: check init refresh
 	$(TERRAFORM) plan -var-file=$(VARFILE) plans
 
 validate: check init
@@ -19,7 +22,7 @@ validate: check init
 generate: check
 	$(MAKE) -C arm_templates
 
-deploy: check init
+deploy: check init refresh
 	$(TERRAFORM) apply -var-file=$(VARFILE) -auto-approve=true plans
 
 init: check prepare generate
@@ -48,6 +51,6 @@ prepare:
 	for file in variables provider remote-state; do \
 		cp plans/$$file.tf $(TFSTATE_PREPARE_DIR); \
 	done;
-	cd $(TFSTATE_PREPARE_DIR) && ../$(TERRAFORM) init &&  ../$(TERRAFORM) apply -var-file=$(VARFILE)
+	cd $(TFSTATE_PREPARE_DIR) && ../$(TERRAFORM) init &&  ../$(TERRAFORM) apply -var-file=$(VARFILE) -auto-approve=true
 	sleep 90
 

@@ -115,6 +115,7 @@ finally {
                      * state before doing anything
                      */
                     sh 'make init'
+                    sh 'make refresh'
                     /*
                      * Remove backend configuration in order to use the default local backend
                      * instead of azure
