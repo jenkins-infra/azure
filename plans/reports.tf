@@ -12,9 +12,14 @@ resource "azurerm_resource_group" "reports" {
 resource "azurerm_storage_account" "reports" {
     name                     = "${var.prefix}jenkinsreports"
     resource_group_name      = "${azurerm_resource_group.reports.name}"
+
     location                 = "${var.location}"
     account_tier             = "Standard"
     account_replication_type = "GRS"
+
+    custom_domain {
+        name = "reports.jenkins.io"
+    }
 }
 
 resource "azurerm_storage_container" "reports" {
