@@ -7,7 +7,7 @@ TF_VAR_PREFIX:=$(shell python -c "import json; print json.load(file('.azure-terr
 # Directory to use for local preparatory state
 TFSTATE_PREPARE_DIR=.tf-prepare
 
-check:
+check: validate generate
 	@python -c "import sys; sys.exit(0) if sys.version_info < (3,0) else sys.exit('\n\nPython 2 required \n\n')"
 
 refresh: check init
@@ -16,16 +16,16 @@ refresh: check init
 terraform: check init refresh
 	$(TERRAFORM) plan -var-file=$(VARFILE) plans
 
-validate: check init
+validate: init
 	$(TERRAFORM) validate --var-file=$(VARFILE) plans
 
-generate: check
+generate:
 	$(MAKE) -C arm_templates
 
 deploy: check init refresh
 	$(TERRAFORM) apply -var-file=$(VARFILE) -auto-approve=true plans
 
-init: check prepare generate
+init: prepare generate
 	$(TERRAFORM) init \
 		-backend-config="storage_account_name=$(TF_VAR_PREFIX)tfstate" \
 		-backend-config="container_name=tfstate" \
@@ -42,8 +42,8 @@ clean:
 .PHONY: terraform deploy init clean validate generate prepare
 
 prepare:
-	# Before using azure backend, we first have to be sure that 
-	# remote_tfstate is correctly configured and we must to do it in an other 
+	# Before using azure backend, we first have to be sure that
+	# remote_tfstate is correctly configured and we must to do it in an other
 	# directory as the global directory is already configured to use azure backend.
 	mkdir $(TFSTATE_PREPARE_DIR) || true
 	cd $(TFSTATE_PREPARE_DIR) && ../$(TERRAFORM) init

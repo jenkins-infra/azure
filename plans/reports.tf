@@ -18,7 +18,7 @@ resource "azurerm_storage_account" "reports" {
     account_replication_type = "GRS"
 
     custom_domain {
-        name = "reports.jenkins.io"
+        name = "${var.prefix == "prod" ? "reports.jenkins.io" : ""}"
     }
 }
 
