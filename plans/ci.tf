@@ -48,7 +48,7 @@ resource "azurerm_network_interface" "ci_trusted_agent_1_nic" {
 
     ip_configuration {
         name                          = "testconfiguration1"
-        subnet_id                     = "${azurerm_subnet.public_dmz.id}"
+        subnet_id                     = "${azurerm_virtual_network.public_prod.subnet.public_dmz.id}"
         private_ip_address_allocation = "dynamic"
         public_ip_address_id          = "${azurerm_public_ip.ci_trusted_agent_1.id}"
     }
