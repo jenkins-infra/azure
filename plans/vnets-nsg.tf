@@ -139,8 +139,39 @@ resource "azurerm_network_security_group" "public_data_tier" {
   }
 }
 
-# NOTE: Currently empty to enable us to add security rules to this NSG at a
-# later date.
+resource "azurerm_network_security_group" "real_dmz_tier" {
+  name                = "public-network-realdmztier"
+  location            = "${var.location}"
+  resource_group_name = "${azurerm_resource_group.public_prod.name}"
+
+  # Always allow SSH from machines in our Private Production network
+  security_rule {
+    name                       = "allow-private-ssh"
+    priority                   = 4000
+    direction                  = "inbound"
+    access                     = "allow"
+    protocol                   = "tcp"
+    source_port_range          = "22"
+    destination_port_range     = "*"
+    source_address_prefix      = "${element(azurerm_virtual_network.private_prod.address_space, 0)}"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "deny-all-else"
+    priority                   = 4096
+    direction                  = "inbound"
+    access                     = "deny"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
+
+
+# NOTE: Consider completely unused.
 resource "azurerm_network_security_group" "public_dmz_tier" {
   name                = "public-network-dmztier"
   location            = "${var.location}"

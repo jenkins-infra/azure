@@ -64,16 +64,30 @@ resource "azurerm_virtual_network" "public_prod" {
     security_group = "${azurerm_network_security_group.public_data_tier.id}"
   }
 
-  # The "dmz-tier" subnet is intended for resources which need to be
-  # provisioned in the Public Production network but don't need to be
-  # accessible from the public internet. Such as dynamically provisioned VMs for
-  # Jenkins masters, or other untrusted workloads which should be in the Public
-  # Production VNet
+  # NOTE: The following subnet should be considered completely unused, due to a
+  # problem with how nested subnets in Terraform are treated, this subnet is
+  # effectively 100% usable.
+  #
+  # See: https://github.com/terraform-providers/terraform-provider-azurerm/issues/666
   subnet {
     name           = "dmz-tier"
     address_prefix = "10.0.99.0/24"
     security_group = "${azurerm_network_security_group.public_dmz_tier.id}"
   }
+}
+
+# The "dmz-tier" subnet is intended for resources which need to be
+# provisioned in the Public Production network but don't need to be
+# accessible from the public internet. Such as dynamically provisioned VMs for
+# Jenkins masters, or other untrusted workloads which should be in the Public
+# Production VNet
+resource "azurerm_subnet" "real_dmz" {
+    name                      = "real-dmz-tier"
+    resource_group_name       = "${azurerm_resource_group.public_prod.name}"
+
+    virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
+    network_security_group_id = "${azurerm_network_security_group.real_dmz_tier.id}"
+    address_prefix            = "10.0.99.0/24"
 }
 
 
