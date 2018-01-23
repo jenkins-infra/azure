@@ -42,15 +42,24 @@ resource "azurerm_resource_group" "development" {
 
 ## VIRTUAL NETWORKS
 ################################################################################
+
+resource "azurerm_virtual_network" "public_prod" {
+  name                = "${var.prefix}-jenkins-public-prod"
+  resource_group_name = "${azurerm_resource_group.public_prod.name}"
+  address_space       = ["10.0.0.0/16"]
+  location            = "${var.location}"
+}
+
 # The "dmz-tier" subnet is intended for resources which need to be
 # provisioned in the Public Production network but don't need to be
 # accessible from the public internet. Such as dynamically provisioned VMs for
 # Jenkins masters, or other untrusted workloads which should be in the Public
 # Production VNet
+
 resource "azurerm_subnet" "public_dmz"{
   name                      = "dmz-tier"
   resource_group_name       = "${azurerm_resource_group.public_prod.name}"
-  virtual_network_name      = "${var.prefix}-jenkins-public-prod"
+  virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
   address_prefix            = "10.0.99.0/24"
   network_security_group_id = "${azurerm_network_security_group.public_dmz_tier.id}"
 }
@@ -61,7 +70,7 @@ resource "azurerm_subnet" "public_dmz"{
 resource "azurerm_subnet" "public_data"{
   name                      = "data-tier"
   resource_group_name       = "${azurerm_resource_group.public_prod.name}"
-  virtual_network_name      = "${var.prefix}-jenkins-public-prod"
+  virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
   address_prefix            = "10.0.2.0/24"
   network_security_group_id = "${azurerm_network_security_group.public_data_tier.id}"
 }
@@ -70,27 +79,10 @@ resource "azurerm_subnet" "public_data"{
 resource "azurerm_subnet" "public_app"{
   name                      = "app-tier"
   resource_group_name       = "${azurerm_resource_group.public_prod.name}"
-  virtual_network_name      = "${var.prefix}-jenkins-public-prod"
+  virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
   address_prefix            = "10.0.1.0/24"
   network_security_group_id = "${azurerm_network_security_group.public_app_tier.id}"
-}
-
-# As we can't retrieve a subnet id if declared in a virtual network resource (https://git.io/vNa4F), we split them into separated subnet resources.
-# And because one of subnet (defined in the virtual network resouce'public_prod') was already referenced from trusted_ci_agent_1, we must follow this order in order to unblock the situation.
-# 
-# 1 Create subnet resources
-# 2 Recreate ci_trusted_agent network interface with a reference to the new subnet resource
-# 3 Remove subnet definition from azurerm_virtual_network resource.
-# Once applied in
-
-# This resource is volontary put after all public subnet, 
-
-resource "azurerm_virtual_network" "public_prod" {
-  name                = "${var.prefix}-jenkins-public-prod"
-  resource_group_name = "${azurerm_resource_group.public_prod.name}"
-  address_space       = ["10.0.0.0/16"]
-  location            = "${var.location}"
-  depends_on          = ["azurerm_network_interface.ci_trusted_agent_2_nic"]
+  depends_on                = ["azurerm_virtual_network.public_prod"]
 }
 
 
