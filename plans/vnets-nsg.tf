@@ -146,7 +146,7 @@ resource "azurerm_network_security_group" "public_dmz_tier" {
   location            = "${var.location}"
   resource_group_name = "${azurerm_resource_group.public_prod.name}"
 
-  # Always allow SSH from machines in our Private Production network
+  # Always allow SSH
   security_rule {
     name                       = "allow-private-ssh"
     priority                   = 4000
@@ -155,7 +155,7 @@ resource "azurerm_network_security_group" "public_dmz_tier" {
     protocol                   = "tcp"
     source_port_range          = "22"
     destination_port_range     = "*"
-    source_address_prefix      = "${element(azurerm_virtual_network.private_prod.address_space, 0)}"
+    source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
 
