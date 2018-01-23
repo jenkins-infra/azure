@@ -17,9 +17,13 @@ resource "azurerm_storage_account" "reports" {
     account_tier             = "Standard"
     account_replication_type = "GRS"
 
-    custom_domain {
-        name = "${var.prefix == "prod" ? "reports.jenkins.io" : ""}"
-    }
+
+    # Setup custom domain to "" in non production environment, lead azure to become crazy
+    # The storage account stay stuck in 'creating' mode
+    # https://git.io/vNuG2
+    # custom_domain {
+    #     name = "${var.prefix == "prod" ? "reports.jenkins.io" : ""}"
+    # }
 }
 
 resource "azurerm_storage_container" "reports" {
