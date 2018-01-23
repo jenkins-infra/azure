@@ -48,7 +48,6 @@ resource "azurerm_virtual_network" "public_prod" {
   resource_group_name = "${azurerm_resource_group.public_prod.name}"
   address_space       = ["10.0.0.0/16"]
   location            = "${var.location}"
-  #depends_on          = ["azurerm_network_interface.ci_trusted_agent_2_nic"]
 }
 
 # The "dmz-tier" subnet is intended for resources which need to be
@@ -63,7 +62,6 @@ resource "azurerm_subnet" "public_dmz"{
   virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
   address_prefix            = "10.0.99.0/24"
   network_security_group_id = "${azurerm_network_security_group.public_dmz_tier.id}"
-  depends_on                = ["azurerm_virtual_network.public_prod"]
 }
 
 # The "data-tier" subnet is for data services which we might choose to run
@@ -75,7 +73,6 @@ resource "azurerm_subnet" "public_data"{
   virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
   address_prefix            = "10.0.2.0/24"
   network_security_group_id = "${azurerm_network_security_group.public_data_tier.id}"
-  depends_on                = ["azurerm_virtual_network.public_prod"]
 }
 
 # "app-tier" hosts should expect to be accessible from the public internet
