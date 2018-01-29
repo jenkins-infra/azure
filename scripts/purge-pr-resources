@@ -10,7 +10,7 @@ for g in $GROUPS; do
     echo ">> ${g}"
 done;
 
-read -p "Procees? (yes): " CONFIRM
+read -p "Proceed? (yes): " CONFIRM
 
 if [ ! "${CONFIRM}" = "yes" ]; then
     exit 1
