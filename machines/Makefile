@@ -1,12 +1,22 @@
+SECRETS=.azure-packer.json
+PACKER=../scripts/packer
 
-PACKER=packer
+all: check
+	for t in $(shell find . -iname "*.json" -type f); do \
+		./scripts/packer build --var-file=$(SECRETS) $$t; \
+	done;
 
-all: validate
+check: $(SECRETS)
+	for t in $(shell find . -iname "*.json" -type f); do \
+		$(PACKER) validate --var-file=$(SECRETS) $$t; \
+	done;
 
-validate:
-	$(PACKER) validate -var-file=.azure-packer.json *.json
 
-build: validate
-	$(PACKER) build -var-file=.azure-packer.json *.json
+$(SECRETS):
+	echo ">> $(SECRETS) doesn't exist, you'll probably want to generate it yourself"
+	ln -sf vars.json $(SECRETS)
 
-PHONY: all validate
+clean:
+
+
+.PHONY: all validate clean validate-yaml
