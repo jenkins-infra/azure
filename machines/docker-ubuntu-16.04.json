@@ -1,4 +1,12 @@
 {
+    "variables" : {
+        "azure_subscription_id" : "",
+        "azure_client_id"       : "",
+        "azure_client_secret"   : "",
+        "azure_tenant_id"       : "",
+        "resource_group"        : "{{env `PACKER_IMAGE_RESOURCE_GROUP`}}",
+        "storage_account"       : "{{env `PACKER_IMAGE_STORAGE_ACCOUNT`}}"
+    },
     "builders" : [
         {
             "type": "azure-arm",
@@ -8,8 +16,8 @@
             "client_secret": "{{user `azure_client_secret`}}",
             "tenant_id" : "{{user `azure_tenant_id`}}",
 
-            "resource_group_name": "azureagents-for-codevalet",
-            "storage_account": "codevaletimages",
+            "resource_group_name": "{{user `resource_group`}}",
+            "storage_account": "{{user `storage_account`}}",
 
             "capture_container_name": "images",
             "capture_name_prefix": "packer",
