@@ -2,7 +2,6 @@
 # Resources related to our CI infrastructure for ci.jenkins.io or trusted.ci
 #
 
-
 resource "azurerm_resource_group" "ci" {
     name     = "${var.prefix}jenkinsci"
     location = "${var.location}"
@@ -10,6 +9,35 @@ resource "azurerm_resource_group" "ci" {
         env = "${var.prefix}"
     }
 }
+
+# This resource group is largely for the Azure VM Agents plugin to manage,
+# we're creating it here because we need a custom storage account for storing
+# Packer built images.
+#
+# This is only expected to be in use by ci.jenkins.io, i.e. untrusted
+resource "azurerm_resource_group" "ci_agents" {
+    name     = "${var.prefix}jenkinsci-agents"
+    location = "${var.location}"
+    tags {
+        env = "${var.prefix}"
+    }
+}
+
+# NOTE: This storage account must be in the same location as the ci_agents
+# resource group in order for the Azure VM Agents plugin to properly use the
+# the VHDs created by Packer
+resource "azurerm_storage_account" "ci_image_store" {
+    name                     = "${var.prefix}jenkinsimgs"
+    resource_group_name      = "${azurerm_resource_group.ci_agents.name}"
+    location                 = "${var.location}"
+    account_tier             = "Standard"
+    account_replication_type = "LRS"
+
+    tags {
+        environment = "${var.prefix}"
+    }
+}
+
 
 resource "azurerm_storage_account" "ci_storage" {
     name                     = "${var.prefix}jenkinscistore"
