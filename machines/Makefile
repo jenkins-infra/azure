@@ -1,5 +1,6 @@
 SECRETS=.azure-packer.json
 PACKER=../scripts/packer
+TIMESTAMP=$(shell date -Iminutes)
 
 export PACKER_IMAGE_RESOURCE_GROUP:=$(PREFIX)jenkinsci-agents
 export PACKER_IMAGE_STORAGE_ACCOUNT:=$(PREFIX)jenkinsimgs
@@ -7,7 +8,8 @@ export PACKER_IMAGE_LOCATION:=eastus2
 
 all: check
 	for t in $(wildcard *.json); do \
-		$(PACKER) build --var-file=$(SECRETS) $$t; \
+		$(PACKER) build --var-file=$(SECRETS) \
+			-machine-readable $$t 2>&1 | tee $(TIMESTAMP)-$$t.log; \
 	done;
 
 check: $(SECRETS)
@@ -23,6 +25,7 @@ $(SECRETS):
 	ln -sf vars.json.example $(SECRETS)
 
 clean:
+	rm -f *.log
 
 
 .PHONY: all validate clean validate-yaml
