@@ -1,18 +1,19 @@
 SECRETS=.azure-packer.json
 PACKER=../scripts/packer
 
-export PACKER_IMAGE_RESOURCE_GROUP:=$(PREFIX)jenkinsci
+export PACKER_IMAGE_RESOURCE_GROUP:=$(PREFIX)jenkinsci-agents
 export PACKER_IMAGE_STORAGE_ACCOUNT:=$(PREFIX)jenkinsimgs
+export PACKER_IMAGE_LOCATION:=eastus2
 
 all: check
-	for t in $(shell find . -iname "*.json" -type f); do \
-		./scripts/packer build --var-file=$(SECRETS) $$t; \
+	for t in $(wildcard *.json); do \
+		$(PACKER) build --var-file=$(SECRETS) $$t; \
 	done;
 
 check: $(SECRETS)
 	@echo ">> Using the following environment variables:"
 	@printenv | grep -i \^packer
-	for t in $(shell find . -iname "*.json" -type f); do \
+	for t in $(wildcard *.json); do \
 		$(PACKER) validate --var-file=$(SECRETS) $$t; \
 	done;
 
