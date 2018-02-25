@@ -20,8 +20,8 @@
             "resource_group_name": "{{user `resource_group`}}",
             "storage_account": "{{user `storage_account`}}",
 
-            "capture_container_name": "images",
-            "capture_name_prefix": "packer",
+            "capture_container_name": "ubuntu",
+            "capture_name_prefix": "docker-ubuntu-16.04",
 
 
             "os_type": "Linux",
