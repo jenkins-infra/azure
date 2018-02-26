@@ -1,0 +1,5 @@
+= Packer scripts
+
+Many of these scripts originally came from Stefan Scherer's
+link:https://github.com/StefanScherer/packer-windows[packer-windows]
+repository, and are thusly licensed under his MIT license.
