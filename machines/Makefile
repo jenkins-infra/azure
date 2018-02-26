@@ -8,6 +8,7 @@ export PACKER_IMAGE_LOCATION:=eastus2
 
 all: check
 	for t in $(wildcard *.json); do \
+		set -e; \
 		$(PACKER) build --var-file=$(SECRETS) \
 			-machine-readable $$t 2>&1 | tee $(TIMESTAMP)-$$t.log; \
 	done;
@@ -16,6 +17,7 @@ check: $(SECRETS)
 	@echo ">> Using the following environment variables:"
 	@printenv | grep -i \^packer
 	for t in $(wildcard *.json); do \
+		set -e; \
 		$(PACKER) validate --var-file=$(SECRETS) $$t; \
 	done;
 
