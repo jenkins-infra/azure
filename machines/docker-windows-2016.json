@@ -1,38 +1,45 @@
 {
   "variables": {
-    "app_id": "{{env `PACKER_AZURE_APP_ID`}}",
-    "azure_ad_tenant_id": "{{env `PACKER_AZURE_AD_TENANT_ID`}}",
-    "azure_subscription_id": "{{env `PACKER_AZURE_SUBSCRIPTION_ID`}}",
-    "client_secret": "{{env `PACKER_AZURE_CLIENT_SECRET`}}",
-    "docker_images": "microsoft/windowsservercore microsoft/nanoserver",
-    "docker_provider": "DockerProvider",
-    "docker_version": "stable",
-    "headless": "false",
-    "object_id": "{{env `PACKER_AZURE_OBJECT_ID`}}",
-    "resource_group": "{{env `PACKER_AZURE_RESOURCE_GROUP`}}",
-    "storage_account": "{{env `PACKER_AZURE_STORAGE_ACCOUNT`}}"
+        "azure_subscription_id" : "",
+        "azure_client_id"       : "",
+        "azure_client_secret"   : "",
+        "azure_tenant_id"       : "",
+        "azure_object_id": "{{env `PACKER_AZURE_OBJECT_ID`}}",
+        "resource_group"        : "{{env `PACKER_IMAGE_RESOURCE_GROUP`}}",
+        "storage_account"       : "{{env `PACKER_IMAGE_STORAGE_ACCOUNT`}}",
+        "location"              : "{{env `PACKER_IMAGE_LOCATION` }}",
+        "docker_images": "microsoft/windowsservercore microsoft/nanoserver",
+        "docker_provider": "DockerProvider",
+        "docker_version": "stable",
+        "headless": "false"
   },
   "builders": [
     {
-      "capture_container_name": "images",
-      "capture_name_prefix": "WindowsServer2016Docker",
-      "client_id": "{{user `app_id`}}",
-      "client_secret": "{{user `client_secret`}}",
-      "cloud_environment_name": "Public",
+      "type": "azure-arm",
+
+      "client_id": "{{user `azure_client_id`}}",
+      "client_secret": "{{user `azure_client_secret`}}",
+      "subscription_id": "{{user `azure_subscription_id`}}",
+      "tenant_id" : "{{user `azure_tenant_id`}}",
+      "object_id" : "{{ user `azure_object_id` }}",
+
       "communicator": "winrm",
+      "capture_container_name": "windows",
+      "capture_name_prefix": "docker-windows-2016",
+
       "image_offer": "WindowsServer",
       "image_publisher": "MicrosoftWindowsServer",
       "image_sku": "2016-Datacenter",
       "image_version": "latest",
-      "location": "West Europe",
-      "object_id": "{{user `object_id`}}",
+
+      "location": "{{user `location` }}",
+      "vm_size": "Standard_DS4_v2",
+
       "os_type": "Windows",
+
       "resource_group_name": "{{user `resource_group`}}",
       "storage_account": "{{user `storage_account`}}",
-      "subscription_id": "{{user `azure_subscription_id`}}",
-      "tenant_id": "{{user `azure_ad_tenant_id`}}",
-      "type": "azure-arm",
-      "vm_size": "Standard_D2_v2",
+
       "winrm_insecure": "true",
       "winrm_timeout": "3m",
       "winrm_use_ssl": "true",
