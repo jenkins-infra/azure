@@ -1,0 +1,42 @@
+= Packer templates
+
+This directory contains a number of link:https://packer.io[Packer] templates
+which are used to create Azure VHDs for use in
+link:https://ci.jenkins.io[Jenkins].
+
+== Hacking
+
+The _long_ way around to set up the environment you would need to build these
+Packer templates would be to run the Terraform in the parent directory and set
+up your own copy of Jenkins project infrastructure. That takes a while, and is
+expensive!
+
+The _short_ way is to create the Azure resources necessary to build the
+images, basically a resource group and storage account.
+
+First set a `PREFIX` environment variable, e.g.:
+
+[source,bash]
+----
+export PREFIX=rtyler
+----
+
+[source,bash]
+----
+az group create -l eastus2 -n ${PREFIX}jenkinsci-agents
+az storage account create -g ${PREFIX}jenkinsci-agents -n ${PREFIX}jenkinsimgs --sku Standard_LRS
+----
+
+With these two set up, you can run `make` targets
+
+=== Make Targets
+
+==== all
+
+`make all` will build all the Packer templates and may take a really long time.
+
+==== check
+
+`make check` will run the Packer `validate` command on all templates, which
+basically ensures that the JSON is well formed, but not much else.
+
