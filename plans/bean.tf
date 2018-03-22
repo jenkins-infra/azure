@@ -20,6 +20,18 @@ resource "azurerm_public_ip" "bean" {
   }
 }
 
+# Public IP used for ldap on Kubernetes cluster
+resource "azurerm_public_ip" "ldap" {
+  name                         = "${var.prefix}ldap"
+  location                     = "${var.location}"
+  resource_group_name          = "${azurerm_resource_group.bean.name}"
+  public_ip_address_allocation = "Static"
+  idle_timeout_in_minutes      = 30
+  tags {
+    environment = "${var.prefix}"
+  }
+}
+
 resource "azurerm_storage_account" "bean" {
     name                     = "${azurerm_resource_group.bean.name}"
     resource_group_name      = "${azurerm_resource_group.bean.name}"
