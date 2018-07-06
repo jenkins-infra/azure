@@ -28,3 +28,11 @@ resource "azurerm_storage_container" "reports" {
     storage_account_name  = "${azurerm_storage_account.reports.name}"
     container_access_type = "container"
 }
+
+resource "azurerm_storage_share" "reports" {
+    name                  = "reports"
+    resource_group_name   = "${azurerm_resource_group.reports.name}"
+    storage_account_name  = "${azurerm_storage_account.reports.name}"
+    depends_on            = ["azurerm_resource_group.reports","azurerm_storage_account.reports"]
+}
+
