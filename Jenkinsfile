@@ -101,6 +101,14 @@ lock("azure_${tfPrefix}") {
               }
           }
       }
+
+    stage('Packer VHDs') {
+        node('docker') {
+            deleteDir()
+            checkout scm
+            /** TODO run Make with the right params **/
+        }
+    }
   }
   finally {
       /* If Pipeline is executing with a pull request, the infrastructure should

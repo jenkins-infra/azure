@@ -6,13 +6,6 @@ export PACKER_IMAGE_RESOURCE_GROUP:=$(PREFIX)jenkinsci-agents
 export PACKER_IMAGE_STORAGE_ACCOUNT:=$(PREFIX)jenkinsimgs
 export PACKER_IMAGE_LOCATION:=eastus2
 
-all: check
-	for t in $(wildcard *.json); do \
-		set -e; \
-		$(PACKER) build --var-file=$(SECRETS) \
-			-machine-readable $$t 2>&1 | tee $(TIMESTAMP)-$$t.log; \
-	done;
-
 check: $(SECRETS)
 	@echo ">> Using the following environment variables:"
 	@printenv | grep -i \^packer
@@ -21,6 +14,12 @@ check: $(SECRETS)
 		$(PACKER) validate --var-file=$(SECRETS) $$t; \
 	done;
 
+deploy: check
+	for t in $(wildcard *.json); do \
+		set -e; \
+		$(PACKER) build --var-file=$(SECRETS) \
+			-machine-readable $$t 2>&1 | tee $(TIMESTAMP)-$$t.log; \
+	done;
 
 $(SECRETS):
 	echo ">> $(SECRETS) doesn't exist, you'll probably want to generate it yourself"
