@@ -13,7 +13,7 @@ resource "azurerm_resource_group" "updates-proxy" {
 }
 
 resource "azurerm_storage_account" "updates-proxy" {
-    name                     = "${var.prefix}updates-proxy"
+    name                     = "${var.prefix}updatesproxy"
     resource_group_name      = "${azurerm_resource_group.updates-proxy.name}"
     location                 = "${var.location}"
     account_tier             = "Standard"
