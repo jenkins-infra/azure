@@ -50,10 +50,18 @@ resource "azurerm_mysql_firewall_rule" "confluence" {
   end_ip_address      = "140.211.9.32"
 }
 
-resource "azurerm_mysql_configuration" "confluence" {
+resource "azurerm_mysql_configuration" "confluence_character_set_server" {
   name                = "character_set_server"
   resource_group_name = "${azurerm_resource_group.confluence.name}"
   server_name         = "${azurerm_mysql_server.confluence.name}"
   value               = "UTF8"
+}
+
+# https://confluence.atlassian.com/confkb/confluence-fails-to-start-and-throws-mysql-session-isolation-level-repeatable-read-is-no-longer-supported-error-241568536.html
+resource "azurerm_mysql_configuration" "confluence_tx_isolation" {
+  name                = "tx_isolation"
+  resource_group_name = "${azurerm_resource_group.confluence.name}"
+  server_name         = "${azurerm_mysql_server.confluence.name}"
+  value               = "READ-COMMITTED"
 }
 
