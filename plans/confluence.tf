@@ -18,9 +18,9 @@ resource "azurerm_mysql_server" "confluence" {
     family = "Gen5"
   }
 
-  # Current Database backup use 2GB (2018/08/20)
+  # Current Database backup use 5.51GB (2018/08/23)
   storage_profile {
-    storage_mb = 5120
+    storage_mb = 10240
     backup_retention_days = 7
     geo_redundant_backup = "Enabled"
   }
