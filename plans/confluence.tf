@@ -1,3 +1,21 @@
+data "azurerm_client_config" "current" {}
+
+# This variable is only use for resetting the mysql database password
+variable "confluence_db_password_id"{
+    type = "string"
+    default = "2018082402"
+}
+
+# This random value is generated once, stored in the state file and only changed
+# when 'confluence_db_password_id' is modified
+# cfr. https://www.terraform.io/docs/providers/random/index.html
+resource "random_string" "confluence_db_password" {
+  length = 16
+    keepers {
+      id = "${var.confluence_db_password_id}"
+    }
+}
+
 resource "azurerm_resource_group" "confluence" {
   name     = "${var.prefix}confluence"
   location = "${var.location}"
@@ -25,10 +43,11 @@ resource "azurerm_mysql_server" "confluence" {
     geo_redundant_backup = "Enabled"
   }
 
-  # Once the infrastructure has been deployed, the password should be manually
-  # reset such that it can be utilized in Kubernetes/Puppet/etc
   administrator_login = "mysqladmin"
-  administrator_login_password = "${random_id.prefix.hex}!Z3"
+  # Currently terraform doesn't detect if the password was changed from a different place like portal.azure.com
+  # but if any other setting is modified, terraform will re-apply the password from the terraform state
+  # cfr https://github.com/terraform-providers/terraform-provider-azurerm/issues/1823
+  administrator_login_password = "${random_string.confluence_db_password.result}"
   version = "5.7"
   ssl_enforcement = "Enabled"
 }
@@ -64,4 +83,3 @@ resource "azurerm_mysql_configuration" "confluence_tx_isolation" {
   server_name         = "${azurerm_mysql_server.confluence.name}"
   value               = "READ-COMMITTED"
 }
-
