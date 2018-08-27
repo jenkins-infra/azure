@@ -30,3 +30,10 @@ variable "logslocation" {
     type    = "string"
     default = "East US"
 }
+
+# This variable is only use to trigger a new confluence database password
+variable "confluence_db_password_id"{
+    type = "string"
+    default = "2018082402"
+}
+

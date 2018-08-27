@@ -1,11 +1,5 @@
 data "azurerm_client_config" "current" {}
 
-# This variable is only use for resetting the mysql database password
-variable "confluence_db_password_id"{
-    type = "string"
-    default = "2018082402"
-}
-
 # This random value is generated once, stored in the state file and only changed
 # when 'confluence_db_password_id' is modified
 # cfr. https://www.terraform.io/docs/providers/random/index.html
