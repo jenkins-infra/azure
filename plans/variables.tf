@@ -37,3 +37,8 @@ variable "confluence_db_password_id"{
     default = "2018082402"
 }
 
+# This variable is used to trigger a new uplink database password
+variable "uplink_db_password_id"{
+    type = "string"
+    default = "2018091501"
+}
