@@ -43,7 +43,7 @@ resource "azurerm_mysql_server" "confluence" {
   # cfr https://github.com/terraform-providers/terraform-provider-azurerm/issues/1823
   administrator_login_password = "${random_string.confluence_db_password.result}"
   version = "5.7"
-  ssl_enforcement = "Enabled"
+  ssl_enforcement = "Disabled"
 }
 
 resource "azurerm_mysql_database" "confluence" {
