@@ -5,7 +5,7 @@
 locals {
   a_records = {
     # Root
-    "" = "40.79.70.97"
+    "@" = "40.79.70.97"
 
     # Physical machine at Contegix
     cucumber = "199.193.196.24"
@@ -48,7 +48,7 @@ locals {
   cname_records = {
     # Azure
     accounts = "nginx.azure"
-    nginx.azure = "jenkins.io"
+    nginx.azure = "@"
     javadoc = "nginx.azure"
     plugins = "nginx.azure"
     repo.azure = "nginx.azure"
@@ -84,7 +84,7 @@ locals {
     # Amazon SES configuration to send out email from noreply@jenkins.io    
     _amazonses = "kYNeW+b+9GnKO/LzqP/t0TzLyN86jQ9didoBAJSjezE="
     # mailgun configuration
-    "" = "v=spf1 include:mailgun.org ~all"
+    "@" = "v=spf1 include:mailgun.org ~all"
     mailo._domainkey = "k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCpS+8K+bVvFlfTqbVbuvM9SoX0BqjW3zK7BJeCZ4GnaJTeRaurKx81hUX1wz3wKt+Qt9xI+X6mAlar2Co+B13GsNZIlYVdO/zBVtZG+R5KvMQUynNyie05oRyaTFWtNEiQVgGYgM4xkwlIWSA9EXmBMaKg7ze3kKNKUOnzKDIxMQIDAQAB"
   }
 }
@@ -141,7 +141,7 @@ resource "azurerm_dns_txt_record" "txt_entries" {
 }
 
 resource "azurerm_dns_ns_record" "ns_entries" {
-  name                = ""
+  name                = "@"
   zone_name           = "${azurerm_dns_zone.jenkinsio.name}"
   resource_group_name = "${azurerm_resource_group.jenkinsio_dns.name}"
   ttl                 = 3600
