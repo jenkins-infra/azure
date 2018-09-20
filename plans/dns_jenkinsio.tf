@@ -48,7 +48,7 @@ locals {
   cname_records = {
     # Azure
     accounts = "nginx.azure"
-    nginx.azure = "@"
+    nginx.azure = "jenkins.io."
     javadoc = "nginx.azure"
     plugins = "nginx.azure"
     repo.azure = "nginx.azure"
@@ -69,7 +69,7 @@ locals {
     issues = "edamame"
 
     # Magical CNAME for certificate validation
-    D07F852F584FA592123140354D366066.ldap.jenkins.io. = "75E741181A7ACDBE2996804B2813E09B65970718.comodoca.com."
+    "D07F852F584FA592123140354D366066.ldap" = "75E741181A7ACDBE2996804B2813E09B65970718.comodoca.com."
 
     # Amazon SES configuration to send out email from noreply@jenkins.io
     pbssnl2yyudgfdl3flznotnarnamz5su._domainkey = "pbssnl2yyudgfdl3flznotnarnamz5su.dkim.amazonses.com."
@@ -77,7 +77,7 @@ locals {
     "37qo4cqmkxeocwr2iicjop77fq52m6yh._domainkey" = "37qo4cqmkxeocwr2iicjop77fq52m6yh.dkim.amazonses.com."
 
     # Others
-    _26F1803EE76B9FFE3884B762F77A11B5.ldap.jenkins.io. = "BB7DE2B47B0E47A15260A401C6A5477E.F6289F84FFAA8F222EE876DEE5D91C0C.5ac644adc424f.comodoca.com."
+    "_26F1803EE76B9FFE3884B762F77A11B5.ldap" = "BB7DE2B47B0E47A15260A401C6A5477E.F6289F84FFAA8F222EE876DEE5D91C0C.5ac644adc424f.comodoca.com."
   }
 
   txt_records = {
@@ -138,14 +138,6 @@ resource "azurerm_dns_txt_record" "txt_entries" {
   record {
     value = "${local.txt_records[element(keys(local.txt_records), count.index)]}"
   }
-}
-
-resource "azurerm_dns_ns_record" "ns_entries" {
-  name                = "@"
-  zone_name           = "${azurerm_dns_zone.jenkinsio.name}"
-  resource_group_name = "${azurerm_resource_group.jenkinsio_dns.name}"
-  ttl                 = 3600
-  records             = ["ns1.jenkins-ci.org.", "ns2.jenkins-ci.org.", "ns3.jenkins-ci.org."]
 }
 
 resource "azurerm_dns_mx_record" "mx_entries" {
