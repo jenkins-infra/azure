@@ -3,7 +3,7 @@
 #
 
 locals {
-  a_records = {
+  jenkinsio_a_records = {
     # Root
     "@" = "40.79.70.97"
 
@@ -39,13 +39,13 @@ locals {
     ldap = "52.232.180.203"
   }
 
-  aaaa_records = {
+  jenkinsio_aaaa_records = {
     # VM at Rackspace
     celery = "2001:4802:7801:103:be76:4eff:fe20:357c"
     okra = "2001:4802:7800:2:be76:4eff:fe20:7a31"
   }
   
-  cname_records = {
+  jenkinsio_cname_records = {
     # Azure
     accounts = "nginx.azure"
     nginx.azure = "jenkins.io."
@@ -80,7 +80,7 @@ locals {
     "_26F1803EE76B9FFE3884B762F77A11B5.ldap" = "BB7DE2B47B0E47A15260A401C6A5477E.F6289F84FFAA8F222EE876DEE5D91C0C.5ac644adc424f.comodoca.com."
   }
 
-  txt_records = {
+  jenkinsio_txt_records = {
     # Amazon SES configuration to send out email from noreply@jenkins.io    
     _amazonses = "kYNeW+b+9GnKO/LzqP/t0TzLyN86jQ9didoBAJSjezE="
     # mailgun configuration
@@ -89,8 +89,8 @@ locals {
   }
 }
 
-resource "azurerm_resource_group" "jenkinsio_dns" {
-  name     = "${var.prefix}jenkinsio_dns"
+resource "azurerm_resource_group" "dns_jenkinsio" {
+  name     = "${var.prefix}dns_jenkinsio"
   location = "${var.location}"
   tags {
       env = "${var.prefix}"
@@ -99,51 +99,51 @@ resource "azurerm_resource_group" "jenkinsio_dns" {
 
 resource "azurerm_dns_zone" "jenkinsio" {
   name                = "jenkins.io"
-  resource_group_name = "${azurerm_resource_group.jenkinsio_dns.name}"
+  resource_group_name = "${azurerm_resource_group.dns_jenkinsio.name}"
 }
 
-resource "azurerm_dns_a_record" "a_entries" {
-  count               = "${length(local.a_records)}"
-  name                = "${element(keys(local.a_records), count.index)}"
+resource "azurerm_dns_a_record" "jenkinsio_a_entries" {
+  count               = "${length(local.jenkinsio_a_records)}"
+  name                = "${element(keys(local.jenkinsio_a_records), count.index)}"
   zone_name           = "${azurerm_dns_zone.jenkinsio.name}"
-  resource_group_name = "${azurerm_resource_group.jenkinsio_dns.name}"
+  resource_group_name = "${azurerm_resource_group.dns_jenkinsio.name}"
   ttl                 = 3600
-  records             = ["${local.a_records[element(keys(local.a_records), count.index)]}"]
+  records             = ["${local.jenkinsio_a_records[element(keys(local.jenkinsio_a_records), count.index)]}"]
 }
 
-resource "azurerm_dns_aaaa_record" "aaaa_entries" {
-  count               = "${length(local.aaaa_records)}"
-  name                = "${element(keys(local.aaaa_records), count.index)}"
+resource "azurerm_dns_aaaa_record" "jenkinsio_aaaa_entries" {
+  count               = "${length(local.jenkinsio_aaaa_records)}"
+  name                = "${element(keys(local.jenkinsio_aaaa_records), count.index)}"
   zone_name           = "${azurerm_dns_zone.jenkinsio.name}"
-  resource_group_name = "${azurerm_resource_group.jenkinsio_dns.name}"
+  resource_group_name = "${azurerm_resource_group.dns_jenkinsio.name}"
   ttl                 = 3600
-  records             = ["${local.aaaa_records[element(keys(local.aaaa_records), count.index)]}"]
+  records             = ["${local.jenkinsio_aaaa_records[element(keys(local.jenkinsio_aaaa_records), count.index)]}"]
 }
 
-resource "azurerm_dns_cname_record" "cname_entries" {
-  count               = "${length(local.cname_records)}"
-  name                = "${element(keys(local.cname_records), count.index)}"
+resource "azurerm_dns_cname_record" "jenkinsio_cname_entries" {
+  count               = "${length(local.jenkinsio_cname_records)}"
+  name                = "${element(keys(local.jenkinsio_cname_records), count.index)}"
   zone_name           = "${azurerm_dns_zone.jenkinsio.name}"
-  resource_group_name = "${azurerm_resource_group.jenkinsio_dns.name}"
+  resource_group_name = "${azurerm_resource_group.dns_jenkinsio.name}"
   ttl                 = 3600
-  record             = "${local.cname_records[element(keys(local.cname_records), count.index)]}"
+  record             = "${local.jenkinsio_cname_records[element(keys(local.jenkinsio_cname_records), count.index)]}"
 }
 
-resource "azurerm_dns_txt_record" "txt_entries" {
-  count               = "${length(local.txt_records)}"
-  name                = "${element(keys(local.txt_records), count.index)}"
+resource "azurerm_dns_txt_record" "jenkinsio_txt_entries" {
+  count               = "${length(local.jenkinsio_txt_records)}"
+  name                = "${element(keys(local.jenkinsio_txt_records), count.index)}"
   zone_name           = "${azurerm_dns_zone.jenkinsio.name}"
-  resource_group_name = "${azurerm_resource_group.jenkinsio_dns.name}"
+  resource_group_name = "${azurerm_resource_group.dns_jenkinsio.name}"
   ttl                 = 3600
   record {
-    value = "${local.txt_records[element(keys(local.txt_records), count.index)]}"
+    value = "${local.jenkinsio_txt_records[element(keys(local.jenkinsio_txt_records), count.index)]}"
   }
 }
 
-resource "azurerm_dns_mx_record" "mx_entries" {
+resource "azurerm_dns_mx_record" "jenkinsio_mx_entries" {
   name                = "spamtrap"
   zone_name           = "${azurerm_dns_zone.jenkinsio.name}"
-  resource_group_name = "${azurerm_resource_group.jenkinsio_dns.name}"
+  resource_group_name = "${azurerm_resource_group.dns_jenkinsio.name}"
   ttl                 = 3600
 
   record {
