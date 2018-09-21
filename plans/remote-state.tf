@@ -26,7 +26,7 @@ resource "azurerm_storage_container" "tfstate" {
 
 resource "azurerm_storage_account" "tfstate_datadog" {
     name                     = "${var.prefix}tfstate_datadog"
-    resource_group_name      = "${azurerm_resource_group.tfstate_datadog.name}"
+    resource_group_name      = "${azurerm_resource_group.tfstate.name}"
     location                 = "${var.location}"
     account_tier             = "Standard"
     account_replication_type = "GRS"
