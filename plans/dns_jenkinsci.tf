@@ -78,12 +78,6 @@ locals {
     demo = "kelp"
     accounts = "accounts.jenkins.io."
   }
-
-  jenkinsci_txt_records = {
-    # DKIM
-    cucumber._domainkey = "v=DKIM1;p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzGI3F6ZZemke1oeZLfdlWT6bNz71CHIF74XFPkzJvPrKfCIa50KVV1FLdAbvBFFhtZB9soQphMg1g8JVvCCcJykf8QAnr0/zGy2CZoHGfqYem1SUgMd//jOQ4PIgypfBXHYPeFOFcKg2seIyd75YcR0DOWXCF1UO5K/nezfPT9RB5vBW4mXV5dn8TUwdvsu1ApQKWQj3dLYpMNlVqAgwdc7dCifqAWvhfxrRaPzG/4aSgpwxqYt4d6NV3Jl0MB9nnBeWK3JzmPxkXwaO1D8e3KxxIkvGTBs4BK9SIC3lY90xV5eqOlehLL9ZUYndtiQfABp2tfQkitG59N4FEfUBvwIDAQAB"
-    eggplant._domainkey = "v=DKIM1;p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsBwtlRrZE7oYs5y3FKjt/gXl4QR7LqdBmmQXX+l5pYE0VbTaweUlnNfSkV72sZchTikQ7X15hNgQ+hW/99tUWGnXlAC2r444Ggl9xoFVxKhSIbkRVRszzIe5axo4BQENZ/cj7Mw8BwsB8mESG29KYtKeMkXfLuBkWuUZ/56pu1eOOfZl4iMLiQnP7UNpAlX4L1/Le3bIaTWZUrsk/MwEpwULsW0VB3sghu4K+Kdos1AyGP2NwkQL3CCzpwm1TaBaC0rb0sQ0m62JgPe3NzOtU3NGXKNnpLRuhYNFU46bW/6ZVF0NskessArYAsbY54cMHTzhpvkC6b2hs5x+ps0J3QIDAQAB"
-  }
 }
 
 resource "azurerm_resource_group" "dns_jenkinsci" {
@@ -133,17 +127,6 @@ resource "azurerm_dns_txt_record" "jenkinsci_root_txt_entries" {
   ttl                 = 3600
   record {
     value = "v=spf1 mx ip4:199.193.196.24 ip4:140.211.15.0/24 ip4:140.211.8.0/23 ip4:173.203.60.151 ip4:140.211.166.128/25 -all"
-  }
-}
-
-resource "azurerm_dns_txt_record" "jenkinsci_txt_entries" {
-  count               = "${length(local.jenkinsci_txt_records)}"
-  name                = "${element(keys(local.jenkinsci_txt_records), count.index)}"
-  zone_name           = "${azurerm_dns_zone.jenkinsci.name}"
-  resource_group_name = "${azurerm_resource_group.dns_jenkinsci.name}"
-  ttl                 = 604800
-  record {
-    value = "${local.jenkinsci_txt_records[element(keys(local.jenkinsci_txt_records), count.index)]}"
   }
 }
 
