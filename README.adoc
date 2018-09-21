@@ -79,4 +79,9 @@ Estimated time to complete: 2 man-weeks
 * Big for project contributors, and a huge pain in the ass but otherwise not very
   note-worthy
 
+==== Migrate DNS to Azure
+* Modify plans/dns_*.tf
+* If it is A/AAAA/CNAME/TXT record, add the mapping of entry - IP/cname to the map variables in `locals`
+* Else, find the appropriate record entries resource and modify it
+
 ==== Migrate remaining stragglers
