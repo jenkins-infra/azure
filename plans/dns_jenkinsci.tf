@@ -41,42 +41,42 @@ locals {
   }
   
   jenkinsci_cname_records = {
-    www = "jenkins-ci.org."
-    issues = "edamame"
-    wiki = "lettuce"
-    updates = "updates.jenkins.io."
-    javadoc = "javadoc.jenkins.io."
-    gherkin = "cucumber"
-    drupal = "cucumber"
-    downloads = "cucumber"
-    fisheye = "cucumber"
-    stacktrace = "cucumber"
-    sorcerer = "cucumber"
-    maven = "cucumber"
-    maven2 = "cucumber"
-    ci = "ci.jenkins.io."
-    svn = "cucumber"
-    javanet2 = "cucumber"
-    l10n = "l10n.jenkins.io."
-    mirrors = "mirrors.jenkins.io."
-    pkg = "pkg.jenkins.io."
-    usage = "usage.jenkins.io."
-    stats = "jenkins-infra.github.io."
-    meetings = "edamame"
-    jekyll = "jenkinsci.github.io."
-    mirrors2 = "lettuce"
-    ips = "lettuce"
-    nagios = "lettuce"
-    kale = "ec2-184-73-58-254.compute-1.amazonaws.com."
-    repo = "jenkinsci.jfrog.org."
-    links = "rhs.reddit.com."
-    plugin-generator = "jpi-create.jenkins.cloudbees.net."
-    goto = "goto.jenkins.cloudbees.net."
-    recipe = "recipe.jenkins.cloudbees.net."
-    puppet = "artichoke"
-    archives = "okra"
-    demo = "kelp"
-    accounts = "accounts.jenkins.io."
+    www = "jenkins-ci.org"
+    issues = "edamame.jenkins-ci.org"
+    wiki = "lettuce.jenkins-ci.org"
+    updates = "updates.jenkins.io"
+    javadoc = "javadoc.jenkins.io"
+    gherkin = "cucumber.jenkins-ci.org"
+    drupal = "cucumber.jenkins-ci.org"
+    downloads = "cucumber.jenkins-ci.org"
+    fisheye = "cucumber.jenkins-ci.org"
+    stacktrace = "cucumber.jenkins-ci.org"
+    sorcerer = "cucumber.jenkins-ci.org"
+    maven = "cucumber.jenkins-ci.org"
+    maven2 = "cucumber.jenkins-ci.org"
+    ci = "ci.jenkins.io"
+    svn = "cucumber.jenkins-ci.org"
+    javanet2 = "cucumber.jenkins-ci.org"
+    l10n = "l10n.jenkins.io"
+    mirrors = "mirrors.jenkins.io"
+    pkg = "pkg.jenkins.io"
+    usage = "usage.jenkins.io"
+    stats = "jenkins-infra.github.io"
+    meetings = "edamame.jenkins-ci.org"
+    jekyll = "jenkinsci.github.io"
+    mirrors2 = "lettuce.jenkins-ci.org"
+    ips = "lettuce.jenkins-ci.org"
+    nagios = "lettuce.jenkins-ci.org"
+    kale = "ec2-184-73-58-254.compute-1.amazonaws.com"
+    repo = "jenkinsci.jfrog.org"
+    links = "rhs.reddit.com"
+    plugin-generator = "jpi-create.jenkins.cloudbees.net"
+    goto = "goto.jenkins.cloudbees.net"
+    recipe = "recipe.jenkins.cloudbees.net"
+    puppet = "artichoke.jenkins-ci.org"
+    archives = "okra.jenkins-ci.org"
+    demo = "kelp.jenkins-ci.org"
+    accounts = "accounts.jenkins.io"
   }
 }
 
@@ -138,7 +138,7 @@ resource "azurerm_dns_mx_record" "jenkinsci_root_mx_entries" {
 
   record {
     preference = 0
-    exchange   = "cucumber"
+    exchange   = "cucumber.jenkins-ci.org"
   }
 }
 
@@ -150,21 +150,21 @@ resource "azurerm_dns_mx_record" "jenkinsci_mx_entries" {
 
   record {
     preference = 0
-    exchange   = "smtp1.osuosl.org."
+    exchange   = "smtp1.osuosl.org"
   }
 
   record {
     preference = 0
-    exchange   = "smtp2.osuosl.org."
+    exchange   = "smtp2.osuosl.org"
   }
 
   record {
     preference = 0
-    exchange   = "smtp3.osuosl.org."
+    exchange   = "smtp3.osuosl.org"
   }
 
   record {
     preference = 0
-    exchange   = "smtp4.osuosl.org."
+    exchange   = "smtp4.osuosl.org"
   }
 }

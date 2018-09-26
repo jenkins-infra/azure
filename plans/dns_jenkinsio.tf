@@ -47,37 +47,37 @@ locals {
   
   jenkinsio_cname_records = {
     # Azure
-    accounts = "nginx.azure"
-    nginx.azure = "jenkins.io."
-    javadoc = "nginx.azure"
-    plugins = "nginx.azure"
-    repo.azure = "nginx.azure"
-    updates.azure = "nginx.azure"
-    reports = "nginx.azure"
-    www = "nginx.azure"
-    evergreen = "nginx.azure"
-    uplink = "nginx.azure"
+    accounts = "nginx.azure.jenkins.io"
+    nginx.azure = "jenkins.io"
+    javadoc = "nginx.azure.jenkins.io"
+    plugins = "nginx.azure.jenkins.io"
+    repo.azure = "nginx.azure.jenkins.io"
+    updates.azure = "nginx.azure.jenkins.io"
+    reports = "nginx.azure.jenkins.io"
+    www = "nginx.azure.jenkins.io"
+    evergreen = "nginx.azure.jenkins.io"
+    uplink = "nginx.azure.jenkins.io"
 
     # CNAME Records
-    pkg = "mirrors"
-    puppet = "raddish"
-    updates = "mirrors"
-    archives = "okra"
+    pkg = "mirrors.jenkins.io"
+    puppet = "raddish.jenkins.io"
+    updates = "mirrors.jenkins.io"
+    archives = "okra.jenkins.io"
     stats = "jenkins-infra.github.io"
     patron = "jenkins-infra.github.io"
-    wiki = "lettuce"
-    issues = "edamame"
+    wiki = "lettuce.jenkins.io"
+    issues = "edamame.jenkins.io"
 
     # Magical CNAME for certificate validation
-    "D07F852F584FA592123140354D366066.ldap" = "75E741181A7ACDBE2996804B2813E09B65970718.comodoca.com."
+    "D07F852F584FA592123140354D366066.ldap" = "75E741181A7ACDBE2996804B2813E09B65970718.comodoca.com"
 
     # Amazon SES configuration to send out email from noreply@jenkins.io
-    pbssnl2yyudgfdl3flznotnarnamz5su._domainkey = "pbssnl2yyudgfdl3flznotnarnamz5su.dkim.amazonses.com."
-    "6ch6fw67efpfgoqyhdhs2cy2fpkwrvsk._domainkey" = "6ch6fw67efpfgoqyhdhs2cy2fpkwrvsk.dkim.amazonses.com."
-    "37qo4cqmkxeocwr2iicjop77fq52m6yh._domainkey" = "37qo4cqmkxeocwr2iicjop77fq52m6yh.dkim.amazonses.com."
+    pbssnl2yyudgfdl3flznotnarnamz5su._domainkey = "pbssnl2yyudgfdl3flznotnarnamz5su.dkim.amazonses.com"
+    "6ch6fw67efpfgoqyhdhs2cy2fpkwrvsk._domainkey" = "6ch6fw67efpfgoqyhdhs2cy2fpkwrvsk.dkim.amazonses.com"
+    "37qo4cqmkxeocwr2iicjop77fq52m6yh._domainkey" = "37qo4cqmkxeocwr2iicjop77fq52m6yh.dkim.amazonses.com"
 
     # Others
-    "_26F1803EE76B9FFE3884B762F77A11B5.ldap" = "BB7DE2B47B0E47A15260A401C6A5477E.F6289F84FFAA8F222EE876DEE5D91C0C.5ac644adc424f.comodoca.com."
+    "_26F1803EE76B9FFE3884B762F77A11B5.ldap" = "BB7DE2B47B0E47A15260A401C6A5477E.F6289F84FFAA8F222EE876DEE5D91C0C.5ac644adc424f.comodoca.com"
   }
 
   jenkinsio_txt_records = {
@@ -141,6 +141,23 @@ resource "azurerm_dns_txt_record" "jenkinsio_txt_entries" {
 }
 
 resource "azurerm_dns_mx_record" "jenkinsio_mx_entries" {
+  name                = "@"
+  zone_name           = "${azurerm_dns_zone.jenkinsio.name}"
+  resource_group_name = "${azurerm_resource_group.dns_jenkinsio.name}"
+  ttl                 = 3600
+
+  record {
+    preference = 10
+    exchange   = "mxa.mailgun.org"
+  }
+
+  record {
+    preference = 10
+    exchange   = "mxb.mailgun.org"
+  }
+}
+
+resource "azurerm_dns_mx_record" "spamtrap_jenkinsio_mx_entries" {
   name                = "spamtrap"
   zone_name           = "${azurerm_dns_zone.jenkinsio.name}"
   resource_group_name = "${azurerm_resource_group.dns_jenkinsio.name}"
@@ -148,11 +165,11 @@ resource "azurerm_dns_mx_record" "jenkinsio_mx_entries" {
 
   record {
     preference = 10
-    exchange   = "mxa.mailgun.org."
+    exchange   = "mxa.mailgun.org"
   }
 
   record {
     preference = 10
-    exchange   = "mxb.mailgun.org."
+    exchange   = "mxb.mailgun.org"
   }
 }
