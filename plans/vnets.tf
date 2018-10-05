@@ -64,6 +64,14 @@ resource "azurerm_subnet" "public_dmz"{
   network_security_group_id = "${azurerm_network_security_group.public_dmz_tier.id}"
 }
 
+resource "azurerm_subnet" "public_k8s"{
+  name                      = "public-k8s"
+  resource_group_name       = "${azurerm_resource_group.public_prod.name}"
+  virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
+  address_prefix            = "10.0.100.0/24"
+  network_security_group_id = "${azurerm_network_security_group.public_app_tier.id}"
+}
+
 # The "data-tier" subnet is for data services which we might choose to run
 # ourselves that shouldn't have public IP addresses but accessible from within
 # the Public Production network

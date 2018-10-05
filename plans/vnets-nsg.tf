@@ -56,6 +56,18 @@ resource "azurerm_network_security_group" "public_app_tier" {
     destination_address_prefix = "*"
   }
 
+  security_rule {
+    name                       = "allow-ldaps-inbound"
+    priority                   = 102
+    direction                  = "inbound"
+    access                     = "allow"
+    protocol                   = "tcp"
+    source_port_range          = "636"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
   # Always allow SSH from machines in our Private Production network
   security_rule {
     name                       = "allow-private-ssh"
