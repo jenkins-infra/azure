@@ -28,7 +28,7 @@ resource "azurerm_public_ip" "maink8s" {
 }
 
 # Public IP used for ldap on Kubernetes cluster
-resource "azurerm_public_ip" "ldap" {
+resource "azurerm_public_ip" "maink8sldap" {
   name                         = "${var.prefix}ldap"
   location                     = "${var.location}"
   resource_group_name          = "${azurerm_resource_group.maink8s.name}"
