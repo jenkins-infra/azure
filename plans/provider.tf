@@ -2,7 +2,7 @@
 # https://releases.hashicorp.com/terraform-provider-azurerm/
 
 provider "azurerm" {
-    version         = "~> 1.10.0"
+    version         = "~> 1.16.0"
     subscription_id = "${var.subscription_id}"
     client_id       = "${var.client_id}"
     client_secret   = "${var.client_secret}"
