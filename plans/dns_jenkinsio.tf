@@ -37,7 +37,7 @@ locals {
 
     # Azure
     ldap = "52.232.180.203"
-    cn = "122.112.226.199" # Chinese jenkins.io hosted Huawei China
+    cn = "159.138.4.250" # Chinese jenkins.io hosted Huawei China
   }
 
   jenkinsio_aaaa_records = {
