@@ -62,7 +62,7 @@ resource "azurerm_kubernetes_cluster" "maink8s" {
   agent_pool_profile {
     name    = "maink8spool"
     count   = "3"
-    vm_size = "Standard_DS4_v3"
+    vm_size = "Standard_D4s_v3"
     os_type = "Linux"
     vnet_subnet_id = "${azurerm_subnet.public_k8s.id}" # ! Only one AKS per subnet
   }
