@@ -9,7 +9,7 @@ resource "azurerm_resource_group" "maink8s" {
 # Azure LogAnalytics to visualize Kubernetes logs
 resource "azurerm_log_analytics_workspace" "maink8s" {
   name                = "${var.prefix}maink8s"
-  location            = "${azurerm_resource_group.maink8s.location}"
+  location            = "eastus"
   resource_group_name = "${azurerm_resource_group.maink8s.name}"
   sku                 = "Standard"
   retention_in_days   = 30
