@@ -23,7 +23,15 @@ resource "azurerm_storage_account" "jenkinsio" {
 }
 
 resource "azurerm_storage_share" "jenkinsio" {
-    name = "jenkinsio"
+    name                    = "jenkinsio"
+    resource_group_name     = "${azurerm_resource_group.jenkinsio.name}"
+    storage_account_name    = "${azurerm_storage_account.jenkinsio.name}"
+    quota                   = 10
+    depends_on              = ["azurerm_resource_group.jenkinsio","azurerm_storage_account.jenkinsio"]
+}
+
+resource "azurerm_storage_share" "cnjenkinsio" {
+    name                    = "cnjenkinsio"
     resource_group_name     = "${azurerm_resource_group.jenkinsio.name}"
     storage_account_name    = "${azurerm_storage_account.jenkinsio.name}"
     quota                   = 10
