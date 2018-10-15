@@ -61,7 +61,7 @@ locals {
 
     # CNAME Records
     pkg = "mirrors.jenkins.io"
-    puppet = "raddish.jenkins.io"
+    puppet = "radish.jenkins.io"
     updates = "mirrors.jenkins.io"
     archives = "okra.jenkins.io"
     stats = "jenkins-infra.github.io"
