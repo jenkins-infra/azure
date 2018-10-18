@@ -1,0 +1,54 @@
+{
+    "variables" : {
+        "azure_subscription_id" : "",
+        "azure_client_id"       : "",
+        "azure_client_secret"   : "",
+        "azure_tenant_id"       : "",
+        "resource_group"        : "{{env `PACKER_IMAGE_RESOURCE_GROUP`}}",
+        "storage_account"       : "{{env `PACKER_IMAGE_STORAGE_ACCOUNT`}}",
+        "location"              : "{{env `PACKER_IMAGE_LOCATION` }}"
+    },
+    "builders" : [
+        {
+            "type": "azure-arm",
+
+            "subscription_id": "{{user `azure_subscription_id`}}",
+            "client_id": "{{user `azure_client_id`}}",
+            "client_secret": "{{user `azure_client_secret`}}",
+            "tenant_id" : "{{user `azure_tenant_id`}}",
+
+            "resource_group_name": "{{user `resource_group`}}",
+            "storage_account": "{{user `storage_account`}}",
+
+            "capture_container_name": "ubuntu",
+            "capture_name_prefix": "docker-ubuntu-16.04",
+
+
+            "os_type": "Linux",
+            "image_publisher": "Canonical",
+            "image_offer": "UbuntuServer",
+            "image_sku": "16.04-LTS",
+
+            "location": "{{user `location` }}",
+            "vm_size": "Standard_DS4_v2"
+        }
+    ],
+    "provisioners" : [
+        {
+            "type" : "shell",
+            "inline" : [
+                "curl -sSL https://get.docker.com | bash",
+                "sudo apt-get install -qy git make default-jre zip",
+                "sudo /usr/sbin/useradd --home-dir /home/jenkins --groups admin,docker --create-home jenkins"
+            ]
+        },
+        {
+            "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
+            "inline": [
+                "/usr/sbin/waagent -force -deprovision+user && export HISTSIZE=0 && sync"
+            ],
+            "inline_shebang": "/bin/sh -x",
+            "type": "shell"
+        }
+    ]
+}

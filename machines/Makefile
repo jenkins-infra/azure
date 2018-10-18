@@ -1,12 +1,31 @@
+SECRETS=.azure-packer.json
+PACKER=../scripts/packer
+TIMESTAMP=$(shell date -Iminutes)
 
-PACKER=packer
+export PACKER_IMAGE_RESOURCE_GROUP:=$(PREFIX)jenkinsci-agents
+export PACKER_IMAGE_STORAGE_ACCOUNT:=$(PREFIX)jenkinsimgs
+export PACKER_IMAGE_LOCATION:=eastus2
 
-all: validate
+all: check
+	for t in $(wildcard *.json); do \
+		$(PACKER) build --var-file=$(SECRETS) \
+			-machine-readable $$t 2>&1 | tee $(TIMESTAMP)-$$t.log; \
+	done;
 
-validate:
-	$(PACKER) validate -var-file=.azure-packer.json *.json
+check: $(SECRETS)
+	@echo ">> Using the following environment variables:"
+	@printenv | grep -i \^packer
+	for t in $(wildcard *.json); do \
+		$(PACKER) validate --var-file=$(SECRETS) $$t; \
+	done;
 
-build: validate
-	$(PACKER) build -var-file=.azure-packer.json *.json
 
-PHONY: all validate
+$(SECRETS):
+	echo ">> $(SECRETS) doesn't exist, you'll probably want to generate it yourself"
+	ln -sf vars.json.example $(SECRETS)
+
+clean:
+	rm -f *.log
+
+
+.PHONY: all validate clean validate-yaml
