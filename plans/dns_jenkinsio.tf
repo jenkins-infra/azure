@@ -38,6 +38,7 @@ locals {
     # Azure
     ldap = "52.232.180.203"
     cn = "159.138.4.250" # Chinese jenkins.io hosted Huawei China
+    gateway.evergreen = "137.116.80.151"
   }
 
   jenkinsio_aaaa_records = {
