@@ -33,7 +33,7 @@ resource "azurerm_postgresql_server" "uplink" {
   }
 
   storage_profile {
-    storage_mb = 5120
+    storage_mb = 46080
     backup_retention_days = 7
     geo_redundant_backup = "Disabled"
   }
