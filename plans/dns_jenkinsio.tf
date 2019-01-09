@@ -175,3 +175,11 @@ resource "azurerm_dns_mx_record" "spamtrap_jenkinsio_mx_entries" {
     exchange   = "mxb.mailgun.org"
   }
 }
+
+resource "azurerm_dns_a_record" "vpn" {
+  name                = "${azurerm_public_ip.vpn.name}"
+  zone_name           = "${azurerm_dns_zone.jenkinsio.name}"
+  resource_group_name = "${azurerm_resource_group.dns_jenkinsio.name}"
+  ttl                 = 3600
+  records             = ["${azurerm_public_ip.vpn.ip_address}"]
+}
