@@ -58,8 +58,8 @@ resource "azurerm_virtual_machine" "vpn" {
   primary_network_interface_id = "${azurerm_network_interface.vpn_public_dmz.id}"
   vm_size               = "Standard_D2s_v3"
 
-  delete_os_disk_on_termination = false
-  delete_data_disks_on_termination = false
+  delete_os_disk_on_termination = true
+  delete_data_disks_on_termination = true
 
   storage_image_reference {
     publisher = "Canonical"
@@ -80,6 +80,7 @@ resource "azurerm_virtual_machine" "vpn" {
   os_profile {
     computer_name  = "vpn.jenkins.io"
     admin_username = "azureadmin"
+    custom_data    = "${ var.prefix == "prod"? file("scripts/init-puppet.sh"): "#cloud-config" }"
   }
 
   os_profile_linux_config {
