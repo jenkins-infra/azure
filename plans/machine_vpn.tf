@@ -52,7 +52,7 @@ resource "azurerm_virtual_machine" "vpn" {
   location              = "${azurerm_resource_group.vpn.location}"
   resource_group_name   = "${azurerm_resource_group.vpn.name}"
   network_interface_ids = ["${azurerm_network_interface.public_app_vpn.id}"]
-  vm_size               = "Standard_DS2_v3"
+  vm_size               = "Standard_D2s_v3"
 
   delete_os_disk_on_termination = false
   delete_data_disks_on_termination = false
