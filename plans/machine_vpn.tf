@@ -82,7 +82,7 @@ resource "azurerm_virtual_machine" "vpn" {
     disable_password_authentication = true
     ssh_keys {
       key_data = "${file("${var.ssh_pubkey_path}")}"
-      path = "/home/butler/.ssh/authorized_keys"
+      path = "/home/azureadmin/.ssh/authorized_keys"
     }
   }
   tags {
