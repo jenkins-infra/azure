@@ -20,14 +20,14 @@ resource "azurerm_public_ip" "vpn" {
 
 # Interface within a network with ports 80,443 opened to the internet
 resource "azurerm_network_interface" "public_app_vpn" {
-  name                = "${var.prefix}-public-app-nic"
+  name                = "${var.prefix}-public-dmz-nic"
   location            = "${azurerm_resource_group.vpn.location}"
   resource_group_name = "${azurerm_resource_group.vpn.name}"
   enable_ip_forwarding          = true
 
   ip_configuration {
     name                          = "${var.prefix}-public-app"
-    subnet_id                     = "${azurerm_subnet.public_app.id}"
+    subnet_id                     = "${azurerm_subnet.public_dmz.id}"
     private_ip_address_allocation = "dynamic" # nope
     primary                       = true
     public_ip_address_id          = "${azurerm_public_ip.vpn.id}"
