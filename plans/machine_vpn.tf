@@ -18,9 +18,9 @@ resource "azurerm_public_ip" "vpn" {
   }
 }
 
-# Interface within a network with ports 80,443 opened to the internet
-resource "azurerm_network_interface" "public_app_vpn" {
-  name                = "${var.prefix}-public-dmz-nic"
+# Interface within a network with ports 443 opened to the internet
+resource "azurerm_network_interface" "vpn_public_dmz" {
+  name                = "${var.prefix}-vpn-public-dmz"
   location            = "${azurerm_resource_group.vpn.location}"
   resource_group_name = "${azurerm_resource_group.vpn.name}"
   enable_ip_forwarding          = true
@@ -35,8 +35,8 @@ resource "azurerm_network_interface" "public_app_vpn" {
 }
 
 # Interface within a network without access from internet
-resource "azurerm_network_interface" "public_data_vpn" {
-  name                = "${var.prefix}-public-data-nic"
+resource "azurerm_network_interface" "vpn_public_data" {
+  name                = "${var.prefix}-vpn-public-data"
   location            = "${azurerm_resource_group.vpn.location}"
   resource_group_name = "${azurerm_resource_group.vpn.name}"
   enable_ip_forwarding          = true
@@ -51,7 +51,11 @@ resource "azurerm_virtual_machine" "vpn" {
   name                  = "${var.prefix}-vpn"
   location              = "${azurerm_resource_group.vpn.location}"
   resource_group_name   = "${azurerm_resource_group.vpn.name}"
-  network_interface_ids = ["${azurerm_network_interface.public_app_vpn.id}"]
+  network_interface_ids = [
+    "${azurerm_network_interface.vpn_public_dmz.id}",
+    "${azurerm_network_interface.vpn_public_data.id}"
+  ]
+  primary_network_interface_id = "${azurerm_network_interface.vpn_public_dmz.id}"
   vm_size               = "Standard_D2s_v3"
 
   delete_os_disk_on_termination = false
