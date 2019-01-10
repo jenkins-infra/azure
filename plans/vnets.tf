@@ -61,6 +61,10 @@ resource "azurerm_subnet" "public_dmz"{
   resource_group_name       = "${azurerm_resource_group.public_prod.name}"
   virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
   address_prefix            = "10.0.99.0/24"
+}
+
+resource "azurerm_subnet_network_security_group_association" "public_dmz" {
+  subnet_id                 = "${azurerm_subnet.public_dmz.id}"
   network_security_group_id = "${azurerm_network_security_group.public_dmz_tier.id}"
 }
 
@@ -72,6 +76,10 @@ resource "azurerm_subnet" "public_data"{
   resource_group_name       = "${azurerm_resource_group.public_prod.name}"
   virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
   address_prefix            = "10.0.2.0/24"
+}
+
+resource "azurerm_subnet_network_security_group_association" "public_data" {
+  subnet_id                 = "${azurerm_subnet.public_data.id}"
   network_security_group_id = "${azurerm_network_security_group.public_data_tier.id}"
 }
 
@@ -81,10 +89,12 @@ resource "azurerm_subnet" "public_app"{
   resource_group_name       = "${azurerm_resource_group.public_prod.name}"
   virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
   address_prefix            = "10.0.1.0/24"
-  network_security_group_id = "${azurerm_network_security_group.public_app_tier.id}"
-  depends_on                = ["azurerm_virtual_network.public_prod"]
 }
 
+resource "azurerm_subnet_network_security_group_association" "public_app" {
+  subnet_id                 = "${azurerm_subnet.public_app.id}"
+  network_security_group_id = "${azurerm_network_security_group.public_app_tier.id}"
+}
 
 # The Private Production VNet is where all management and highly classified
 # resources should be provisioned. It should never have its resources exposed
@@ -94,18 +104,31 @@ resource "azurerm_virtual_network" "private_prod" {
   resource_group_name = "${azurerm_resource_group.private_prod.name}"
   address_space       = ["10.1.0.0/16"]
   location            = "${var.location}"
+}
 
-  subnet {
-    name           = "management-tier"
-    address_prefix = "10.1.1.0/24"
-    security_group = "${azurerm_network_security_group.private_mgmt_tier.id}"
-  }
+resource "azurerm_subnet" "private_mgmt_tier" {
+  name                      = "private-mgmt-tier"
+  resource_group_name       = "${azurerm_resource_group.private_prod.name}"
+  virtual_network_name      = "${azurerm_virtual_network.private_prod.name}"
+  address_prefix            = "10.1.1.0/24"
+}
 
-  subnet {
-    name           = "data-tier"
-    address_prefix = "10.1.2.0/24"
-    security_group = "${azurerm_network_security_group.private_dmz_tier.id}"
-  }
+resource "azurerm_subnet_network_security_group_association" "private_mgmt_tier" {
+  subnet_id                 = "${azurerm_subnet.private_mgmt_tier.id}"
+  network_security_group_id = "${azurerm_network_security_group.private_mgmt_tier.id}"
+}
+
+
+resource "azurerm_subnet" "private_data_tier" {
+  name                      = "private-data-tier"
+  resource_group_name       = "${azurerm_resource_group.private_prod.name}"
+  virtual_network_name      = "${azurerm_virtual_network.private_prod.name}"
+  address_prefix            = "10.1.2.0/24"
+}
+
+resource "azurerm_subnet_network_security_group_association" "private_data_tier" {
+  subnet_id                 = "${azurerm_subnet.private_data_tier.id}"
+  network_security_group_id = "${azurerm_network_security_group.private_data_tier.id}"
 }
 
 # Peer the Public and Private Production networks, using the Private Production
@@ -125,13 +148,22 @@ resource "azurerm_virtual_network" "development" {
   resource_group_name = "${azurerm_resource_group.development.name}"
   address_space       = ["10.2.0.0/16"]
   location            = "${var.location}"
-
-  # Pretty much everything in the development VNet should be considered
-  # untrusted and almost like the wild west
-  subnet {
-    name           = "dmz-tier"
-    address_prefix = "10.2.99.0/24"
-    security_group = "${azurerm_network_security_group.development_dmz.id}"
-  }
 }
+
+# Pretty much everything in the development VNet should be considered
+# untrusted and almost like the wild west
+resource "azurerm_subnet" "development_dmz_tier" {
+  name                      = "development-dmz-tier"
+  resource_group_name       = "${azurerm_resource_group.development.name}"
+  virtual_network_name      = "${azurerm_virtual_network.development.name}"
+  address_prefix            = "10.1.99.0/24"
+  network_security_group_id = "${azurerm_network_security_group.development_dmz.id}"
+  depends_on                = ["azurerm_virtual_network.development"]
+}
+
+resource "azurerm_subnet_network_security_group_association" "development_dmz_tier" {
+  subnet_id                 = "${azurerm_subnet.development_dmz_tier.id}"
+  network_security_group_id = "${azurerm_network_security_group.development_dmz.id}"
+}
+
 ################################################################################
