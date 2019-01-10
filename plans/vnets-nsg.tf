@@ -25,7 +25,7 @@ resource "azurerm_network_security_group" "development_dmz" {
 
 resource "azurerm_network_security_rule" "development-dmz-allow-ssh-inbound" {
   name                        = "allow-ssh-inbound"
-  priority                    = 100
+  priority                    = 101
   direction                   = "inbound"
   access                      = "allow"
   protocol                    = "*"
