@@ -107,7 +107,7 @@ resource "azurerm_virtual_network" "private_prod" {
 }
 
 resource "azurerm_subnet" "private_mgmt_tier" {
-  name                      = "private-mgmt-tier"
+  name                      = "management-tier"
   resource_group_name       = "${azurerm_resource_group.private_prod.name}"
   virtual_network_name      = "${azurerm_virtual_network.private_prod.name}"
   address_prefix            = "10.1.1.0/24"
@@ -120,7 +120,7 @@ resource "azurerm_subnet_network_security_group_association" "private_mgmt_tier"
 
 
 resource "azurerm_subnet" "private_data_tier" {
-  name                      = "private-data-tier"
+  name                      = "data-tier"
   resource_group_name       = "${azurerm_resource_group.private_prod.name}"
   virtual_network_name      = "${azurerm_virtual_network.private_prod.name}"
   address_prefix            = "10.1.2.0/24"
@@ -153,7 +153,7 @@ resource "azurerm_virtual_network" "development" {
 # Pretty much everything in the development VNet should be considered
 # untrusted and almost like the wild west
 resource "azurerm_subnet" "development_dmz_tier" {
-  name                      = "development-dmz-tier"
+  name                      = "dmz-tier"
   resource_group_name       = "${azurerm_resource_group.development.name}"
   virtual_network_name      = "${azurerm_virtual_network.development.name}"
   address_prefix            = "10.1.99.0/24"
