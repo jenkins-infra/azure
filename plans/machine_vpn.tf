@@ -28,7 +28,7 @@ resource "azurerm_network_interface" "vpn_public_dmz" {
   ip_configuration {
     name                          = "${var.prefix}-public-app"
     subnet_id                     = "${azurerm_subnet.public_dmz.id}"
-    private_ip_address_allocation = "dynamic" # nope
+    private_ip_address_allocation = "dynamic"
     primary                       = true
     public_ip_address_id          = "${azurerm_public_ip.vpn.id}"
   }
@@ -43,7 +43,7 @@ resource "azurerm_network_interface" "vpn_public_data" {
   ip_configuration {
     name                          = "${var.prefix}-public-data"
     subnet_id                     = "${azurerm_subnet.public_data.id}"
-    private_ip_address_allocation = "dynamic" # nope
+    private_ip_address_allocation = "dynamic"
   }
 }
 
