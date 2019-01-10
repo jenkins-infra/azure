@@ -61,7 +61,7 @@ resource "azurerm_network_security_rule" "public-app-tier-allow-http-inbound" {
 
 resource "azurerm_network_security_rule" "public-app-tier-allow-https-inbound" {
   name                        = "allow-https-inbound"
-  priority                    = 100
+  priority                    = 101
   direction                   = "inbound"
   access                      = "allow"
   protocol                    = "tcp"
@@ -75,7 +75,7 @@ resource "azurerm_network_security_rule" "public-app-tier-allow-https-inbound" {
 
 resource "azurerm_network_security_rule" "public-app-tier-allow-ldaps-inbound" {
   name                        = "allow-ldaps-inbound"
-  priority                    = 100
+  priority                    = 102
   direction                   = "inbound"
   access                      = "allow"
   protocol                    = "tcp"
@@ -148,7 +148,7 @@ resource "azurerm_network_security_rule" "public-dmz-tier-allow-https-inbound" {
 
 resource "azurerm_network_security_rule" "public-dmz-tier-allow-ssh-inbound" {
   name                        = "allow-ssh-inbound"
-  priority                    = 100
+  priority                    = 101
   direction                   = "inbound"
   access                      = "allow"
   protocol                    = "tcp"
