@@ -157,8 +157,6 @@ resource "azurerm_subnet" "development_dmz_tier" {
   resource_group_name       = "${azurerm_resource_group.development.name}"
   virtual_network_name      = "${azurerm_virtual_network.development.name}"
   address_prefix            = "10.1.99.0/24"
-  network_security_group_id = "${azurerm_network_security_group.development_dmz.id}"
-  depends_on                = ["azurerm_virtual_network.development"]
 }
 
 resource "azurerm_subnet_network_security_group_association" "development_dmz_tier" {
