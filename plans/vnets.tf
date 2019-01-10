@@ -156,7 +156,7 @@ resource "azurerm_subnet" "development_dmz_tier" {
   name                      = "dmz-tier"
   resource_group_name       = "${azurerm_resource_group.development.name}"
   virtual_network_name      = "${azurerm_virtual_network.development.name}"
-  address_prefix            = "10.1.99.0/24"
+  address_prefix            = "10.2.99.0/24"
 }
 
 resource "azurerm_subnet_network_security_group_association" "development_dmz_tier" {
