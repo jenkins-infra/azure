@@ -47,16 +47,30 @@ resource "azurerm_network_interface" "vpn_public_data" {
   }
 }
 
+resource "azurerm_network_interface" "vpn_public_app" {
+  name                = "${var.prefix}-vpn-public-app"
+  location            = "${azurerm_resource_group.vpn.location}"
+  resource_group_name = "${azurerm_resource_group.vpn.name}"
+  enable_ip_forwarding          = true
+  ip_configuration {
+    name                          = "${var.prefix}-public-data"
+    subnet_id                     = "${azurerm_subnet.public_data.id}"
+    private_ip_address_allocation = "dynamic"
+  }
+}
+
 resource "azurerm_virtual_machine" "vpn" {
   name                  = "${var.prefix}-vpn"
   location              = "${azurerm_resource_group.vpn.location}"
   resource_group_name   = "${azurerm_resource_group.vpn.name}"
   network_interface_ids = [
     "${azurerm_network_interface.vpn_public_dmz.id}",
-    "${azurerm_network_interface.vpn_public_data.id}"
+    "${azurerm_network_interface.vpn_public_data.id}",
+    "${azurerm_network_interface.vpn_public_app.id}"
   ]
   primary_network_interface_id = "${azurerm_network_interface.vpn_public_dmz.id}"
-  vm_size               = "Standard_D2s_v3"
+  # Cheapest machine size that can go up to 4 NIC
+  vm_size               = "Standard_D3s_v3"
 
   delete_os_disk_on_termination = true
   delete_data_disks_on_termination = true
