@@ -190,5 +190,5 @@ resource "azurerm_dns_a_record" "certsci" {
   zone_name           = "${azurerm_dns_zone.jenkinsio.name}"
   resource_group_name = "${azurerm_resource_group.dns_jenkinsio.name}"
   ttl                 = 3600
-  records             = ["${azurerm_network_interface.certci_private.private_ip_address}"]
+  records             = ["${azurerm_network_interface.certsci_private.private_ip_address}"]
 }
