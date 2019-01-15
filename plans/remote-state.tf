@@ -23,3 +23,19 @@ resource "azurerm_storage_container" "tfstate" {
     storage_account_name  = "${azurerm_storage_account.tfstate.name}"
     container_access_type = "private"
 }
+
+resource "azurerm_storage_account" "tfstate_datadog" {
+    name                     = "${var.prefix}tfstatedatadog"
+    resource_group_name      = "${azurerm_resource_group.tfstate.name}"
+    location                 = "${var.location}"
+    account_tier             = "Standard"
+    account_replication_type = "GRS"
+    enable_blob_encryption   = true
+}
+
+resource "azurerm_storage_container" "tfstate_datadog" {
+    name                  = "tfstatedatadog"
+    resource_group_name   = "${azurerm_resource_group.tfstate.name}"
+    storage_account_name  = "${azurerm_storage_account.tfstate_datadog.name}"
+    container_access_type = "private"
+}
