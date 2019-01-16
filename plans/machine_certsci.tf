@@ -18,7 +18,10 @@ resource "azurerm_network_interface" "certsci_private" {
   ip_configuration {
     name                          = "${var.prefix}-private"
     subnet_id                     = "${azurerm_subnet.public_data.id}"
-    private_ip_address_allocation = "dynamic"
+    private_ip_address_allocation = "static"
+  }
+  tags {
+    env = "${var.prefix}"
   }
 }
 
@@ -77,9 +80,8 @@ resource "azurerm_managed_disk" "certsci_data" {
   storage_account_type = "Standard_LRS"
   create_option        = "Empty"
   disk_size_gb         = "300"
-
   tags {
-    environment = "${var.prefix}"
+    env = "${var.prefix}"
   }
 }
 
@@ -88,4 +90,7 @@ resource "azurerm_virtual_machine_data_disk_attachment" "certsci_data" {
   virtual_machine_id = "${azurerm_virtual_machine.certsci.id}"
   lun                = "10"
   caching            = "ReadWrite"
+  tags {
+    env = "${var.prefix}"
+  }
 }
