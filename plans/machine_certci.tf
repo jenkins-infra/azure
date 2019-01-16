@@ -1,8 +1,8 @@
-# This terraform plan describe the virtual machine needed to run certs.ci.jenkins.io
+# This terraform plan describe the virtual machine needed to run cert.ci.jenkins.io
 # This machine must remain in a private network.
 
-resource "azurerm_resource_group" "certsci" {
-  name     = "${var.prefix}certsci"
+resource "azurerm_resource_group" "certci" {
+  name     = "${var.prefix}certci"
   location = "${var.location}"
   tags {
     env = "${var.prefix}"
@@ -10,10 +10,10 @@ resource "azurerm_resource_group" "certsci" {
 }
 
 # Interface within a network without access from internet
-resource "azurerm_network_interface" "certsci_private" {
-  name                  = "${var.prefix}-certsci"
-  location              = "${azurerm_resource_group.certsci.location}"
-  resource_group_name   = "${azurerm_resource_group.certsci.name}"
+resource "azurerm_network_interface" "certci_private" {
+  name                  = "${var.prefix}-certci"
+  location              = "${azurerm_resource_group.certci.location}"
+  resource_group_name   = "${azurerm_resource_group.certci.name}"
   enable_ip_forwarding  = false
   ip_configuration {
     name                          = "${var.prefix}-private"
@@ -25,14 +25,14 @@ resource "azurerm_network_interface" "certsci_private" {
   }
 }
 
-resource "azurerm_virtual_machine" "certsci" {
-  name                  = "${var.prefix}-certsci"
-  location              = "${azurerm_resource_group.certsci.location}"
-  resource_group_name   = "${azurerm_resource_group.certsci.name}"
+resource "azurerm_virtual_machine" "certci" {
+  name                  = "${var.prefix}-certci"
+  location              = "${azurerm_resource_group.certci.location}"
+  resource_group_name   = "${azurerm_resource_group.certci.name}"
   network_interface_ids = [
-    "${azurerm_network_interface.certsci_private.id}"
+    "${azurerm_network_interface.certci_private.id}"
   ]
-  primary_network_interface_id = "${azurerm_network_interface.certsci_private.id}"
+  primary_network_interface_id = "${azurerm_network_interface.certci_private.id}"
   vm_size               = "Standard_D2s_v3"
 
   delete_os_disk_on_termination = true
@@ -46,7 +46,7 @@ resource "azurerm_virtual_machine" "certsci" {
   }
 
   storage_os_disk {
-    name              = "${var.prefix}certsci"
+    name              = "${var.prefix}certci"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
@@ -55,7 +55,7 @@ resource "azurerm_virtual_machine" "certsci" {
   }
 
   os_profile {
-    computer_name  = "certs.ci.jenkins.io"
+    computer_name  = "cert.ci.jenkins.io"
     admin_username = "azureadmin"
     custom_data    = "${ var.prefix == "prod"? file("scripts/init-puppet.sh"): "#cloud-config" }"
   }
@@ -73,10 +73,10 @@ resource "azurerm_virtual_machine" "certsci" {
 }
 
 # Disk that will be used for jenkins home
-resource "azurerm_managed_disk" "certsci_data" {
-  name                 = "certsci-data"
-  location             = "${azurerm_resource_group.certsci.location}"
-  resource_group_name  = "${azurerm_resource_group.certsci.name}"
+resource "azurerm_managed_disk" "certci_data" {
+  name                 = "certci-data"
+  location             = "${azurerm_resource_group.certci.location}"
+  resource_group_name  = "${azurerm_resource_group.certci.name}"
   storage_account_type = "Standard_LRS"
   create_option        = "Empty"
   disk_size_gb         = "300"
@@ -85,9 +85,9 @@ resource "azurerm_managed_disk" "certsci_data" {
   }
 }
 
-resource "azurerm_virtual_machine_data_disk_attachment" "certsci_data" {
-  managed_disk_id    = "${azurerm_managed_disk.certsci_data.id}"
-  virtual_machine_id = "${azurerm_virtual_machine.certsci.id}"
+resource "azurerm_virtual_machine_data_disk_attachment" "certci_data" {
+  managed_disk_id    = "${azurerm_managed_disk.certci_data.id}"
+  virtual_machine_id = "${azurerm_virtual_machine.certci.id}"
   lun                = "10"
   caching            = "ReadWrite"
   tags {

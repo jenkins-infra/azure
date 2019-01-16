@@ -184,11 +184,11 @@ resource "azurerm_dns_a_record" "vpn" {
   records             = ["${azurerm_public_ip.vpn.ip_address}"]
 }
 
-# Create certs ci internal endpoints
-resource "azurerm_dns_a_record" "certsci" {
-  name                = "certs.ci"
+# Create cert ci internal endpoints
+resource "azurerm_dns_a_record" "certci" {
+  name                = "cert.ci"
   zone_name           = "${azurerm_dns_zone.jenkinsio.name}"
   resource_group_name = "${azurerm_resource_group.dns_jenkinsio.name}"
   ttl                 = 3600
-  records             = ["${azurerm_network_interface.certsci_private.private_ip_address}"]
+  records             = ["${azurerm_network_interface.certci_private.private_ip_address}"]
 }
