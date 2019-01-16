@@ -26,10 +26,11 @@ resource "azurerm_network_interface" "vpn_public_dmz" {
   enable_ip_forwarding  = true
 
   ip_configuration {
-    name                          = "${var.prefix}-public-app"
+    name                          = "${var.prefix}-public-dmz"
     subnet_id                     = "${azurerm_subnet.public_dmz.id}"
     # IP allocaton must be static in order to not be release once the vm is stopped
     private_ip_address_allocation = "static"
+    private_ip_address            = "10.0.99.253"
     primary                       = true
     public_ip_address_id          = "${azurerm_public_ip.vpn.id}"
   }
@@ -47,6 +48,7 @@ resource "azurerm_network_interface" "vpn_public_data" {
   ip_configuration {
     name                          = "${var.prefix}-public-data"
     subnet_id                     = "${azurerm_subnet.public_data.id}"
+    private_ip_address            = "10.0.2.253"
     # IP allocaton must be static in order to not be release once the vm is stopped
     private_ip_address_allocation = "static"
   }
@@ -61,9 +63,11 @@ resource "azurerm_network_interface" "vpn_public_app" {
   resource_group_name   = "${azurerm_resource_group.vpn.name}"
   enable_ip_forwarding  = true
   ip_configuration {
-    name                          = "${var.prefix}-public-data"
-    subnet_id                     = "${azurerm_subnet.public_data.id}"
+    name                          = "${var.prefix}-public-app"
+    subnet_id                     = "${azurerm_subnet.public_app.id}"
+    # IP allocaton must be static in order to not be release once the vm is stopped
     private_ip_address_allocation = "static"
+    private_ip_address            = "10.0.1.253"
   }
   tags {
     env = "${var.prefix}"
