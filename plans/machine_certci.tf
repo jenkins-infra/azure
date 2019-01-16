@@ -11,14 +11,16 @@ resource "azurerm_resource_group" "certci" {
 
 # Interface within a network without access from internet
 resource "azurerm_network_interface" "certci_private" {
-  name                  = "${var.prefix}-certci"
-  location              = "${azurerm_resource_group.certci.location}"
-  resource_group_name   = "${azurerm_resource_group.certci.name}"
-  enable_ip_forwarding  = false
+  name                    = "${var.prefix}-certci"
+  location                = "${azurerm_resource_group.certci.location}"
+  resource_group_name     = "${azurerm_resource_group.certci.name}"
+  enable_ip_forwarding    = false
+  internal_dns_name_label = "certci"
   ip_configuration {
     name                          = "${var.prefix}-private"
     subnet_id                     = "${azurerm_subnet.public_data.id}"
     private_ip_address_allocation = "static"
+    private_ip_address            = "10.0.2.252"
   }
   tags {
     env = "${var.prefix}"
@@ -90,7 +92,4 @@ resource "azurerm_virtual_machine_data_disk_attachment" "certci_data" {
   virtual_machine_id = "${azurerm_virtual_machine.certci.id}"
   lun                = "10"
   caching            = "ReadWrite"
-  tags {
-    env = "${var.prefix}"
-  }
 }
