@@ -14,36 +14,63 @@ resource "azurerm_public_ip" "vpn" {
   resource_group_name          = "${azurerm_resource_group.vpn.name}"
   public_ip_address_allocation = "static"
   tags {
-    environment = "${var.prefix}"
+    env = "${var.prefix}"
   }
 }
 
 # Interface within a network with ports 443 opened to the internet
 resource "azurerm_network_interface" "vpn_public_dmz" {
-  name                = "${var.prefix}-vpn-public-dmz"
-  location            = "${azurerm_resource_group.vpn.location}"
-  resource_group_name = "${azurerm_resource_group.vpn.name}"
-  enable_ip_forwarding          = true
+  name                  = "${var.prefix}-vpn-public-dmz"
+  location              = "${azurerm_resource_group.vpn.location}"
+  resource_group_name   = "${azurerm_resource_group.vpn.name}"
+  enable_ip_forwarding  = true
 
   ip_configuration {
-    name                          = "${var.prefix}-public-app"
+    name                          = "${var.prefix}-vpn-public-dmz"
     subnet_id                     = "${azurerm_subnet.public_dmz.id}"
-    private_ip_address_allocation = "dynamic"
+    # IP allocaton must be static in order to not be release once the vm is stopped
+    private_ip_address_allocation = "static"
+    private_ip_address            = "10.0.99.253"
     primary                       = true
     public_ip_address_id          = "${azurerm_public_ip.vpn.id}"
+  }
+  tags {
+    env = "${var.prefix}"
   }
 }
 
 # Interface within a network without access from internet
 resource "azurerm_network_interface" "vpn_public_data" {
-  name                = "${var.prefix}-vpn-public-data"
-  location            = "${azurerm_resource_group.vpn.location}"
-  resource_group_name = "${azurerm_resource_group.vpn.name}"
-  enable_ip_forwarding          = true
+  name                  = "${var.prefix}-vpn-public-data"
+  location              = "${azurerm_resource_group.vpn.location}"
+  resource_group_name   = "${azurerm_resource_group.vpn.name}"
+  enable_ip_forwarding  = true
   ip_configuration {
-    name                          = "${var.prefix}-public-data"
+    name                          = "${var.prefix}-vpn-public-data"
     subnet_id                     = "${azurerm_subnet.public_data.id}"
-    private_ip_address_allocation = "dynamic"
+    private_ip_address            = "10.0.2.253"
+    # IP allocaton must be static in order to not be release once the vm is stopped
+    private_ip_address_allocation = "static"
+  }
+  tags {
+    env = "${var.prefix}"
+  }
+}
+
+resource "azurerm_network_interface" "vpn_public_app" {
+  name                  = "${var.prefix}-vpn-public-app"
+  location              = "${azurerm_resource_group.vpn.location}"
+  resource_group_name   = "${azurerm_resource_group.vpn.name}"
+  enable_ip_forwarding  = true
+  ip_configuration {
+    name                          = "${var.prefix}-public-app"
+    subnet_id                     = "${azurerm_subnet.public_app.id}"
+    # IP allocaton must be static in order to not be release once the vm is stopped
+    private_ip_address_allocation = "static"
+    private_ip_address            = "10.0.1.253"
+  }
+  tags {
+    env = "${var.prefix}"
   }
 }
 
@@ -53,10 +80,13 @@ resource "azurerm_virtual_machine" "vpn" {
   resource_group_name   = "${azurerm_resource_group.vpn.name}"
   network_interface_ids = [
     "${azurerm_network_interface.vpn_public_dmz.id}",
-    "${azurerm_network_interface.vpn_public_data.id}"
+    "${azurerm_network_interface.vpn_public_data.id}",
+    "${azurerm_network_interface.vpn_public_app.id}"
   ]
   primary_network_interface_id = "${azurerm_network_interface.vpn_public_dmz.id}"
-  vm_size               = "Standard_D2s_v3"
+  # Cheapest machine size that can go up to 4 NIC
+  # https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-general#b-series
+  vm_size               = "Standard_B2ms"
 
   delete_os_disk_on_termination = true
   delete_data_disks_on_termination = true
