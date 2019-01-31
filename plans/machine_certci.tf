@@ -9,6 +9,19 @@ resource "azurerm_resource_group" "certci" {
   }
 }
 
+# This public ip is currently needed to whitelist this service on the ldap firewall.
+# Once prodbean is migrated in a private network which doesn't conflict with public prod network,
+# We can then remove this public IP and use private network
+resource "azurerm_public_ip" "certci" {
+  name                         = "${var.prefix}certci"
+  location                     = "${var.location}"
+  resource_group_name          = "${azurerm_resource_group.certci.name}"
+  public_ip_address_allocation = "static"
+  tags {
+    env = "${var.prefix}"
+  }
+}
+
 # Interface within a network without access from internet
 resource "azurerm_network_interface" "certci_private" {
   name                    = "${var.prefix}-certci"
@@ -21,6 +34,7 @@ resource "azurerm_network_interface" "certci_private" {
     subnet_id                     = "${azurerm_subnet.public_data.id}"
     private_ip_address_allocation = "static"
     private_ip_address            = "10.0.2.252"
+    public_ip_address_id          = "${azurerm_public_ip.certci.id}"
   }
   tags {
     env = "${var.prefix}"
