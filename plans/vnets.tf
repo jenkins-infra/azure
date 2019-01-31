@@ -61,6 +61,7 @@ resource "azurerm_subnet" "public_dmz"{
   resource_group_name       = "${azurerm_resource_group.public_prod.name}"
   virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
   address_prefix            = "10.0.99.0/24"
+  network_security_group_id = "${azurerm_network_security_group.public_dmz_tier.id}"
 }
 
 resource "azurerm_subnet_network_security_group_association" "public_dmz" {
@@ -76,6 +77,7 @@ resource "azurerm_subnet" "public_data"{
   resource_group_name       = "${azurerm_resource_group.public_prod.name}"
   virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
   address_prefix            = "10.0.2.0/24"
+  network_security_group_id = "${azurerm_network_security_group.public_data_tier.id}"
 }
 
 resource "azurerm_subnet_network_security_group_association" "public_data" {
@@ -89,6 +91,7 @@ resource "azurerm_subnet" "public_app"{
   resource_group_name       = "${azurerm_resource_group.public_prod.name}"
   virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
   address_prefix            = "10.0.1.0/24"
+  network_security_group_id = "${azurerm_network_security_group.public_app_tier.id}"
 }
 
 resource "azurerm_subnet_network_security_group_association" "public_app" {
@@ -111,6 +114,7 @@ resource "azurerm_subnet" "private_mgmt_tier" {
   resource_group_name       = "${azurerm_resource_group.private_prod.name}"
   virtual_network_name      = "${azurerm_virtual_network.private_prod.name}"
   address_prefix            = "10.1.1.0/24"
+  network_security_group_id = "${azurerm_network_security_group.private_mgmt_tier.id}"
 }
 
 resource "azurerm_subnet_network_security_group_association" "private_mgmt_tier" {
@@ -124,6 +128,7 @@ resource "azurerm_subnet" "private_data_tier" {
   resource_group_name       = "${azurerm_resource_group.private_prod.name}"
   virtual_network_name      = "${azurerm_virtual_network.private_prod.name}"
   address_prefix            = "10.1.2.0/24"
+  network_security_group_id = "${azurerm_network_security_group.private_data_tier.id}"
 }
 
 resource "azurerm_subnet_network_security_group_association" "private_data_tier" {
@@ -157,6 +162,7 @@ resource "azurerm_subnet" "development_dmz_tier" {
   resource_group_name       = "${azurerm_resource_group.development.name}"
   virtual_network_name      = "${azurerm_virtual_network.development.name}"
   address_prefix            = "10.2.99.0/24"
+  network_security_group_id = "${azurerm_network_security_group.development_dmz.id}"
 }
 
 resource "azurerm_subnet_network_security_group_association" "development_dmz_tier" {
