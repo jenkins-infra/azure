@@ -39,7 +39,7 @@ locals {
     kelp = "2001:4802:7801:101:be76:4eff:fe20:b252"
     ns2 = "2001:4802:7801:101:be76:4eff:fe20:b252"
   }
-  
+
   jenkinsci_cname_records = {
     www = "jenkins-ci.org"
     issues = "edamame.jenkins-ci.org"
@@ -77,6 +77,10 @@ locals {
     archives = "okra.jenkins-ci.org"
     demo = "kelp.jenkins-ci.org"
     accounts = "accounts.jenkins.io"
+    "_9EDE1B274D351E6D534FDC94833DF749.jenkins-ci.org" = "A52BB2524DAF896F76544BA7067F72E7.EADA96B92AE1DBD4BE6A9DB208FD8EED.5c60846ea259f.comodoca.com"
+    "_9EDE1B274D351E6D534FDC94833DF749.updates.jenkins-ci.org" = "A52BB2524DAF896F76544BA7067F72E7.EADA96B92AE1DBD4BE6A9DB208FD8EED.5c60846ea259f.comodoca.com"
+    "_9EDE1B274D351E6D534FDC94833DF749.usage.jenkins-ci.org" = "A52BB2524DAF896F76544BA7067F72E7.EADA96B92AE1DBD4BE6A9DB208FD8EED.5c60846ea259f.comodoca.com"
+
   }
 }
 
@@ -119,6 +123,7 @@ resource "azurerm_dns_cname_record" "jenkinsci_cname_entries" {
   ttl                 = 3600
   record             = "${local.jenkinsci_cname_records[element(keys(local.jenkinsci_cname_records), count.index)]}"
 }
+
 
 resource "azurerm_dns_txt_record" "jenkinsci_root_txt_entries" {
   name                = "@"
