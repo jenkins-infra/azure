@@ -1,13 +1,5 @@
 # This terraform plan describe the virtual machine needed to run ci.jenkins.io
 
-resource "azurerm_resource_group" "ci" {
-  name     = "${var.prefix}ci"
-  location = "${var.location}"
-  tags {
-    env = "${var.prefix}"
-  }
-}
-
 resource "azurerm_public_ip" "ci" {
   name                         = "${var.prefix}ci"
   location                     = "${var.location}"
@@ -27,6 +19,7 @@ resource "azurerm_network_interface" "ci_public" {
   ip_configuration {
     name                          = "${var.prefix}-public"
     subnet_id                     = "${azurerm_subnet.public_data.id}"
+    private_ip_address_allocation = "dynamic"
     public_ip_address_id          = "${azurerm_public_ip.ci.id}"
   }
   tags {
