@@ -14,13 +14,10 @@ resource "azurerm_postgresql_server" "evergreen" {
   resource_group_name = "${azurerm_resource_group.evergreen.name}"
 
   sku {
-    # In production we have Gen4 deployed, but that can no longer exist thanks
-    # to a deprecation by Azure. This hack is the best that comes to mind
-    # unfortunately
-    name = "${var.prefix == "prod" ? "B_Gen4_2" : "B_Gen5_2"}"
+    name = "B_Gen4_2"
     capacity = 2
     tier = "Basic"
-    family = "${var.prefix == "prod" ? "Gen4" : "Gen5"}"
+    family = "Gen4"
   }
 
   storage_profile {
