@@ -30,7 +30,6 @@ locals {
     # EC2
     rating = "52.23.130.110"
     mirrors = "52.202.51.185"
-    ci = "52.71.231.250"
     l10n = "52.71.7.244"
     census = "52.202.38.86"
     usage = "52.204.62.78"
@@ -39,6 +38,7 @@ locals {
     ldap = "52.232.180.203"
     cn = "159.138.4.250" # Chinese jenkins.io hosted Huawei China
     azure.ci = "104.208.238.39"
+    ci = "104.208.238.39"
     gateway.evergreen = "137.116.80.151"
   }
 
