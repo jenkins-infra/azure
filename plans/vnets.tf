@@ -99,6 +99,20 @@ resource "azurerm_subnet_network_security_group_association" "public_app" {
   network_security_group_id = "${azurerm_network_security_group.public_app_tier.id}"
 }
 
+resource "azurerm_subnet" "publick8s"{
+  name                      = "publick8s"
+  resource_group_name       = "${azurerm_resource_group.public_prod.name}"
+  virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
+  address_prefix            = "10.0.3.0/24"
+  network_security_group_id = "${azurerm_network_security_group.public_data_tier.id}"
+}
+
+resource "azurerm_subnet_network_security_group_association" "publick8s" {
+  subnet_id                 = "${azurerm_subnet.publick8s.id}"
+  network_security_group_id = "${azurerm_network_security_group.public_data_tier.id}"
+}
+
+
 # The Private Production VNet is where all management and highly classified
 # resources should be provisioned. It should never have its resources exposed
 # to the public internet but is peered with Public Production
