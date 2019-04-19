@@ -40,6 +40,8 @@ locals {
     azure.ci = "104.208.238.39"
     ci = "104.208.238.39"
     gateway.evergreen = "137.116.80.151"
+    private.aks = "10.0.2.5"
+    public.aks = "40.70.215.138"
   }
 
   jenkinsio_aaaa_records = {
@@ -70,6 +72,8 @@ locals {
     patron = "jenkins-infra.github.io"
     wiki = "lettuce.jenkins.io"
     issues = "edamame.jenkins.io"
+
+    *.jx.release.alpha = "private.aks.jenkins.io"
 
     # Magical CNAME for certificate validation
     "D07F852F584FA592123140354D366066.ldap" = "75E741181A7ACDBE2996804B2813E09B65970718.comodoca.com"
