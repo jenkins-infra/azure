@@ -73,7 +73,7 @@ locals {
     wiki = "lettuce.jenkins.io"
     issues = "edamame.jenkins.io"
 
-    *.jx.release.alpha = "private.aks.jenkins.io"
+    "*.jx.release.alpha" = "private.aks.jenkins.io"
 
     # Magical CNAME for certificate validation
     "D07F852F584FA592123140354D366066.ldap" = "75E741181A7ACDBE2996804B2813E09B65970718.comodoca.com"
