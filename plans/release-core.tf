@@ -17,7 +17,6 @@ resource "azurerm_key_vault" "release-core" {
   sku {
     name = "standard"
   }
-  }
 }
 
 # https://docs.microsoft.com/en-us/rest/api/keyvault/certificates-and-policies
@@ -78,7 +77,6 @@ resource "azurerm_storage_account" "release-core" {
     location                 = "${var.location}"
     account_tier             = "Standard"
     account_replication_type = "GRS"
-  }
 }
 
 resource "azurerm_storage_container" "release-core-gpg" {
