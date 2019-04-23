@@ -17,13 +17,6 @@ resource "azurerm_key_vault" "release-core" {
   sku {
     name = "standard"
   }
-
-  network_acls {
-    default_action              = "Deny"
-    bypass                      = "None"
-    virtual_network_subnet_ids  = [
-        "${azurerm_subnet.public_data.id}"
-    ]
   }
 }
 
@@ -85,11 +78,6 @@ resource "azurerm_storage_account" "release-core" {
     location                 = "${var.location}"
     account_tier             = "Standard"
     account_replication_type = "GRS"
-    network_rules {
-      bypass                      = ["None"]
-      virtual_network_subnet_ids  = [
-          "${azurerm_subnet.public_data.id}"
-      ]
   }
 }
 
