@@ -3,6 +3,7 @@
 resource "azurerm_resource_group" "bean" {
   name     = "${var.prefix}bean"
   location = "${var.location}"
+
   tags {
     env = "${var.prefix}"
   }
@@ -15,6 +16,7 @@ resource "azurerm_public_ip" "bean" {
   resource_group_name          = "${azurerm_resource_group.bean.name}"
   public_ip_address_allocation = "Static"
   idle_timeout_in_minutes      = 30
+
   tags {
     environment = "${var.prefix}"
   }
@@ -27,21 +29,23 @@ resource "azurerm_public_ip" "ldap" {
   resource_group_name          = "${azurerm_resource_group.bean.name}"
   public_ip_address_allocation = "Static"
   idle_timeout_in_minutes      = 30
+
   tags {
     environment = "${var.prefix}"
   }
 }
 
 resource "azurerm_storage_account" "bean" {
-    name                     = "${azurerm_resource_group.bean.name}"
-    resource_group_name      = "${azurerm_resource_group.bean.name}"
-    location                 = "${var.location}"
-    account_tier             = "Standard"
-    account_replication_type = "GRS"
-    depends_on               = ["azurerm_resource_group.bean"]
-    tags {
-        env = "${var.prefix}"
-    }
+  name                     = "${azurerm_resource_group.bean.name}"
+  resource_group_name      = "${azurerm_resource_group.bean.name}"
+  location                 = "${var.location}"
+  account_tier             = "Standard"
+  account_replication_type = "GRS"
+  depends_on               = ["azurerm_resource_group.bean"]
+
+  tags {
+    env = "${var.prefix}"
+  }
 }
 
 resource "azurerm_container_service" "bean" {

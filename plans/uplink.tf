@@ -7,16 +7,18 @@
 # cfr. https://www.terraform.io/docs/providers/random/index.html
 resource "random_string" "uplink_db_password" {
   length = 16
-    keepers {
-      id = "${var.uplink_db_password_id}"
-    }
+
+  keepers {
+    id = "${var.uplink_db_password_id}"
+  }
 }
 
 resource "azurerm_resource_group" "uplink" {
   name     = "${var.prefix}uplink"
   location = "${var.location}"
+
   tags {
-      env = "${var.prefix}"
+    env = "${var.prefix}"
   }
 }
 
@@ -26,22 +28,22 @@ resource "azurerm_postgresql_server" "uplink" {
   resource_group_name = "${azurerm_resource_group.uplink.name}"
 
   sku {
-    name = "B_Gen5_2"
+    name     = "B_Gen5_2"
     capacity = 2
-    tier = "Basic"
-    family = "Gen5"
+    tier     = "Basic"
+    family   = "Gen5"
   }
 
   storage_profile {
-    storage_mb = 46080
+    storage_mb            = 46080
     backup_retention_days = 7
-    geo_redundant_backup = "Disabled"
+    geo_redundant_backup  = "Disabled"
   }
 
-  administrator_login = "uplinkadmin"
+  administrator_login          = "uplinkadmin"
   administrator_login_password = "${random_string.uplink_db_password.result}"
-  version = "10.0"
-  ssl_enforcement = "Disabled"
+  version                      = "10.0"
+  ssl_enforcement              = "Disabled"
 }
 
 resource "azurerm_postgresql_database" "uplink" {
@@ -51,4 +53,3 @@ resource "azurerm_postgresql_database" "uplink" {
   charset             = "UTF8"
   collation           = "English_United States.1252"
 }
-

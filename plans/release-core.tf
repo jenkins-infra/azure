@@ -21,7 +21,7 @@ resource "azurerm_key_vault" "release-core" {
 
 # https://docs.microsoft.com/en-us/rest/api/keyvault/certificates-and-policies
 resource "azurerm_key_vault_certificate" "release-core" {
-  name     = "${var.prefix}releasecore"
+  name         = "${var.prefix}releasecore"
   key_vault_id = "${azurerm_key_vault.release-core.id}"
 
   certificate_policy {
@@ -68,20 +68,19 @@ resource "azurerm_key_vault_certificate" "release-core" {
   }
 }
 
-
 ### GPG key stored on a storage account 
 
 resource "azurerm_storage_account" "release-core" {
-    name                     = "${var.prefix}releasecore"
-    resource_group_name      = "${azurerm_resource_group.release-core.name}"
-    location                 = "${var.location}"
-    account_tier             = "Standard"
-    account_replication_type = "GRS"
+  name                     = "${var.prefix}releasecore"
+  resource_group_name      = "${azurerm_resource_group.release-core.name}"
+  location                 = "${var.location}"
+  account_tier             = "Standard"
+  account_replication_type = "GRS"
 }
 
 resource "azurerm_storage_container" "release-core-gpg" {
-    name                  = "gpg"
-    resource_group_name   = "${azurerm_resource_group.release-core.name}"
-    storage_account_name  = "${azurerm_storage_account.release-core.name}"
-    container_access_type = "container"
+  name                  = "gpg"
+  resource_group_name   = "${azurerm_resource_group.release-core.name}"
+  storage_account_name  = "${azurerm_storage_account.release-core.name}"
+  container_access_type = "container"
 }

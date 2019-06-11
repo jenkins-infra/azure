@@ -22,23 +22,24 @@
 #                        +----------------+
 #
 
-
 ## RESOURCE GROUPS
 ################################################################################
 resource "azurerm_resource_group" "public_prod" {
-    name     = "${var.prefix}-jenkins-public-prod"
-    location = "${var.location}"
+  name     = "${var.prefix}-jenkins-public-prod"
+  location = "${var.location}"
 }
-resource "azurerm_resource_group" "private_prod" {
-    name     = "${var.prefix}-jenkins-private-prod"
-    location = "${var.location}"
-}
-resource "azurerm_resource_group" "development" {
-    name     = "${var.prefix}-jenkins-development"
-    location = "${var.location}"
-}
-################################################################################
 
+resource "azurerm_resource_group" "private_prod" {
+  name     = "${var.prefix}-jenkins-private-prod"
+  location = "${var.location}"
+}
+
+resource "azurerm_resource_group" "development" {
+  name     = "${var.prefix}-jenkins-development"
+  location = "${var.location}"
+}
+
+################################################################################
 
 ## VIRTUAL NETWORKS
 ################################################################################
@@ -56,7 +57,7 @@ resource "azurerm_virtual_network" "public_prod" {
 # Jenkins masters, or other untrusted workloads which should be in the Public
 # Production VNet
 
-resource "azurerm_subnet" "public_dmz"{
+resource "azurerm_subnet" "public_dmz" {
   name                      = "dmz-tier"
   resource_group_name       = "${azurerm_resource_group.public_prod.name}"
   virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
@@ -72,7 +73,7 @@ resource "azurerm_subnet_network_security_group_association" "public_dmz" {
 # The "data-tier" subnet is for data services which we might choose to run
 # ourselves that shouldn't have public IP addresses but accessible from within
 # the Public Production network
-resource "azurerm_subnet" "public_data"{
+resource "azurerm_subnet" "public_data" {
   name                      = "data-tier"
   resource_group_name       = "${azurerm_resource_group.public_prod.name}"
   virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
@@ -86,7 +87,7 @@ resource "azurerm_subnet_network_security_group_association" "public_data" {
 }
 
 # "app-tier" hosts should expect to be accessible from the public internet
-resource "azurerm_subnet" "public_app"{
+resource "azurerm_subnet" "public_app" {
   name                      = "app-tier"
   resource_group_name       = "${azurerm_resource_group.public_prod.name}"
   virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
@@ -99,7 +100,7 @@ resource "azurerm_subnet_network_security_group_association" "public_app" {
   network_security_group_id = "${azurerm_network_security_group.public_app_tier.id}"
 }
 
-resource "azurerm_subnet" "publick8s"{
+resource "azurerm_subnet" "publick8s" {
   name                      = "publick8s"
   resource_group_name       = "${azurerm_resource_group.public_prod.name}"
   virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
@@ -111,7 +112,6 @@ resource "azurerm_subnet_network_security_group_association" "publick8s" {
   subnet_id                 = "${azurerm_subnet.publick8s.id}"
   network_security_group_id = "${azurerm_network_security_group.public_data_tier.id}"
 }
-
 
 # The Private Production VNet is where all management and highly classified
 # resources should be provisioned. It should never have its resources exposed
@@ -136,7 +136,6 @@ resource "azurerm_subnet_network_security_group_association" "private_mgmt_tier"
   network_security_group_id = "${azurerm_network_security_group.private_mgmt_tier.id}"
 }
 
-
 resource "azurerm_subnet" "private_data_tier" {
   name                      = "data-tier"
   resource_group_name       = "${azurerm_resource_group.private_prod.name}"
@@ -153,10 +152,10 @@ resource "azurerm_subnet_network_security_group_association" "private_data_tier"
 # Peer the Public and Private Production networks, using the Private Production
 # resource group for holding the VNet Peer
 resource "azurerm_virtual_network_peering" "pub_to_priv_peer" {
-    name                      = "${var.prefix}-public-to-private-peer"
-    resource_group_name       = "${azurerm_resource_group.private_prod.name}"
-    virtual_network_name      = "${azurerm_virtual_network.private_prod.name}"
-    remote_virtual_network_id = "${azurerm_virtual_network.public_prod.id}"
+  name                      = "${var.prefix}-public-to-private-peer"
+  resource_group_name       = "${azurerm_resource_group.private_prod.name}"
+  virtual_network_name      = "${azurerm_virtual_network.private_prod.name}"
+  remote_virtual_network_id = "${azurerm_virtual_network.public_prod.id}"
 }
 
 # The development VNet should be largely considered entirely on its own and
@@ -185,3 +184,4 @@ resource "azurerm_subnet_network_security_group_association" "development_dmz_ti
 }
 
 ################################################################################
+

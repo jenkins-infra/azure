@@ -11,7 +11,6 @@
 #   65500       DenyAllInBound                  Any   Any       Any                 Any             Deny
 # https://docs.microsoft.com/en-us/azure/virtual-network/security-overview#security-rules
 
-
 ## NETWORK SECURITY GROUPS
 ################################################################################
 # Allow pretty much any and all traffic into the development DMZ. Wild west!
@@ -123,7 +122,6 @@ resource "azurerm_network_security_rule" "public-data-tier-allow-puppet-outbound
   network_security_group_name = "${azurerm_network_security_group.public_data_tier.name}"
 }
 
-
 # NOTE: Currently empty to enable us to add security rules to this NSG at a
 # later date.
 resource "azurerm_network_security_group" "public_dmz_tier" {
@@ -191,4 +189,6 @@ resource "azurerm_network_security_group" "private_dmz_tier" {
   location            = "${var.location}"
   resource_group_name = "${azurerm_resource_group.private_prod.name}"
 }
+
 ################################################################################
+
