@@ -17,6 +17,18 @@ resource "azurerm_key_vault" "release-core" {
   sku {
     name = "standard"
   }
+
+  network_acls {
+    bypass  = "AzureServices"
+    default_action = "Allow" # As long as trusted.ci doesn't run inside a trusted azure network, we need to allow access by default
+    ip_rules = [
+      "13.68.206.234/32",
+      "40.70.215.138/32"
+    ]
+    virtual_network_subnet_ids = [
+      "${azurerm_subnet.public_data.id}",
+    ]
+  }
 }
 
 # https://docs.microsoft.com/en-us/rest/api/keyvault/certificates-and-policies
@@ -47,7 +59,7 @@ resource "azurerm_key_vault_certificate" "release-core" {
     }
 
     secret_properties {
-      content_type = "application/x-pkcs12"
+      content_type = "application/x-pem-file"
     }
 
     x509_certificate_properties {
