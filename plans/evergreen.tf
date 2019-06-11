@@ -14,23 +14,25 @@ resource "azurerm_postgresql_server" "evergreen" {
   resource_group_name = "${azurerm_resource_group.evergreen.name}"
 
   sku {
-    name = "B_Gen5_2"
+    name     = "B_Gen5_2"
     capacity = 2
-    tier = "Basic"
-    family = "Gen5"
+    tier     = "Basic"
+    family   = "Gen5"
   }
 
   storage_profile {
-    storage_mb = 5120
+    storage_mb            = 5120
     backup_retention_days = 7
-    geo_redundant_backup = "Disabled"
+    geo_redundant_backup  = "Disabled"
   }
 
   administrator_login = "evergreen_admin"
+
   # Once the infrastructure has been deployed, the password should be manually
   # reset such that it can be utilized in Kubernetes/Puppet/etc
   administrator_login_password = "${random_id.prefix.hex}A1!"
-  version = "10.0"
+
+  version         = "10.0"
   ssl_enforcement = "Disabled"
 }
 
@@ -41,4 +43,3 @@ resource "azurerm_postgresql_database" "evergreen_prod" {
   charset             = "UTF8"
   collation           = "English_United States.1252"
 }
-

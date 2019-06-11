@@ -34,6 +34,9 @@ init: prepare generate
 		-force-copy \
 		plans
 
+test_fmt:
+	$(TERRAFORM) fmt --write=false --diff=true --check=true
+
 clean:
 	$(MAKE) -C arm_templates clean
 	rm -Rf ${TFSTATE_PREPARE_DIR}
