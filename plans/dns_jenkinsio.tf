@@ -64,8 +64,8 @@ locals {
     uplink        = "nginx.azure.jenkins.io"
 
     # AKS
-    repo.release = "private.aks.jenkins.io"
-    ci.release   = "private.aks.jenkins.io"
+    release.repo = "private.aks.jenkins.io"
+    release.ci   = "private.aks.jenkins.io"
 
     # CNAME Records
     pkg      = "mirrors.jenkins.io"
