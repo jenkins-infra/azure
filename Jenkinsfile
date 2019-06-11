@@ -65,6 +65,17 @@ lock("azure_${tfPrefix}") {
               }
           }
       }
+      stage('Validate Format') {
+          node('docker') {
+              deleteDir()
+              checkout scm
+              sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
+
+              tfsh {
+                  sh 'make test_fmt'
+              }
+          }
+      }
 
       stage('Plan') {
           node('docker') {
