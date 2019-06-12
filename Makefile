@@ -22,6 +22,9 @@ validate: init
 generate:
 	$(MAKE) -C arm_templates
 
+destroy: refresh
+	$(TERRAFORM) destroy -var-file=$(VARFILE) plans
+
 deploy: check init refresh
 	$(TERRAFORM) apply -var-file=$(VARFILE) -auto-approve=true plans
 
@@ -36,6 +39,9 @@ init: prepare generate
 
 test_fmt:
 	$(TERRAFORM) fmt --write=false --diff=true --check=true
+
+fmt:
+	$(TERRAFORM) fmt --write=true --diff=true
 
 clean:
 	$(MAKE) -C arm_templates clean
