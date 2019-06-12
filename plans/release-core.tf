@@ -19,12 +19,14 @@ resource "azurerm_key_vault" "release-core" {
   }
 
   network_acls {
-    bypass  = "AzureServices"
-    default_action = "Allow" # As long as trusted.ci doesn't run inside a trusted azure network, we need to allow access by default
+    bypass         = "AzureServices"
+    default_action = "Allow"         # As long as trusted.ci doesn't run inside a trusted azure network, we need to allow access by default
+
     ip_rules = [
       "13.68.206.234/32",
-      "40.70.215.138/32"
+      "40.70.215.138/32",
     ]
+
     virtual_network_subnet_ids = [
       "${azurerm_subnet.public_data.id}",
     ]
