@@ -51,7 +51,7 @@ lock("azure_${tfPrefix}") {
            * infrastructure
            */
           if (env.CHANGE_ID) {
-              node('docker') {
+              node('docker&&linux') {
                   deleteDir()
                   git 'https://github.com/jenkins-infra/azure.git'
                   /* Create an empty terraform variables file so that everything can
@@ -66,7 +66,7 @@ lock("azure_${tfPrefix}") {
           }
       }
       stage('Validate Format') {
-          node('docker') {
+          node('docker&&linux') {
               deleteDir()
               checkout scm
               sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
@@ -78,7 +78,7 @@ lock("azure_${tfPrefix}") {
       }
 
       stage('Plan') {
-          node('docker') {
+          node('docker&&linux') {
               deleteDir()
               checkout scm
               sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
@@ -103,7 +103,7 @@ lock("azure_${tfPrefix}") {
       }
 
       stage('Apply') {
-          node('docker') {
+          node('docker&&linux') {
               deleteDir()
               checkout scm
               sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
@@ -119,7 +119,7 @@ lock("azure_${tfPrefix}") {
        */
       if (env.CHANGE_ID) {
           stage('Destroy') {
-              node('docker') {
+              node('docker&&linux') {
                   deleteDir()
                   checkout scm
                   sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
