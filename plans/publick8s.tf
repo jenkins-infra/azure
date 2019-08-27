@@ -1,9 +1,10 @@
-variable "publick8s_windows_admin_password"{
+variable "publick8s_windows_admin_password" {
   type = "string"
 }
 
-resource "random_string" "publick8s_windows_admin_password"{
+resource "random_string" "publick8s_windows_admin_password" {
   lenght = 16
+
   keepers {
     id = "${var.publickk8s_windows_admin_password}"
   }
@@ -57,7 +58,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     vm_size             = "Standard_D4s_v3"
     os_type             = "Linux"
     vnet_subnet_id      = "${azurerm_subnet.publick8s.id}" # ! Only one AKS per subnet
-    os_disk_size_gb     = 100                           # It seems that terraform force a resource re-creation if size is not defined
+    os_disk_size_gb     = 100                              # It seems that terraform force a resource re-creation if size is not defined
     type                = "VirtualMachineScaleSets"
     enable_auto_scaling = true
     min_count           = 1
