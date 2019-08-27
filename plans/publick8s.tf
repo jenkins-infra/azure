@@ -1,5 +1,5 @@
 variable "publick8s_windows_admin_password" {
-  type = "string"
+  type    = "string"
   default = "2019082701"
 }
 
