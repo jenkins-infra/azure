@@ -1,5 +1,6 @@
 variable "publick8s_windows_admin_password" {
   type = "string"
+  default = "2019082701"
 }
 
 resource "random_string" "publick8s_windows_admin_password" {
