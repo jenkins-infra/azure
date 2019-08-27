@@ -20,7 +20,6 @@ resource "azurerm_storage_account" "tfstate" {
 
 resource "azurerm_storage_container" "tfstate" {
   name                  = "tfstate"
-  resource_group_name   = "${azurerm_resource_group.tfstate.name}"
   storage_account_name  = "${azurerm_storage_account.tfstate.name}"
   container_access_type = "private"
 }
@@ -37,7 +36,6 @@ resource "azurerm_storage_account" "tfstate_datadog" {
 
 resource "azurerm_storage_container" "tfstate_datadog" {
   name                  = "tfstatedatadog"
-  resource_group_name   = "${azurerm_resource_group.tfstate.name}"
   storage_account_name  = "${azurerm_storage_account.tfstate_datadog.name}"
   container_access_type = "private"
 }
