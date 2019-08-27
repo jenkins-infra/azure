@@ -1,3 +1,14 @@
+variable "publick8s_windows_admin_password"{
+  type = "string"
+}
+
+resource "random_string" "publick8s_windows_admin_password"{
+  lenght = 16
+  keepers {
+    id = "${var.publickk8s_windows_admin_password}"
+  }
+}
+
 resource "azurerm_resource_group" "publick8s" {
   name     = "${var.prefix}publick8s"
   location = "${var.location}"
@@ -42,12 +53,32 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   }
 
   agent_pool_profile {
-    name            = "publick8s"
-    count           = "1"
-    vm_size         = "Standard_D4s_v3"
-    os_type         = "Linux"
-    vnet_subnet_id  = "${azurerm_subnet.publick8s.id}" # ! Only one AKS per subnet
-    os_disk_size_gb = 30                               # It seems that terraform force a resource re-creation if size is not defined
+    name                = "linux"
+    vm_size             = "Standard_D4s_v3"
+    os_type             = "Linux"
+    vnet_subnet_id      = "${azurerm_subnet.publick8s.id}" # ! Only one AKS per subnet
+    os_disk_size_gb     = 100                           # It seems that terraform force a resource re-creation if size is not defined
+    type                = "VirtualMachineScaleSets"
+    enable_auto_scaling = true
+    min_count           = 1
+    max_count           = 5
+  }
+
+  agent_pool_profile {
+    name                = "windows"
+    vm_size             = "Standard_D4s_v3"
+    os_type             = "Windows"
+    vnet_subnet_id      = "${azurerm_subnet.publick8s.id}"
+    os_disk_size_gb     = 200
+    type                = "VirtualMachineScaleSets"
+    enable_auto_scaling = true
+    min_count           = 1
+    max_count           = 3
+  }
+
+  windows_profile {
+    admin_username = "azureuser"
+    admin_password = "${random_string.publick8s_windows_admin_password.result}"
   }
 
   linux_profile {
