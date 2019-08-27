@@ -60,6 +60,6 @@ prepare:
 	for file in variables provider remote-state; do \
 		cp plans/$$file.tf $(TFSTATE_PREPARE_DIR); \
 	done;
-	cd $(TFSTATE_PREPARE_DIR) && ../$(TERRAFORM) init &&  ../$(TERRAFORM) apply -var-file=$(VARFILE) -auto-approve=true
+	cd $(TFSTATE_PREPARE_DIR) && ../$(TERRAFORM) init &&  ../$(TERRAFORM) apply -var-file=$(VARFILE) -auto-approve=true -refresh=true || true
 	sleep 90
 
