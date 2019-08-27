@@ -21,7 +21,6 @@ resource "azurerm_storage_account" "backups" {
 # user data. Most things will fit into this storage container
 resource "azurerm_storage_container" "private_backups" {
   name                  = "privatebackups"
-  resource_group_name   = "${azurerm_resource_group.backups.name}"
   storage_account_name  = "${azurerm_storage_account.backups.name}"
   container_access_type = "private"
 }
