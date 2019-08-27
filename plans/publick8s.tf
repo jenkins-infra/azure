@@ -6,7 +6,7 @@ resource "random_string" "publick8s_windows_admin_password" {
   lenght = 16
 
   keepers {
-    id = "${var.publickk8s_windows_admin_password}"
+    id = "${var.publick8s_windows_admin_password}"
   }
 }
 
