@@ -95,8 +95,8 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
 
   network_profile {
     network_plugin     = "azure"
-    service_cidr       = "10.0.16.0/19" # Number of IPs needed  = (number of nodes) + (number of nodes * pods per node)
-    dns_service_ip     = "10.0.16.10"   # Must be in service_cidr range
+    service_cidr       = "10.0.16.0/19"  # Number of IPs needed  = (number of nodes) + (number of nodes * pods per node)
+    dns_service_ip     = "10.0.16.10"    # Must be in service_cidr range
     docker_bridge_cidr = "172.17.0.1/16"
   }
 
