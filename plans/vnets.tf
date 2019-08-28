@@ -104,7 +104,7 @@ resource "azurerm_subnet" "publick8s" {
   name                      = "publick8s"
   resource_group_name       = "${azurerm_resource_group.public_prod.name}"
   virtual_network_name      = "${azurerm_virtual_network.public_prod.name}"
-  address_prefix            = "10.0.3.0/24"
+  address_prefix            = "10.0.32.0/19"                                          # 8190 IPs used for every nodes, pods or services deployed by publick8s AKS cluster.
   network_security_group_id = "${azurerm_network_security_group.public_data_tier.id}"
 }
 
