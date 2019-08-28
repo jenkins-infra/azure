@@ -68,7 +68,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   }
 
   agent_pool_profile {
-    name                = "windows"
+    name                = "win"
     vm_size             = "Standard_D4s_v3"
     os_type             = "Windows"
     vnet_subnet_id      = "${azurerm_subnet.publick8s.id}"

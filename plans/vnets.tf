@@ -100,6 +100,8 @@ resource "azurerm_subnet_network_security_group_association" "public_app" {
   network_security_group_id = "${azurerm_network_security_group.public_app_tier.id}"
 }
 
+# ! 10.0.64.0/19 range is used by publick8s as defined in azurerm_kubernetes_cluster.publick8s.network_profile.service_cidr
+
 resource "azurerm_subnet" "publick8s" {
   name                      = "publick8s"
   resource_group_name       = "${azurerm_resource_group.public_prod.name}"
