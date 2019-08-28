@@ -64,7 +64,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     enable_auto_scaling = true
     min_count           = 1
     max_count           = 5
-    max_pods            = 250
+    max_pods            = 200                              # Private IPs pool for a node will be reserved at node creation
   }
 
   agent_pool_profile {
@@ -77,7 +77,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     enable_auto_scaling = true
     min_count           = 1
     max_count           = 3
-    max_pods            = 250
+    max_pods            = 200
   }
 
   windows_profile {
@@ -95,8 +95,8 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
 
   network_profile {
     network_plugin     = "azure"
-    service_cidr       = "10.0.32.0/19"  # Number of IPs needed  = (number of nodes) + (number of nodes * pods per node)
-    dns_service_ip     = "10.0.32.10"    # Must be in service_cidr range
+    service_cidr       = "10.0.16.0/19" # Number of IPs needed  = (number of nodes) + (number of nodes * pods per node)
+    dns_service_ip     = "10.0.16.10"   # Must be in service_cidr range
     docker_bridge_cidr = "172.17.0.1/16"
   }
 
