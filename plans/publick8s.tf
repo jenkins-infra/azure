@@ -124,7 +124,7 @@ resource "azurerm_public_ip" "publick8s" {
   depends_on                   = ["azurerm_kubernetes_cluster.publick8s"]
   name                         = "${var.prefix}gw-publick8s"
   location                     = "${var.location}"
-  resource_group_name          = "MC_${azurerm_resource_group.publick8s.name}_${azurerm_kubernetes_cluster.publick8s.name}_${azurerm_kubernetes_cluster.publick8s.location}"
+  resource_group_name          = "${azurerm_resource_group.publick8s.name}"
   public_ip_address_allocation = "Static"
   idle_timeout_in_minutes      = 30
 
