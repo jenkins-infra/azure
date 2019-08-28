@@ -78,6 +78,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     min_count           = 1
     max_count           = 3
     max_pods            = 200
+    node_taints         = "os=windows:NoSchedule"
   }
 
   windows_profile {
