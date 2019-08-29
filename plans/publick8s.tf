@@ -122,7 +122,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
 resource "azurerm_role_assignment" "publick8s" {
   scope                = "/subscriptions/${var.subscription_id}/resourceGroups/${azurerm_resource_group.publick8s.name}"
   role_definition_name = "Network Contributor"
-  principal_id         = "${azurerm_kubernetes_cluster.publick8s.service_principal.client_id}"
+  principal_id         = "${var.client_id}"
 }
 
 # Public IP used by the loadbalancer gw
