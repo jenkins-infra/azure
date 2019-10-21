@@ -68,6 +68,24 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   }
 
   agent_pool_profile {
+    name                = "highmemlinux"
+    vm_size             = "Standard_D8s_v3"
+    os_type             = "Linux"
+    vnet_subnet_id      = "${azurerm_subnet.publick8s.id}" # ! Only one AKS per subnet
+    os_disk_size_gb     = 100                              # It seems that terraform force a resource re-creation if size is not defined
+    type                = "VirtualMachineScaleSets"
+    enable_auto_scaling = true
+    min_count           = 0
+    max_count           = 5
+    max_pods            = 200                              # Private IPs pool for a node will be reserved at node creation
+
+    node_taints = [
+      "os=linux:NoSchedule",
+      "profile=highmem:NoSchedule",
+    ]
+  }
+
+  agent_pool_profile {
     name                = "win"
     vm_size             = "Standard_D4s_v3"
     os_type             = "Windows"
