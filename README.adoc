@@ -10,9 +10,39 @@ This repository is meant to hold documentation, tooling and other resources
 related to the link:https://jenkins.io[Jenkins] project's migration to
 link:https://azure.com[Azure].
 
-=== Resources
+= Requirements
+
+In order to use this repository to provision the Jenkins infrastructure on azure, you need:
+
+* An `Azure` account
+* `Docker` to run terraform defined in this repository
+* `Make` which simplify the different steps
+
+= HowTo
+
+== Provision
+
+IMPORTANT: Don't blindly execute the terraform code located in this repository on your own account as it may lead your account bill to significantly increase.
+
+Once you fulfill the requirements, you can use the code located here to provision this infrastructure on your azure account
+
+. Add your public ssh key under `ssh_key` folder, but do not commit it as it only must be used for your personal environment.
+. Create your `.azure-terraform.json` as exampled in the file HACKING.adoc
+. Run `make init`: to create the remote azure storage that will host your terraform state.
+. Run `make test_fmt validate`: to run linting checks and validate your resources.
+. Run `make deploy`: to provision all resources on your account.
+
+
+== Test
+
+In order to test any modification on this repository, you need to
+
+* Run linting tests on your machine `make test_fmt`, which don't need a azure account
+* You may also run make validate, if you have an azure account configured but keep in minds that it implies deploying at least an azure storage to store a remote terraform state
+* Open a pull request on link:https://github.com/jenkins-infra/azure[jenkins-infra/azure], this will provision a temporary environment with your specific changes and then report provisionning logs on link:https://ci.jenkins.io/blue/organizations/jenkins/Infra%2Fazure/pr[ci.jenkins.io].
+
+= Links
 
 * link:https://github.com/jenkins-infra/jenkins-infra[Puppet repository]
 * link:https://p.datadoghq.com/sb/0Igb9a-a5ff8c4199[Public Datadog Dashboard]
-* link:https://ci.jenkins.io[Jenkins-on-Jenkins server]
-
+* link:https://ci.jenkins.io/blue/organizations/jenkins/Infra%2Fazure/pr[Jenkins-on-Jenkins server]
