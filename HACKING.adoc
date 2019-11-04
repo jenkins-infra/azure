@@ -84,6 +84,8 @@ containing:
     "subscription_id" : "",
     "client_id"       : "",
     "client_secret"   : "",
+    "location"        : "",
+    "ssh_pubkey_path" : "",
     "tenant_id"       : ""
 }
 ----
@@ -94,4 +96,6 @@ Where (assuming your subscription is named "Pay-As-You-Go"):
 * `subscription_id` is the output of: `az account list -o tsv --query "[?name=='Pay-As-You-Go'].id"`
 * `client_id` is the output of: `az ad app list -o tsv --query "[?displayName=='jenkins-terraform'].appId"`
 * `client_secret` is the `$GENERATED_TOKEN` you created with `openssl` previously
+* `location`: is the region where all resources are deployed by default as used links:https://github.com/jenkins-infra/azure/blob/709fce6c0f45af844732bd4995aa29b704131622/plans/ldap.tf#L6[here] for example.
+* `ssh_pubkey_path`: is the ssh public key file used to configure admin user on linux virtual machines.
 * `tenant_id` is the output of: `az account list -o tsv --query "[?name=='Pay-As-You-Go'].tenantId"`

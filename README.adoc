@@ -27,7 +27,7 @@ IMPORTANT: Don't blindly execute the terraform code located in this repository o
 Once you fulfill the requirements, you can use the code located here to provision this infrastructure on your azure account
 
 . Add your public ssh key under `ssh_key` folder, but do not commit it as it only must be used for your personal environment.
-. Create your `.azure-terraform.json` based on `azure-terraform.json.example`.
+. Create your `.azure-terraform.json` as exampled in the file HACKING.adoc
 . Run `make init`: to create the remote azure storage that will host your terraform state.
 . Run `make test_fmt validate`: to run linting checks and validate your resources.
 . Run `make deploy`: to provision all resources on your account.
