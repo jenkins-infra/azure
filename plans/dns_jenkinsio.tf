@@ -54,7 +54,7 @@ locals {
     accounts      = "nginx.azure.jenkins.io"
     nginx.azure   = "jenkins.io"
     javadoc       = "nginx.azure.jenkins.io"
-    plugins       = "nginx.azure.jenkins.io"
+    plugins       = "public.aks.jenkins.io"
     repo.azure    = "nginx.azure.jenkins.io"
     updates.azure = "nginx.azure.jenkins.io"
     reports       = "nginx.azure.jenkins.io"
