@@ -36,12 +36,11 @@ locals {
 
     # Azure
     ldap              = "52.232.180.203"
-    cn                = "159.138.4.250"  # Chinese jenkins.io hosted Huawei China
     azure.ci          = "104.208.238.39"
     ci                = "104.208.238.39"
     gateway.evergreen = "137.116.80.151"
     private.aks       = "10.0.2.5"
-    public.aks        = "40.70.215.138"
+    public.aks        = "52.147.174.4"
   }
 
   jenkinsio_aaaa_records = {
@@ -55,7 +54,7 @@ locals {
     accounts      = "nginx.azure.jenkins.io"
     nginx.azure   = "jenkins.io"
     javadoc       = "nginx.azure.jenkins.io"
-    plugins       = "nginx.azure.jenkins.io"
+    plugins       = "public.aks.jenkins.io"
     repo.azure    = "nginx.azure.jenkins.io"
     updates.azure = "nginx.azure.jenkins.io"
     reports       = "nginx.azure.jenkins.io"
@@ -64,8 +63,13 @@ locals {
     uplink        = "nginx.azure.jenkins.io"
 
     # AKS
-    release.repo = "private.aks.jenkins.io"
-    release.ci   = "private.aks.jenkins.io"
+    release.repo    = "private.aks.jenkins.io"
+    release.ci      = "private.aks.jenkins.io"
+    release.pkg     = "private.aks.jenkins.io"
+    release.grafana = "private.aks.jenkins.io"
+    admin.polls     = "private.aks.jenkins.io"
+    private.dex     = "private.aks.jenkins.io"
+    polls           = "public.aks.jenkins.io"
 
     # CNAME Records
     pkg      = "mirrors.jenkins.io"
