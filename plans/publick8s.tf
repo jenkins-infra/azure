@@ -48,16 +48,15 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   location            = "${azurerm_resource_group.publick8s.location}"
   dns_prefix          = "${var.prefix}"
   resource_group_name = "${azurerm_resource_group.publick8s.name}"
-  kubernetes_version  = "1.14.6"                                       #az aks get-versions --location eastus --output table
+  kubernetes_version  = "1.14.8"                                       #az aks get-versions --location eastus --output table
 
   role_based_access_control {
     enabled = true
   }
 
-  agent_pool_profile {
+  default_node_pool {
     name                = "linux"
     vm_size             = "Standard_D4s_v3"
-    os_type             = "Linux"
     vnet_subnet_id      = "${azurerm_subnet.publick8s.id}" # ! Only one AKS per subnet
     os_disk_size_gb     = 100                              # It seems that terraform force a resource re-creation if size is not defined
     type                = "VirtualMachineScaleSets"
@@ -65,38 +64,6 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     min_count           = 1
     max_count           = 5
     max_pods            = 200                              # Private IPs pool for a node will be reserved at node creation
-  }
-
-  agent_pool_profile {
-    name                = "highmemlinux"
-    vm_size             = "Standard_D8s_v3"
-    os_type             = "Linux"
-    vnet_subnet_id      = "${azurerm_subnet.publick8s.id}" # ! Only one AKS per subnet
-    os_disk_size_gb     = 100                              # It seems that terraform force a resource re-creation if size is not defined
-    type                = "VirtualMachineScaleSets"
-    enable_auto_scaling = true
-    min_count           = 0
-    max_count           = 5
-    max_pods            = 200                              # Private IPs pool for a node will be reserved at node creation
-
-    node_taints = [
-      "os=linux:NoSchedule",
-      "profile=highmem:NoSchedule",
-    ]
-  }
-
-  agent_pool_profile {
-    name                = "win"
-    vm_size             = "Standard_D4s_v3"
-    os_type             = "Windows"
-    vnet_subnet_id      = "${azurerm_subnet.publick8s.id}"
-    os_disk_size_gb     = 200
-    type                = "VirtualMachineScaleSets"
-    enable_auto_scaling = true
-    min_count           = 1
-    max_count           = 3
-    max_pods            = 200
-    node_taints         = ["os=windows:NoSchedule"]
   }
 
   windows_profile {
@@ -137,6 +104,43 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   }
 }
 
+resource "azurerm_kubernetes_cluster_node_pool" "highmem" {
+  name                  = "highmemlinux"
+  kubernetes_cluster_id = "${azurerm_kubernetes_cluster.publick8s.id}"
+  vm_size               = "Standard_D8s_v3"
+  enable_auto_scaling   = true
+  node_count            = 1
+  max_pods              = 200
+
+  node_taints = [
+    "os=linux:NoSchedule",
+    "profile=highmem:NoSchedule",
+  ]
+
+  os_disk_size_gb = 100
+  os_type         = "Linux"
+  vnet_subnet_id  = "${azurerm_subnet.publick8s.id}"
+
+  min_count = 1
+  max_count = 5
+}
+
+resource "azurerm_kubernetes_cluster_node_pool" "windows" {
+  name                  = "win"
+  kubernetes_cluster_id = "${azurerm_kubernetes_cluster.publick8s.id}"
+  vm_size               = "Standard_D4s_v3"
+  enable_auto_scaling   = true
+  node_count            = 1
+  max_pods              = 200
+  node_taints           = ["os=windows:NoSchedule"]
+  os_disk_size_gb       = 200
+  os_type               = "Windows"
+  vnet_subnet_id        = "${azurerm_subnet.publick8s.id}"
+
+  min_count = 1
+  max_count = 3
+}
+
 resource "azurerm_role_assignment" "publick8s" {
   scope                = "/subscriptions/${var.subscription_id}/resourceGroups/${azurerm_resource_group.publick8s.name}"
   role_definition_name = "Network Contributor"
@@ -145,12 +149,12 @@ resource "azurerm_role_assignment" "publick8s" {
 
 # Public IP used by the loadbalancer gw
 resource "azurerm_public_ip" "publick8s" {
-  depends_on                   = ["azurerm_kubernetes_cluster.publick8s"]
-  name                         = "${var.prefix}gw-publick8s"
-  location                     = "${var.location}"
-  resource_group_name          = "${azurerm_resource_group.publick8s.name}"
-  public_ip_address_allocation = "Static"
-  idle_timeout_in_minutes      = 30
+  depends_on              = ["azurerm_kubernetes_cluster.publick8s"]
+  name                    = "${var.prefix}gw-publick8s"
+  location                = "${var.location}"
+  resource_group_name     = "${azurerm_resource_group.publick8s.name}"
+  allocation_method       = "Static"
+  idle_timeout_in_minutes = 30
 
   tags {
     environment = "${var.prefix}"
