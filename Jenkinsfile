@@ -42,7 +42,7 @@ else {
 // dynamic lock to prevent multiple PR/branches trying to plan/apply things at the same time to the same environment
 lock("azure_${tfPrefix}") {
 
-  try {
+  // try {
       // Disable for now as it's broken due to regular resource limit reached
       // stage('Prepare') {
       //     /* When planning and applying changes for a pull request, the Pipeline
@@ -115,7 +115,7 @@ lock("azure_${tfPrefix}") {
               }
           }
       }
-  }
+  //}
   // For now disable this step as it is broken due to regular resources limit reached
   // finally {
   //     /* If Pipeline is executing with a pull request, the infrastructure should
