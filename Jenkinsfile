@@ -43,28 +43,30 @@ else {
 lock("azure_${tfPrefix}") {
 
   try {
-      stage('Prepare') {
-          /* When planning and applying changes for a pull request, the Pipeline
-           * should first use the master branch which will create a remote state
-           * that can be continued from later, more accurately simulating an
-           * execution of terraform plans on an existing production
-           * infrastructure
-           */
-          if (env.CHANGE_ID) {
-              node('docker&&linux') {
-                  deleteDir()
-                  git 'https://github.com/jenkins-infra/azure.git'
-                  /* Create an empty terraform variables file so that everything can
-                   * be overridden in the environment
-                   */
-                  sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
+      // For now disable this step as it is broken because of regular resources limit reached
+      //
+      // stage('Prepare') {
+      //     /* When planning and applying changes for a pull request, the Pipeline
+      //      * should first use the master branch which will create a remote state
+      //      * that can be continued from later, more accurately simulating an
+      //      * execution of terraform plans on an existing production
+      //      * infrastructure
+      //      */
+      //     if (env.CHANGE_ID) {
+      //         node('docker&&linux') {
+      //             deleteDir()
+      //             git 'https://github.com/jenkins-infra/azure.git'
+      //             /* Create an empty terraform variables file so that everything can
+      //              * be overridden in the environment
+      //              */
+      //             sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
 
-                  tfsh {
-                      sh 'make deploy'
-                  }
-              }
-          }
-      }
+      //             tfsh {
+      //                 sh 'make deploy'
+      //             }
+      //         }
+      //     }
+      // }
       stage('Validate Format') {
           node('docker&&linux') {
               deleteDir()
@@ -104,44 +106,48 @@ lock("azure_${tfPrefix}") {
 
       stage('Apply') {
           node('docker&&linux') {
-              deleteDir()
-              checkout scm
-              sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
-              tfsh {
-                  sh 'make deploy'
-              }
-          }
-      }
-  }
-  finally {
-      /* If Pipeline is executing with a pull request, the infrastructure should
-       * be destroyed at the end
-       */
-      if (env.CHANGE_ID) {
-          stage('Destroy') {
-              node('docker&&linux') {
+              if (infra.isTrusted()) {
                   deleteDir()
                   checkout scm
                   sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
-
                   tfsh {
-                      /* `make init` ensures we have synced state from the remote
-                       * state before doing anything
-                       */
-                      sh 'make init'
-                      sh 'make refresh'
-                      /*
-                       * Remove backend configuration in order to use the default local backend
-                       * instead of azure
-                       */
-                      sh "sed -i 's/azurerm/local/g' backend.tf plans/backend.tf"
-                      sh "./scripts/terraform init -force-copy"
-                      sh "./scripts/terraform destroy -force -var-file=${tfVarFile} plans"
+                      sh 'make deploy'
                   }
               }
           }
       }
   }
+  // finally {
+  //     /* If Pipeline is executing with a pull request, the infrastructure should
+  //      * be destroyed at the end
+  //      */
+  //      Disable resources (de)provisioning
+  //
+  //     if (env.CHANGE_ID) {
+  //         stage('Destroy') {
+  //             node('docker&&linux') {
+  //                 deleteDir()
+  //                 checkout scm
+  //                 sh "echo '{\"prefix\":\"${tfPrefix}\"}' > ${tfVarFile}"
+  //
+  //                 tfsh {
+  //                     /* `make init` ensures we have synced state from the remote
+  //                      * state before doing anything
+  //                      */
+  //                     sh 'make init'
+  //                     sh 'make refresh'
+  //                     /*
+  //                      * Remove backend configuration in order to use the default local backend
+  //                      * instead of azure
+  //                      */
+  //                     sh "sed -i 's/azurerm/local/g' backend.tf plans/backend.tf"
+  //                     sh "./scripts/terraform init -force-copy"
+  //                     sh "./scripts/terraform destroy -force -var-file=${tfVarFile} plans"
+  //                 }
+  //             }
+  //         }
+  //     }
+  // }
 }
 
 /**
