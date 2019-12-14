@@ -33,6 +33,7 @@ resource "azurerm_storage_account" "tfstate_datadog" {
   account_tier             = "Standard"
   account_replication_type = "GRS"
   enable_blob_encryption   = true
+  is_hns_enabled           = false
 }
 
 resource "azurerm_storage_container" "tfstate_datadog" {
