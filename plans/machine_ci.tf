@@ -40,7 +40,7 @@ resource "azurerm_virtual_machine" "ci" {
   ]
 
   primary_network_interface_id = "${azurerm_network_interface.ci_public.id}"
-  vm_size                      = "Standard_D4s_v3"
+  vm_size                      = "Standard_D8s_v3"
 
   delete_os_disk_on_termination    = true
   delete_data_disks_on_termination = true
