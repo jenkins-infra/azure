@@ -41,6 +41,7 @@ locals {
     gateway.evergreen = "137.116.80.151"
     private.aks       = "10.0.2.5"
     public.aks        = "52.147.174.4"
+    nginx.azure       = "40.79.70.97"
   }
 
   jenkinsio_aaaa_records = {
@@ -52,7 +53,6 @@ locals {
   jenkinsio_cname_records = {
     # Azure
     accounts      = "nginx.azure.jenkins.io"
-    nginx.azure   = "jenkins.io"
     javadoc       = "nginx.azure.jenkins.io"
     plugins       = "public.aks.jenkins.io"
     repo.azure    = "nginx.azure.jenkins.io"
