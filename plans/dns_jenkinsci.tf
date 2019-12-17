@@ -5,7 +5,7 @@
 locals {
   jenkinsci_a_records = {
     # Root
-    "@" = "40.79.70.97"
+    "@" = "52.147.174.4"
 
     # Physical machine at Contegix
     cucumber = "199.193.196.24"

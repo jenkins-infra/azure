@@ -5,7 +5,7 @@
 locals {
   jenkinsio_a_records = {
     # Root
-    "@" = "40.79.70.97"
+    "@" = "52.147.174.4"
 
     # Physical machine at Contegix
     cucumber = "199.193.196.24"
@@ -63,13 +63,13 @@ locals {
     uplink        = "nginx.azure.jenkins.io"
 
     # AKS
-    release.repo    = "private.aks.jenkins.io"
-    release.ci      = "private.aks.jenkins.io"
-    release.pkg     = "private.aks.jenkins.io"
-    release.grafana = "private.aks.jenkins.io"
-    admin.polls     = "private.aks.jenkins.io"
-    private.dex     = "private.aks.jenkins.io"
-    polls           = "public.aks.jenkins.io"
+    release.repo      = "private.aks.jenkins.io"
+    release.ci        = "private.aks.jenkins.io"
+    release.pkg       = "private.aks.jenkins.io"
+    grafana.publick8s = "private.aks.jenkins.io"
+    admin.polls       = "private.aks.jenkins.io"
+    private.dex       = "private.aks.jenkins.io"
+    polls             = "public.aks.jenkins.io"
 
     # CNAME Records
     pkg      = "mirrors.jenkins.io"
@@ -98,7 +98,6 @@ locals {
     _amazonses = "kYNeW+b+9GnKO/LzqP/t0TzLyN86jQ9didoBAJSjezE="
 
     # mailgun configuration
-    "@"              = "v=spf1 include:mailgun.org ~all"
     mailo._domainkey = "k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCpS+8K+bVvFlfTqbVbuvM9SoX0BqjW3zK7BJeCZ4GnaJTeRaurKx81hUX1wz3wKt+Qt9xI+X6mAlar2Co+B13GsNZIlYVdO/zBVtZG+R5KvMQUynNyie05oRyaTFWtNEiQVgGYgM4xkwlIWSA9EXmBMaKg7ze3kKNKUOnzKDIxMQIDAQAB"
   }
 }
@@ -153,6 +152,21 @@ resource "azurerm_dns_txt_record" "jenkinsio_txt_entries" {
 
   record {
     value = "${local.jenkinsio_txt_records[element(keys(local.jenkinsio_txt_records), count.index)]}"
+  }
+}
+
+resource "azurerm_dns_txt_record" "jenkinsio_txt_root_entries" {
+  name                = "@"
+  zone_name           = "${azurerm_dns_zone.jenkinsio.name}"
+  resource_group_name = "${azurerm_resource_group.dns_jenkinsio.name}"
+  ttl                 = 3600
+
+  record {
+    value = "google-site-verification=4Z81CA6VzprPWEbGFtNbJwWoZBTGmTp3dk7N0hbt87U"
+  }
+
+  record {
+    value = "v=spf1 include:mailgun.org ~all"
   }
 }
 
