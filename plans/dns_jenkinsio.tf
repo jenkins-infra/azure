@@ -5,7 +5,7 @@
 locals {
   jenkinsio_a_records = {
     # Root
-    "@" = "40.79.70.97"
+    "@" = "52.147.174.4"
 
     # Physical machine at Contegix
     cucumber = "199.193.196.24"
@@ -63,13 +63,13 @@ locals {
     uplink        = "nginx.azure.jenkins.io"
 
     # AKS
-    release.repo    = "private.aks.jenkins.io"
-    release.ci      = "private.aks.jenkins.io"
-    release.pkg     = "private.aks.jenkins.io"
-    release.grafana = "private.aks.jenkins.io"
-    admin.polls     = "private.aks.jenkins.io"
-    private.dex     = "private.aks.jenkins.io"
-    polls           = "public.aks.jenkins.io"
+    release.repo      = "private.aks.jenkins.io"
+    release.ci        = "private.aks.jenkins.io"
+    release.pkg       = "private.aks.jenkins.io"
+    grafana.publick8s = "private.aks.jenkins.io"
+    admin.polls       = "private.aks.jenkins.io"
+    private.dex       = "private.aks.jenkins.io"
+    polls             = "public.aks.jenkins.io"
 
     # CNAME Records
     pkg      = "mirrors.jenkins.io"
@@ -153,6 +153,18 @@ resource "azurerm_dns_txt_record" "jenkinsio_txt_entries" {
 
   record {
     value = "${local.jenkinsio_txt_records[element(keys(local.jenkinsio_txt_records), count.index)]}"
+  }
+}
+
+resource "azurerm_dns_txt_record" "jenkinsio_txt_root_entries" {
+  name                = "@"
+  zone_name           = "${azurerm_dns_zone.jenkinsio.name}"
+  resource_group_name = "${azurerm_resource_group.dns_jenkinsio.name}"
+  ttl                 = 3600
+
+  record {
+    value = "google-site-verification=4Z81CA6VzprPWEbGFtNbJwWoZBTGmTp3dk7N0hbt87U"
+    value = "v=spf1 include:mailgun.org ~all"
   }
 }
 
