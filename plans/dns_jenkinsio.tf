@@ -98,7 +98,6 @@ locals {
     _amazonses = "kYNeW+b+9GnKO/LzqP/t0TzLyN86jQ9didoBAJSjezE="
 
     # mailgun configuration
-    "@"              = "v=spf1 include:mailgun.org ~all"
     mailo._domainkey = "k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCpS+8K+bVvFlfTqbVbuvM9SoX0BqjW3zK7BJeCZ4GnaJTeRaurKx81hUX1wz3wKt+Qt9xI+X6mAlar2Co+B13GsNZIlYVdO/zBVtZG+R5KvMQUynNyie05oRyaTFWtNEiQVgGYgM4xkwlIWSA9EXmBMaKg7ze3kKNKUOnzKDIxMQIDAQAB"
   }
 }
@@ -164,6 +163,9 @@ resource "azurerm_dns_txt_record" "jenkinsio_txt_root_entries" {
 
   record {
     value = "google-site-verification=4Z81CA6VzprPWEbGFtNbJwWoZBTGmTp3dk7N0hbt87U"
+  }
+
+  record {
     value = "v=spf1 include:mailgun.org ~all"
   }
 }
