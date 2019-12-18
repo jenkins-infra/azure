@@ -57,7 +57,7 @@ locals {
     plugins       = "public.aks.jenkins.io"
     repo.azure    = "nginx.azure.jenkins.io"
     updates.azure = "nginx.azure.jenkins.io"
-    reports       = "nginx.azure.jenkins.io"
+    reports       = "public.aks.jenkins.io"
     www           = "jenkins.io"
     evergreen     = "nginx.azure.jenkins.io"
     uplink        = "nginx.azure.jenkins.io"
