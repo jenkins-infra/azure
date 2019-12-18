@@ -53,7 +53,7 @@ locals {
   jenkinsio_cname_records = {
     # Azure
     accounts      = "nginx.azure.jenkins.io"
-    javadoc       = "nginx.azure.jenkins.io"
+    javadoc       = "public.aks.jenkins.io"
     plugins       = "public.aks.jenkins.io"
     repo.azure    = "nginx.azure.jenkins.io"
     updates.azure = "nginx.azure.jenkins.io"
