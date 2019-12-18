@@ -46,6 +46,7 @@ locals {
     wiki                                = "lettuce.jenkins-ci.org"
     updates                             = "updates.jenkins.io"
     javadoc                             = "javadoc.jenkins.io"
+    grafana                             = "grafana.publick8s.jenkins.io"
     gherkin                             = "cucumber.jenkins-ci.org"
     drupal                              = "cucumber.jenkins-ci.org"
     downloads                           = "cucumber.jenkins-ci.org"
