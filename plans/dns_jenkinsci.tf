@@ -25,6 +25,8 @@ locals {
     artichoke = "140.211.9.22"
     eggplant  = "140.211.15.101"
     edamame   = "140.211.9.2"
+    
+    grafana = "10.0.2.5"
 
     # Others
     lists = "140.211.166.34"
