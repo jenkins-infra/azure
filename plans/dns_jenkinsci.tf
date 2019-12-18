@@ -25,8 +25,6 @@ locals {
     artichoke = "140.211.9.22"
     eggplant  = "140.211.15.101"
     edamame   = "140.211.9.2"
-    
-    grafana = "10.0.2.5"
 
     # Others
     lists = "140.211.166.34"
@@ -48,6 +46,7 @@ locals {
     wiki                                = "lettuce.jenkins-ci.org"
     updates                             = "updates.jenkins.io"
     javadoc                             = "javadoc.jenkins.io"
+    grafana                             = "grafana.publick8s.jenkins.io"
     gherkin                             = "cucumber.jenkins-ci.org"
     drupal                              = "cucumber.jenkins-ci.org"
     downloads                           = "cucumber.jenkins-ci.org"
