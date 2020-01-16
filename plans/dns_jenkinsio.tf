@@ -35,10 +35,9 @@ locals {
     usage   = "52.204.62.78"
 
     # Azure
-    ldap              = "52.232.180.203"
+    ldap              = "40.70.191.84"
     azure.ci          = "104.208.238.39"
     ci                = "104.208.238.39"
-    gateway.evergreen = "137.116.80.151"
     private.aks       = "10.0.2.5"
     public.aks        = "52.147.174.4"
     nginx.azure       = "40.79.70.97"
@@ -52,15 +51,14 @@ locals {
 
   jenkinsio_cname_records = {
     # Azure
-    accounts      = "nginx.azure.jenkins.io"
+    accounts      = "public.aks.jenkins.io"
     javadoc       = "public.aks.jenkins.io"
     plugins       = "public.aks.jenkins.io"
     repo.azure    = "nginx.azure.jenkins.io"
     updates.azure = "nginx.azure.jenkins.io"
     reports       = "public.aks.jenkins.io"
     www           = "jenkins.io"
-    evergreen     = "nginx.azure.jenkins.io"
-    uplink        = "nginx.azure.jenkins.io"
+    uplink        = "public.aks.jenkins.io"
 
     # AKS
     release.repo      = "private.aks.jenkins.io"
