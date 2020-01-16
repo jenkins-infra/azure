@@ -35,12 +35,12 @@ locals {
     usage   = "52.204.62.78"
 
     # Azure
-    ldap              = "40.70.191.84"
-    azure.ci          = "104.208.238.39"
-    ci                = "104.208.238.39"
-    private.aks       = "10.0.2.5"
-    public.aks        = "52.147.174.4"
-    nginx.azure       = "40.79.70.97"
+    ldap        = "40.70.191.84"
+    azure.ci    = "104.208.238.39"
+    ci          = "104.208.238.39"
+    private.aks = "10.0.2.5"
+    public.aks  = "52.147.174.4"
+    nginx.azure = "40.79.70.97"
   }
 
   jenkinsio_aaaa_records = {
