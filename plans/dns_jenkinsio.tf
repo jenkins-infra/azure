@@ -40,7 +40,6 @@ locals {
     ci          = "104.208.238.39"
     private.aks = "10.0.2.5"
     public.aks  = "52.147.174.4"
-    nginx.azure = "40.79.70.97"
   }
 
   jenkinsio_aaaa_records = {
@@ -54,8 +53,6 @@ locals {
     accounts      = "public.aks.jenkins.io"
     javadoc       = "public.aks.jenkins.io"
     plugins       = "public.aks.jenkins.io"
-    repo.azure    = "nginx.azure.jenkins.io"
-    updates.azure = "nginx.azure.jenkins.io"
     reports       = "public.aks.jenkins.io"
     www           = "jenkins.io"
     uplink        = "public.aks.jenkins.io"
