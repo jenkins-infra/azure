@@ -112,7 +112,7 @@ resource "azurerm_subnet" "publick8s" {
 
 resource "azurerm_subnet_network_security_group_association" "publick8s" {
   subnet_id                 = "${azurerm_subnet.publick8s.id}"
-  network_security_group_id = "${azurerm_network_security_group.public_data_tier.id}"
+  network_security_group_id = "${azurerm_network_security_group.public_app_tier.id}"
 }
 
 # The Private Production VNet is where all management and highly classified
