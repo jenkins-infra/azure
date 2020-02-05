@@ -50,12 +50,12 @@ locals {
 
   jenkinsio_cname_records = {
     # Azure
-    accounts      = "public.aks.jenkins.io"
-    javadoc       = "public.aks.jenkins.io"
-    plugins       = "public.aks.jenkins.io"
-    reports       = "public.aks.jenkins.io"
-    www           = "jenkins.io"
-    uplink        = "public.aks.jenkins.io"
+    accounts = "public.aks.jenkins.io"
+    javadoc  = "public.aks.jenkins.io"
+    plugins  = "public.aks.jenkins.io"
+    reports  = "public.aks.jenkins.io"
+    www      = "jenkins.io"
+    uplink   = "public.aks.jenkins.io"
 
     # AKS
     release.repo      = "private.aks.jenkins.io"
