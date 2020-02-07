@@ -38,10 +38,10 @@ init: prepare generate
 		plans
 
 test_fmt:
-	$(TERRAFORM) fmt --write=false --diff=true --check=true
+	$(TERRAFORM) fmt --recursive --check=true
 
 fmt:
-	$(TERRAFORM) fmt --write=true --diff=true
+	$(TERRAFORM) fmt --write=true --diff=true --recursive
 
 clean:
 	$(MAKE) -C arm_templates clean
