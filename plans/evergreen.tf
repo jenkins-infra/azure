@@ -10,8 +10,8 @@ resource "azurerm_resource_group" "evergreen" {
 
 resource "azurerm_postgresql_server" "evergreen" {
   name                = "${var.prefix}-evergreen-db"
-  location            = "${azurerm_resource_group.evergreen.location}"
-  resource_group_name = "${azurerm_resource_group.evergreen.name}"
+  location            = azurerm_resource_group.evergreen.location
+  resource_group_name = azurerm_resource_group.evergreen.name
 
   sku {
     name     = "B_Gen5_2"
@@ -38,8 +38,9 @@ resource "azurerm_postgresql_server" "evergreen" {
 
 resource "azurerm_postgresql_database" "evergreen_prod" {
   name                = "evergreen_prod"
-  resource_group_name = "${azurerm_resource_group.evergreen.name}"
-  server_name         = "${azurerm_postgresql_server.evergreen.name}"
+  resource_group_name = azurerm_resource_group.evergreen.name
+  server_name         = azurerm_postgresql_server.evergreen.name
   charset             = "UTF8"
   collation           = "English_United States.1252"
 }
+

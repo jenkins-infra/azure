@@ -4,46 +4,56 @@
 
 resource "azurerm_resource_group" "jenkinsio" {
   name     = "${var.prefix}jenkinsio"
-  location = "${var.location}"
+  location = var.location
 
-  tags {
-    env = "${var.prefix}"
+  tags = {
+    env = var.prefix
   }
 }
 
 resource "azurerm_storage_account" "jenkinsio" {
   name                     = "${var.prefix}jenkinsio"
-  resource_group_name      = "${azurerm_resource_group.jenkinsio.name}"
-  location                 = "${var.location}"
+  resource_group_name      = azurerm_resource_group.jenkinsio.name
+  location                 = var.location
   account_tier             = "Standard"
   account_replication_type = "GRS"
-  depends_on               = ["azurerm_resource_group.jenkinsio"]
+  depends_on               = [azurerm_resource_group.jenkinsio]
 
-  tags {
-    env = "${var.prefix}"
+  tags = {
+    env = var.prefix
   }
 }
 
 resource "azurerm_storage_share" "jenkinsio" {
   name                 = "jenkinsio"
-  resource_group_name  = "${azurerm_resource_group.jenkinsio.name}"
-  storage_account_name = "${azurerm_storage_account.jenkinsio.name}"
+  resource_group_name  = azurerm_resource_group.jenkinsio.name
+  storage_account_name = azurerm_storage_account.jenkinsio.name
   quota                = 10
-  depends_on           = ["azurerm_resource_group.jenkinsio", "azurerm_storage_account.jenkinsio"]
+  depends_on = [
+    azurerm_resource_group.jenkinsio,
+    azurerm_storage_account.jenkinsio,
+  ]
 }
 
 resource "azurerm_storage_share" "cnjenkinsio" {
   name                 = "cnjenkinsio"
-  resource_group_name  = "${azurerm_resource_group.jenkinsio.name}"
-  storage_account_name = "${azurerm_storage_account.jenkinsio.name}"
+  resource_group_name  = azurerm_resource_group.jenkinsio.name
+  storage_account_name = azurerm_storage_account.jenkinsio.name
   quota                = 10
-  depends_on           = ["azurerm_resource_group.jenkinsio", "azurerm_storage_account.jenkinsio"]
+  depends_on = [
+    azurerm_resource_group.jenkinsio,
+    azurerm_storage_account.jenkinsio,
+  ]
 }
 
 resource "azurerm_storage_share" "zhjenkinsio" {
   name                 = "zhjenkinsio"
-  resource_group_name  = "${azurerm_resource_group.jenkinsio.name}"
-  storage_account_name = "${azurerm_storage_account.jenkinsio.name}"
+  resource_group_name  = azurerm_resource_group.jenkinsio.name
+  storage_account_name = azurerm_storage_account.jenkinsio.name
   quota                = 10
-  depends_on           = ["azurerm_resource_group.jenkinsio", "azurerm_storage_account.jenkinsio"]
+  depends_on = [
+    azurerm_resource_group.jenkinsio,
+    azurerm_storage_account.jenkinsio,
+  ]
 }
+

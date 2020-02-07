@@ -5,30 +5,34 @@
 
 resource "azurerm_resource_group" "repo-proxy" {
   name     = "${var.prefix}repo-proxy"
-  location = "${var.location}"
+  location = var.location
 
-  tags {
-    env = "${var.prefix}"
+  tags = {
+    env = var.prefix
   }
 }
 
 resource "azurerm_storage_account" "repo-proxy" {
   name                     = "${var.prefix}repoproxy"
-  resource_group_name      = "${azurerm_resource_group.repo-proxy.name}"
-  location                 = "${var.location}"
+  resource_group_name      = azurerm_resource_group.repo-proxy.name
+  location                 = var.location
   account_tier             = "Standard"
   account_replication_type = "GRS"
-  depends_on               = ["azurerm_resource_group.repo-proxy"]
+  depends_on               = [azurerm_resource_group.repo-proxy]
 
-  tags {
-    env = "${var.prefix}"
+  tags = {
+    env = var.prefix
   }
 }
 
 resource "azurerm_storage_share" "repo-proxy" {
   name                 = "repo-proxy"
-  resource_group_name  = "${azurerm_resource_group.repo-proxy.name}"
-  storage_account_name = "${azurerm_storage_account.repo-proxy.name}"
+  resource_group_name  = azurerm_resource_group.repo-proxy.name
+  storage_account_name = azurerm_storage_account.repo-proxy.name
   quota                = 200
-  depends_on           = ["azurerm_resource_group.repo-proxy", "azurerm_storage_account.repo-proxy"]
+  depends_on = [
+    azurerm_resource_group.repo-proxy,
+    azurerm_storage_account.repo-proxy,
+  ]
 }
+

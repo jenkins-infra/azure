@@ -1,4 +1,5 @@
-data "azurerm_client_config" "current" {}
+data "azurerm_client_config" "current" {
+}
 
 # This random value is generated once, stored in the state file and only changed
 # when 'confluence_db_password_id' is modified
@@ -6,24 +7,24 @@ data "azurerm_client_config" "current" {}
 resource "random_string" "confluence_db_password" {
   length = 16
 
-  keepers {
-    id = "${var.confluence_db_password_id}"
+  keepers = {
+    id = var.confluence_db_password_id
   }
 }
 
 resource "azurerm_resource_group" "confluence" {
   name     = "${var.prefix}confluence"
-  location = "${var.location}"
+  location = var.location
 
-  tags {
-    env = "${var.prefix}"
+  tags = {
+    env = var.prefix
   }
 }
 
 resource "azurerm_mysql_server" "confluence" {
   name                = "${var.prefix}confluence"
-  location            = "${azurerm_resource_group.confluence.location}"
-  resource_group_name = "${azurerm_resource_group.confluence.name}"
+  location            = azurerm_resource_group.confluence.location
+  resource_group_name = azurerm_resource_group.confluence.name
 
   sku {
     name     = "GP_Gen5_2"
@@ -44,7 +45,7 @@ resource "azurerm_mysql_server" "confluence" {
   # Currently terraform doesn't detect if the password was changed from a different place like portal.azure.com
   # but if any other setting is modified, terraform will re-apply the password from the terraform state
   # cfr https://github.com/terraform-providers/terraform-provider-azurerm/issues/1823
-  administrator_login_password = "${random_string.confluence_db_password.result}"
+  administrator_login_password = random_string.confluence_db_password.result
 
   version         = "5.7"
   ssl_enforcement = "Disabled"
@@ -52,8 +53,8 @@ resource "azurerm_mysql_server" "confluence" {
 
 resource "azurerm_mysql_database" "confluence" {
   name                = "confluence"
-  resource_group_name = "${azurerm_resource_group.confluence.name}"
-  server_name         = "${azurerm_mysql_server.confluence.name}"
+  resource_group_name = azurerm_resource_group.confluence.name
+  server_name         = azurerm_mysql_server.confluence.name
   charset             = "utf8"
   collation           = "utf8_bin"
 }
@@ -61,23 +62,24 @@ resource "azurerm_mysql_database" "confluence" {
 # Allow connection from lettuce
 resource "azurerm_mysql_firewall_rule" "confluence" {
   name                = "confluence"
-  resource_group_name = "${azurerm_resource_group.confluence.name}"
-  server_name         = "${azurerm_mysql_server.confluence.name}"
+  resource_group_name = azurerm_resource_group.confluence.name
+  server_name         = azurerm_mysql_server.confluence.name
   start_ip_address    = "140.211.9.32"
   end_ip_address      = "140.211.9.32"
 }
 
 resource "azurerm_mysql_configuration" "confluence_character_set_server" {
   name                = "character_set_server"
-  resource_group_name = "${azurerm_resource_group.confluence.name}"
-  server_name         = "${azurerm_mysql_server.confluence.name}"
+  resource_group_name = azurerm_resource_group.confluence.name
+  server_name         = azurerm_mysql_server.confluence.name
   value               = "UTF8"
 }
 
 # https://confluence.atlassian.com/confkb/confluence-fails-to-start-and-throws-mysql-session-isolation-level-repeatable-read-is-no-longer-supported-error-241568536.html
 resource "azurerm_mysql_configuration" "confluence_tx_isolation" {
   name                = "tx_isolation"
-  resource_group_name = "${azurerm_resource_group.confluence.name}"
-  server_name         = "${azurerm_mysql_server.confluence.name}"
+  resource_group_name = azurerm_resource_group.confluence.name
+  server_name         = azurerm_mysql_server.confluence.name
   value               = "READ-COMMITTED"
 }
+

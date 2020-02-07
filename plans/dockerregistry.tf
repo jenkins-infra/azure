@@ -1,39 +1,40 @@
 resource "azurerm_resource_group" "dockerregistry" {
   name     = "${var.prefix}dockerregistry"
-  location = "${var.dockerregistrylocation}"
+  location = var.dockerregistrylocation
 
-  tags {
-    "env" = "${var.prefix}"
+  tags = {
+    "env" = var.prefix
   }
 }
 
 resource "azurerm_storage_account" "dockerregistry" {
   name                     = "${var.prefix}dockerregistry"
-  resource_group_name      = "${azurerm_resource_group.dockerregistry.name}"
-  location                 = "${var.dockerregistrylocation}"
-  depends_on               = ["azurerm_resource_group.dockerregistry"]
+  resource_group_name      = azurerm_resource_group.dockerregistry.name
+  location                 = var.dockerregistrylocation
+  depends_on               = [azurerm_resource_group.dockerregistry]
   account_tier             = "Standard"
   account_replication_type = "GRS"
 
-  tags {
-    "env" = "${var.prefix}"
+  tags = {
+    "env" = var.prefix
   }
 }
 
 resource "azurerm_template_deployment" "dockerregistry" {
   name                = "${var.prefix}dockerregistry"
-  resource_group_name = "${ azurerm_resource_group.dockerregistry.name }"
-  depends_on          = ["azurerm_resource_group.dockerregistry"]
+  resource_group_name = azurerm_resource_group.dockerregistry.name
+  depends_on          = [azurerm_resource_group.dockerregistry]
 
   parameters = {
     registryName       = "${var.prefix}registry"
-    registryLocation   = "${var.dockerregistrylocation}"
+    registryLocation   = var.dockerregistrylocation
     registryApiVersion = "2016-06-27-preview"
-    storageAccountName = "${ azurerm_storage_account.dockerregistry.name }"
-
-    #adminUserEnabled  = true
+    storageAccountName = azurerm_storage_account.dockerregistry.name
   }
 
+  #adminUserEnabled  = true
+
   deployment_mode = "Incremental"
-  template_body   = "${file("./arm_templates/dockerregistry.json")}"
+  template_body   = file("./arm_templates/dockerregistry.json")
 }
+

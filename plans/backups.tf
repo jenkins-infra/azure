@@ -6,13 +6,13 @@
 
 resource "azurerm_resource_group" "backups" {
   name     = "${var.prefix}-backups"
-  location = "${var.location}"
+  location = var.location
 }
 
 resource "azurerm_storage_account" "backups" {
   name                     = "${var.prefix}jenkinsbackups"
-  resource_group_name      = "${azurerm_resource_group.backups.name}"
-  location                 = "${var.location}"
+  resource_group_name      = azurerm_resource_group.backups.name
+  location                 = var.location
   account_tier             = "Standard"
   account_replication_type = "GRS"
 }
@@ -21,7 +21,7 @@ resource "azurerm_storage_account" "backups" {
 # user data. Most things will fit into this storage container
 resource "azurerm_storage_container" "private_backups" {
   name                  = "privatebackups"
-  storage_account_name  = "${azurerm_storage_account.backups.name}"
+  storage_account_name  = azurerm_storage_account.backups.name
   container_access_type = "private"
 }
 
@@ -29,7 +29,8 @@ resource "azurerm_storage_container" "private_backups" {
 # already existing public data, such as meeting minutes, etc.
 resource "azurerm_storage_container" "public_backups" {
   name                  = "publicbackups"
-  resource_group_name   = "${azurerm_resource_group.backups.name}"
-  storage_account_name  = "${azurerm_storage_account.backups.name}"
+  resource_group_name   = azurerm_resource_group.backups.name
+  storage_account_name  = azurerm_storage_account.backups.name
   container_access_type = "container"
 }
+
