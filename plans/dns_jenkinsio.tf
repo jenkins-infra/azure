@@ -215,3 +215,11 @@ resource "azurerm_dns_a_record" "certci" {
   ttl                 = 3600
   records             = ["${azurerm_network_interface.certci_private.private_ip_address}"]
 }
+
+resource "azurerm_dns_a_record" "ciprivate" {
+  name                = "ci.private.jenkins.io"
+  zone_name           = "${azurerm_dns_zone.jenkinsio.name}"
+  resource_group_name = "${azurerm_resource_group.dns_jenkinsio.name}"
+  ttl                 = 3600
+  records             = ["${azurerm_network_interface.ci_public.private_ip_address}"]
+}
