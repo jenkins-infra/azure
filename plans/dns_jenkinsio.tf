@@ -207,7 +207,7 @@ resource "azurerm_dns_a_record" "certci" {
 }
 
 resource "azurerm_dns_a_record" "ciprivate" {
-  name                = "ci.private.jenkins.io"
+  name                = "ci.private"
   zone_name           = azurerm_dns_zone.jenkinsio.name
   resource_group_name = azurerm_resource_group.dns_jenkinsio.name
   ttl                 = 3600
