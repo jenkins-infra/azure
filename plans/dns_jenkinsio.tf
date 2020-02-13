@@ -33,7 +33,6 @@ locals {
     ci          = "104.208.238.39"
     private.aks = "10.0.2.5"
     public.aks  = "52.147.174.4"
-    nginx.azure = "40.79.70.97"
   }
 
   jenkinsio_aaaa_records = {
@@ -47,11 +46,10 @@ locals {
     accounts      = "public.aks.jenkins.io"
     javadoc       = "public.aks.jenkins.io"
     plugins       = "public.aks.jenkins.io"
-    repo.azure    = "nginx.azure.jenkins.io"
-    updates.azure = "nginx.azure.jenkins.io"
     reports       = "public.aks.jenkins.io"
     www           = "jenkins.io"
     uplink        = "public.aks.jenkins.io"
+
     # AKS
     release.repo      = "private.aks.jenkins.io"
     release.ci        = "private.aks.jenkins.io"
@@ -208,3 +206,10 @@ resource "azurerm_dns_a_record" "certci" {
   records             = [azurerm_network_interface.certci_private.private_ip_address]
 }
 
+resource "azurerm_dns_a_record" "ciprivate" {
+  name                = "ci.private.jenkins.io"
+  zone_name           = azurerm_dns_zone.jenkinsio.name
+  resource_group_name = azurerm_resource_group.dns_jenkinsio.name
+  ttl                 = 3600
+  records             = [azurerm_network_interface.ci_public.private_ip_address]
+}

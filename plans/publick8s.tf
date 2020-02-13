@@ -62,8 +62,8 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     type                = "VirtualMachineScaleSets"
     enable_auto_scaling = true
     min_count           = 1
-    max_count           = 5
-    max_pods            = 200 # Private IPs pool for a node will be reserved at node creation
+    max_count           = 8
+    max_pods            = 200                              # Private IPs pool for a node will be reserved at node creation
   }
 
   windows_profile {
@@ -122,7 +122,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "highmem" {
   vnet_subnet_id  = azurerm_subnet.publick8s.id
 
   min_count = 1
-  max_count = 5
+  max_count = 8
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "windows" {
