@@ -62,7 +62,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     type                = "VirtualMachineScaleSets"
     enable_auto_scaling = true
     min_count           = 1
-    max_count           = 5
+    max_count           = 8
     max_pods            = 200                              # Private IPs pool for a node will be reserved at node creation
   }
 
