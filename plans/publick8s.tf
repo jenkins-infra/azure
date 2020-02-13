@@ -122,7 +122,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "highmem" {
   vnet_subnet_id  = "${azurerm_subnet.publick8s.id}"
 
   min_count = 1
-  max_count = 5
+  max_count = 8
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "windows" {
