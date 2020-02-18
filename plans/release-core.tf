@@ -14,9 +14,7 @@ resource "azurerm_key_vault" "release-core" {
   enabled_for_disk_encryption     = false
   enabled_for_template_deployment = false
 
-  sku {
-    name = "standard"
-  }
+  sku_name = "standard"
 
   network_acls {
     bypass         = "AzureServices"
