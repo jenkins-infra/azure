@@ -27,7 +27,6 @@ resource "azurerm_storage_account" "repo-proxy" {
 
 resource "azurerm_storage_share" "repo-proxy" {
   name                 = "repo-proxy"
-  resource_group_name  = azurerm_resource_group.repo-proxy.name
   storage_account_name = azurerm_storage_account.repo-proxy.name
   quota                = 200
   depends_on = [

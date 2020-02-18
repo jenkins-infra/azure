@@ -26,7 +26,6 @@ resource "azurerm_storage_account" "jenkinsio" {
 
 resource "azurerm_storage_share" "jenkinsio" {
   name                 = "jenkinsio"
-  resource_group_name  = azurerm_resource_group.jenkinsio.name
   storage_account_name = azurerm_storage_account.jenkinsio.name
   quota                = 10
   depends_on = [
@@ -37,7 +36,6 @@ resource "azurerm_storage_share" "jenkinsio" {
 
 resource "azurerm_storage_share" "cnjenkinsio" {
   name                 = "cnjenkinsio"
-  resource_group_name  = azurerm_resource_group.jenkinsio.name
   storage_account_name = azurerm_storage_account.jenkinsio.name
   quota                = 10
   depends_on = [
@@ -48,7 +46,6 @@ resource "azurerm_storage_share" "cnjenkinsio" {
 
 resource "azurerm_storage_share" "zhjenkinsio" {
   name                 = "zhjenkinsio"
-  resource_group_name  = azurerm_resource_group.jenkinsio.name
   storage_account_name = azurerm_storage_account.jenkinsio.name
   quota                = 10
   depends_on = [

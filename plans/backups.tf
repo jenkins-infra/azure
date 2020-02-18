@@ -29,7 +29,6 @@ resource "azurerm_storage_container" "private_backups" {
 # already existing public data, such as meeting minutes, etc.
 resource "azurerm_storage_container" "public_backups" {
   name                  = "publicbackups"
-  resource_group_name   = azurerm_resource_group.backups.name
   storage_account_name  = azurerm_storage_account.backups.name
   container_access_type = "container"
 }

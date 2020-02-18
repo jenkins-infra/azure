@@ -92,7 +92,6 @@ resource "azurerm_storage_account" "release-core" {
 
 resource "azurerm_storage_container" "release-core-gpg" {
   name                  = "gpg"
-  resource_group_name   = azurerm_resource_group.release-core.name
   storage_account_name  = azurerm_storage_account.release-core.name
   container_access_type = "container"
 }

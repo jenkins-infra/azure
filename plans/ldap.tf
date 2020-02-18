@@ -25,7 +25,6 @@ resource "azurerm_storage_account" "ldap" {
 
 resource "azurerm_storage_share" "ldap" {
   name                 = "ldap"
-  resource_group_name  = azurerm_resource_group.ldap.name
   storage_account_name = azurerm_storage_account.ldap.name
   quota                = 100
   depends_on = [

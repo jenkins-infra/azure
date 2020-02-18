@@ -26,7 +26,6 @@ resource "azurerm_storage_account" "pluginsite" {
 
 resource "azurerm_storage_share" "pluginsite" {
   name                 = "pluginsite"
-  resource_group_name  = azurerm_resource_group.pluginsite.name
   storage_account_name = azurerm_storage_account.pluginsite.name
   depends_on = [
     azurerm_resource_group.pluginsite,

@@ -22,7 +22,6 @@ resource "azurerm_storage_account" "logs" {
 
 resource "azurerm_storage_share" "logs" {
   name                 = "logs"
-  resource_group_name  = azurerm_resource_group.logs.name
   storage_account_name = azurerm_storage_account.logs.name
   quota                = 200
   depends_on = [

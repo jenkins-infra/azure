@@ -26,7 +26,6 @@ resource "azurerm_storage_account" "javadoc" {
 
 resource "azurerm_storage_share" "javadoc" {
   name                 = "javadoc"
-  resource_group_name  = azurerm_resource_group.javadoc.name
   storage_account_name = azurerm_storage_account.javadoc.name
   depends_on = [
     azurerm_resource_group.javadoc,

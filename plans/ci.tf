@@ -25,7 +25,6 @@ resource "azurerm_storage_account" "ci_storage" {
 
 resource "azurerm_storage_container" "ci_container" {
   name                  = "vhds"
-  resource_group_name   = azurerm_resource_group.ci.name
   storage_account_name  = azurerm_storage_account.ci_storage.name
   container_access_type = "private"
 }

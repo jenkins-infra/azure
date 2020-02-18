@@ -28,7 +28,6 @@ resource "azurerm_storage_account" "updates-proxy" {
 
 resource "azurerm_storage_share" "updates-proxy" {
   name                 = "updates-proxy"
-  resource_group_name  = azurerm_resource_group.updates-proxy.name
   storage_account_name = azurerm_storage_account.updates-proxy.name
   depends_on = [
     azurerm_resource_group.updates-proxy,

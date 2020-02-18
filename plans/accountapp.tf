@@ -25,7 +25,6 @@ resource "azurerm_storage_account" "accountapp" {
 
 resource "azurerm_storage_share" "accountapp" {
   name                 = "accountapp"
-  resource_group_name  = azurerm_resource_group.accountapp.name
   storage_account_name = azurerm_storage_account.accountapp.name
   quota                = 10
   depends_on = [
