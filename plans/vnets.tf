@@ -58,10 +58,10 @@ resource "azurerm_virtual_network" "public_prod" {
 # Production VNet
 
 resource "azurerm_subnet" "public_dmz" {
-  name                      = "dmz-tier"
-  resource_group_name       = azurerm_resource_group.public_prod.name
-  virtual_network_name      = azurerm_virtual_network.public_prod.name
-  address_prefix            = "10.0.99.0/24"
+  name                 = "dmz-tier"
+  resource_group_name  = azurerm_resource_group.public_prod.name
+  virtual_network_name = azurerm_virtual_network.public_prod.name
+  address_prefix       = "10.0.99.0/24"
 }
 
 resource "azurerm_subnet_network_security_group_association" "public_dmz" {
@@ -73,10 +73,10 @@ resource "azurerm_subnet_network_security_group_association" "public_dmz" {
 # ourselves that shouldn't have public IP addresses but accessible from within
 # the Public Production network
 resource "azurerm_subnet" "public_data" {
-  name                      = "data-tier"
-  resource_group_name       = azurerm_resource_group.public_prod.name
-  virtual_network_name      = azurerm_virtual_network.public_prod.name
-  address_prefix            = "10.0.2.0/24"
+  name                 = "data-tier"
+  resource_group_name  = azurerm_resource_group.public_prod.name
+  virtual_network_name = azurerm_virtual_network.public_prod.name
+  address_prefix       = "10.0.2.0/24"
 }
 
 resource "azurerm_subnet_network_security_group_association" "public_data" {
@@ -86,10 +86,10 @@ resource "azurerm_subnet_network_security_group_association" "public_data" {
 
 # "app-tier" hosts should expect to be accessible from the public internet
 resource "azurerm_subnet" "public_app" {
-  name                      = "app-tier"
-  resource_group_name       = azurerm_resource_group.public_prod.name
-  virtual_network_name      = azurerm_virtual_network.public_prod.name
-  address_prefix            = "10.0.1.0/24"
+  name                 = "app-tier"
+  resource_group_name  = azurerm_resource_group.public_prod.name
+  virtual_network_name = azurerm_virtual_network.public_prod.name
+  address_prefix       = "10.0.1.0/24"
 }
 
 resource "azurerm_subnet_network_security_group_association" "public_app" {
@@ -100,10 +100,10 @@ resource "azurerm_subnet_network_security_group_association" "public_app" {
 # ! 10.0.64.0/19 range is used by publick8s as defined in azurerm_kubernetes_cluster.publick8s.network_profile.service_cidr
 
 resource "azurerm_subnet" "publick8s" {
-  name                      = "publick8s"
-  resource_group_name       = azurerm_resource_group.public_prod.name
-  virtual_network_name      = azurerm_virtual_network.public_prod.name
-  address_prefix            = "10.0.32.0/19" # 8190 IPs used for every nodes, pods or services deployed by publick8s AKS cluster.
+  name                 = "publick8s"
+  resource_group_name  = azurerm_resource_group.public_prod.name
+  virtual_network_name = azurerm_virtual_network.public_prod.name
+  address_prefix       = "10.0.32.0/19" # 8190 IPs used for every nodes, pods or services deployed by publick8s AKS cluster.
 }
 
 resource "azurerm_subnet_network_security_group_association" "publick8s" {
@@ -122,10 +122,10 @@ resource "azurerm_virtual_network" "private_prod" {
 }
 
 resource "azurerm_subnet" "private_mgmt_tier" {
-  name                      = "management-tier"
-  resource_group_name       = azurerm_resource_group.private_prod.name
-  virtual_network_name      = azurerm_virtual_network.private_prod.name
-  address_prefix            = "10.1.1.0/24"
+  name                 = "management-tier"
+  resource_group_name  = azurerm_resource_group.private_prod.name
+  virtual_network_name = azurerm_virtual_network.private_prod.name
+  address_prefix       = "10.1.1.0/24"
 }
 
 resource "azurerm_subnet_network_security_group_association" "private_mgmt_tier" {
@@ -134,10 +134,10 @@ resource "azurerm_subnet_network_security_group_association" "private_mgmt_tier"
 }
 
 resource "azurerm_subnet" "private_data_tier" {
-  name                      = "data-tier"
-  resource_group_name       = azurerm_resource_group.private_prod.name
-  virtual_network_name      = azurerm_virtual_network.private_prod.name
-  address_prefix            = "10.1.2.0/24"
+  name                 = "data-tier"
+  resource_group_name  = azurerm_resource_group.private_prod.name
+  virtual_network_name = azurerm_virtual_network.private_prod.name
+  address_prefix       = "10.1.2.0/24"
 }
 
 resource "azurerm_subnet_network_security_group_association" "private_data_tier" {
@@ -167,10 +167,10 @@ resource "azurerm_virtual_network" "development" {
 # Pretty much everything in the development VNet should be considered
 # untrusted and almost like the wild west
 resource "azurerm_subnet" "development_dmz_tier" {
-  name                      = "dmz-tier"
-  resource_group_name       = azurerm_resource_group.development.name
-  virtual_network_name      = azurerm_virtual_network.development.name
-  address_prefix            = "10.2.99.0/24"
+  name                 = "dmz-tier"
+  resource_group_name  = azurerm_resource_group.development.name
+  virtual_network_name = azurerm_virtual_network.development.name
+  address_prefix       = "10.2.99.0/24"
 }
 
 resource "azurerm_subnet_network_security_group_association" "development_dmz_tier" {

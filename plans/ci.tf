@@ -30,10 +30,10 @@ resource "azurerm_storage_container" "ci_container" {
 }
 
 resource "azurerm_public_ip" "ci_trusted_agent_2" {
-  name                         = "trusted-agent-2"
-  location                     = azurerm_resource_group.ci.location
-  resource_group_name          = azurerm_resource_group.ci.name
-  allocation_method = "Dynamic"
+  name                = "trusted-agent-2"
+  location            = azurerm_resource_group.ci.location
+  resource_group_name = azurerm_resource_group.ci.name
+  allocation_method   = "Dynamic"
 
   tags = {
     environment = var.prefix

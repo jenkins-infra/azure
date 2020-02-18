@@ -10,10 +10,10 @@ resource "azurerm_resource_group" "vpn" {
 }
 
 resource "azurerm_public_ip" "vpn" {
-  name                         = "${var.prefix}vpn"
-  location                     = var.location
-  resource_group_name          = azurerm_resource_group.vpn.name
-  allocation_method = "Static"
+  name                = "${var.prefix}vpn"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.vpn.name
+  allocation_method   = "Static"
 
   tags = {
     env = var.prefix
