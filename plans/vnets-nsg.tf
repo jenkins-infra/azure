@@ -132,8 +132,8 @@ resource "azurerm_network_security_rule" "public-data-tier-allow-ldaps-inbound" 
   destination_port_range      = "636"
   source_address_prefix       = "*"
   destination_address_prefix  = "*"
-  resource_group_name         = "${azurerm_resource_group.public_prod.name}"
-  network_security_group_name = "${azurerm_network_security_group.public_data_tier.name}"
+  resource_group_name         = azurerm_resource_group.public_prod.name
+  network_security_group_name = azurerm_network_security_group.public_data_tier.name
 }
 
 # NOTE: Currently empty to enable us to add security rules to this NSG at a
