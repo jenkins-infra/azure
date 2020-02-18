@@ -29,10 +29,10 @@ locals {
     usage   = "52.204.62.78"
     # Azure
     ldap        = "40.70.191.84"
-    azure.ci    = "104.208.238.39"
+    "azure.ci"    = "104.208.238.39"
     ci          = "104.208.238.39"
-    private.aks = "10.0.2.5"
-    public.aks  = "52.147.174.4"
+    "private.aks" = "10.0.2.5"
+    "public.aks"  = "52.147.174.4"
   }
 
   jenkinsio_aaaa_records = {
@@ -51,13 +51,13 @@ locals {
     uplink   = "public.aks.jenkins.io"
 
     # AKS
-    release.repo      = "private.aks.jenkins.io"
-    release.ci        = "private.aks.jenkins.io"
-    release.pkg       = "private.aks.jenkins.io"
-    grafana.publick8s = "private.aks.jenkins.io"
-    admin.polls       = "private.aks.jenkins.io"
-    private.dex       = "private.aks.jenkins.io"
-    polls             = "public.aks.jenkins.io"
+    "release.repo"      = "private.aks.jenkins.io"
+    "release.ci"        = "private.aks.jenkins.io"
+    "release.pkg"       = "private.aks.jenkins.io"
+    "grafana.publick8s" = "private.aks.jenkins.io"
+    "admin.polls"       = "private.aks.jenkins.io"
+    "private.dex "      = "private.aks.jenkins.io"
+    polls               = "public.aks.jenkins.io"
     # CNAME Records
     pkg      = "mirrors.jenkins.io"
     puppet   = "radish.jenkins.io"
@@ -70,7 +70,7 @@ locals {
     # Magical CNAME for certificate validation
     "D07F852F584FA592123140354D366066.ldap" = "75E741181A7ACDBE2996804B2813E09B65970718.comodoca.com"
     # Amazon SES configuration to send out email from noreply@jenkins.io
-    pbssnl2yyudgfdl3flznotnarnamz5su._domainkey   = "pbssnl2yyudgfdl3flznotnarnamz5su.dkim.amazonses.com"
+    "pbssnl2yyudgfdl3flznotnarnamz5su._domainkey" = "pbssnl2yyudgfdl3flznotnarnamz5su.dkim.amazonses.com"
     "6ch6fw67efpfgoqyhdhs2cy2fpkwrvsk._domainkey" = "6ch6fw67efpfgoqyhdhs2cy2fpkwrvsk.dkim.amazonses.com"
     "37qo4cqmkxeocwr2iicjop77fq52m6yh._domainkey" = "37qo4cqmkxeocwr2iicjop77fq52m6yh.dkim.amazonses.com"
     # Others
@@ -81,7 +81,7 @@ locals {
     # Amazon SES configuration to send out email from noreply@jenkins.io
     _amazonses = "kYNeW+b+9GnKO/LzqP/t0TzLyN86jQ9didoBAJSjezE="
     # mailgun configuration
-    mailo._domainkey = "k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCpS+8K+bVvFlfTqbVbuvM9SoX0BqjW3zK7BJeCZ4GnaJTeRaurKx81hUX1wz3wKt+Qt9xI+X6mAlar2Co+B13GsNZIlYVdO/zBVtZG+R5KvMQUynNyie05oRyaTFWtNEiQVgGYgM4xkwlIWSA9EXmBMaKg7ze3kKNKUOnzKDIxMQIDAQAB"
+    "mailo._domainkey" = "k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCpS+8K+bVvFlfTqbVbuvM9SoX0BqjW3zK7BJeCZ4GnaJTeRaurKx81hUX1wz3wKt+Qt9xI+X6mAlar2Co+B13GsNZIlYVdO/zBVtZG+R5KvMQUynNyie05oRyaTFWtNEiQVgGYgM4xkwlIWSA9EXmBMaKg7ze3kKNKUOnzKDIxMQIDAQAB"
   }
 }
 
