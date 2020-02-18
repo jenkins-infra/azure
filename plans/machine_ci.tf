@@ -1,10 +1,10 @@
 # This terraform plan describe the virtual machine needed to run ci.jenkins.io
 
 resource "azurerm_public_ip" "ci" {
-  name                         = "${var.prefix}ci"
-  location                     = var.location
-  resource_group_name          = azurerm_resource_group.ci.name
-  public_ip_address_allocation = "static"
+  name                = "${var.prefix}ci"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.ci.name
+  allocation_method   = "Static"
 
   tags = {
     env = var.prefix

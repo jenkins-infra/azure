@@ -13,7 +13,7 @@ resource "azurerm_public_ip" "vpn" {
   name                         = "${var.prefix}vpn"
   location                     = var.location
   resource_group_name          = azurerm_resource_group.vpn.name
-  public_ip_address_allocation = "static"
+  allocation_method = "Static"
 
   tags = {
     env = var.prefix

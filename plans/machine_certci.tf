@@ -14,10 +14,10 @@ resource "azurerm_resource_group" "certci" {
 # Once prodbean is migrated in a private network which doesn't conflict with public prod network,
 # We can then remove this public IP and use private network
 resource "azurerm_public_ip" "certci" {
-  name                         = "${var.prefix}certci"
-  location                     = var.location
-  resource_group_name          = azurerm_resource_group.certci.name
-  public_ip_address_allocation = "static"
+  name                = "${var.prefix}certci"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.certci.name
+  allocation_method   = "Static"
 
   tags = {
     env = var.prefix
