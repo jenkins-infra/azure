@@ -25,6 +25,11 @@ resource "azurerm_storage_container" "tfstate" {
   container_access_type = "private"
 }
 
+output "tfstate_primary_access_key" {
+  value = azurerm_storage_account.tfstate.primary_access_key
+  sensitive = true
+}
+
 resource "azurerm_storage_account" "tfstate_datadog" {
   name                     = "${var.prefix}tfstatedatadog"
   resource_group_name      = azurerm_resource_group.tfstate.name
@@ -41,4 +46,3 @@ resource "azurerm_storage_container" "tfstate_datadog" {
   storage_account_name  = azurerm_storage_account.tfstate_datadog.name
   container_access_type = "private"
 }
-
