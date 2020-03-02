@@ -1,26 +1,24 @@
 resource "azurerm_resource_group" "release-core" {
   name     = "${var.prefix}releasecore"
-  location = "${var.location}"
+  location = var.location
 }
 
 ### Release Certificate stored on key vault
 
 resource "azurerm_key_vault" "release-core" {
   name                            = "${var.prefix}releasecore"
-  location                        = "${azurerm_resource_group.release-core.location}"
-  resource_group_name             = "${azurerm_resource_group.release-core.name}"
-  tenant_id                       = "${var.tenant_id}"
+  location                        = azurerm_resource_group.release-core.location
+  resource_group_name             = azurerm_resource_group.release-core.name
+  tenant_id                       = var.tenant_id
   enabled_for_deployment          = false
   enabled_for_disk_encryption     = false
   enabled_for_template_deployment = false
 
-  sku {
-    name = "standard"
-  }
+  sku_name = "standard"
 
   network_acls {
     bypass         = "AzureServices"
-    default_action = "Allow"         # As long as trusted.ci doesn't run inside a trusted azure network, we need to allow access by default
+    default_action = "Allow" # As long as trusted.ci doesn't run inside a trusted azure network, we need to allow access by default
 
     ip_rules = [
       "13.68.206.234/32",
@@ -28,7 +26,7 @@ resource "azurerm_key_vault" "release-core" {
     ]
 
     virtual_network_subnet_ids = [
-      "${azurerm_subnet.public_data.id}",
+      azurerm_subnet.public_data.id,
     ]
   }
 }
@@ -36,7 +34,7 @@ resource "azurerm_key_vault" "release-core" {
 # https://docs.microsoft.com/en-us/rest/api/keyvault/certificates-and-policies
 resource "azurerm_key_vault_certificate" "release-core" {
   name         = "${var.prefix}releasecore"
-  key_vault_id = "${azurerm_key_vault.release-core.id}"
+  key_vault_id = azurerm_key_vault.release-core.id
 
   certificate_policy {
     issuer_parameters {
@@ -86,15 +84,15 @@ resource "azurerm_key_vault_certificate" "release-core" {
 
 resource "azurerm_storage_account" "release-core" {
   name                     = "${var.prefix}releasecore"
-  resource_group_name      = "${azurerm_resource_group.release-core.name}"
-  location                 = "${var.location}"
+  resource_group_name      = azurerm_resource_group.release-core.name
+  location                 = var.location
   account_tier             = "Standard"
   account_replication_type = "GRS"
 }
 
 resource "azurerm_storage_container" "release-core-gpg" {
   name                  = "gpg"
-  resource_group_name   = "${azurerm_resource_group.release-core.name}"
-  storage_account_name  = "${azurerm_storage_account.release-core.name}"
+  storage_account_name  = azurerm_storage_account.release-core.name
   container_access_type = "container"
 }
+

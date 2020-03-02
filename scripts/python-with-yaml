@@ -8,7 +8,7 @@ docker inspect -f . ${CONTAINER} > /dev/null
 if [ $? -eq 1 ]; then
 
     cat << EOF | docker build -t ${CONTAINER} --rm -
-FROM python:2-alpine
+FROM python:3-alpine
 RUN pip install pyyaml
 EOF
 

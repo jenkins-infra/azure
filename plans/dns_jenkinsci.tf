@@ -6,26 +6,20 @@ locals {
   jenkinsci_a_records = {
     # Root
     "@" = "52.147.174.4"
-
     # Physical machine at Contegix
     cucumber = "199.193.196.24"
-
     # VM at Rackspace
     celery = "162.242.234.101"
     okra   = "162.209.106.32"
-
     # cabbage has died of dysentery
     cabbage = "104.130.167.56"
     kelp    = "162.209.124.149"
-
     # Hosts at OSUOSL
     lettuce = "140.211.9.32"
-
     # artichoke has died of dysentery
     artichoke = "140.211.9.22"
     eggplant  = "140.211.15.101"
     edamame   = "140.211.9.2"
-
     # Others
     lists = "140.211.166.34"
     ns1   = "140.211.9.2"
@@ -86,49 +80,51 @@ locals {
 
 resource "azurerm_resource_group" "dns_jenkinsci" {
   name     = "${var.prefix}dns_jenkinsci"
-  location = "${var.location}"
+  location = var.location
 
-  tags {
-    env = "${var.prefix}"
+  tags = {
+    env = var.prefix
   }
 }
 
 resource "azurerm_dns_zone" "jenkinsci" {
   name                = "jenkins-ci.org"
-  resource_group_name = "${azurerm_resource_group.dns_jenkinsci.name}"
+  resource_group_name = azurerm_resource_group.dns_jenkinsci.name
 }
 
 resource "azurerm_dns_a_record" "jenkinsci_a_entries" {
-  count               = "${length(local.jenkinsci_a_records)}"
-  name                = "${element(keys(local.jenkinsci_a_records), count.index)}"
-  zone_name           = "${azurerm_dns_zone.jenkinsci.name}"
-  resource_group_name = "${azurerm_resource_group.dns_jenkinsci.name}"
+  count               = length(local.jenkinsci_a_records)
+  name                = element(keys(local.jenkinsci_a_records), count.index)
+  zone_name           = azurerm_dns_zone.jenkinsci.name
+  resource_group_name = azurerm_resource_group.dns_jenkinsci.name
   ttl                 = 3600
-  records             = ["${local.jenkinsci_a_records[element(keys(local.jenkinsci_a_records), count.index)]}"]
+
+  records = [local.jenkinsci_a_records[element(keys(local.jenkinsci_a_records), count.index)]]
 }
 
 resource "azurerm_dns_aaaa_record" "jenkinsci_aaaa_entries" {
-  count               = "${length(local.jenkinsci_aaaa_records)}"
-  name                = "${element(keys(local.jenkinsci_aaaa_records), count.index)}"
-  zone_name           = "${azurerm_dns_zone.jenkinsci.name}"
-  resource_group_name = "${azurerm_resource_group.dns_jenkinsci.name}"
+  count               = length(local.jenkinsci_aaaa_records)
+  name                = element(keys(local.jenkinsci_aaaa_records), count.index)
+  zone_name           = azurerm_dns_zone.jenkinsci.name
+  resource_group_name = azurerm_resource_group.dns_jenkinsci.name
   ttl                 = 3600
-  records             = ["${local.jenkinsci_aaaa_records[element(keys(local.jenkinsci_aaaa_records), count.index)]}"]
+
+  records = [local.jenkinsci_aaaa_records[element(keys(local.jenkinsci_aaaa_records), count.index)]]
 }
 
 resource "azurerm_dns_cname_record" "jenkinsci_cname_entries" {
-  count               = "${length(local.jenkinsci_cname_records)}"
-  name                = "${element(keys(local.jenkinsci_cname_records), count.index)}"
-  zone_name           = "${azurerm_dns_zone.jenkinsci.name}"
-  resource_group_name = "${azurerm_resource_group.dns_jenkinsci.name}"
+  count               = length(local.jenkinsci_cname_records)
+  name                = element(keys(local.jenkinsci_cname_records), count.index)
+  zone_name           = azurerm_dns_zone.jenkinsci.name
+  resource_group_name = azurerm_resource_group.dns_jenkinsci.name
   ttl                 = 3600
-  record              = "${local.jenkinsci_cname_records[element(keys(local.jenkinsci_cname_records), count.index)]}"
+  record              = local.jenkinsci_cname_records[element(keys(local.jenkinsci_cname_records), count.index)]
 }
 
 resource "azurerm_dns_txt_record" "jenkinsci_root_txt_entries" {
   name                = "@"
-  zone_name           = "${azurerm_dns_zone.jenkinsci.name}"
-  resource_group_name = "${azurerm_resource_group.dns_jenkinsci.name}"
+  zone_name           = azurerm_dns_zone.jenkinsci.name
+  resource_group_name = azurerm_resource_group.dns_jenkinsci.name
   ttl                 = 3600
 
   record {
@@ -138,8 +134,8 @@ resource "azurerm_dns_txt_record" "jenkinsci_root_txt_entries" {
 
 resource "azurerm_dns_mx_record" "jenkinsci_root_mx_entries" {
   name                = "@"
-  zone_name           = "${azurerm_dns_zone.jenkinsci.name}"
-  resource_group_name = "${azurerm_resource_group.dns_jenkinsci.name}"
+  zone_name           = azurerm_dns_zone.jenkinsci.name
+  resource_group_name = azurerm_resource_group.dns_jenkinsci.name
   ttl                 = 3600
 
   record {
@@ -150,8 +146,8 @@ resource "azurerm_dns_mx_record" "jenkinsci_root_mx_entries" {
 
 resource "azurerm_dns_mx_record" "jenkinsci_mx_entries" {
   name                = "lists"
-  zone_name           = "${azurerm_dns_zone.jenkinsci.name}"
-  resource_group_name = "${azurerm_resource_group.dns_jenkinsci.name}"
+  zone_name           = azurerm_dns_zone.jenkinsci.name
+  resource_group_name = azurerm_resource_group.dns_jenkinsci.name
   ttl                 = 3600
 
   record {
@@ -174,3 +170,4 @@ resource "azurerm_dns_mx_record" "jenkinsci_mx_entries" {
     exchange   = "smtp4.osuosl.org"
   }
 }
+
