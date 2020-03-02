@@ -10,14 +10,14 @@ TFSTATE_PREPARE_DIR=.tf-prepare
 check: validate generate
 	@python -c "import sys; sys.exit(0) if sys.version_info > (3,0) else sys.exit('\n\nPython 3 required \n\n')"
 
-refresh: check init
+refresh: init
 	$(TERRAFORM) refresh -var-file=$(VARFILE) plans
 
-terraform: check init refresh
+terraform: init refresh
 	$(TERRAFORM) plan -var-file=$(VARFILE) plans
 
 validate: init
-	$(TERRAFORM) validate --var-file=$(VARFILE) plans
+	$(TERRAFORM) validate plans
 
 generate:
 	$(MAKE) -C arm_templates
@@ -25,7 +25,7 @@ generate:
 destroy: refresh
 	$(TERRAFORM) destroy -var-file=$(VARFILE) plans
 
-deploy: check init refresh
+deploy: init refresh
 	$(TERRAFORM) apply -var-file=$(VARFILE) -auto-approve=true plans
 
 init: prepare generate
