@@ -44,6 +44,7 @@ locals {
   jenkinsio_cname_records = {
     # Azure
     accounts = "public.aks.jenkins.io"
+    get      = "public.aks.jenkins.io"
     javadoc  = "public.aks.jenkins.io"
     plugins  = "public.aks.jenkins.io"
     reports  = "public.aks.jenkins.io"
