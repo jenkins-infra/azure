@@ -197,3 +197,9 @@ resource "azurerm_storage_share" "mirrorbits" {
   name                 = "mirrorbits"
   storage_account_name = "${azurerm_storage_account.releases.name}"
 }
+
+resource "azurerm_storage_share" "archives" {
+  name                 = "archives"
+  storage_account_name = "${azurerm_storage_account.releases.name}"
+}
+
