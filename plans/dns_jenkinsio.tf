@@ -55,6 +55,7 @@ locals {
     # AKS
     "release.repo"      = "private.aks.jenkins.io"
     "release.ci"        = "private.aks.jenkins.io"
+    "infra.ci"          = "private.aks.jenkins.io"
     "release.pkg"       = "private.aks.jenkins.io"
     "grafana.publick8s" = "private.aks.jenkins.io"
     "admin.polls"       = "private.aks.jenkins.io"
