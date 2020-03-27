@@ -45,6 +45,7 @@ locals {
     # Azure
     accounts         = "public.aks.jenkins.io"
     "archives.azure" = "public.aks.jenkins.io"
+    "mirror.azure"   = "public.aks.jenkins.io"
     get              = "public.aks.jenkins.io"
     javadoc          = "public.aks.jenkins.io"
     plugins          = "public.aks.jenkins.io"
