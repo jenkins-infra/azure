@@ -159,6 +159,18 @@ resource "azurerm_dns_txt_record" "jenkinsio_txt_root_entries" {
   }
 }
 
+resource "azurerm_dns_txt_record" "jenkinsio_txt_azure_entries" {
+  name                = "azure"
+  zone_name           = azurerm_dns_zone.jenkinsio.name
+  resource_group_name = azurerm_resource_group.dns_jenkinsio.name
+  ttl                 = 3600
+
+  record {
+    value = "MS=ms77162642"
+  }
+
+}
+
 resource "azurerm_dns_mx_record" "jenkinsio_mx_entries" {
   name                = "@"
   zone_name           = azurerm_dns_zone.jenkinsio.name
