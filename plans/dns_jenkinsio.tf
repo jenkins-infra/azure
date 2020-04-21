@@ -48,7 +48,7 @@ locals {
     "mirror.azure"   = "public.aks.jenkins.io"
     get              = "public.aks.jenkins.io"
     javadoc          = "public.aks.jenkins.io"
-    plugins          = "public.aks.jenkins.io"
+    plugins          = "d.sni.global.fastly.net"
     reports          = "public.aks.jenkins.io"
     www              = "jenkins.io"
     uplink           = "public.aks.jenkins.io"
@@ -62,6 +62,11 @@ locals {
     "admin.polls"       = "private.aks.jenkins.io"
     "private.dex "      = "private.aks.jenkins.io"
     polls               = "public.aks.jenkins.io"
+
+    # Fastly
+    "_acme-challenge.plugins" = "tr8qxfomlsxfq1grha.fastly-validations.com"
+    "_acme-challenge" = "ohh97689e0dknl1rqp.fastly-validations.com"
+
     # CNAME Records
     pkg      = "mirrors.jenkins.io"
     puppet   = "radish.jenkins.io"
@@ -157,6 +162,22 @@ resource "azurerm_dns_txt_record" "jenkinsio_txt_root_entries" {
   record {
     value = "v=spf1 include:mailgun.org ~all"
   }
+
+  record {
+    value = "_globalsign-domain-verification=b1pmSjP4FyG8hkZunkD3Aoz8tK0FWCje80-YwtLeDU" # Fastly
+  }
+}
+
+resource "azurerm_dns_txt_record" "jenkinsio_txt_azure_entries" {
+  name                = "azure"
+  zone_name           = azurerm_dns_zone.jenkinsio.name
+  resource_group_name = azurerm_resource_group.dns_jenkinsio.name
+  ttl                 = 3600
+
+  record {
+    value = "MS=ms77162642"
+  }
+
 }
 
 resource "azurerm_dns_mx_record" "jenkinsio_mx_entries" {
