@@ -48,7 +48,7 @@ locals {
     "mirror.azure"   = "public.aks.jenkins.io"
     get              = "public.aks.jenkins.io"
     javadoc          = "public.aks.jenkins.io"
-    plugins          = "public.aks.jenkins.io"
+    plugins          = "d.sni.global.fastly.net"
     reports          = "public.aks.jenkins.io"
     www              = "jenkins.io"
     uplink           = "public.aks.jenkins.io"
@@ -62,6 +62,11 @@ locals {
     "admin.polls"       = "private.aks.jenkins.io"
     "private.dex "      = "private.aks.jenkins.io"
     polls               = "public.aks.jenkins.io"
+
+    # Fastly
+    "_acme-challenge.plugins" = "tr8qxfomlsxfq1grha.fastly-validations.com"
+    "_acme-challenge" = "ohh97689e0dknl1rqp.fastly-validations.com"
+
     # CNAME Records
     pkg      = "mirrors.jenkins.io"
     puppet   = "radish.jenkins.io"
