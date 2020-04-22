@@ -48,7 +48,7 @@ locals {
     "mirror.azure"   = "public.aks.jenkins.io"
     get              = "public.aks.jenkins.io"
     javadoc          = "public.aks.jenkins.io"
-    plugins          = "d.sni.global.fastly.net"
+    plugins          = "dualstack.d.sni.global.fastly.net"
     reports          = "public.aks.jenkins.io"
     www              = "jenkins.io"
     uplink           = "public.aks.jenkins.io"
@@ -68,7 +68,7 @@ locals {
     "_acme-challenge" = "ohh97689e0dknl1rqp.fastly-validations.com"
 
     # CNAME Records
-    pkg      = "mirrors.jenkins.io"
+    pkg      = "dualstack.d.sni.global.fastly.net"
     puppet   = "radish.jenkins.io"
     updates  = "mirrors.jenkins.io"
     archives = "okra.jenkins.io"
