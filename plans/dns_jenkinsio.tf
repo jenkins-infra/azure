@@ -68,7 +68,7 @@ locals {
     "_acme-challenge" = "ohh97689e0dknl1rqp.fastly-validations.com"
 
     # CNAME Records
-    pkg      = "mirrors.jenkins.io"
+    pkg      = "dualstack.d.sni.global.fastly.net"
     puppet   = "radish.jenkins.io"
     updates  = "mirrors.jenkins.io"
     archives = "okra.jenkins.io"
