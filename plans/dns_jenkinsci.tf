@@ -54,7 +54,7 @@ locals {
     javanet2                            = "cucumber.jenkins-ci.org"
     l10n                                = "l10n.jenkins.io"
     mirrors                             = "mirrors.jenkins.io"
-    pkg                                 = "pkg.jenkins.io"
+    pkg                                 = "pkg.origin.jenkins.io"
     usage                               = "usage.jenkins.io"
     stats                               = "jenkins-infra.github.io"
     meetings                            = "edamame.jenkins-ci.org"
