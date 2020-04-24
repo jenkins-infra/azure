@@ -50,7 +50,7 @@ locals {
     javadoc          = "public.aks.jenkins.io"
     plugins          = "dualstack.d.sni.global.fastly.net"
     reports          = "public.aks.jenkins.io"
-    www              = "jenkins.io"
+    www              = "dualstack.d.sni.global.fastly.net"
     uplink           = "public.aks.jenkins.io"
 
     # AKS
