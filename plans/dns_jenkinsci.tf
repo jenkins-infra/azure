@@ -130,6 +130,9 @@ resource "azurerm_dns_txt_record" "jenkinsci_root_txt_entries" {
   record {
     value = "v=spf1 mx ip4:199.193.196.24 ip4:140.211.15.0/24 ip4:140.211.8.0/23 ip4:173.203.60.151 ip4:140.211.166.128/25 -all"
   }
+  record {
+    value = "v=DMARC1; p=reject; pct=100;rua=mailto:jenkins@olblak.com"
+  }
 }
 
 resource "azurerm_dns_mx_record" "jenkinsci_root_mx_entries" {
