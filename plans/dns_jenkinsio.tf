@@ -168,7 +168,7 @@ resource "azurerm_dns_txt_record" "jenkinsio_txt_root_entries" {
   }
 }
 
-resource "azurerm_dns_txt_record" "jenkinsio_txt_root_entries" {
+resource "azurerm_dns_txt_record" "jenkinsio_txt_dmarc_entries" {
   name                = "_dmarc"
   zone_name           = azurerm_dns_zone.jenkinsio.name
   resource_group_name = azurerm_resource_group.dns_jenkinsio.name

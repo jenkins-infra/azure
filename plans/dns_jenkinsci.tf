@@ -132,7 +132,7 @@ resource "azurerm_dns_txt_record" "jenkinsci_root_txt_entries" {
   }
 }
 
-resource "azurerm_dns_txt_record" "jenkinsci_root_txt_entries" {
+resource "azurerm_dns_txt_record" "jenkinsci_dmarc_txt_entries" {
   name                = "_dmarc"
   zone_name           = azurerm_dns_zone.jenkinsci.name
   resource_group_name = azurerm_resource_group.dns_jenkinsci.name
