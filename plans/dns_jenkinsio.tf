@@ -166,8 +166,16 @@ resource "azurerm_dns_txt_record" "jenkinsio_txt_root_entries" {
   record {
     value = "_globalsign-domain-verification=b1pmSjP4FyG8hkZunkD3Aoz8tK0FWCje80-YwtLeDU" # Fastly
   }
+}
+
+resource "azurerm_dns_txt_record" "jenkinsio_txt_root_entries" {
+  name                = "_dmarc"
+  zone_name           = azurerm_dns_zone.jenkinsio.name
+  resource_group_name = azurerm_resource_group.dns_jenkinsio.name
+  ttl                 = 3600
+
   record {
-    value = "v=DMARC1; p=quarantine; pct=100;rua=mailto:jenkins@olblak.com" # Fastly
+    value = "v=DMARC1; p=reject; pct=100;rua=mailto:jenkins-dmarc@olblak.com"
   }
 }
 
