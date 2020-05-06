@@ -130,8 +130,16 @@ resource "azurerm_dns_txt_record" "jenkinsci_root_txt_entries" {
   record {
     value = "v=spf1 mx ip4:199.193.196.24 ip4:140.211.15.0/24 ip4:140.211.8.0/23 ip4:173.203.60.151 ip4:140.211.166.128/25 -all"
   }
+}
+
+resource "azurerm_dns_txt_record" "jenkinsci_dmarc_txt_entries" {
+  name                = "_dmarc"
+  zone_name           = azurerm_dns_zone.jenkinsci.name
+  resource_group_name = azurerm_resource_group.dns_jenkinsci.name
+  ttl                 = 3600
+
   record {
-    value = "v=DMARC1; p=reject; pct=100;rua=mailto:jenkins@olblak.com"
+    value = "v=DMARC1; p=reject; pct=100;rua=mailto:jenkins-dmarc@olblak.com"
   }
 }
 
