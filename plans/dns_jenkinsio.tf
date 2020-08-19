@@ -43,15 +43,16 @@ locals {
 
   jenkinsio_cname_records = {
     # Azure
-    accounts         = "public.aks.jenkins.io"
-    "archives.azure" = "public.aks.jenkins.io"
-    "mirror.azure"   = "public.aks.jenkins.io"
-    get              = "public.aks.jenkins.io"
-    javadoc          = "public.aks.jenkins.io"
-    plugins          = "dualstack.d.sni.global.fastly.net"
-    reports          = "public.aks.jenkins.io"
-    www              = "dualstack.d.sni.global.fastly.net"
-    uplink           = "public.aks.jenkins.io"
+    accounts              = "public.aks.jenkins.io"
+    "archives.azure"      = "public.aks.jenkins.io"
+    "mirror.azure"        = "public.aks.jenkins.io"
+    get                   = "public.aks.jenkins.io"
+    javadoc               = "public.aks.jenkins.io"
+    plugins               = "dualstack.d.sni.global.fastly.net"
+    reports               = "public.aks.jenkins.io"
+    www                   = "dualstack.d.sni.global.fastly.net"
+    uplink                = "public.aks.jenkins.io"
+    distribution_service
 
     # AKS
     "release.repo"      = "private.aks.jenkins.io"
