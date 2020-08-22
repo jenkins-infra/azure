@@ -47,6 +47,7 @@ locals {
     "archives.azure" = "public.aks.jenkins.io"
     "mirror.azure"   = "public.aks.jenkins.io"
     get              = "public.aks.jenkins.io"
+    "fallback.get"   = "public.aks.jenkins.io"
     javadoc          = "public.aks.jenkins.io"
     plugins          = "dualstack.d.sni.global.fastly.net"
     reports          = "public.aks.jenkins.io"
