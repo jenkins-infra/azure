@@ -66,7 +66,7 @@ locals {
 
     # Fastly
     "_acme-challenge.plugins" = "tr8qxfomlsxfq1grha.fastly-validations.com"
-    "_acme-challenge" = "ohh97689e0dknl1rqp.fastly-validations.com"
+    "_acme-challenge"         = "ohh97689e0dknl1rqp.fastly-validations.com"
 
     # CNAME Records
     pkg      = "dualstack.d.sni.global.fastly.net"
