@@ -54,6 +54,7 @@ locals {
     www              = "dualstack.d.sni.global.fastly.net"
     uplink           = "public.aks.jenkins.io"
     customize        = "public.aks.jenkins.io"
+    incrementals     = "public.aks.jenkins.io"
     # AKS
     "release.repo"      = "private.aks.jenkins.io"
     "release.ci"        = "private.aks.jenkins.io"
