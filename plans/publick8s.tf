@@ -48,7 +48,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   location            = azurerm_resource_group.publick8s.location
   dns_prefix          = var.prefix
   resource_group_name = azurerm_resource_group.publick8s.name
-  kubernetes_version  = "1.14.8" #az aks get-versions --location eastus --output table
+  kubernetes_version  = "1.17.9" #az aks get-versions --location eastus --output table
 
   role_based_access_control {
     enabled = true
