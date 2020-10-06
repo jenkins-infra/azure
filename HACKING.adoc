@@ -44,7 +44,7 @@ We can then retrieve the Application's ID via:
 
 [source]
 ----
-az ad app list -o tsv --query "[?displayName=='jenkins-terraform'].appId"`
+az ad app list -o tsv --query "[?displayName=='jenkins-terraform'].appId"
 ----
 
 
@@ -55,7 +55,7 @@ Service Principle associated with the application and grant permissions to that.
 
 [source]
 ----
-az ad sp create --id $(az ad app list -o tsv --query "[?displayName=='jenkins-terraform'].appId"`)
+az ad sp create --id $(az ad app list -o tsv --query "[?displayName=='jenkins-terraform'].appId")
 ----
 
 
