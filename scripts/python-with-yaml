@@ -1,8 +1,14 @@
 #!/bin/sh
 
+
 # local container which will just run Python with PyYaml installed since it's
 # not in the default python distribution
 CONTAINER=python-yaml
+READLINK="readlink -m"
+if [ `uname -s` == 'Darwin' ]; then
+  echo "Using coreutils greadlink"
+  READLINK="greadlink -m"
+fi
 
 docker inspect -f . ${CONTAINER} > /dev/null
 if [ $? -eq 1 ]; then
@@ -14,5 +20,5 @@ EOF
 
 fi;
 exec docker run --rm -i \
-    -v $(readlink -m $(dirname $0))/../:/data -w /data \
+    -v $($READLINK $(dirname $0))/../:/data -w /data \
         ${CONTAINER} $@
