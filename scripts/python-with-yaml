@@ -5,7 +5,7 @@
 # not in the default python distribution
 CONTAINER=python-yaml
 READLINK="readlink -m"
-if [ `uname -s` == 'Darwin' ]; then
+if [[ `uname -s` == 'Darwin' ]]; then
   echo "Using coreutils greadlink"
   READLINK="greadlink -m"
 fi
