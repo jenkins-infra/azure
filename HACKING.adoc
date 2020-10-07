@@ -97,5 +97,5 @@ Where (assuming your subscription is named "Pay-As-You-Go"):
 * `client_id` is the output of: `az ad app list -o tsv --query "[?displayName=='jenkins-terraform'].appId"`
 * `client_secret` is the `$GENERATED_TOKEN` you created with `openssl` previously
 * `location`: is the region where all resources are deployed by default as used links:https://github.com/jenkins-infra/azure/blob/709fce6c0f45af844732bd4995aa29b704131622/plans/ldap.tf#L6[here] for example.
-* `ssh_pubkey_path`: is the ssh public key file used to configure admin user on linux virtual machines.
+* `ssh_pubkey_path`: is the ssh public key file used to configure admin user on linux virtual machines. In later versions of terraform this needs to be a relative path distributed as part of the configuration source code.
 * `tenant_id` is the output of: `az account list -o tsv --query "[?name=='Pay-As-You-Go'].tenantId"`
