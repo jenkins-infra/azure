@@ -14,7 +14,7 @@ if [ $? -ne 0 ]; then
 fi;
 
 TTY="tty"
-if [[ `uname -s` == 'Darwin' ]]; then
+if [ `uname -s` = 'Darwin' ]; then
   TTY="gtty"
 fi
 
