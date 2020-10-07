@@ -24,6 +24,7 @@ if [ ! "${WORKSPACE}" = "" ]; then
     ADDITIONAL_ARGS="-v ${WORKSPACE}@tmp:${WORKSPACE}@tmp"
 fi;
 
+set +x
 exec docker run --rm  -u $(id -u):$(id -u) \
     ${ADDITIONAL_ARGS} \
     ${TTY_ARGS} \
