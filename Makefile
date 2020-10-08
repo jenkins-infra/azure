@@ -43,6 +43,9 @@ test_fmt:
 fmt:
 	$(TERRAFORM) fmt --write=true --diff=true --recursive
 
+tfsec:
+	./scripts/tfsec
+
 clean:
 	$(MAKE) -C arm_templates clean
 	rm -Rf ${TFSTATE_PREPARE_DIR}

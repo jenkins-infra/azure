@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# This script is meant to be added to the PATH so the latest terraform
+# container is always in use
+
+CONTAINER_NAME=liamg/tfsec:v0.27.0
+
+set -x
+
+# Pull down the container if we don't already have it
+docker inspect -f . ${CONTAINER_NAME} 2>&1 > /dev/null
+if [ $? -ne 0 ]; then
+    docker pull ${CONTAINER_NAME}
+fi;
+
+# If we're executing from a normal shell, allow input. If we're in a
+# subprocess, like under Jenkins Pipeline, don't allow it
+tty --quiet
+if [ $? -eq 0 ]; then
+    TTY_ARGS="-ti"
+fi;
+
+if [ ! "${WORKSPACE}" = "" ]; then
+    ADDITIONAL_ARGS="-v ${WORKSPACE}@tmp:${WORKSPACE}@tmp"
+fi;
+
+set +x
+exec docker run --rm  -u $(id -u):$(id -u) \
+    ${ADDITIONAL_ARGS} \
+    ${TTY_ARGS} \
+    -v $PWD:/data \
+    --workdir=/data \
+    $(printenv | grep -i \^tf | awk '{ print "-e", $1 }') \
+    ${CONTAINER_NAME} /data $@
