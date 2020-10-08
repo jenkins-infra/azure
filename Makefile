@@ -29,7 +29,8 @@ deploy: init refresh
 	$(TERRAFORM) apply -var-file=$(VARFILE) -auto-approve=true plans
 
 init: prepare generate
-	$(TERRAFORM) init \
+	echo "Initializing terraform"
+	@$(TERRAFORM) init \
 		-backend-config="storage_account_name=$(TF_VAR_PREFIX)tfstate" \
 		-backend-config="container_name=tfstate" \
 		-backend-config="key=terraform.tfstate" \
