@@ -62,6 +62,8 @@ Retrieve the subscriptionId
 [source]
 ----
 SUBSCRIPTION_ID=$(az account list -o tsv --query "[?name=='Jenkins'].id")
+or 
+SUBSCRIPTION_ID=$(az account show --query id -o tsv)
 ----
 
 Once a Service Principle exists, we can grant the permissions on it:
