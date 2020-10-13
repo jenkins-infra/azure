@@ -23,7 +23,7 @@ Directory and other related authentication and authorization objects.
 
 [source]
 ----
-openssl rand -base64 24
+GENERATED_TOKEN=$(openssl rand -base64 24)
 ----
 
 This will be needed later, so don't lose it!
@@ -58,15 +58,20 @@ Service Principle associated with the application and grant permissions to that.
 az ad sp create --id $(az ad app list -o tsv --query "[?displayName=='jenkins-terraform'].appId")
 ----
 
+Retrieve the subscriptionId
+[source]
+----
+SUBSCRIPTION_ID=$(az account list -o tsv --query "[?name=='Jenkins'].id")
+or 
+SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+----
 
 Once a Service Principle exists, we can grant the permissions on it:
-
-
 [source]
 ----
 az role assignment create --assignee http://example.com/jenkins-terraform \
                             --role Owner \
-                            --scope /subscriptions/be53081d-a3a2-499c-b355-8f5c3d4126e5
+                            --scope /subscriptions/$SUBSCRIPTION_ID
 ----
 
 
