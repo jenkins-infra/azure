@@ -87,8 +87,8 @@ resource "azurerm_network_security_rule" "public-app-tier-allow-ldaps-inbound" {
 }
 
 resource "azurerm_network_security_rule" "public-app-tier-allow-rsync-inbound" {
-  name                        = "allow-ldaps-inbound"
-  priority                    = 102
+  name                        = "allow-rsyncd-inbound"
+  priority                    = 103
   direction                   = "inbound"
   access                      = "allow"
   protocol                    = "tcp"
@@ -151,8 +151,8 @@ resource "azurerm_network_security_rule" "public-data-tier-allow-ldaps-inbound" 
 }
 
 resource "azurerm_network_security_rule" "public-data-tier-allow-rsync-inbound" {
-  name                        = "allow-ldaps-inbound"
-  priority                    = 102
+  name                        = "allow-rsyncd-inbound"
+  priority                    = 103
   direction                   = "inbound"
   access                      = "allow"
   protocol                    = "tcp"
