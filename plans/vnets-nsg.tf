@@ -94,7 +94,7 @@ resource "azurerm_network_security_rule" "public-app-tier-allow-rsync-inbound" {
   protocol                    = "tcp"
   source_port_range           = "*"
   destination_port_range      = "873"
-  source_address_prefix       = "*"
+  source_address_prefix       = "52.167.253.43/32,52.202.51.185/32"
   destination_address_prefix  = "*"
   resource_group_name         = azurerm_resource_group.public_prod.name
   network_security_group_name = azurerm_network_security_group.public_app_tier.name
@@ -158,7 +158,7 @@ resource "azurerm_network_security_rule" "public-data-tier-allow-rsync-inbound" 
   protocol                    = "tcp"
   source_port_range           = "*"
   destination_port_range      = "873"
-  source_address_prefix       = "*"
+  source_address_prefix       = "52.167.253.43/32,52.202.51.185/32"
   destination_address_prefix  = "*"
   resource_group_name         = azurerm_resource_group.public_prod.name
   network_security_group_name = azurerm_network_security_group.public_data_tier.name
