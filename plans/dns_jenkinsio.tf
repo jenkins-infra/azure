@@ -172,6 +172,10 @@ resource "azurerm_dns_txt_record" "jenkinsio_txt_root_entries" {
   record {
     value = "_globalsign-domain-verification=b1pmSjP4FyG8hkZunkD3Aoz8tK0FWCje80-YwtLeDU" # Fastly
   }
+  
+  record {
+    value = "libera-MjLnxZ2KPqJJnJr6X4WFovAe" # libera.chat
+  }
 }
 
 resource "azurerm_dns_txt_record" "jenkinsio_txt_dmarc_entries" {
