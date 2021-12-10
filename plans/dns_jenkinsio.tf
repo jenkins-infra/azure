@@ -51,6 +51,7 @@ locals {
     "fallback.get"      = "pkg.origin.jenkins.io"
     javadoc             = "public.aks.jenkins.io"
     plugins             = "dualstack.d.sni.global.fastly.net"
+    "plugin-site-issues"= "public.aks.jenkins.io"
     reports             = "public.aks.jenkins.io"
     www                 = "dualstack.d.sni.global.fastly.net"
     uplink              = "public.aks.jenkins.io"
