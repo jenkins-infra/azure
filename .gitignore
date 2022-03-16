@@ -6,7 +6,6 @@
 *.sw*
 .*.json
 .tf-prepare/
-# .tf-remote-state-enabled Deprecated since terraform 0.9 upgrade
 .tf-remote-state-enabled
 .terraform
-ssh_key/jenkinsolblak.pub
+backend-config
