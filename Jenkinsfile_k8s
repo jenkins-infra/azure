@@ -1,10 +1,9 @@
-node('docker') {
+node('linux-amd64-docker') {
   stage('Foo') {
     sh '''
     echo Super Secret Output
     exit 3
     '''
-
   }
 }
 // parallel(
