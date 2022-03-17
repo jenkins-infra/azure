@@ -1,5 +1,7 @@
-stage('Foo') {
-  sh 'echo Super Secret Output'
+node('docker') {
+  stage('Foo') {
+    sh 'echo Super Secret Output'
+  }
 }
 // parallel(
 //   failFast: false,
