@@ -1,25 +1,33 @@
-parallel(
-  failFast: false,
-  'terraform': {
-    terraform(
-      stagingCredentials: [
-        string(variable: 'AWS_ACCESS_KEY_ID', credentialsId: 'ci-terraform-aws-access-key'),
-        string(variable: 'AWS_SECRET_ACCESS_KEY', credentialsId:'ci-terraform-aws-secret-key'),
-        file(variable: 'BACKEND_CONFIG_FILE', credentialsId: 'ci-terraform-aws-backend-config'),
-      ],
-      productionCredentials: [
-        string(variable: 'AWS_ACCESS_KEY_ID', credentialsId: 'production-terraform-aws-access-key'),
-        string(variable: 'AWS_SECRET_ACCESS_KEY', credentialsId:'production-terraform-aws-secret-key'),
-        file(variable: 'BACKEND_CONFIG_FILE', credentialsId: 'production-terraform-aws-backend-config'),
-      ],
-    )
-  },
-  'updatecli': {
-    withCredentials([string(credentialsId: 'updatecli-github-token', variable: 'UPDATECLI_GITHUB_TOKEN')]) {
-      updatecli(action: 'diff')
-      if (env.BRANCH_IS_PRIMARY) {
-        updatecli(action: 'apply', cronTriggerExpression: '@weekly')
-      }
-    }
-  },
-)
+node('linux-amd64-docker') {
+  stage('Foo') {
+    sh '''
+    echo Super Secret Output
+    exit 3
+    '''
+  }
+}
+// parallel(
+//   failFast: false,
+//   'terraform': {
+//     terraform(
+//       stagingCredentials: [
+//         string(variable: 'AWS_ACCESS_KEY_ID', credentialsId: 'ci-terraform-aws-access-key'),
+//         string(variable: 'AWS_SECRET_ACCESS_KEY', credentialsId:'ci-terraform-aws-secret-key'),
+//         file(variable: 'BACKEND_CONFIG_FILE', credentialsId: 'ci-terraform-aws-backend-config'),
+//       ],
+//       productionCredentials: [
+//         string(variable: 'AWS_ACCESS_KEY_ID', credentialsId: 'production-terraform-aws-access-key'),
+//         string(variable: 'AWS_SECRET_ACCESS_KEY', credentialsId:'production-terraform-aws-secret-key'),
+//         file(variable: 'BACKEND_CONFIG_FILE', credentialsId: 'production-terraform-aws-backend-config'),
+//       ],
+//     )
+//   },
+//   'updatecli': {
+//     withCredentials([string(credentialsId: 'updatecli-github-token', variable: 'UPDATECLI_GITHUB_TOKEN')]) {
+//       updatecli(action: 'diff')
+//       if (env.BRANCH_IS_PRIMARY) {
+//         updatecli(action: 'apply', cronTriggerExpression: '@weekly')
+//       }
+//     }
+//   },
+// )
