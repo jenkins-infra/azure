@@ -1,6 +1,10 @@
 node('docker') {
   stage('Foo') {
-    sh 'echo Super Secret Output'
+    sh '''
+    echo Super Secret Output
+    exit 3
+    '''
+
   }
 }
 // parallel(
