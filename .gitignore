@@ -9,3 +9,4 @@
 .tf-remote-state-enabled
 .terraform
 backend-config
+terraform-plan-output.txt
