@@ -15,7 +15,7 @@ resource "azurerm_postgresql_flexible_server" "public" {
   name                   = "public"
   resource_group_name    = data.azurerm_resource_group.public_prod.name
   location               = var.location
-  administrator_login    = "psqladmin${random_password.pgsql_admin_login.result}"
+  administrator_login    = local.public_pgsql_admin_login
   administrator_password = random_password.pgsql_admin_password.result
   sku_name               = "B_Standard_B1ms" # 1vCore / 2 Gb - https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-b-series-burstable
   storage_mb             = "32768"

@@ -8,5 +8,8 @@ terraform {
     local = {
       source = "hashicorp/local"
     }
+    postgresql = {
+      source = "cyrilgdn/postgresql"
+    }
   }
 }
