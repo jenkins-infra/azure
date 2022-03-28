@@ -33,7 +33,6 @@ data "azurerm_resource_group" "public_prod" {
 data "azurerm_virtual_network" "public_prod" {
   name                = "prod-jenkins-public-prod"
   resource_group_name = data.azurerm_resource_group.public_prod.name
-  # address_space       = ["10.0.0.0/16"]
 }
 
 ################################################################################
@@ -47,9 +46,22 @@ resource "azurerm_subnet" "pgsql_tier" {
   resource_group_name  = data.azurerm_resource_group.public_prod.name
   virtual_network_name = data.azurerm_virtual_network.public_prod.name
   address_prefixes     = ["10.0.3.0/24"]
+  delegation {
+    name = "pgsql"
+    service_delegation {
+      name = "Microsoft.DBforPostgreSQL/flexibleServers"
+    }
+  }
 }
 
 resource "azurerm_subnet_network_security_group_association" "public_pgsql" {
   subnet_id                 = azurerm_subnet.pgsql_tier.id
   network_security_group_id = azurerm_network_security_group.public_pgsql_tier.id
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "public_pgsql" {
+  name                  = "public-pgsql"
+  resource_group_name   = data.azurerm_resource_group.public_prod.name
+  private_dns_zone_name = azurerm_private_dns_zone.public_pgsql.name
+  virtual_network_id    = data.azurerm_virtual_network.public_prod.id
 }
