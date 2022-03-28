@@ -20,4 +20,5 @@ resource "azurerm_postgresql_flexible_server" "public" {
   sku_name               = "B_Standard_B1ms" # 1vCore / 2 Gb - https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-b-series-burstable
   storage_mb             = "32768"
   version                = "13"
+  zone                   = "1"
 }
