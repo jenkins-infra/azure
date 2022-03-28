@@ -30,10 +30,10 @@ parallel(
       ],
     )
   },
-  // 'updatecli': {
-  //   updatecli(action: 'diff')
-  //   if (env.BRANCH_IS_PRIMARY) {
-  //     updatecli(action: 'apply', cronTriggerExpression: '@weekly')
-  //   }
-  // },
+  'updatecli': {
+    updatecli(action: 'diff')
+     if (env.BRANCH_IS_PRIMARY) {
+       updatecli(action: 'apply', cronTriggerExpression: '@daily')
+     }
+   },
 )
