@@ -21,4 +21,11 @@ resource "azurerm_postgresql_flexible_server" "public" {
   storage_mb             = "32768"
   version                = "13"
   zone                   = "1"
+  private_dns_zone_id    = azurerm_private_dns_zone.public_pgsql.id
+  delegated_subnet_id    = azurerm_subnet.pgsql_tier.id
+}
+
+resource "azurerm_private_dns_zone" "public_pgsql" {
+  name                = "public-pgsql.jenkins-infra.postgres.database.azure.com"
+  resource_group_name = data.azurerm_resource_group.public_prod.name
 }
