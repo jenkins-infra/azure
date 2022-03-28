@@ -23,6 +23,5 @@ output "dbconfig" {
       $dbname='rating';
       $dbserver='${azurerm_postgresql_flexible_server.public.fqdn}';
       $dbport='';
-    ?>
   EOT
 }
