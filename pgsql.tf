@@ -23,6 +23,15 @@ resource "azurerm_postgresql_flexible_server" "public" {
   zone                   = "1"
   private_dns_zone_id    = azurerm_private_dns_zone.public_pgsql.id
   delegated_subnet_id    = azurerm_subnet.pgsql_tier.id
+
+  depends_on = [
+    /**
+    The network link from private pod is required to allow the provider "postgresql"
+    to connect to this server from the private Jenkins agents where terraform runs
+    (or through VPN tunnelling)
+    **/
+    azurerm_private_dns_zone_virtual_network_link.privatevnet_to_publicpgsql,
+  ]
 }
 
 resource "azurerm_private_dns_zone" "public_pgsql" {
