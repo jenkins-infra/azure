@@ -13,7 +13,8 @@ resource "postgresql_role" "rating" {
   password = random_password.pgsql_rating_user_password.result
 }
 
-output "dbconfig" {
+# This (sensitive) output is meants to be encrypted into the production secret system, to be provided as a secret to the ratings.jenkins.io application
+output "rating_dbconfig" {
   sensitive   = true
   description = "file /config/dbconfig.php"
   value       = <<-EOT
