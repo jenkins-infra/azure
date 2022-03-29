@@ -38,3 +38,17 @@ resource "azurerm_private_dns_zone" "public_pgsql" {
   name                = "public-pgsql.jenkins-infra.postgres.database.azure.com"
   resource_group_name = data.azurerm_resource_group.public_prod.name
 }
+
+resource "azurerm_private_dns_zone_virtual_network_link" "publicvnet_to_publicpgsql" {
+  name                  = "publicvnet-to-publicpgsql"
+  resource_group_name   = data.azurerm_resource_group.public_prod.name
+  private_dns_zone_name = azurerm_private_dns_zone.public_pgsql.name
+  virtual_network_id    = data.azurerm_virtual_network.public_prod.id
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "privatevnet_to_publicpgsql" {
+  name                  = "privatevnet-to-publicpgsql"
+  resource_group_name   = data.azurerm_resource_group.public_prod.name
+  private_dns_zone_name = azurerm_private_dns_zone.public_pgsql.name
+  virtual_network_id    = data.azurerm_virtual_network.private_prod.id
+}
