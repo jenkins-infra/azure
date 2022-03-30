@@ -16,13 +16,12 @@ resource "postgresql_role" "rating" {
 # This (sensitive) output is meant to be encrypted into the production secret system, to be provided as a secret to the ratings.jenkins.io application
 output "rating_dbconfig" {
   sensitive   = true
-  description = "file /config/dbconfig.php"
+  description = "YAML helm (secret) values for the helm-chart jenkins-infra/rating"
   value       = <<-EOT
-    <?php
-      $dbuser='${local.public_pgsql_admin_login}';
-      $dbpass='${random_password.pgsql_rating_user_password.result}';
-      $dbname='rating';
-      $dbserver='${azurerm_postgresql_flexible_server.public.fqdn}';
-      $dbport='';
+database:
+  username: "${local.public_pgsql_admin_login}"
+  password: "${random_password.pgsql_rating_user_password.result}"
+  server: "${azurerm_postgresql_flexible_server.public.fqdn}"
+  name: "${postgresql_database.rating.name}"
   EOT
 }
