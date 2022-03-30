@@ -18,8 +18,10 @@ output "rating_dbconfig" {
   sensitive   = true
   description = "dbconfig values"
   value       = <<-EOT
-      username=${local.public_pgsql_admin_login}
-      password=${random_password.pgsql_rating_user_password.result}
-      server=${azurerm_postgresql_flexible_server.public.fqdn}
+database:
+  username: "${local.public_pgsql_admin_login}"
+  password: "${random_password.pgsql_rating_user_password.result}"
+  server: "${azurerm_postgresql_flexible_server.public.fqdn}"
+  name: "${postgresql_database.rating.name}"
   EOT
 }
