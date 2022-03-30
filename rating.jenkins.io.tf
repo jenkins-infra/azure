@@ -16,7 +16,7 @@ resource "postgresql_role" "rating" {
 # This (sensitive) output is meant to be encrypted into the production secret system, to be provided as a secret to the ratings.jenkins.io application
 output "rating_dbconfig" {
   sensitive   = true
-  description = "dbconfig values"
+  description = "YAML helm (secret) values for the helm-chart jenkins-infra/rating"
   value       = <<-EOT
 database:
   username: "${local.public_pgsql_admin_login}"
