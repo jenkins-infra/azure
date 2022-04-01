@@ -19,7 +19,7 @@ output "rating_dbconfig" {
   description = "YAML helm (secret) values for the helm-chart jenkins-infra/rating"
   value       = <<-EOT
 database:
-  username: "${local.public_pgsql_admin_login}"
+  username: "${postgresql_role.rating.name}"
   password: "${random_password.pgsql_rating_user_password.result}"
   server: "${azurerm_postgresql_flexible_server.public.fqdn}"
   name: "${postgresql_database.rating.name}"
