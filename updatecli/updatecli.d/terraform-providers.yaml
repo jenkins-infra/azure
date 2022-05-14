@@ -1,0 +1,38 @@
+title: "Bump Terraform plugins - not modules"
+
+scms:
+  default:
+    kind: github
+    spec:
+      user: "{{ .github.user }}"
+      email: "{{ .github.email }}"
+      owner: "{{ .github.owner }}"
+      repository: "{{ .github.repository }}"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ .github.username }}"
+      branch: "{{ .github.branch }}"
+
+sources:
+  getLatestLockFileContent:
+    kind: shell
+    spec:
+      command: bash ./updatecli/scripts/terraform-get-upgraded-lockfile.sh ./
+
+targets:
+  upgradeActualLockFile:
+    name: "Update the content of the Terraform lock file to upgrade terraform providers"
+    kind: file
+    sourceid: getLatestLockFileContent
+    spec:
+      file: ".terraform.lock.hcl"
+    scmid: default
+
+pullrequests:
+  default:
+    kind: github
+    scmid: default
+    targets:
+      - upgradeActualLockFile
+    spec:
+      labels:
+        - dependencies

@@ -11,5 +11,8 @@ terraform {
     postgresql = {
       source = "cyrilgdn/postgresql"
     }
+    random = {
+      source = "hashicorp/random"
+    }
   }
 }
