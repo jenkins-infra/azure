@@ -10,3 +10,4 @@
 .terraform
 backend-config
 terraform-plan-output.txt
+tfplan
