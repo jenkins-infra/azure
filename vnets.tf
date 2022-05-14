@@ -59,6 +59,9 @@ resource "azurerm_subnet" "pgsql_tier" {
     name = "pgsql"
     service_delegation {
       name = "Microsoft.DBforPostgreSQL/flexibleServers"
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/join/action",
+      ]
     }
   }
 }
