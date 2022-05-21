@@ -56,9 +56,7 @@ resource "azurerm_shared_image" "jenkins_agent_images" {
     sku       = format("jenkins-agent-%s", split("_", each.value)[1])
   }
 
-  ## No tags otherwise there is the following error when applying:
-  # creating/updating Shared Image: (Image Name "jenkins-agent-ubuntu-20.04" / Gallery Name "prod_packer_images" / Resource Group "prod-packer-images"): compute.GalleryImagesClient#CreateOrUpdate: Failure sending request: StatusCode=0 -- Original Error: autorest/azure: Service returned an error. Status=<nil> Code="PropertyChangeNotAllowed" Message="Changing property 'galleryImage.properties.eula' is not allowed." Target="galleryImage.properties.eula"
-  # tags = {
-  #   scope = "terraform-managed"
-  # }
+  tags = {
+    scope = "terraform-managed"
+  }
 }
