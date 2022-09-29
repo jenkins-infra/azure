@@ -1,7 +1,7 @@
 ## This file contains the resources associated to the buckets used to store private and public reports
 resource "azurerm_resource_group" "prod_reports" {
   name     = "prod-reports"
-  location = "East US 2"
+  location = var.location
 
   tags = {
     scope = "terraform-managed"
