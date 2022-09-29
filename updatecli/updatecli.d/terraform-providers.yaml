@@ -1,4 +1,4 @@
-title: "Bump Terraform plugins - not modules"
+name: "Bump Terraform plugins - not modules"
 
 scms:
   default:
@@ -15,6 +15,7 @@ scms:
 sources:
   getLatestLockFileContent:
     kind: shell
+    name: Generate an up-to-date terraform lock file
     spec:
       command: bash ./updatecli/scripts/terraform-get-upgraded-lockfile.sh ./
 
@@ -31,8 +32,6 @@ pullrequests:
   default:
     kind: github
     scmid: default
-    targets:
-      - upgradeActualLockFile
     spec:
       labels:
         - dependencies
