@@ -14,7 +14,7 @@ resource "azurerm_storage_account" "prodjenkinsreports" {
   location                  = azurerm_resource_group.prod_reports.location
   account_tier              = "Standard"
   account_replication_type  = "GRS"
-  account_kind              = "Storage" # StorageV2
+  account_kind              = "Storage"
   enable_https_traffic_only = true
   min_tls_version           = "TLS1_2"
 

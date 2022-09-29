@@ -1,4 +1,4 @@
-name: "Bump Terraform plugins - not modules"
+name: "Bump Terraform providers - not modules"
 
 scms:
   default:
@@ -35,3 +35,4 @@ pullrequests:
     spec:
       labels:
         - dependencies
+        - terraform-providers
