@@ -5,6 +5,7 @@ provider "registry.terraform.io/cyrilgdn/postgresql" {
   version = "1.17.1"
   hashes = [
     "h1:HdACkXJ2OUc7wIBtM0HWnY6QnUrdz9Pl4j/g4LL77Q8=",
+    "h1:VEIrhgiMCzkB2wmUUUtUZmgU2FM9gW/iOHYn/hoA2dc=",
     "zh:0a800fd3d6745a75916f00d4fb8615a63a40fe296beba93c5cdb4fcca6fef0c3",
     "zh:0ce6d6d1bc3a93305393e965b58449ee938bbfda09248a8e2d90ad94858ac046",
     "zh:1d20431ce36aa371ca83ae1717282fc5fda3efd884eace5b4285daab1077f1e1",
@@ -44,6 +45,7 @@ provider "registry.terraform.io/hashicorp/azurerm" {
 provider "registry.terraform.io/hashicorp/local" {
   version = "2.2.3"
   hashes = [
+    "h1:FvRIEgCmAezgZUqb2F+PZ9WnSSnR5zbEM2ZI+GLmbMk=",
     "h1:aWp5iSUxBGgPv1UnV5yag9Pb0N+U1I0sZb38AXBFO8A=",
     "zh:04f0978bb3e052707b8e82e46780c371ac1c66b689b4a23bbc2f58865ab7d5c0",
     "zh:6484f1b3e9e3771eb7cc8e8bab8b35f939a55d550b3f4fb2ab141a24269ee6aa",
@@ -63,6 +65,7 @@ provider "registry.terraform.io/hashicorp/local" {
 provider "registry.terraform.io/hashicorp/random" {
   version = "3.4.3"
   hashes = [
+    "h1:saZR+mhthL0OZl4SyHXZraxyaBNVMxiZzks78nWcZ2o=",
     "h1:xZGZf18JjMS06pFa4NErzANI98qi59SEcBsOcS2P2yQ=",
     "zh:41c53ba47085d8261590990f8633c8906696fa0a3c4b384ff6a7ecbf84339752",
     "zh:59d98081c4475f2ad77d881c4412c5129c56214892f490adf11c7e7a5a47de9b",
