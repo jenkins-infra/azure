@@ -20,11 +20,6 @@ output "keycloak_dbconfig" {
   sensitive   = true
   description = "YAML (secret) values for the Helm chart codecentric/keycloak"
   value       = <<-EOT
-database:
-  username: "${postgresql_role.keycloak.name}"
-  password: "${random_password.pgsql_keycloak_user_password.result}"
-  server: "${azurerm_postgresql_flexible_server.public.fqdn}"
-  name: "${postgresql_database.keycloak.name}"
 secrets:
     db:
         data:
