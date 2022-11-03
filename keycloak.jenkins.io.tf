@@ -1,8 +1,3 @@
-resource "postgresql_database" "keycloak" {
-  name  = "keycloak"
-  owner = postgresql_role.keycloak.name
-}
-
 resource "random_password" "pgsql_keycloak_user_password" {
   length           = 24
   override_special = "!#%&*()-_=+[]{}:?"
@@ -15,10 +10,15 @@ resource "postgresql_role" "keycloak" {
   password = random_password.pgsql_keycloak_user_password.result
 }
 
+resource "postgresql_database" "keycloak" {
+  name  = "keycloak"
+  owner = postgresql_role.keycloak.name
+}
+
 # This (sensitive) output is meant to be encrypted into the production secret system, to be provided as a secret to the Keycloak application (https://admin.accounts.jenkins.io)
 output "keycloak_dbconfig" {
-  # default port to use: https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking
-  # nothing to get from terraform for the port: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server#attributes-reference
+  # Value of DB_PORT: 5432 is the only usable port: https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking
+  ## Terraform resource does not export any port attribute: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server#attributes-reference
   sensitive   = true
   description = "YAML (secret) values for the Helm chart codecentric/keycloak"
   value       = <<-EOT
