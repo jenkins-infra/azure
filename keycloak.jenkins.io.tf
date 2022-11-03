@@ -15,7 +15,7 @@ resource "postgresql_role" "keycloak" {
   password = random_password.pgsql_keycloak_user_password.result
 }
 
-# This (sensitive) output is meant to be encrypted into the production secret system, to be provided as a secret to the keycloaks application https://admin.accounts.jenkins.io/auth/admin
+# This (sensitive) output is meant to be encrypted into the production secret system, to be provided as a secret to the Keycloak application (https://admin.accounts.jenkins.io)
 output "keycloak_dbconfig" {
   sensitive   = true
   description = "YAML (secret) values for the Helm chart codecentric/keycloak"
