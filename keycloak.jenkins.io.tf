@@ -17,6 +17,8 @@ resource "postgresql_role" "keycloak" {
 
 # This (sensitive) output is meant to be encrypted into the production secret system, to be provided as a secret to the Keycloak application (https://admin.accounts.jenkins.io)
 output "keycloak_dbconfig" {
+  # default port to use: https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking
+  # nothing to get from terraform for the port: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/postgresql_flexible_server#attributes-reference
   sensitive   = true
   description = "YAML (secret) values for the Helm chart codecentric/keycloak"
   value       = <<-EOT
