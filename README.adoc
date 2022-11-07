@@ -5,18 +5,28 @@
 :caution-caption: :fire:
 :warning-caption: :warning:
 :toc:
+:private_repo_name: terraform-states
+:private_repo_url: https://github.com/jenkins-infra/{private_repo_name}
 
-This repository is meant to hold documentation, tooling and other resources
-related to the link:https://jenkins.io[Jenkins] project's migration to
-link:https://azure.com[Azure].
+This repository hosts the infrastructure-as-code definition for all the link:https://azure.com/[Azure hosted] resources for the link:https://www.jenkins.io/projects/infrastructure/[Jenkins Infrastructure Project].
 
 == Requirements
 
 In order to use this repository to provision the Jenkins infrastructure on azure, you need:
 
 * An `Azure` account
-* `Docker` to run terraform defined in this repository
-* `Make` which simplify the different steps
+* The requirements (of the shared tools) listed at link:https://github.com/jenkins-infra/shared-tools/tree/main/terraform#requirements[shared-tools/terraform#requirements]
+* The link:https://developer.hashicorp.com/terraform/language/settings/backends/azurerm[Terraform AzureRM Backend Configuration] on a local file named `backend-config`:
+** The content can be retrieved from the outputs of the link:{private_repo_url}[(private) repository {private_repo_name}]
+** This file (`backend-config`) is git-ignored
+
+* The git command line to allow cloning the repository and its submodule link:https://github.com/jenkins-infra/shared-tools[shared-tools]
+** This repository has submodules. Once you cloned the repository, execute the following command to obtain the shared tools:
+
+[source,bash]
+----
+git submodule update --init --recursive
+----
 
 == HowTo
 
@@ -24,25 +34,22 @@ In order to use this repository to provision the Jenkins infrastructure on azure
 
 IMPORTANT: Don't blindly execute the terraform code located in this repository on your own account as it may lead your account bill to significantly increase.
 
-Once you fulfill the requirements, you can use the code located here to provision this infrastructure on your azure account
 
-. Add your public ssh key under `ssh_key` folder, but do not commit it as it only must be used for your personal environment.
-. Create your `.azure-terraform.json` as exampled in the file HACKING.adoc
-. Run `make init`: to create the remote azure storage that will host your terraform state.
-. Run `make test_fmt validate`: to run linting checks and validate your resources.
-. Run `make deploy`: to provision all resources on your account.
+Once you've fulfilled the <<Requirements>>, you may execute any command from https://github.com/jenkins-infra/shared-tools/blob/main/terraform/README.adoc#available-commands by adding the correct flag `--directory` pointing to `.shared-tools/terraform/`:
+
+[source,bash]
+----
+make --directory=.shared-tools/terraform help
+make --directory=.shared-tools/terraform lint
+# ...
+----
 
 
-=== Test
+A usual change to this repository looks like the following:
 
-In order to test any modification on this repository, you need to
-
-* Run linting tests on your machine `make test_fmt`, which don't need a azure account
-* You may also run make validate, if you have an azure account configured but keep in minds that it implies deploying at least an azure storage to store a remote terraform state
-* Open a pull request on link:https://github.com/jenkins-infra/azure[jenkins-infra/azure], this will provision a temporary environment with your specific changes and then report provisionning logs on link:https://ci.jenkins.io/blue/organizations/jenkins/Infra%2Fazure/pr[ci.jenkins.io].
-
-== Links
-
-* link:https://github.com/jenkins-infra/jenkins-infra[Puppet repository]
-* link:https://p.datadoghq.com/sb/0Igb9a-a5ff8c4199[Public Datadog Dashboard]
-* link:https://ci.jenkins.io/blue/organizations/jenkins/Infra%2Fazure/pr[Jenkins-on-Jenkins server]
+* Fork the repository and clone it locally
+* Follow the <<Requirements>> steps to obtain the shared tools
+* Start by running a full `make --directory=.shared-tools/terraform validate` command to ensure that you work on a sane base (should generate a report TXT file with no changes to be applied)
+* Edit the Terraform project files
+* Run the command `make --directory=.shared-tools/terraform validate` again to ensure that your changes are OK
+* Commit, push and open a pull request to let the Jenkins pipeline run the test + plan (as per https://github.com/jenkins-infra/shared-tools/blob/main/terraform/README.adoc#jenkins-pipeline)
