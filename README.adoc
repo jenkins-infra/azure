@@ -16,7 +16,7 @@ In order to use this repository to provision the Jenkins infrastructure on azure
 
 * An `Azure` account
 * The requirements (of the shared tools) listed at link:https://github.com/jenkins-infra/shared-tools/tree/main/terraform#requirements[shared-tools/terraform#requirements]
-* The link:https://www.terraform.io/docs/language/settings/backends/s3.html[Terraform S3 Backend Configuration] on a local file named `backend-config`:
+* The link:https://developer.hashicorp.com/terraform/language/settings/backends/azurerm[Terraform AzureRM Backend Configuration] on a local file named `backend-config`:
 ** The content can be retrieved from the outputs of the link:{private_repo_url}[(private) repository {private_repo_name}]
 ** This file (`backend-config`) is git-ignored
 
