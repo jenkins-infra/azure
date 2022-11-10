@@ -1,6 +1,7 @@
 resource "azurerm_resource_group" "privatek8s" {
   name     = "privatek8s"
-  location = "East US 2"
+  location = var.location
+  tags     = local.default_tags
 }
 
 resource "random_pet" "suffix_privatek8s" {
@@ -79,8 +80,25 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   tags = local.default_tags
 }
 
-# one public IP for cluster load balancer
-# one record (data to existing dns zone)
+resource "azurerm_public_ip" "public_privatek8s" {
+  name                = "public-privatek8s"
+  resource_group_name = azurerm_resource_group.privatek8s.name
+  location            = var.location
+  allocation_method   = "Static"
+
+  tags = local.default_tags
+}
+
+resource "azurerm_dns_a_record" "public_privatek8s" {
+  name                = "public-privatek8s"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 300
+  records             = [azurerm_public_ip.public_privatek8s.ip_address]
+
+  tags = local.default_tags
+}
+
 # one public IP for gateway (?)
 # public IP external requests count is limited
 
