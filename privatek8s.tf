@@ -35,6 +35,7 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
     node_count     = 1
     vm_size        = "Standard_D2as_v4"
     vnet_subnet_id = azurerm_subnet.privatek8s_tier.id
+    tags           = local.default_tags
   }
 
   identity {
@@ -90,7 +91,7 @@ resource "azurerm_public_ip" "public_privatek8s" {
 }
 
 resource "azurerm_dns_a_record" "public_privatek8s" {
-  name                = "public-privatek8s"
+  name                = "public.privatek8s"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 300
@@ -112,4 +113,8 @@ output "privatek8s_client_certificate" {
 output "privatek8s_kube_config" {
   value     = azurerm_kubernetes_cluster.privatek8s.kube_config_raw
   sensitive = true
+}
+
+output "privatek8s_public_ip_address" {
+  value     = azurerm_public_ip.public_privatek8s.ip_address
 }
