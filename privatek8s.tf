@@ -15,27 +15,37 @@ resource "azurerm_subnet" "privatek8s_tier" {
   address_prefixes     = ["10.242.0.0/16"]
 }
 
+# Automatic upgrades for patch versions
+# Note: The first time we apply this configuration, Terraform will apply whatever latest version it finds in the AKS versions data source.
+# When new versions are available, AKS will upgrade automatically. But Azure will not allow skip-version upgrades.
+# You may need to pin your data source to the next version, upgrade, then remove the pinning and upgrade again to get to the latest version.
+data "azurerm_kubernetes_service_versions" "current" {
+  location       = var.location
+  version_prefix = "1.23"
+}
+
 #tfsec:ignore:azure-container-logging
 resource "azurerm_kubernetes_cluster" "privatek8s" {
-  name                = "privatek8s-${random_pet.suffix_privatek8s.id}"
-  location            = azurerm_resource_group.privatek8s.location
-  resource_group_name = azurerm_resource_group.privatek8s.name
-  # Kubernetes version in format '<MINOR>.<MINOR>'
-  kubernetes_version                = "1.23"
+  name                              = "privatek8s-${random_pet.suffix_privatek8s.id}"
+  location                          = azurerm_resource_group.privatek8s.location
+  resource_group_name               = azurerm_resource_group.privatek8s.name
+  kubernetes_version                = data.azurerm_kubernetes_service_versions.current.latest_version
   dns_prefix                        = "privatek8s-${random_pet.suffix_privatek8s.id}"
-  role_based_access_control_enabled = true           # default value, added to please tfsec
-  api_server_authorized_ip_ranges   = ["0.0.0.0/32"] # TODO: set correct value
+  role_based_access_control_enabled = true                                 # default value, added to please tfsec
+  api_server_authorized_ip_ranges   = ["0.0.0.0/32", "176.185.227.180/32"] # TODO: set correct value
+  # public_network_access_enabled     = true # default value, 'no changes.'
   network_profile {
     network_plugin = "azure"
     network_policy = "azure"
   }
 
   default_node_pool {
-    name           = "systempool"
-    node_count     = 1
-    vm_size        = "Standard_D2as_v4"
-    vnet_subnet_id = azurerm_subnet.privatek8s_tier.id
-    tags           = local.default_tags
+    name                 = "systempool"
+    vm_size              = "Standard_D2as_v4"
+    orchestrator_version = data.azurerm_kubernetes_service_versions.current.latest_version
+    node_count           = 1
+    vnet_subnet_id       = azurerm_subnet.privatek8s_tier.id
+    tags                 = local.default_tags
   }
 
   identity {
@@ -47,24 +57,27 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
 
 resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
   name                  = "linuxpool"
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   vm_size               = "Standard_D4s_v3"
-  vnet_subnet_id        = azurerm_subnet.privatek8s_tier.id
+  orchestrator_version  = data.azurerm_kubernetes_service_versions.current.latest_version
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
   min_count             = 1
   max_count             = 3
-
-  tags = local.default_tags
+  availability_zones    = [1, 2, 3]
+  vnet_subnet_id        = azurerm_subnet.privatek8s_tier.id
+  tags                  = local.default_tags
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   name                  = "infracipool"
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   vm_size               = "Standard_D4s_v3"
-  vnet_subnet_id        = azurerm_subnet.privatek8s_tier.id
+  orchestrator_version  = data.azurerm_kubernetes_service_versions.current.latest_version
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
   min_count             = 1
   max_count             = 2
+  availability_zones    = [1, 2, 3]
+  vnet_subnet_id        = azurerm_subnet.privatek8s_tier.id
 
   # Spot instances
   priority        = "Spot"
@@ -86,8 +99,7 @@ resource "azurerm_public_ip" "public_privatek8s" {
   resource_group_name = azurerm_resource_group.privatek8s.name
   location            = var.location
   allocation_method   = "Static"
-
-  tags = local.default_tags
+  tags                = local.default_tags
 }
 
 resource "azurerm_dns_a_record" "public_privatek8s" {
@@ -96,8 +108,7 @@ resource "azurerm_dns_a_record" "public_privatek8s" {
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 300
   records             = [azurerm_public_ip.public_privatek8s.ip_address]
-
-  tags = local.default_tags
+  tags                = local.default_tags
 }
 
 # one public IP for gateway (?)
@@ -116,5 +127,5 @@ output "privatek8s_kube_config" {
 }
 
 output "privatek8s_public_ip_address" {
-  value     = azurerm_public_ip.public_privatek8s.ip_address
+  value = azurerm_public_ip.public_privatek8s.ip_address
 }
