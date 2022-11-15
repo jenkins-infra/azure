@@ -64,7 +64,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
   enable_auto_scaling   = true
   min_count             = 1
   max_count             = 3
-  availability_zones    = [1, 2, 3]
+  zones                 = [1, 2, 3]
   vnet_subnet_id        = azurerm_subnet.privatek8s_tier.id
   tags                  = local.default_tags
 }
@@ -77,7 +77,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   enable_auto_scaling   = true
   min_count             = 1
   max_count             = 2
-  availability_zones    = [1, 2, 3]
+  zones                 = [1, 2, 3]
   vnet_subnet_id        = azurerm_subnet.privatek8s_tier.id
 
   # Spot instances
