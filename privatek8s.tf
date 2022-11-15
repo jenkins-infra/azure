@@ -54,6 +54,11 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
     type = "SystemAssigned"
   }
 
+  azure_active_directory_role_based_access_control {
+    managed = true
+    # admin_group_object_ids = 
+  }
+
   tags = local.default_tags
 }
 
