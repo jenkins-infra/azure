@@ -29,6 +29,7 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   name                              = "privatek8s-${random_pet.suffix_privatek8s.id}"
   location                          = azurerm_resource_group.privatek8s.location
   resource_group_name               = azurerm_resource_group.privatek8s.name
+  node_resource_group               = "${azurerm_resource_group.privatek8s.name}-aks"
   kubernetes_version                = data.azurerm_kubernetes_service_versions.current.latest_version
   dns_prefix                        = "privatek8s-${random_pet.suffix_privatek8s.id}"
   role_based_access_control_enabled = true                                 # default value, added to please tfsec
@@ -96,7 +97,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
 
 resource "azurerm_public_ip" "public_privatek8s" {
   name                = "public-privatek8s"
-  resource_group_name = azurerm_resource_group.privatek8s.name
+  resource_group_name = "${azurerm_resource_group.privatek8s.name}-aks"
   location            = var.location
   allocation_method   = "Static"
   tags                = local.default_tags
