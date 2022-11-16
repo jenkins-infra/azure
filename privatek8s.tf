@@ -31,8 +31,8 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   resource_group_name               = azurerm_resource_group.privatek8s.name
   kubernetes_version                = data.azurerm_kubernetes_service_versions.current.latest_version
   dns_prefix                        = "privatek8s-${random_pet.suffix_privatek8s.id}"
-  role_based_access_control_enabled = true                                 # default value, added to please tfsec
-  api_server_authorized_ip_ranges   = ["0.0.0.0/32", "176.185.227.180/32"] # TODO: set correct value
+  role_based_access_control_enabled = true                   # default value, added to please tfsec
+  api_server_authorized_ip_ranges   = ["176.185.227.180/32"] # TODO: set correct value
   # public_network_access_enabled     = true # default value, 'no changes.'
   network_profile {
     network_plugin = "azure"
@@ -54,10 +54,10 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
     type = "SystemAssigned"
   }
 
-  azure_active_directory_role_based_access_control {
-    managed = true
-    # admin_group_object_ids = 
-  }
+  # azure_active_directory_role_based_access_control {
+  #   managed = true
+  #   # admin_group_object_ids = 
+  # }
 
   tags = local.default_tags
 }
@@ -122,6 +122,19 @@ resource "azurerm_dns_a_record" "public_privatek8s" {
 # public IP external requests count is limited
 
 # definition of storage classes with correct CSI type (with helmfile provider)
+
+data "azurerm_user_assigned_identity" "privatek8s_agentpool" {
+  name                = "${azurerm_kubernetes_cluster.privatek8s.name}-agentpool"
+  resource_group_name = azurerm_kubernetes_cluster.privatek8s.node_resource_group
+}
+
+resource "azurerm_role_assignment" "privatek8s_networkcontributor" {
+  scope                = azurerm_subnet.privatek8s_tier.id
+  role_definition_name = "Network Contributor"
+  principal_id         = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
+  # principal_id                     = data.azurerm_user_assigned_identity.privatek8s_agentpool.principal_id
+  skip_service_principal_aad_check = true
+}
 
 output "privatek8s_client_certificate" {
   value     = azurerm_kubernetes_cluster.privatek8s.kube_config.0.client_certificate
