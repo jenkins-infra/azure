@@ -1,3 +1,6 @@
+data "azurerm_subscription" "jenkins" {
+}
+
 resource "azurerm_resource_group" "privatek8s" {
   name     = "privatek8s"
   location = var.location
@@ -20,9 +23,9 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   name                              = "privatek8s-${random_pet.suffix_privatek8s.id}"
   location                          = azurerm_resource_group.privatek8s.location
   resource_group_name               = azurerm_resource_group.privatek8s.name
-  kubernetes_version                = kubernetes_version
+  kubernetes_version                = var.kubernetes_version
   dns_prefix                        = "privatek8s-${random_pet.suffix_privatek8s.id}"
-  role_based_access_control_enabled = true                   # default value, added to please tfsec
+  role_based_access_control_enabled = true # default value, added to please tfsec
   # api_server_authorized_ip_ranges   = ["176.185.227.180/32"] # TODO: set correct value
 
   network_profile {
