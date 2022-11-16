@@ -106,6 +106,7 @@ resource "azurerm_public_ip" "public_privatek8s" {
   resource_group_name = azurerm_kubernetes_cluster.privatek8s.node_resource_group
   location            = var.location
   allocation_method   = "Static"
+  sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
   tags                = local.default_tags
 }
 
