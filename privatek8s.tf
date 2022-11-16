@@ -23,7 +23,7 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   kubernetes_version                = kubernetes_version
   dns_prefix                        = "privatek8s-${random_pet.suffix_privatek8s.id}"
   role_based_access_control_enabled = true                   # default value, added to please tfsec
-  api_server_authorized_ip_ranges   = ["176.185.227.180/32"] # TODO: set correct value
+  # api_server_authorized_ip_ranges   = ["176.185.227.180/32"] # TODO: set correct value
 
   network_profile {
     network_plugin = "azure"
