@@ -18,7 +18,7 @@ resource "azurerm_subnet" "privatek8s_tier" {
   address_prefixes     = ["10.242.0.0/16"]
 }
 
-#tfsec:ignore:azure-container-logging
+#tfsec:ignore:azure-container-logging #tfsec:ignore:azure-container-limit-authorized-ips
 resource "azurerm_kubernetes_cluster" "privatek8s" {
   name                              = "privatek8s-${random_pet.suffix_privatek8s.id}"
   location                          = azurerm_resource_group.privatek8s.location
