@@ -15,25 +15,16 @@ resource "azurerm_subnet" "privatek8s_tier" {
   address_prefixes     = ["10.242.0.0/16"]
 }
 
-# Automatic upgrades for patch versions
-# Note: The first time we apply this configuration, Terraform will apply whatever latest version it finds in the AKS versions data source.
-# When new versions are available, AKS will upgrade automatically. But Azure will not allow skip-version upgrades.
-# You may need to pin your data source to the next version, upgrade, then remove the pinning and upgrade again to get to the latest version.
-data "azurerm_kubernetes_service_versions" "current" {
-  location       = var.location
-  version_prefix = "1.23"
-}
-
 #tfsec:ignore:azure-container-logging
 resource "azurerm_kubernetes_cluster" "privatek8s" {
   name                              = "privatek8s-${random_pet.suffix_privatek8s.id}"
   location                          = azurerm_resource_group.privatek8s.location
   resource_group_name               = azurerm_resource_group.privatek8s.name
-  kubernetes_version                = data.azurerm_kubernetes_service_versions.current.latest_version
+  kubernetes_version                = kubernetes_version
   dns_prefix                        = "privatek8s-${random_pet.suffix_privatek8s.id}"
   role_based_access_control_enabled = true                   # default value, added to please tfsec
   api_server_authorized_ip_ranges   = ["176.185.227.180/32"] # TODO: set correct value
-  # public_network_access_enabled     = true # default value, 'no changes.'
+
   network_profile {
     network_plugin = "azure"
     network_policy = "azure"
@@ -42,22 +33,16 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   }
 
   default_node_pool {
-    name                 = "systempool"
-    vm_size              = "Standard_D2as_v4"
-    orchestrator_version = data.azurerm_kubernetes_service_versions.current.latest_version
-    node_count           = 1
-    vnet_subnet_id       = azurerm_subnet.privatek8s_tier.id
-    tags                 = local.default_tags
+    name           = "systempool"
+    vm_size        = "Standard_D2as_v4"
+    node_count     = 1
+    vnet_subnet_id = azurerm_subnet.privatek8s_tier.id
+    tags           = local.default_tags
   }
 
   identity {
     type = "SystemAssigned"
   }
-
-  # azure_active_directory_role_based_access_control {
-  #   managed = true
-  #   # admin_group_object_ids = 
-  # }
 
   tags = local.default_tags
 }
@@ -65,10 +50,9 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
 resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
   name                  = "linuxpool"
   vm_size               = "Standard_D4s_v3"
-  orchestrator_version  = data.azurerm_kubernetes_service_versions.current.latest_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
-  min_count             = 1
+  min_count             = 0
   max_count             = 3
   zones                 = [1, 2, 3]
   vnet_subnet_id        = azurerm_subnet.privatek8s_tier.id
@@ -78,10 +62,9 @@ resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
 resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   name                  = "infracipool"
   vm_size               = "Standard_D4s_v3"
-  orchestrator_version  = data.azurerm_kubernetes_service_versions.current.latest_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
-  min_count             = 1
+  min_count             = 0
   max_count             = 2
   zones                 = [1, 2, 3]
   vnet_subnet_id        = azurerm_subnet.privatek8s_tier.id
@@ -119,27 +102,11 @@ resource "azurerm_dns_a_record" "public_privatek8s" {
   tags                = local.default_tags
 }
 
-# one public IP for gateway (?)
-# public IP external requests count is limited
-
-# definition of storage classes with correct CSI type (with helmfile provider)
-
-data "azurerm_user_assigned_identity" "privatek8s_agentpool" {
-  name                = "${azurerm_kubernetes_cluster.privatek8s.name}-agentpool"
-  resource_group_name = azurerm_kubernetes_cluster.privatek8s.node_resource_group
-}
-
 resource "azurerm_role_assignment" "privatek8s_networkcontributor" {
-  scope                = azurerm_subnet.privatek8s_tier.id
-  role_definition_name = "Network Contributor"
-  principal_id         = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
-  # principal_id                     = data.azurerm_user_assigned_identity.privatek8s_agentpool.principal_id
+  scope                            = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private_prod.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private_prod.name}/subnets/${azurerm_subnet.privatek8s_tier.name}" # azurerm_subnet.privatek8s_tier.name
+  role_definition_name             = "Network Contributor"
+  principal_id                     = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
   skip_service_principal_aad_check = true
-}
-
-output "privatek8s_client_certificate" {
-  value     = azurerm_kubernetes_cluster.privatek8s.kube_config.0.client_certificate
-  sensitive = true
 }
 
 output "privatek8s_kube_config" {
