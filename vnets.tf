@@ -21,6 +21,9 @@
 #                        |                |
 #                        +----------------+
 #
+#
+# See also https://github.com/jenkins-infra/azure/blob/legacy-tf/plans/vnets.tf
+
 ## RESOURCE GROUPS
 ################################################################################
 data "azurerm_resource_group" "public_prod" {
