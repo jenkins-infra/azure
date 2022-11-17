@@ -38,9 +38,11 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   default_node_pool {
     name           = "systempool"
     vm_size        = "Standard_D2as_v4"
+    os_disk_type   = "Ephemeral"
     node_count     = 1
     vnet_subnet_id = azurerm_subnet.privatek8s_tier.id
     tags           = local.default_tags
+    zones          = [3]
   }
 
   identity {
@@ -53,11 +55,12 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
 resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
   name                  = "linuxpool"
   vm_size               = "Standard_D4s_v3"
+  os_disk_type          = "Ephemeral"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
   min_count             = 0
   max_count             = 3
-  zones                 = [1, 2, 3]
+  zones                 = [3]
   vnet_subnet_id        = azurerm_subnet.privatek8s_tier.id
   tags                  = local.default_tags
 }
@@ -65,11 +68,12 @@ resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
 resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   name                  = "infracipool"
   vm_size               = "Standard_D4s_v3"
+  os_disk_type          = "Ephemeral"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
   min_count             = 0
   max_count             = 2
-  zones                 = [1, 2, 3]
+  zones                 = [3]
   vnet_subnet_id        = azurerm_subnet.privatek8s_tier.id
 
   # Spot instances
