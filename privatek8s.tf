@@ -2,7 +2,7 @@ data "azurerm_subscription" "jenkins" {
 }
 
 resource "azurerm_resource_group" "privatek8s" {
-  name     = "privatek8s"
+  name     = "prod-privatek8s"
   location = var.location
   tags     = local.default_tags
 }
