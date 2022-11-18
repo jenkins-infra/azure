@@ -12,7 +12,7 @@ resource "random_pet" "suffix_privatek8s" {
 }
 
 # Important: the Enterprise Application "terraform-production" used by this repo pipeline needs to be able to manage this subnet
-# See the corresponding role assignment defined here (private repo):
+# See the corresponding role assignment defined here for this cluster (private repo):
 # https://github.com/jenkins-infra/terraform-states/blob/897b8a3764623764dd0e2a14e78b2347bd4ece01/azure/main.tf#L49
 resource "azurerm_subnet" "privatek8s_tier" {
   name                 = "privatek8s-tier"
