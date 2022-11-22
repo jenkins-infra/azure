@@ -122,6 +122,18 @@ resource "azurerm_role_assignment" "privatek8s_networkcontributor" {
   skip_service_principal_aad_check = true
 }
 
+resource "kubernetes_storage_class" "managed_csi_premium_retain" {
+  metadata {
+    name = "managed-csi-premium-retain"
+  }
+  storage_provisioner = "disk.csi.azure.com"
+  reclaim_policy      = "Retain"
+  parameters = {
+    skuname = "Premium_LRS"
+  }
+  provider = kubernetes.privatek8s
+}
+
 output "privatek8s_kube_config" {
   value     = azurerm_kubernetes_cluster.privatek8s.kube_config_raw
   sensitive = true
