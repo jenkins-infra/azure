@@ -5,6 +5,9 @@ terraform {
     azurerm = {
       source = "hashicorp/azurerm"
     }
+    kubernetes = {
+      source = "hashicorp/kubernetes"
+    }
     local = {
       source = "hashicorp/local"
     }

@@ -3,6 +3,14 @@ provider "azurerm" {
   features {}
 }
 
+provider "kubernetes" {
+  alias                  = "privatek8s"
+  host                   = azurerm_kubernetes_cluster.privatek8s.kube_config.0.host
+  client_certificate     = base64decode(azurerm_kubernetes_cluster.privatek8s.kube_config.0.client_certificate)
+  client_key             = base64decode(azurerm_kubernetes_cluster.privatek8s.kube_config.0.client_key)
+  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.privatek8s.kube_config.0.cluster_ca_certificate)
+}
+
 provider "postgresql" {
   /**
   Important: terraform must be allowed to reach this instance through the network. Check the followings:
