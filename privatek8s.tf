@@ -72,13 +72,13 @@ resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
 
 resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   name                  = "infracipool"
-  vm_size               = "Standard_D4s_v3"
+  vm_size               = "Standard_D8s_v3"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 30
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
   min_count             = 0
-  max_count             = 2
+  max_count             = 20
   zones                 = [3]
   vnet_subnet_id        = azurerm_subnet.privatek8s_tier.id
 
@@ -91,7 +91,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
     "kubernetes.azure.com/scalesetpriority" = "spot"
   }
   node_taints = [
-    "kubernetes.azure.com/scalesetpriority=spot:NoSchedule"
+    "jenkins=infra.ci.jenkins.io:NoSchedule",
+    "kubernetes.azure.com/scalesetpriority=spot:NoSchedule",
   ]
 
   tags = local.default_tags
