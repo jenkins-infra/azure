@@ -10,6 +10,8 @@
 
 This repository hosts the infrastructure-as-code definition for all the link:https://azure.com/[Azure hosted] resources for the link:https://www.jenkins.io/projects/infrastructure/[Jenkins Infrastructure Project].
 
+See also https://github.com/jenkins-infra/azure-net for all global network related resources.
+
 == Requirements
 
 In order to use this repository to provision the Jenkins infrastructure on azure, you need:
