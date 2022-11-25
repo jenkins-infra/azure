@@ -34,8 +34,8 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   network_profile {
     network_plugin = "azure"
     network_policy = "azure"
-    ## https://learn.microsoft.com/en-gb/azure/aks/configure-kubenet-dual-stack
-    # ip_versions = ["IPv4", "IPv6"]
+    # https://learn.microsoft.com/en-gb/azure/aks/configure-kubenet-dual-stack
+    ip_versions = ["IPv4", "IPv6"]
   }
 
   default_node_pool {
