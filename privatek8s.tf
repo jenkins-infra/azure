@@ -18,7 +18,8 @@ resource "azurerm_subnet" "privatek8s_tier" {
   name                 = "privatek8s-tier"
   resource_group_name  = data.azurerm_resource_group.prod_private.name
   virtual_network_name = data.azurerm_virtual_network.prod_private.name
-  address_prefixes     = ["10.244.0.0/16"]
+  # See address plan at https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
+  address_prefixes     = ["10.249.0.0/16"]
 }
 
 #tfsec:ignore:azure-container-logging #tfsec:ignore:azure-container-limit-authorized-ips
