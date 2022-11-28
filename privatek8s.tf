@@ -19,7 +19,7 @@ resource "azurerm_subnet" "privatek8s_tier" {
   resource_group_name  = data.azurerm_resource_group.prod_private.name
   virtual_network_name = data.azurerm_virtual_network.prod_private.name
   # See address plan at https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
-  address_prefixes     = ["10.249.0.0/16"]
+  address_prefixes = ["10.249.0.0/16"]
 }
 
 #tfsec:ignore:azure-container-logging #tfsec:ignore:azure-container-limit-authorized-ips
@@ -35,8 +35,6 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   network_profile {
     network_plugin = "azure"
     network_policy = "azure"
-    # https://learn.microsoft.com/en-gb/azure/aks/configure-kubenet-dual-stack
-    ip_versions = ["IPv4", "IPv6"]
   }
 
   default_node_pool {
