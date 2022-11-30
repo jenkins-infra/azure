@@ -12,13 +12,14 @@ data "azurerm_resource_group" "private_prod" {
   name = "prod-jenkins-private-prod"
 }
 
-data "azurerm_resource_group" "prod_public" {
-  name = "prod-jenkins-public"
-}
+# TODO: restore after azure-net vnets renaming
+# data "azurerm_resource_group" "prod_public" {
+#   name = "prod-jenkins-public"
+# }
 
-data "azurerm_resource_group" "prod_private" {
-  name = "prod-jenkins-private"
-}
+# data "azurerm_resource_group" "prod_private" {
+#   name = "prod-jenkins-private"
+# }
 
 ## Virtual Networks
 # Deprecation notice: not included in https://github.com/jenkins-infra/azure-net
