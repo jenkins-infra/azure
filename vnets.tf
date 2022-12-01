@@ -1,50 +1,46 @@
-#
-# This terraform plan defines the resources necessary to provision the Virtual
-# Networks in Azure according to IEP-002:
-#   <https://github.com/jenkins-infra/iep/tree/master/iep-002>
-#
-#                        +---------------------+
-#                        |                     |
-#      +---------------> |  Public Production  <-------+
-#      |                 |                     |       |
-#      |                 +---------------------+     VNet Peering
-#      |                                               |
-#      |                                 +-------------v--------+
-#                        +-------------+ |                      |
-# The Internet --------> + VPN Gateway |-|  Private Production  |
-#                        +-------------+ |                      |
-#      |                                 +----------------------+
-#      |
-#      |                 +----------------+
-#      |                 |                |
-#      +---------------> |   Development  |
-#                        |                |
-#                        +----------------+
-#
-#
-# See also https://github.com/jenkins-infra/azure/blob/legacy-tf/plans/vnets.tf
+# The resources groups and virtual networks below are defined here:
+# https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
 
-## RESOURCE GROUPS
-################################################################################
+## Resource Groups
+# Deprecation notice: not included in https://github.com/jenkins-infra/azure-net
 data "azurerm_resource_group" "public_prod" {
   name = "prod-jenkins-public-prod"
 }
 
+# Deprecation notice: not included in https://github.com/jenkins-infra/azure-net
 data "azurerm_resource_group" "private_prod" {
   name = "prod-jenkins-private-prod"
 }
 
-################################################################################
-## VIRTUAL NETWORKS
-################################################################################
+# Defined in https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
+data "azurerm_resource_group" "public" {
+  name = "public"
+}
+data "azurerm_resource_group" "private" {
+  name = "private"
+}
+
+## Virtual Networks
+# Deprecation notice: not included in https://github.com/jenkins-infra/azure-net
 data "azurerm_virtual_network" "public_prod" {
   name                = "prod-jenkins-public-prod"
   resource_group_name = data.azurerm_resource_group.public_prod.name
 }
 
+# Deprecation notice: not included in https://github.com/jenkins-infra/azure-net
 data "azurerm_virtual_network" "private_prod" {
   name                = "prod-jenkins-private-prod-vnet"
   resource_group_name = data.azurerm_resource_group.private_prod.name
+}
+
+# Defined in https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
+data "azurerm_virtual_network" "public" {
+  name                = "${data.azurerm_resource_group.public.name}-vnet"
+  resource_group_name = data.azurerm_resource_group.public.name
+}
+data "azurerm_virtual_network" "private" {
+  name                = "${data.azurerm_resource_group.private.name}-vnet"
+  resource_group_name = data.azurerm_resource_group.private.name
 }
 
 ################################################################################

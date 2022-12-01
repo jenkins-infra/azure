@@ -16,9 +16,10 @@
 # # https://github.com/jenkins-infra/terraform-states/blob/1f44cdb8c6837021b1007fef383207703b0f4d76/azure/main.tf#L49
 # resource "azurerm_subnet" "privatek8s_tier" {
 #   name                 = "privatek8s-tier"
-#   resource_group_name  = data.azurerm_resource_group.private_prod.name
-#   virtual_network_name = data.azurerm_virtual_network.private_prod.name
-#   address_prefixes     = ["10.242.0.0/16"]
+#   resource_group_name  = data.azurerm_resource_group.prod_private.name
+#   virtual_network_name = data.azurerm_virtual_network.prod_private.name
+#   # See address plan at https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
+#   address_prefixes = ["10.249.0.0/16"]
 # }
 
 # #tfsec:ignore:azure-container-logging #tfsec:ignore:azure-container-limit-authorized-ips
@@ -34,8 +35,6 @@
 #   network_profile {
 #     network_plugin = "azure"
 #     network_policy = "azure"
-#     ## https://learn.microsoft.com/en-gb/azure/aks/configure-kubenet-dual-stack
-#     # ip_versions = ["IPv4", "IPv6"]
 #   }
 
 #   default_node_pool {
