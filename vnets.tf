@@ -12,14 +12,13 @@ data "azurerm_resource_group" "private_prod" {
   name = "prod-jenkins-private-prod"
 }
 
-# TODO: restore after azure-net vnets renaming
-# data "azurerm_resource_group" "prod_public" {
-#   name = "prod-jenkins-public"
-# }
-
-# data "azurerm_resource_group" "prod_private" {
-#   name = "prod-jenkins-private"
-# }
+# Defined in https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
+data "azurerm_resource_group" "public" {
+  name = "public"
+}
+data "azurerm_resource_group" "private" {
+  name = "private"
+}
 
 ## Virtual Networks
 # Deprecation notice: not included in https://github.com/jenkins-infra/azure-net
@@ -34,16 +33,15 @@ data "azurerm_virtual_network" "private_prod" {
   resource_group_name = data.azurerm_resource_group.private_prod.name
 }
 
-# TODO: restore after azure-net vnets renaming
-# data "azurerm_virtual_network" "prod_public" {
-#   name                = "prod-jenkins-public-vnet"
-#   resource_group_name = data.azurerm_resource_group.prod_public.name
-# }
-
-# data "azurerm_virtual_network" "prod_private" {
-#   name                = "prod-jenkins-private-vnet"
-#   resource_group_name = data.azurerm_resource_group.prod_private.name
-# }
+# Defined in https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
+data "azurerm_virtual_network" "public" {
+  name                = "${data.azurerm_resource_group.public.name}-vnet"
+  resource_group_name = data.azurerm_resource_group.public.name
+}
+data "azurerm_virtual_network" "private" {
+  name                = "${data.azurerm_resource_group.private.name}-vnet"
+  resource_group_name = data.azurerm_resource_group.private.name
+}
 
 ################################################################################
 ## SUB NETWORKS
