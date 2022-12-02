@@ -18,5 +18,14 @@ resource "azurerm_storage_account" "archives" {
   tags = local.default_tags
 }
 
-# Dump of confluence databases, see https://github.com/jenkins-infra/helpdesk/issues/3249
-# Should containers be created as code or manually?
+## Archived items
+
+# Container for the dump of confluence databases, see https://github.com/jenkins-infra/helpdesk/issues/3249
+resource "azurerm_storage_container" "confluence_dumps" {
+  name                  = "confluencedatabasedumps"
+  storage_account_name  = azurerm_storage_account.archives.name
+  container_access_type = "private"
+  metadata = merge(local.default_tags, {
+    helpdesk = "https://github.com/jenkins-infra/helpdesk/issues/3249"
+  })
+}
