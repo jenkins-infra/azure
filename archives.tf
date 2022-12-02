@@ -14,6 +14,7 @@ resource "azurerm_storage_account" "archives" {
   public_network_access_enabled   = false
   # https://learn.microsoft.com/en-gb/azure/storage/common/infrastructure-encryption-enable
   infrastructure_encryption_enabled = true
+  min_tls_version                   = "TLS1_2" # default value, needed for tfsec
 
   tags = local.default_tags
 }
