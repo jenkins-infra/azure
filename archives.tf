@@ -22,9 +22,9 @@ resource "azurerm_storage_account" "archives" {
 
 # Archived items
 
-# Container for the dump of confluence databases, see https://github.com/jenkins-infra/helpdesk/issues/3249
+# Container for the dump of confluence databases
 resource "azurerm_storage_container" "confluence_dumps" {
-  name                  = "confluence-databases-dumps"
+  name                  = "confluence-databases-dump"
   storage_account_name  = azurerm_storage_account.archives.name
   container_access_type = "private"
   metadata = merge(local.default_tags, {
