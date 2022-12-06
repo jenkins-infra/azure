@@ -11,8 +11,8 @@ resource "azurerm_storage_account" "archives" {
   account_tier                    = "Standard"
   account_replication_type        = "GRS" # recommended for backups
   allow_nested_items_to_be_public = false
-  # TODO: uncomment and add a network rule allowing only the VPN as soon as this one has been deployed
-  # public_network_access_enabled   = false
+  # TODO: set to false and add a network rule allowing only the VPN as soon as this one has been deployed so we can access containers in the mean time.
+  public_network_access_enabled   = true
   # https://learn.microsoft.com/en-gb/azure/storage/common/infrastructure-encryption-enable
   infrastructure_encryption_enabled = true
   min_tls_version                   = "TLS1_2" # default value, needed for tfsec
