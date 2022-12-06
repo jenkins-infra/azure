@@ -11,7 +11,8 @@ resource "azurerm_storage_account" "archives" {
   account_tier                    = "Standard"
   account_replication_type        = "GRS" # recommended for backups
   allow_nested_items_to_be_public = false
-  public_network_access_enabled   = false
+  # TODO: uncomment and add a network rule allowing only the VPN as soon as this one has been deployed
+  # public_network_access_enabled   = false
   # https://learn.microsoft.com/en-gb/azure/storage/common/infrastructure-encryption-enable
   infrastructure_encryption_enabled = true
   min_tls_version                   = "TLS1_2" # default value, needed for tfsec
@@ -23,7 +24,7 @@ resource "azurerm_storage_account" "archives" {
 
 # Container for the dump of confluence databases, see https://github.com/jenkins-infra/helpdesk/issues/3249
 resource "azurerm_storage_container" "confluence_dumps" {
-  name                  = "confluencedatabasedumps"
+  name                  = "confluence-databases-dumps"
   storage_account_name  = azurerm_storage_account.archives.name
   container_access_type = "private"
   metadata = merge(local.default_tags, {
