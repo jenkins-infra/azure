@@ -34,6 +34,12 @@ locals {
     }
   }
 
+  archives_allowed_ips = {
+    dduportal   = "109.88.253.68"
+    lemeurherve = "176.185.227.180"
+    smerle33    = "82.64.5.129"
+  }
+
   default_tags = {
     scope      = "terraform-managed"
     repository = "jenkins-infra/azure"

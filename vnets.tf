@@ -47,6 +47,14 @@ data "azurerm_virtual_network" "private" {
 ## SUB NETWORKS
 ################################################################################
 
+# Deprecation notice: not included in https://github.com/jenkins-infra/azure-net
+# temp-privatek8s subnet
+data "azurerm_subnet" "default" {
+  name                 = "default"
+  virtual_network_name = data.azurerm_virtual_network.private_prod.name
+  resource_group_name  = data.azurerm_resource_group.private_prod.name
+}
+
 # "pgsql-tier" subnet is reserved as "delegated" for the pgsql server on the public network
 # Ref. https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking
 resource "azurerm_subnet" "pgsql_tier" {

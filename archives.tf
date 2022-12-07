@@ -10,16 +10,21 @@ resource "azurerm_storage_account" "archives" {
   location                 = azurerm_resource_group.archives.location
   account_tier             = "Standard"
   account_replication_type = "GRS" # recommended for backups
-  # TODO: set to false and add a network rule allowing only the VPN as soon as this one has been deployed so we can access containers in the mean time.
-  public_network_access_enabled = true
   # https://learn.microsoft.com/en-gb/azure/storage/common/infrastructure-encryption-enable
   infrastructure_encryption_enabled = true
   min_tls_version                   = "TLS1_2" # default value, needed for tfsec
 
+  network_rules {
+    default_action             = "Deny"
+    ip_rules                   = values(local.archives_allowed_ips)
+    # TODO: replace temp-privatek8s "default" subnet by privatek8s one when switching to the new cluster
+    virtual_network_subnet_ids = [data.azurerm_subnet.default.id]
+  }
+
   tags = local.default_tags
 }
 
-# Archived items
+## Archived items
 
 # Container for the dump of confluence databases
 resource "azurerm_storage_container" "confluence_dumps" {
