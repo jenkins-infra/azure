@@ -5,12 +5,11 @@ resource "azurerm_resource_group" "archives" {
 }
 
 resource "azurerm_storage_account" "archives" {
-  name                            = "jenkinsinfraarchives"
-  resource_group_name             = azurerm_resource_group.archives.name
-  location                        = azurerm_resource_group.archives.location
-  account_tier                    = "Standard"
-  account_replication_type        = "GRS" # recommended for backups
-  allow_nested_items_to_be_public = false
+  name                     = "jenkinsinfraarchives"
+  resource_group_name      = azurerm_resource_group.archives.name
+  location                 = azurerm_resource_group.archives.location
+  account_tier             = "Standard"
+  account_replication_type = "GRS" # recommended for backups
   # TODO: set to false and add a network rule allowing only the VPN as soon as this one has been deployed so we can access containers in the mean time.
   public_network_access_enabled = true
   # https://learn.microsoft.com/en-gb/azure/storage/common/infrastructure-encryption-enable
