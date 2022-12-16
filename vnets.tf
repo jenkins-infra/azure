@@ -55,6 +55,13 @@ data "azurerm_subnet" "default" {
   resource_group_name  = data.azurerm_resource_group.private_prod.name
 }
 
+# Defined in https://github.com/jenkins-infra/azure-net/blob/main/vpn.tf
+data "azurerm_subnet" "vpn" {
+  name                 = "${data.azurerm_virtual_network.private.name}-vpn"
+  virtual_network_name = data.azurerm_virtual_network.private.name
+  resource_group_name  = data.azurerm_resource_group.private.name
+}
+
 # "pgsql-tier" subnet is reserved as "delegated" for the pgsql server on the public network
 # Ref. https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking
 resource "azurerm_subnet" "pgsql_tier" {

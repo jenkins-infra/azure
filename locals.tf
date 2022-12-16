@@ -34,7 +34,7 @@ locals {
     }
   }
 
-  archives_allowed_ips = {
+  admin_allowed_ips = {
     dduportal   = "109.88.253.68"
     lemeurherve = "176.185.227.180"
     smerle33    = "82.64.5.129"

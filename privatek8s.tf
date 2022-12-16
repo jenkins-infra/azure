@@ -16,8 +16,8 @@ resource "random_pet" "suffix_privatek8s" {
 # https://github.com/jenkins-infra/terraform-states/blob/1f44cdb8c6837021b1007fef383207703b0f4d76/azure/main.tf#L49
 resource "azurerm_subnet" "privatek8s_tier" {
   name                 = "privatek8s-tier"
-  resource_group_name  = data.azurerm_resource_group.prod_private.name
-  virtual_network_name = data.azurerm_virtual_network.prod_private.name
+  resource_group_name  = data.azurerm_resource_group.private.name
+  virtual_network_name = data.azurerm_virtual_network.private.name
   # See address plan at https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
   address_prefixes = ["10.249.0.0/16"]
 }
@@ -30,7 +30,12 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   kubernetes_version                = var.kubernetes_version
   dns_prefix                        = "privatek8s-${random_pet.suffix_privatek8s.id}"
   role_based_access_control_enabled = true # default value, added to please tfsec
-  # api_server_authorized_ip_ranges   = ["176.185.227.180/32"] # TODO: set correct value
+  api_server_authorized_ip_ranges = setunion(
+    values(local.admin_allowed_ips),
+    data.azurerm_subnet.vpn.address_prefixes,
+    # temp-privatek8s nodes subnet
+    data.azurerm_subnet.default.address_prefixes
+  )
 
   network_profile {
     network_plugin = "azure"
@@ -141,4 +146,8 @@ output "privatek8s_kube_config" {
 
 output "privatek8s_public_ip_address" {
   value = azurerm_public_ip.public_privatek8s.ip_address
+}
+
+output "privatek8s_kube_config_command" {
+  value = "az aks get-credentials --name ${azurerm_kubernetes_cluster.privatek8s.name} --resource-group ${azurerm_kubernetes_cluster.privatek8s.resource_group_name}"
 }
