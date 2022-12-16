@@ -102,24 +102,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   tags = local.default_tags
 }
 
-resource "azurerm_public_ip" "public_privatek8s" {
-  name                = "public-privatek8s"
-  resource_group_name = azurerm_kubernetes_cluster.privatek8s.node_resource_group
-  location            = var.location
-  allocation_method   = "Static"
-  sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
-  tags                = local.default_tags
-}
-
-resource "azurerm_dns_a_record" "public_privatek8s" {
-  name                = "public.privatek8s"
-  zone_name           = data.azurerm_dns_zone.jenkinsio.name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 300
-  records             = [azurerm_public_ip.public_privatek8s.ip_address]
-  tags                = local.default_tags
-}
-
 resource "azurerm_role_assignment" "privatek8s_networkcontributor" {
   scope                            = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private_prod.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private_prod.name}/subnets/${azurerm_subnet.privatek8s_tier.name}" # azurerm_subnet.privatek8s_tier.name
   role_definition_name             = "Network Contributor"
@@ -137,6 +119,25 @@ resource "kubernetes_storage_class" "managed_csi_premium_retain" {
     skuname = "Premium_LRS"
   }
   provider = kubernetes.privatek8s
+}
+
+# Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/privatek8s.yaml
+resource "azurerm_public_ip" "public_privatek8s" {
+  name                = "public-privatek8s"
+  resource_group_name = azurerm_kubernetes_cluster.privatek8s.node_resource_group
+  location            = var.location
+  allocation_method   = "Static"
+  sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
+  tags                = local.default_tags
+}
+
+resource "azurerm_dns_a_record" "public_privatek8s" {
+  name                = "public.privatek8s"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 300
+  records             = [azurerm_public_ip.public_privatek8s.ip_address]
+  tags                = local.default_tags
 }
 
 output "privatek8s_kube_config" {
