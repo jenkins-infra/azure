@@ -34,7 +34,8 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
     values(local.admin_allowed_ips),
     data.azurerm_subnet.vpn.address_prefixes,
     # temp-privatek8s nodes subnet
-    data.azurerm_subnet.default.address_prefixes
+    data.azurerm_subnet.default.address_prefixes,
+    [local.temp_privatek8s_pod_ip]
   )
 
   network_profile {
