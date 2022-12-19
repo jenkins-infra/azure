@@ -104,7 +104,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
 }
 
 resource "azurerm_role_assignment" "privatek8s_networkcontributor" {
-  scope                            = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private_prod.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private_prod.name}/subnets/${azurerm_subnet.privatek8s_tier.name}" # azurerm_subnet.privatek8s_tier.name
+  scope                            = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}/subnets/${azurerm_subnet.privatek8s_tier.name}" # azurerm_subnet.privatek8s_tier.name
   role_definition_name             = "Network Contributor"
   principal_id                     = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
   skip_service_principal_aad_check = true
