@@ -56,8 +56,8 @@ data "azurerm_subnet" "default" {
 }
 
 # Defined in https://github.com/jenkins-infra/azure-net/blob/main/vpn.tf
-data "azurerm_subnet" "vpn" {
-  name                 = "${data.azurerm_virtual_network.private.name}-vpn"
+data "azurerm_subnet" "private_vnet_data_tier" {
+  name                 = "${data.azurerm_virtual_network.private.name}-data-tier"
   virtual_network_name = data.azurerm_virtual_network.private.name
   resource_group_name  = data.azurerm_resource_group.private.name
 }
