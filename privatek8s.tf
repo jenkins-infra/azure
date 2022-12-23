@@ -110,7 +110,7 @@ resource "azurerm_role_assignment" "privatek8s_networkcontributor" {
 }
 
 # Allow cluster to manage LBs in the data-tier subnet (internal LBs)
-resource "azurerm_role_assignment" "privatek8s_networkcontributor" {
+resource "azurerm_role_assignment" "datatier_networkcontributor" {
   scope                            = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}/subnets/${data.azurerm_subnet.private_vnet_data_tier.name}"
   role_definition_name             = "Network Contributor"
   principal_id                     = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
