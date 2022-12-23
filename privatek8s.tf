@@ -101,8 +101,17 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   tags = local.default_tags
 }
 
+# Allow cluster to manage LBs in the privatek8s-tier subnet (Public LB)
 resource "azurerm_role_assignment" "privatek8s_networkcontributor" {
-  scope                            = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}/subnets/${data.azurerm_subnet.privatek8s_tier.name}" # azurerm_subnet.privatek8s_tier.name
+  scope                            = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}/subnets/${data.azurerm_subnet.privatek8s_tier.name}"
+  role_definition_name             = "Network Contributor"
+  principal_id                     = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
+  skip_service_principal_aad_check = true
+}
+
+# Allow cluster to manage LBs in the data-tier subnet (internal LBs)
+resource "azurerm_role_assignment" "privatek8s_networkcontributor" {
+  scope                            = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}/subnets/${data.azurerm_subnet.private_vnet_data_tier.name}"
   role_definition_name             = "Network Contributor"
   principal_id                     = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
   skip_service_principal_aad_check = true
