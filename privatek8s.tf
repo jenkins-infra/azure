@@ -14,12 +14,10 @@ resource "random_pet" "suffix_privatek8s" {
 # Important: the Enterprise Application "terraform-production" used by this repo pipeline needs to be able to manage this subnet
 # See the corresponding role assignment for this cluster added here (private repo):
 # https://github.com/jenkins-infra/terraform-states/blob/1f44cdb8c6837021b1007fef383207703b0f4d76/azure/main.tf#L49
-resource "azurerm_subnet" "privatek8s_tier" {
+data "azurerm_subnet" "privatek8s_tier" {
   name                 = "privatek8s-tier"
   resource_group_name  = data.azurerm_resource_group.private.name
   virtual_network_name = data.azurerm_virtual_network.private.name
-  # See address plan at https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
-  address_prefixes = ["10.249.0.0/16"]
 }
 
 #tfsec:ignore:azure-container-logging #tfsec:ignore:azure-container-limit-authorized-ips
@@ -32,7 +30,7 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   role_based_access_control_enabled = true # default value, added to please tfsec
   api_server_authorized_ip_ranges = setunion(
     values(local.admin_allowed_ips),
-    data.azurerm_subnet.vpn.address_prefixes,
+    data.azurerm_subnet.data_tier.address_prefixes,
     # temp-privatek8s nodes subnet
     data.azurerm_subnet.default.address_prefixes,
     [local.temp_privatek8s_pod_ip]
@@ -49,7 +47,7 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
     os_disk_type    = "Ephemeral"
     os_disk_size_gb = 30
     node_count      = 1
-    vnet_subnet_id  = azurerm_subnet.privatek8s_tier.id
+    vnet_subnet_id  = data.azurerm_subnet.privatek8s_tier.id
     tags            = local.default_tags
     zones           = [3]
   }
@@ -71,7 +69,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
   min_count             = 0
   max_count             = 3
   zones                 = [3]
-  vnet_subnet_id        = azurerm_subnet.privatek8s_tier.id
+  vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
   tags                  = local.default_tags
 }
 
@@ -85,7 +83,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   min_count             = 0
   max_count             = 20
   zones                 = [3]
-  vnet_subnet_id        = azurerm_subnet.privatek8s_tier.id
+  vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
 
   # Spot instances
   priority        = "Spot"
@@ -104,7 +102,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
 }
 
 resource "azurerm_role_assignment" "privatek8s_networkcontributor" {
-  scope                            = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}/subnets/${azurerm_subnet.privatek8s_tier.name}" # azurerm_subnet.privatek8s_tier.name
+  scope                            = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}/subnets/${data.azurerm_subnet.privatek8s_tier.name}" # azurerm_subnet.privatek8s_tier.name
   role_definition_name             = "Network Contributor"
   principal_id                     = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
   skip_service_principal_aad_check = true
