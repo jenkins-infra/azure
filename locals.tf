@@ -35,9 +35,7 @@ locals {
   }
 
   admin_allowed_ips = {
-    dduportal        = "109.88.253.68"
-    dduportal-travel = "86.194.33.212"
-    dduportal-mobile = "92.184.112.186"
+    dduportal        = "109.88.253.125"
     lemeurherve      = "176.185.227.180"
     smerle33         = "82.64.5.129"
   }
