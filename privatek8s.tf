@@ -18,6 +18,8 @@ data "azurerm_subnet" "privatek8s_tier" {
   name                 = "privatek8s-tier"
   resource_group_name  = data.azurerm_resource_group.private.name
   virtual_network_name = data.azurerm_virtual_network.private.name
+  # Enable KeyVault service endpoint so the cluster can access secrets to update other clusters
+  service_endpoints = ["Microsoft.KeyVault"]
 }
 
 #tfsec:ignore:azure-container-logging #tfsec:ignore:azure-container-limit-authorized-ips
