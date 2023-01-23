@@ -33,9 +33,6 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
     authorized_ip_ranges = setunion(
       values(local.admin_allowed_ips),
       data.azurerm_subnet.private_vnet_data_tier.address_prefixes,
-      # temp-privatek8s nodes subnet
-      data.azurerm_subnet.default.address_prefixes,
-      [local.temp_privatek8s_pod_ip]
     )
   }
 
