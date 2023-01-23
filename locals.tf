@@ -35,13 +35,15 @@ locals {
   }
 
   admin_allowed_ips = {
-    dduportal        = "109.88.253.125"
-    lemeurherve      = "176.185.227.180"
-    smerle33         = "82.64.5.129"
+    dduportal   = "109.88.253.125"
+    lemeurherve = "176.185.227.180"
+    smerle33    = "82.64.5.129"
   }
 
   # TODO: remove when switching infra.ci.jenkins.io from temp-privatek8s to privatek8s
   temp_privatek8s_pod_ip = "20.72.105.159"
+
+  privatek8s_pod_ip = "20.96.66.246"
 
   default_tags = {
     scope      = "terraform-managed"
