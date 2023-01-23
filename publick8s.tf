@@ -1,6 +1,3 @@
-data "azurerm_subscription" "jenkins" {
-}
-
 resource "azurerm_resource_group" "publick8s" {
   name     = "publick8s"
   location = var.location
@@ -105,7 +102,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
 
 # Allow cluster to manage LBs in the publick8s-tier subnet (Public LB)
 resource "azurerm_role_assignment" "publick8s_networkcontributor" {
-  scope                            = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}/subnets/${data.azurerm_subnet.privatek8s_tier.name}" #?
+  scope                            = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}/subnets/${data.azurerm_subnet.publick8s_tier.name}"
   role_definition_name             = "Network Contributor"
   principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
   skip_service_principal_aad_check = true
