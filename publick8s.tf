@@ -68,21 +68,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "publicpool" {
   max_count             = 20
   zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
-
-  #   # Spot instances
-  #   priority        = "Spot"
-  #   eviction_policy = "Delete"
-  #   spot_max_price  = "-1" # in $, -1 = On demand pricing
-  #   # Note: label and taint added automatically when in "Spot" priority, putting it here to explicit them
-  #   node_labels = {
-  #     "kubernetes.azure.com/scalesetpriority" = "spot"
-  #   }
-  #   node_taints = [
-  #     "jenkins=infra.ci.jenkins.io:NoSchedule",
-  #     "kubernetes.azure.com/scalesetpriority=spot:NoSchedule",
-  #   ]
-
-  tags = local.default_tags
+  tags                  = local.default_tags
 }
 
 # Allow cluster to manage LBs in the publick8s-tier subnet (Public LB)
