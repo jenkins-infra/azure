@@ -8,9 +8,9 @@ resource "random_pet" "suffix_publick8s" {
   # You want to taint this resource in order to get a new pet
 }
 
-# Important: the Enterprise Application "terraform-production" used by this repo pipeline needs to be able to manage this subnet
+# Important: the Enterprise Application "terraform-production" used by this repo pipeline needs to be able to manage this vnet
 # See the corresponding role assignment for this cluster added here (private repo):
-# https://github.com/jenkins-infra/terraform-states/blob/1f44cdb8c6837021b1007fef383207703b0f4d76/azure/main.tf#L49
+# https://github.com/jenkins-infra/terraform-states/blob/44521bf0a03b4ab1a99712c215d40afafcaf04d6/azure/main.tf#L75
 data "azurerm_subnet" "publick8s_tier" {
   name                 = "publick8s-tier"
   resource_group_name  = data.azurerm_resource_group.public.name
