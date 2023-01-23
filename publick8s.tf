@@ -58,15 +58,15 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   tags = local.default_tags
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
-  name                  = "linuxpool"
+resource "azurerm_kubernetes_cluster_node_pool" "publicpool" {
+  name                  = "publicpool"
   vm_size               = "Standard_D4s_v3"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 30
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   enable_auto_scaling   = true
   min_count             = 0
-  max_count             = 3
+  max_count             = 20
   zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
   tags                  = local.default_tags
@@ -109,14 +109,14 @@ resource "azurerm_role_assignment" "publick8s_networkcontributor" {
 }
 
 # Allow cluster to manage LBs in the data-tier subnet (internal LBs)
-resource "azurerm_role_assignment" "datatier_networkcontributor" {
+resource "azurerm_role_assignment" "datatier_networkcontributor_public" {
   scope                            = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}/subnets/${data.azurerm_subnet.private_vnet_data_tier.name}" #?
   role_definition_name             = "Network Contributor"
   principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
   skip_service_principal_aad_check = true
 }
 
-resource "kubernetes_storage_class" "managed_csi_premium_retain" {
+resource "kubernetes_storage_class" "managed_csi_premium_retain_public" {
   metadata {
     name = "managed-csi-premium-retain"
   }
