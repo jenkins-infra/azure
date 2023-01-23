@@ -36,9 +36,8 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   network_profile {
     network_plugin = "azure"
     network_policy = "azure"
+    ip_versions    = ["IPv4", "IPv6"]
   }
-
-  ip_versions = ["IPv4", "IPv6"]
 
   default_node_pool {
     name            = "systempool"
