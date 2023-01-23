@@ -47,14 +47,6 @@ data "azurerm_virtual_network" "private" {
 ## SUB NETWORKS
 ################################################################################
 
-# Deprecation notice: not included in https://github.com/jenkins-infra/azure-net
-# temp-privatek8s subnet
-data "azurerm_subnet" "default" {
-  name                 = "default"
-  virtual_network_name = data.azurerm_virtual_network.private_prod.name
-  resource_group_name  = data.azurerm_resource_group.private_prod.name
-}
-
 # Defined in https://github.com/jenkins-infra/azure-net/blob/main/vpn.tf
 data "azurerm_subnet" "private_vnet_data_tier" {
   name                 = "${data.azurerm_virtual_network.private.name}-data-tier"

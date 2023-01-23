@@ -40,9 +40,6 @@ locals {
     smerle33    = "82.64.5.129"
   }
 
-  # TODO: remove when switching infra.ci.jenkins.io from temp-privatek8s to privatek8s
-  temp_privatek8s_pod_ip = "20.72.105.159"
-
   default_tags = {
     scope      = "terraform-managed"
     repository = "jenkins-infra/azure"
