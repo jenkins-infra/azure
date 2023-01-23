@@ -28,14 +28,11 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   kubernetes_version                = var.kubernetes_version
   dns_prefix                        = "privatek8s-${random_pet.suffix_privatek8s.id}"
   role_based_access_control_enabled = true # default value, added to please tfsec
-  
+
   api_server_access_profile {
     authorized_ip_ranges = setunion(
       values(local.admin_allowed_ips),
       data.azurerm_subnet.private_vnet_data_tier.address_prefixes,
-      # temp-privatek8s nodes subnet
-      data.azurerm_subnet.default.address_prefixes,
-      [local.temp_privatek8s_pod_ip]
     )
   }
 
