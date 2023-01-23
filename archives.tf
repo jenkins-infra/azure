@@ -17,8 +17,7 @@ resource "azurerm_storage_account" "archives" {
   network_rules {
     default_action = "Deny"
     ip_rules       = values(local.admin_allowed_ips)
-    # TODO: replace temp-privatek8s "default" subnet by privatek8s one when switching to the new cluster
-    virtual_network_subnet_ids = [data.azurerm_subnet.default.id]
+    virtual_network_subnet_ids = [data.azurerm_subnet.privatek8s_tier.id]
     bypass                     = ["AzureServices"]
   }
 
