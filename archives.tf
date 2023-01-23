@@ -15,8 +15,8 @@ resource "azurerm_storage_account" "archives" {
   min_tls_version                   = "TLS1_2" # default value, needed for tfsec
 
   network_rules {
-    default_action = "Deny"
-    ip_rules       = values(local.admin_allowed_ips)
+    default_action             = "Deny"
+    ip_rules                   = values(local.admin_allowed_ips)
     virtual_network_subnet_ids = [data.azurerm_subnet.privatek8s_tier.id]
     bypass                     = ["AzureServices"]
   }
