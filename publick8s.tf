@@ -79,14 +79,6 @@ resource "azurerm_role_assignment" "publick8s_networkcontributor" {
   skip_service_principal_aad_check = true
 }
 
-# Allow cluster to manage LBs in the data-tier subnet (internal LBs)
-resource "azurerm_role_assignment" "datatier_networkcontributor_public" {
-  scope                            = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.public.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.public.name}/subnets/${data.azurerm_subnet.public_vnet_data_tier.name}"
-  role_definition_name             = "Network Contributor"
-  principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
-  skip_service_principal_aad_check = true
-}
-
 resource "kubernetes_storage_class" "managed_csi_premium_retain_public" {
   metadata {
     name = "managed-csi-premium-retain"
