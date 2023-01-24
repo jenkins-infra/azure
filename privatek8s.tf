@@ -25,13 +25,13 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   name                              = "privatek8s-${random_pet.suffix_privatek8s.id}"
   location                          = azurerm_resource_group.privatek8s.location
   resource_group_name               = azurerm_resource_group.privatek8s.name
-  kubernetes_version                = var.kubernetes_version
+  kubernetes_version                = "1.23.12"
   dns_prefix                        = "privatek8s-${random_pet.suffix_privatek8s.id}"
   role_based_access_control_enabled = true # default value, added to please tfsec
 
   api_server_access_profile {
     authorized_ip_ranges = setunion(
-      values(local.admin_allowed_ips),
+      formatlist("%s/32", values(local.admin_allowed_ips)),
       data.azurerm_subnet.private_vnet_data_tier.address_prefixes,
     )
   }
