@@ -25,14 +25,16 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   kubernetes_version                = "1.23.12"
   dns_prefix                        = "publick8s-${random_pet.suffix_publick8s.id}"
   role_based_access_control_enabled = true # default value, added to please tfsec
-  api_server_authorized_ip_ranges = setunion(
-    # admins
-    formatlist("%s/32", values(local.admin_allowed_ips)),
-    # private VPN access
-    data.azurerm_subnet.private_vnet_data_tier.address_prefixes,
-    # privatek8s nodes subnet
-    data.azurerm_subnet.privatek8s_tier.address_prefixes,
-  )
+  api_server_access_profile {
+    authorized_ip_ranges = setunion(
+      # admins
+      formatlist("%s/32", values(local.admin_allowed_ips)),
+      # private VPN access
+      data.azurerm_subnet.private_vnet_data_tier.address_prefixes,
+      # privatek8s nodes subnet
+      data.azurerm_subnet.privatek8s_tier.address_prefixes,
+    )
+  }
 
   network_profile {
     network_plugin = "azure"
