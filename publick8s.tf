@@ -43,13 +43,14 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   }
 
   default_node_pool {
-    name           = "systempool"
-    vm_size        = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
-    os_disk_type   = "Ephemeral"
-    node_count     = 1
-    vnet_subnet_id = data.azurerm_subnet.publick8s_tier.id
-    tags           = local.default_tags
-    zones          = [3]
+    name            = "systempool"
+    vm_size         = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
+    os_disk_type    = "Ephemeral"
+    os_disk_size_gb = 30
+    node_count      = 1
+    vnet_subnet_id  = data.azurerm_subnet.publick8s_tier.id
+    tags            = local.default_tags
+    zones           = [3]
   }
 
   identity {
@@ -63,6 +64,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "publicpool" {
   name                  = "publicpool"
   vm_size               = "Standard_D8s_v3" # 8 vCPU, 32 GB RAM, 64 GB disk, 16 000 IOPS
   os_disk_type          = "Ephemeral"
+  os_disk_size_gb       = 100
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   enable_auto_scaling   = true
   min_count             = 0
