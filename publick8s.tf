@@ -22,15 +22,16 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   name                              = "publick8s-${random_pet.suffix_publick8s.id}"
   location                          = azurerm_resource_group.publick8s.location
   resource_group_name               = azurerm_resource_group.publick8s.name
-  kubernetes_version                = var.kubernetes_version
+  kubernetes_version                = "1.23.12"
   dns_prefix                        = "publick8s-${random_pet.suffix_publick8s.id}"
   role_based_access_control_enabled = true # default value, added to please tfsec
   api_server_authorized_ip_ranges = setunion(
+    # admins
     values(local.admin_allowed_ips),
+    # private VPN access
     data.azurerm_subnet.private_vnet_data_tier.address_prefixes,
     # privatek8s nodes subnet
     data.azurerm_subnet.privatek8s_tier.address_prefixes,
-    [local.privatek8s_outbound_ip]
   )
 
   network_profile {
@@ -40,14 +41,13 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   }
 
   default_node_pool {
-    name            = "systempool"
-    vm_size         = "Standard_D2as_v4"
-    os_disk_type    = "Ephemeral"
-    os_disk_size_gb = 30
-    node_count      = 1
-    vnet_subnet_id  = data.azurerm_subnet.publick8s_tier.id
-    tags            = local.default_tags
-    zones           = [3]
+    name           = "systempool"
+    vm_size        = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
+    os_disk_type   = "Ephemeral"
+    node_count     = 1
+    vnet_subnet_id = data.azurerm_subnet.publick8s_tier.id
+    tags           = local.default_tags
+    zones          = [3]
   }
 
   identity {
@@ -59,13 +59,12 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
 
 resource "azurerm_kubernetes_cluster_node_pool" "publicpool" {
   name                  = "publicpool"
-  vm_size               = "Standard_D4s_v3"
+  vm_size               = "Standard_D8s_v3" # 8 vCPU, 32 GB RAM, 64 GB disk, 16 000 IOPS
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 30
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   enable_auto_scaling   = true
   min_count             = 0
-  max_count             = 20
+  max_count             = 10
   zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
   tags                  = local.default_tags
