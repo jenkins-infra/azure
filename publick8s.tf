@@ -27,7 +27,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   role_based_access_control_enabled = true # default value, added to please tfsec
   api_server_authorized_ip_ranges = setunion(
     # admins
-    values(local.admin_allowed_ips),
+    formatlist("%s/32", values(local.admin_allowed_ips)),
     # private VPN access
     data.azurerm_subnet.private_vnet_data_tier.address_prefixes,
     # privatek8s nodes subnet
