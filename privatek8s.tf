@@ -31,7 +31,7 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
 
   api_server_access_profile {
     authorized_ip_ranges = setunion(
-      values(local.admin_allowed_ips),
+      formatlist("%s/32", values(local.admin_allowed_ips)),
       data.azurerm_subnet.private_vnet_data_tier.address_prefixes,
     )
   }
