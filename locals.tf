@@ -35,9 +35,9 @@ locals {
   }
 
   admin_allowed_ips = {
-    dduportal   = "109.88.253.125/32"
-    lemeurherve = "176.185.227.180/32"
-    smerle33    = "82.64.5.129/32"
+    dduportal   = "109.88.253.125"
+    lemeurherve = "176.185.227.180"
+    smerle33    = "82.64.5.129"
   }
 
   default_tags = {
