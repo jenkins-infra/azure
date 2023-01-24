@@ -37,8 +37,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   }
 
   network_profile {
-    network_plugin = "azure"
-    network_policy = "azure"
+    network_plugin = "kubenet"
     ip_versions    = ["IPv4", "IPv6"]
   }
 
