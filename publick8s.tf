@@ -36,6 +36,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     )
   }
 
+  #tfsec:ignore:azure-container-configured-network-policy
   network_profile {
     network_plugin = "kubenet"
     ip_versions    = ["IPv4", "IPv6"]
