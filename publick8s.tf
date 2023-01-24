@@ -91,10 +91,21 @@ resource "kubernetes_storage_class" "managed_csi_premium_retain_public" {
 }
 
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/publick8s.yaml
-resource "azurerm_public_ip" "public_publick8s" {
-  name                = "public-publick8s"
+resource "azurerm_public_ip" "publick8s_ipv4" {
+  name                = "public-publick8s-ipv4"
   resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
   location            = var.location
+  ip_version          = "IPv4"
+  allocation_method   = "Static"
+  sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
+  tags                = local.default_tags
+}
+
+resource "azurerm_public_ip" "publick8s_ipv6" {
+  name                = "public-publick8s-ipv6"
+  resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
+  location            = var.location
+  ip_version          = "IPv6"
   allocation_method   = "Static"
   sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
   tags                = local.default_tags
@@ -114,8 +125,12 @@ output "publick8s_kube_config" {
   sensitive = true
 }
 
-output "publick8s_public_ip_address" {
-  value = azurerm_public_ip.public_publick8s.ip_address
+output "publick8s_public_ipv4_address" {
+  value = azurerm_public_ip.publick8s_ipv4.ip_address
+}
+
+output "publick8s_public_ipv6_address" {
+  value = azurerm_public_ip.publick8s_ipv6.ip_address
 }
 
 output "publick8s_kube_config_command" {
