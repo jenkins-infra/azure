@@ -40,6 +40,8 @@ locals {
     smerle33    = "82.64.5.129"
   }
 
+  privatek8s_outbound_ip_cidr = "20.96.66.246/32"
+
   default_tags = {
     scope      = "terraform-managed"
     repository = "jenkins-infra/azure"

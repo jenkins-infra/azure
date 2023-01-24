@@ -33,6 +33,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
       data.azurerm_subnet.private_vnet_data_tier.address_prefixes,
       # privatek8s nodes subnet
       data.azurerm_subnet.privatek8s_tier.address_prefixes,
+      [local.privatek8s_outbound_ip_cidr],
     )
   }
 
