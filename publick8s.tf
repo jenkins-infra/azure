@@ -120,7 +120,7 @@ resource "azurerm_dns_a_record" "publick8s_a" {
   tags                = local.default_tags
 }
 
-resource "azurerm_dns_aaaaa_record" "publick8s_aaaa" {
+resource "azurerm_dns_aaaa_record" "publick8s_aaaa" {
   name                = "public.publick8s"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
