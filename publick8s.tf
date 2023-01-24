@@ -82,17 +82,17 @@ resource "azurerm_role_assignment" "publick8s_networkcontributor" {
   skip_service_principal_aad_check = true
 }
 
-# resource "kubernetes_storage_class" "managed_csi_premium_retain_public" {
-#   metadata {
-#     name = "managed-csi-premium-retain"
-#   }
-#   storage_provisioner = "disk.csi.azure.com"
-#   reclaim_policy      = "Retain"
-#   parameters = {
-#     skuname = "Premium_LRS"
-#   }
-#   provider = kubernetes.publick8s
-# }
+resource "kubernetes_storage_class" "managed_csi_premium_retain_public" {
+  metadata {
+    name = "managed-csi-premium-retain"
+  }
+  storage_provisioner = "disk.csi.azure.com"
+  reclaim_policy      = "Retain"
+  parameters = {
+    skuname = "Premium_LRS"
+  }
+  provider = kubernetes.publick8s
+}
 
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/publick8s.yaml
 resource "azurerm_public_ip" "publick8s_ipv4" {
