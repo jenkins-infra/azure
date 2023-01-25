@@ -25,29 +25,33 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   kubernetes_version                = "1.23.12"
   dns_prefix                        = "publick8s-${random_pet.suffix_publick8s.id}"
   role_based_access_control_enabled = true # default value, added to please tfsec
-  api_server_authorized_ip_ranges = setunion(
-    # admins
-    formatlist("%s/32", values(local.admin_allowed_ips)),
-    # private VPN access
-    data.azurerm_subnet.private_vnet_data_tier.address_prefixes,
-    # privatek8s nodes subnet
-    data.azurerm_subnet.privatek8s_tier.address_prefixes,
-  )
+  api_server_access_profile {
+    authorized_ip_ranges = setunion(
+      # admins
+      formatlist("%s/32", values(local.admin_allowed_ips)),
+      # private VPN access
+      data.azurerm_subnet.private_vnet_data_tier.address_prefixes,
+      # privatek8s nodes subnet
+      data.azurerm_subnet.privatek8s_tier.address_prefixes,
+      [local.privatek8s_outbound_ip_cidr],
+    )
+  }
 
+  #tfsec:ignore:azure-container-configured-network-policy
   network_profile {
-    network_plugin = "azure"
-    network_policy = "azure"
+    network_plugin = "kubenet"
     ip_versions    = ["IPv4", "IPv6"]
   }
 
   default_node_pool {
-    name           = "systempool"
-    vm_size        = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
-    os_disk_type   = "Ephemeral"
-    node_count     = 1
-    vnet_subnet_id = data.azurerm_subnet.publick8s_tier.id
-    tags           = local.default_tags
-    zones          = [3]
+    name            = "systempool"
+    vm_size         = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
+    os_disk_type    = "Ephemeral"
+    os_disk_size_gb = 30
+    node_count      = 1
+    vnet_subnet_id  = data.azurerm_subnet.publick8s_tier.id
+    tags            = local.default_tags
+    zones           = [3]
   }
 
   identity {
@@ -61,6 +65,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "publicpool" {
   name                  = "publicpool"
   vm_size               = "Standard_D8s_v3" # 8 vCPU, 32 GB RAM, 64 GB disk, 16 000 IOPS
   os_disk_type          = "Ephemeral"
+  os_disk_size_gb       = 100
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   enable_auto_scaling   = true
   min_count             = 0
