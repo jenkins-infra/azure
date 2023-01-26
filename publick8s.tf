@@ -17,6 +17,12 @@ data "azurerm_subnet" "publick8s_tier" {
   virtual_network_name = data.azurerm_virtual_network.public.name
 }
 
+data "azurerm_subnet" "public_vnet_data_tier" {
+  name                 = "public-vnet-data-tier"
+  resource_group_name  = data.azurerm_resource_group.public.name
+  virtual_network_name = data.azurerm_virtual_network.public.name
+}
+
 #tfsec:ignore:azure-container-logging #tfsec:ignore:azure-container-limit-authorized-ips
 resource "azurerm_kubernetes_cluster" "publick8s" {
   name                              = "publick8s-${random_pet.suffix_publick8s.id}"
@@ -78,6 +84,14 @@ resource "azurerm_kubernetes_cluster_node_pool" "publicpool" {
 # Allow cluster to manage LBs in the publick8s-tier subnet (Public LB)
 resource "azurerm_role_assignment" "publick8s_networkcontributor" {
   scope                            = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.public.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.public.name}/subnets/${data.azurerm_subnet.publick8s_tier.name}"
+  role_definition_name             = "Network Contributor"
+  principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
+  skip_service_principal_aad_check = true
+}
+
+# Allow cluster to manage LBs in the public-vnet-data-tier subnet (internal LBs)
+resource "azurerm_role_assignment" "public_vnet_data_tier_networkcontributor" {
+  scope                            = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.public.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.public.name}/subnets/${data.azurerm_subnet.public_vnet_data_tier.name}"
   role_definition_name             = "Network Contributor"
   principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
   skip_service_principal_aad_check = true
