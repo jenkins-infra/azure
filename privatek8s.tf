@@ -112,6 +112,10 @@ resource "azurerm_kubernetes_cluster_node_pool" "highmempool" {
   max_count             = 3
   zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
+  node_taints = [
+    "os=linux:NoSchedule",
+    "profile=highmem:NoSchedule",
+  ]
 
   tags = local.default_tags
 }
@@ -129,6 +133,9 @@ resource "azurerm_kubernetes_cluster_node_pool" "windowspool" {
   max_count             = 3
   zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
+  node_taints = [
+    "os=windows:NoSchedule",
+  ]
 
   tags = local.default_tags
 }
