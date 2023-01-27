@@ -102,7 +102,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "highmempool" {
-  name                  = "highmempool"
+  name                  = "highmemlinux"
   vm_size               = "Standard_D8s_v3"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 100
@@ -121,7 +121,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "highmempool" {
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "windowspool" {
-  name                  = "windowspool"
+  name                  = "win"
   vm_size               = "Standard_D4s_v3"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 100
