@@ -107,6 +107,7 @@ resource "kubernetes_storage_class" "managed_csi_premium_retain_public" {
     skuname = "Premium_LRS"
   }
   provider = kubernetes.publick8s
+  allow_volume_expansion = true
 }
 
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/publick8s.yaml
