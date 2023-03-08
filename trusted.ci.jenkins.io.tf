@@ -19,20 +19,15 @@ resource "azuread_application" "trusted_ci_jenkins_io" {
 }
 
 resource "azuread_service_principal" "trusted_ci_jenkins_io" {
-  application_id = azuread_application.trusted_ci_jenkins_io.application_id
+  application_id               = azuread_application.trusted_ci_jenkins_io.application_id
+  app_role_assignment_required = false
   owners = [
     "b847a030-25e1-4791-ad04-9e8484d87bce", # terraform-production Service Principal, used by the CI system
   ]
 }
 
-resource "time_rotating" "trusted_ci_jenkins_io" {
-  rotation_days = 365
-}
-
-resource "azuread_service_principal_password" "trusted_ci_jenkins_io" {
-  display_name         = "trusted.ci.jenkins.io-tf-managed"
-  service_principal_id = azuread_service_principal.trusted_ci_jenkins_io.object_id
-  rotate_when_changed = {
-    rotation = time_rotating.trusted_ci_jenkins_io.id
-  }
+resource "azuread_application_password" "trusted_ci_jenkins_io" {
+  application_object_id = azuread_application.trusted_ci_jenkins_io.object_id
+  display_name          = "trusted.ci.jenkins.io-tf-managed"
+  end_date              = "2024-03-08T19:40:35Z"
 }
