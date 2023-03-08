@@ -5,6 +5,9 @@ terraform {
     azurerm = {
       source = "hashicorp/azurerm"
     }
+    azuread = {
+      source = "hashicorp/azuread"
+    }
     kubernetes = {
       source = "hashicorp/kubernetes"
     }
@@ -16,6 +19,9 @@ terraform {
     }
     random = {
       source = "hashicorp/random"
+    }
+    time = {
+      source = "hashicorp/time"
     }
   }
 }
