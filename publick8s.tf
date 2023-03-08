@@ -106,7 +106,7 @@ resource "kubernetes_storage_class" "managed_csi_premium_retain_public" {
   parameters = {
     skuname = "Premium_LRS"
   }
-  provider = kubernetes.publick8s
+  provider               = kubernetes.publick8s
   allow_volume_expansion = true
 }
 
