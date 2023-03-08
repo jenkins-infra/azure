@@ -28,7 +28,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   name                              = "publick8s-${random_pet.suffix_publick8s.id}"
   location                          = azurerm_resource_group.publick8s.location
   resource_group_name               = azurerm_resource_group.publick8s.name
-  kubernetes_version                = "1.23.12"
+  kubernetes_version                = "1.24.9"
   dns_prefix                        = "publick8s-${random_pet.suffix_publick8s.id}"
   role_based_access_control_enabled = true # default value, added to please tfsec
   api_server_access_profile {
@@ -107,6 +107,7 @@ resource "kubernetes_storage_class" "managed_csi_premium_retain_public" {
     skuname = "Premium_LRS"
   }
   provider = kubernetes.publick8s
+  allow_volume_expansion = true
 }
 
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/publick8s.yaml

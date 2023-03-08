@@ -25,7 +25,7 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   name                              = "privatek8s-${random_pet.suffix_privatek8s.id}"
   location                          = azurerm_resource_group.privatek8s.location
   resource_group_name               = azurerm_resource_group.privatek8s.name
-  kubernetes_version                = "1.23.12"
+  kubernetes_version                = "1.24.9"
   dns_prefix                        = "privatek8s-${random_pet.suffix_privatek8s.id}"
   role_based_access_control_enabled = true # default value, added to please tfsec
 
