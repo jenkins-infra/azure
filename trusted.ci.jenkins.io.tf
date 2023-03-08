@@ -20,6 +20,9 @@ resource "azuread_application" "trusted_ci_jenkins_io" {
 
 resource "azuread_service_principal" "trusted_ci_jenkins_io" {
   application_id = azuread_application.trusted_ci_jenkins_io.application_id
+  owners = [
+    "b847a030-25e1-4791-ad04-9e8484d87bce", # terraform-production Service Principal, used by the CI system
+  ]
 }
 
 resource "time_rotating" "trusted_ci_jenkins_io" {
