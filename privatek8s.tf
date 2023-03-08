@@ -101,6 +101,45 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   tags = local.default_tags
 }
 
+resource "azurerm_kubernetes_cluster_node_pool" "highmempool" {
+  name                  = "highmemlinux"
+  vm_size               = "Standard_D8s_v3"
+  os_disk_type          = "Ephemeral"
+  os_disk_size_gb       = 100
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
+  enable_auto_scaling   = true
+  min_count             = 0
+  max_count             = 3
+  zones                 = [3]
+  vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
+  node_taints = [
+    "os=linux:NoSchedule",
+    "profile=highmem:NoSchedule",
+  ]
+
+  tags = local.default_tags
+}
+
+resource "azurerm_kubernetes_cluster_node_pool" "windows2019pool" {
+  name                  = "windows2019"
+  vm_size               = "Standard_D4s_v3"
+  os_disk_type          = "Ephemeral"
+  os_disk_size_gb       = 100
+  os_type               = "Windows"
+  os_sku                = "Windows2019"
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
+  enable_auto_scaling   = true
+  min_count             = 0
+  max_count             = 3
+  zones                 = [3]
+  vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
+  node_taints = [
+    "os=windows:NoSchedule",
+  ]
+
+  tags = local.default_tags
+}
+
 # Allow cluster to manage LBs in the privatek8s-tier subnet (Public LB)
 resource "azurerm_role_assignment" "privatek8s_networkcontributor" {
   scope                            = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}/subnets/${data.azurerm_subnet.privatek8s_tier.name}"
