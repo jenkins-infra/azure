@@ -121,7 +121,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "highmempool" {
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "windows2019pool" {
-  name                  = "windows2019"
+  name                  = "w2019"
   vm_size               = "Standard_D4s_v3"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 100
