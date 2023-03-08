@@ -1,7 +1,9 @@
 resource "azuread_application" "trusted_ci_jenkins_io" {
   display_name = "trusted.ci.jenkins.io"
-  owners       = [data.azuread_client_config.current.object_id]
-  tags         = [for key, value in local.default_tags : "${key}:${value}"]
+  owners = [
+    "b847a030-25e1-4791-ad04-9e8484d87bce", # terraform-production Service Principal, used by the CI system
+  ]
+  tags = [for key, value in local.default_tags : "${key}:${value}"]
   required_resource_access {
     resource_app_id = "00000003-0000-0000-c000-000000000000" # Microsoft Graph
 
