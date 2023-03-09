@@ -1,13 +1,11 @@
 # Azure Resources required or used by the repository jenkins-infra/packer-images
 
-
-# terraform import azuread_service_principal.packer 53078417-ff2a-44c4-9f9e-8cd2f822737e
 resource "azuread_application" "packer" {
   display_name = "packer"
   owners = [
     data.azuread_service_principal.terraform_production.id, # terraform-production Service Principal, used by the CI system
   ]
-  tags         = [for key, value in local.default_tags : "${key}:${value}"]
+  tags = [for key, value in local.default_tags : "${key}:${value}"]
   required_resource_access {
     resource_app_id = "00000003-0000-0000-c000-000000000000" # Microsoft Graph
 
@@ -23,15 +21,15 @@ resource "azuread_application" "packer" {
 }
 
 resource "azuread_service_principal" "packer" {
-  application_id = azuread_application.packer.application_id
+  application_id               = azuread_application.packer.application_id
   app_role_assignment_required = false
   owners = [
-    data.azuread_service_principal.terraform_production.id,, # terraform-production Service Principal, used by the CI system
+    data.azuread_service_principal.terraform_production.id, # terraform-production Service Principal, used by the CI system
   ]
 }
 
 resource "azuread_application_password" "packer" {
-  display_name         = "packer-tf-managed"
+  display_name          = "packer-tf-managed"
   application_object_id = azuread_service_principal.packer.object_id
   end_date              = "2024-03-09T11:00:00Z"
 }
