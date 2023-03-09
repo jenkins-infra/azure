@@ -67,7 +67,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
   min_count             = 0
-  max_count             = 3
+  max_count             = 5
   zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
   tags                  = local.default_tags
@@ -101,8 +101,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   tags = local.default_tags
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "highmempool" {
-  name                  = "highmemlinux"
+resource "azurerm_kubernetes_cluster_node_pool" "releasecipool" {
+  name                  = "releasecipool"
   vm_size               = "Standard_D8s_v3"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 100
@@ -113,7 +113,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "highmempool" {
   zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
   node_taints = [
-    "os=linux:NoSchedule",
+    "jenkins=release.ci.jenkins.io:NoSchedule",
     "profile=highmem:NoSchedule",
   ]
 
