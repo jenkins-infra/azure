@@ -101,8 +101,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   tags = local.default_tags
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "releasecipool" {
-  name                  = "releasecipool"
+resource "azurerm_kubernetes_cluster_node_pool" "releasepool" {
+  name                  = "releasepool"
   vm_size               = "Standard_D8s_v3"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 100
