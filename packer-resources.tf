@@ -5,7 +5,7 @@
 resource "azuread_application" "packer" {
   display_name = "packer"
   owners = [
-    local.azure_ad_app_owners, # terraform-production Service Principal, used by the CI system
+    data.azuread_service_principal.terraform_production.id, # terraform-production Service Principal, used by the CI system
   ]
   tags         = [for key, value in local.default_tags : "${key}:${value}"]
   required_resource_access {
@@ -26,7 +26,7 @@ resource "azuread_service_principal" "packer" {
   application_id = azuread_application.packer.application_id
   app_role_assignment_required = false
   owners = [
-    local.azure_ad_app_owners, # terraform-production Service Principal, used by the CI system
+    data.azuread_service_principal.terraform_production.id,, # terraform-production Service Principal, used by the CI system
   ]
 }
 
