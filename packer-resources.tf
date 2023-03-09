@@ -1,5 +1,40 @@
 # Azure Resources required or used by the repository jenkins-infra/packer-images
 
+resource "azuread_application" "packer" {
+  display_name = "packer"
+  owners = [
+    data.azuread_service_principal.terraform_production.id, # terraform-production Service Principal, used by the CI system
+  ]
+  tags = [for key, value in local.default_tags : "${key}:${value}"]
+  required_resource_access {
+    resource_app_id = "00000003-0000-0000-c000-000000000000" # Microsoft Graph
+
+    resource_access {
+      id   = "e1fe6dd8-ba31-4d61-89e7-88639da4683d" # User.Read
+      type = "Scope"
+    }
+  }
+
+  web {
+    homepage_url = "https://github.com/jenkins-infra/azure"
+  }
+}
+
+resource "azuread_service_principal" "packer" {
+  application_id               = azuread_application.packer.application_id
+  app_role_assignment_required = false
+  owners = [
+    data.azuread_service_principal.terraform_production.id, # terraform-production Service Principal, used by the CI system
+  ]
+}
+
+resource "azuread_application_password" "packer" {
+  display_name          = "packer-tf-managed"
+  application_object_id = azuread_service_principal.packer.object_id
+  end_date              = "2024-03-09T11:00:00Z"
+}
+
+
 ## Dev Resources are used by the pull requests in jenkins-infra/packer-images
 resource "azurerm_resource_group" "packer_images" {
   for_each = local.shared_galleries
