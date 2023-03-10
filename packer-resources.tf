@@ -30,7 +30,7 @@ resource "azuread_service_principal" "packer" {
 
 resource "azuread_application_password" "packer" {
   display_name          = "packer-tf-managed"
-  application_object_id = azuread_service_principal.packer.object_id
+  application_object_id = azuread_application.packer.object_id
   end_date              = "2024-03-09T11:00:00Z"
 }
 
