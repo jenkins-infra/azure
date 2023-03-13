@@ -1,7 +1,7 @@
 resource "azuread_application" "trusted_ci_jenkins_io" {
   display_name = "trusted.ci.jenkins.io"
   owners = [
-    "b847a030-25e1-4791-ad04-9e8484d87bce", # terraform-production Service Principal, used by the CI system
+    data.azuread_service_principal.terraform_production.id,
   ]
   tags = [for key, value in local.default_tags : "${key}:${value}"]
   required_resource_access {
@@ -22,7 +22,7 @@ resource "azuread_service_principal" "trusted_ci_jenkins_io" {
   application_id               = azuread_application.trusted_ci_jenkins_io.application_id
   app_role_assignment_required = false
   owners = [
-    "b847a030-25e1-4791-ad04-9e8484d87bce", # terraform-production Service Principal, used by the CI system
+    data.azuread_service_principal.terraform_production.id,
   ]
 }
 
