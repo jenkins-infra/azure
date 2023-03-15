@@ -168,6 +168,19 @@ resource "kubernetes_storage_class" "managed_csi_premium_retain" {
   provider = kubernetes.privatek8s
 }
 
+resource "kubernetes_storage_class" "azurefile_csi_premium_retain" {
+  metadata {
+    name = "azurefile-csi-premium-retain"
+  }
+  storage_provisioner = "file.csi.azure.com"
+  reclaim_policy      = "Retain"
+  parameters = {
+    skuname = "Premium_LRS"
+  }
+  mount_options = ["dir_mode=0777", "file_mode=0777", "uid=1000", "gid=1000", "mfsymlinks", "nobrl"]
+  provider = kubernetes.privatek8s
+}
+
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/privatek8s.yaml
 resource "azurerm_public_ip" "public_privatek8s" {
   name                = "public-privatek8s"
