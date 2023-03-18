@@ -58,5 +58,5 @@ resource "azuread_application_password" "cert_ci_jenkins_io" {
 resource "azurerm_role_assignment" "cert_ci_jenkins_io_role_assignement" {
   scope                = "subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${azurerm_resource_group.cert_ci_jenkins_io_agents.name}"
   role_definition_name = "Contributor"
-  principal_id         = azuread_service_principal.packer.id
+  principal_id         = azuread_service_principal.cert_ci_jenkins_io.id
 }
