@@ -28,9 +28,9 @@ targets:
       file: ".terraform.lock.hcl"
     scmid: default
 
-pullrequests:
+actions:
   default:
-    kind: github
+    kind: github/pullrequest
     scmid: default
     spec:
       labels:
