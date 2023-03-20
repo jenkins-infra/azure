@@ -36,10 +36,19 @@ resource "azuread_application_password" "packer" {
 
 
 ## Dev Resources are used by the pull requests in jenkins-infra/packer-images
+## Staging Resources are used by the "main" branch builds
+## Prod Resources are used for final Packer artifacts
 resource "azurerm_resource_group" "packer_images" {
   for_each = local.shared_galleries
 
   name     = "${each.key}-packer-images"
+  location = each.value.rg_location
+}
+
+resource "azurerm_resource_group" "packer_builds" {
+  for_each = local.shared_galleries
+
+  name     = "${each.key}-packer-builds"
   location = each.value.rg_location
 }
 
@@ -97,10 +106,18 @@ resource "azurerm_shared_image" "jenkins_agent_images" {
 }
 
 # Allow packer Service Principal to manage AzureRM resources inside the packer resource groups
-resource "azurerm_role_assignment" "packer_role_assignement" {
+resource "azurerm_role_assignment" "packer_role_images_assignement" {
   for_each = azurerm_resource_group.packer_images
 
-  scope                = "subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${each.value.name}"
+  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${each.value.name}"
+  role_definition_name = "Contributor"
+  principal_id         = azuread_service_principal.packer.id
+}
+# Allow packer Service Principal to manage AzureRM resources inside the packer resource groups
+resource "azurerm_role_assignment" "packer_role_builds_assignement" {
+  for_each = azurerm_resource_group.packer_builds
+
+  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${each.value.name}"
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.packer.id
 }

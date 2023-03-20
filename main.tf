@@ -4,6 +4,6 @@ data "azuread_service_principal" "terraform_production" {
   display_name = "terraform-production"
 }
 
-# Data source used to retrieve the subscription id and tenant id
-data "azurerm_client_config" "current" {
+# Data source used to retrieve the subscription id
+data "azurerm_subscription" "jenkins" {
 }
