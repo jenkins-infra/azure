@@ -61,7 +61,7 @@ resource "azurerm_role_assignment" "cert_ci_jenkins_io_allow_azurerm" {
   principal_id         = azuread_service_principal.cert_ci_jenkins_io.id
 }
 resource "azurerm_role_assignment" "cert_ci_jenkins_io_allow_packer" {
-  scope                = "${data.azurerm_client_config.current.subscription_id}/resourceGroups/prod-packer-images"
+  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/prod-packer-images"
   role_definition_name = "Reader"
   principal_id         = azuread_service_principal.cert_ci_jenkins_io.id
 }
