@@ -1,6 +1,3 @@
-data "azurerm_subscription" "jenkins" {
-}
-
 resource "azurerm_resource_group" "privatek8s" {
   name     = "prod-privatek8s"
   location = var.location
@@ -178,7 +175,7 @@ resource "kubernetes_storage_class" "azurefile_csi_premium_retain" {
     skuname = "Premium_LRS"
   }
   mount_options = ["dir_mode=0777", "file_mode=0777", "uid=1000", "gid=1000", "mfsymlinks", "nobrl"]
-  provider = kubernetes.privatek8s
+  provider      = kubernetes.privatek8s
 }
 
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/privatek8s.yaml
