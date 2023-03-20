@@ -109,7 +109,7 @@ resource "azurerm_shared_image" "jenkins_agent_images" {
 resource "azurerm_role_assignment" "packer_role_images_assignement" {
   for_each = azurerm_resource_group.packer_images
 
-  scope                = "subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${each.value.name}"
+  scope                = "${data.azurerm_client_config.current.subscription_id}/resourceGroups/${each.value.name}"
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.packer.id
 }
@@ -117,7 +117,7 @@ resource "azurerm_role_assignment" "packer_role_images_assignement" {
 resource "azurerm_role_assignment" "packer_role_builds_assignement" {
   for_each = azurerm_resource_group.packer_builds
 
-  scope                = "subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${each.value.name}"
+  scope                = "${data.azurerm_client_config.current.subscription_id}/resourceGroups/${each.value.name}"
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.packer.id
 }
