@@ -5,26 +5,7 @@ resource "azurerm_resource_group" "infra_ci_jenkins_io_agents" {
 }
 
 /** Agent Resources **/
-resource "azurerm_storage_account" "infra_ci_jenkins_io" {
-  name                            = "jenkinsinfraagents"
-  resource_group_name             = azurerm_resource_group.infra_ci_jenkins_io_agents.name
-  location                        = azurerm_resource_group.infra_ci_jenkins_io_agents.location
-  account_tier                    = "Standard"
-  account_replication_type        = "GRS" # Ensure that data is replicated to another physicial region - https://docs.microsoft.com/en-us/azure/storage/common/storage-redundancy
-  access_tier                     = "Hot"
-  min_tls_version                 = "TLS1_2"
-  tags                            = local.default_tags
-  allow_nested_items_to_be_public = false
-
-  # TOCHECK WITH DAMIEN
-  #   network_rules {
-  #     default_action             = "Deny"
-  #     ip_rules                   = values(local.admin_allowed_ips)
-  #     virtual_network_subnet_ids = [data.azurerm_subnet.privatek8s_tier.id]
-  #     bypass                     = ["AzureServices"]
-  #   }
-}
-
+//TODO: create a storage account
 // TODO: import jenkinsarm-vnet virtual network
 
 # Azure AD resources to allow controller to spawn agents in Azure
