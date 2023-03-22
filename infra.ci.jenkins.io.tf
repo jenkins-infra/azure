@@ -5,8 +5,8 @@ resource "azurerm_resource_group" "infra_ci_jenkins_io_agents" {
 }
 
 /** Agent Resources **/
-//TODO: create a storage account
-// TODO: import jenkinsarm-vnet virtual network
+// TODO: create a storage account
+// TODO: create a virtual network/subnet for the agent VM
 
 # Azure AD resources to allow controller to spawn agents in Azure
 resource "azuread_application" "infra_ci_jenkins_io" {
@@ -40,7 +40,6 @@ resource "azuread_application_password" "infra_ci_jenkins_io" {
   end_date              = "2024-03-22T00:00:00Z"
 }
 # Allow Service Principal to manage AzureRM resources inside the agents resource groups
-# "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/providers/Microsoft.Authorization/roleAssignments/3c9aca58-7582-4e39-a8f5-4e547eb93584"
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_azurerm" {
   scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${azurerm_resource_group.infra_ci_jenkins_io_agents.name}"
   role_definition_name = "Contributor"
