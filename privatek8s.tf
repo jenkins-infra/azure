@@ -111,7 +111,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "releasepool" {
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
   node_taints = [
     "jenkins=release.ci.jenkins.io:NoSchedule",
-    "profile=highmem:NoSchedule",
   ]
 
   tags = local.default_tags
@@ -132,6 +131,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "windows2019pool" {
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
   node_taints = [
     "os=windows:NoSchedule",
+    "jenkins=release.ci.jenkins.io:NoSchedule",
   ]
 
   tags = local.default_tags
