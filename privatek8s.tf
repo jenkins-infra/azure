@@ -8,11 +8,14 @@ resource "random_pet" "suffix_privatek8s" {
   # You want to taint this resource in order to get a new pet
 }
 
-# Important: the Enterprise Application "terraform-production" used by this repo pipeline needs to be able to manage this subnet
-# See the corresponding role assignment for this cluster added here (private repo):
-# https://github.com/jenkins-infra/terraform-states/blob/1f44cdb8c6837021b1007fef383207703b0f4d76/azure/main.tf#L49
 data "azurerm_subnet" "privatek8s_tier" {
   name                 = "privatek8s-tier"
+  resource_group_name  = data.azurerm_resource_group.private.name
+  virtual_network_name = data.azurerm_virtual_network.private.name
+}
+
+data "azurerm_subnet" "privatek8s_release_tier" {
+  name                 = "privatek8s-release-tier"
   resource_group_name  = data.azurerm_resource_group.private.name
   virtual_network_name = data.azurerm_virtual_network.private.name
 }
@@ -100,7 +103,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
 
 resource "azurerm_kubernetes_cluster_node_pool" "releasepool" {
   name                  = "releasepool"
-  vm_size               = "Standard_D8s_v3"
+  vm_size               = "Standard_D8s_v3" # 8 vCPU 32 GiB RAM
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 100
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
@@ -108,7 +111,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "releasepool" {
   min_count             = 0
   max_count             = 3
   zones                 = [3]
-  vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
+  vnet_subnet_id        = data.azurerm_subnet.privatek8s_release_tier.id
   node_taints = [
     "jenkins=release.ci.jenkins.io:NoSchedule",
   ]
@@ -118,7 +121,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "releasepool" {
 
 resource "azurerm_kubernetes_cluster_node_pool" "windows2019pool" {
   name                  = "w2019"
-  vm_size               = "Standard_D4s_v3"
+  vm_size               = "Standard_D4s_v3" # 4 vCPU 16 GiB RAM
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 100
   os_type               = "Windows"
@@ -128,7 +131,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "windows2019pool" {
   min_count             = 0
   max_count             = 3
   zones                 = [3]
-  vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
+  vnet_subnet_id        = data.azurerm_subnet.privatek8s_release_tier.id
   node_taints = [
     "os=windows:NoSchedule",
     "jenkins=release.ci.jenkins.io:NoSchedule",
