@@ -50,7 +50,7 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_packer" {
   role_definition_name = "Reader"
   principal_id         = azuread_service_principal.infra_ci_jenkins_io.id
 }
-resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_subnet_networkcontributor" {
+resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_subnet_role" {
   scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}/subnets/${data.azurerm_subnet.privatek8s_tier.name}"
   role_definition_name = "Virtual Machine Contributor"
   principal_id         = azuread_service_principal.infra_ci_jenkins_io.id
@@ -58,7 +58,7 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_subnet_networ
 
 resource "azurerm_role_definition" "private_vnet_reader" {
   name  = "PrivateVNET"
-  scope = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}}"
+  scope = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}"
 
   permissions {
     actions = ["Microsoft.Network/virtualNetworks/read"]
