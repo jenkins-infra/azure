@@ -8,11 +8,14 @@ resource "random_pet" "suffix_privatek8s" {
   # You want to taint this resource in order to get a new pet
 }
 
-# Important: the Enterprise Application "terraform-production" used by this repo pipeline needs to be able to manage this subnet
-# See the corresponding role assignment for this cluster added here (private repo):
-# https://github.com/jenkins-infra/terraform-states/blob/1f44cdb8c6837021b1007fef383207703b0f4d76/azure/main.tf#L49
 data "azurerm_subnet" "privatek8s_tier" {
   name                 = "privatek8s-tier"
+  resource_group_name  = data.azurerm_resource_group.private.name
+  virtual_network_name = data.azurerm_virtual_network.private.name
+}
+
+data "azurerm_subnet" "privatek8s_release_tier" {
+  name                 = "privatek8s-release-tier"
   resource_group_name  = data.azurerm_resource_group.private.name
   virtual_network_name = data.azurerm_virtual_network.private.name
 }
