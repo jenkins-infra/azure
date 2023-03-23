@@ -42,7 +42,7 @@ resource "azuread_application_password" "infra_ci_jenkins_io" {
 # Allow Service Principal to manage AzureRM resources inside the agents resource groups
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_azurerm" {
   scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${azurerm_resource_group.infra_ci_jenkins_io_agents.name}"
-  role_definition_name = "Virtual Machine Contributor"
+  role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.infra_ci_jenkins_io.id
 }
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_packer" {
