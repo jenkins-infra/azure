@@ -65,7 +65,7 @@ resource "azurerm_role_definition" "private_vnet_reader" {
   }
 }
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_subnet_private_vnet_reader" {
-  scope              = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}}"
+  scope              = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}"
   role_definition_id = azurerm_role_definition.private_vnet_reader.role_definition_resource_id
   principal_id       = azuread_service_principal.infra_ci_jenkins_io.id
 }
