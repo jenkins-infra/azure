@@ -52,6 +52,6 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_packer" {
 }
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_networkcontributor" {
   scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}/subnets/${data.azurerm_subnet.privatek8s_tier.name}"
-  role_definition_name = "Virtual Machine Contributor"
+  role_definition_name = "Network Contributor"
   principal_id         = azuread_service_principal.infra_ci_jenkins_io.id
 }
