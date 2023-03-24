@@ -5,7 +5,6 @@ resource "azurerm_resource_group" "infra_ci_jenkins_io_agents" {
 }
 
 /** Agent Resources **/
-// TODO: create a storage account
 resource "azurerm_storage_account" "infra_ci_jenkins_io_agents" {
   name                     = "infraciagents"
   resource_group_name      = azurerm_resource_group.infra_ci_jenkins_io_agents.name
