@@ -49,7 +49,7 @@ resource "azuread_application" "ci_jenkins_io" {
   }
 }
 resource "azuread_service_principal" "ci_jenkins_io" {
-  application_id               = azuread_application.infra_ci_jenkins_io.application_id
+  application_id               = azuread_application.ci_jenkins_io.application_id
   app_role_assignment_required = false
   owners = [
     data.azuread_service_principal.terraform_production.id,
@@ -82,5 +82,5 @@ resource "azurerm_role_assignment" "ci_jenkins_io_manage_net_interfaces_subnet_c
 resource "azurerm_role_assignment" "ci_jenkins_io_read_public_vnets" {
   scope              = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.public.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.public.name}"
   role_definition_id = azurerm_role_definition.public_vnet_reader.role_definition_resource_id
-  principal_id       = azuread_service_principal.infra_ci_jenkins_io.id
+  principal_id       = azuread_service_principal.ci_jenkins_io.id
 }
