@@ -14,7 +14,6 @@ resource "azurerm_storage_account" "infra_ci_jenkins_io_agents" {
   min_tls_version          = "TLS1_2" # default value, needed for tfsec
   tags                     = local.default_tags
 }
-// TODO: create a virtual network/subnet for the agent VM
 
 # Azure AD resources to allow controller to spawn agents in Azure
 resource "azuread_application" "infra_ci_jenkins_io" {
@@ -62,15 +61,6 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_subnet_role" 
   scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}/subnets/${data.azurerm_subnet.privatek8s_tier.name}"
   role_definition_name = "Virtual Machine Contributor"
   principal_id         = azuread_service_principal.infra_ci_jenkins_io.id
-}
-
-resource "azurerm_role_definition" "private_vnet_reader" {
-  name  = "PrivateVNET"
-  scope = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}"
-
-  permissions {
-    actions = ["Microsoft.Network/virtualNetworks/read"]
-  }
 }
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_subnet_private_vnet_reader" {
   scope              = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.private.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.private.name}"
