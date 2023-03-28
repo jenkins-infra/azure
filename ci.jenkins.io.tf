@@ -75,12 +75,12 @@ resource "azurerm_role_assignment" "ci_jenkins_io_read_packer_prod_images" {
 # Allow application to create/delete VM network interfaces in this subnet
 resource "azurerm_role_assignment" "ci_jenkins_io_manage_net_interfaces_subnet_ci_agents" {
   // TODO: manage this subnet in jenkins-infra/azure-net along with a security group
-  scope = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.public.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.public.name}/subnets/ci.j-agents-vm"
+  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/prod-jenkins-public-prod/providers/Microsoft.Network/virtualNetworks/prod-jenkins-public-prod/subnets/ci.j-agents-vm"
   role_definition_name = "Virtual Machine Contributor"
   principal_id         = azuread_service_principal.ci_jenkins_io.id
 }
 resource "azurerm_role_assignment" "ci_jenkins_io_read_public_vnets" {
-  scope              = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.public.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.public.name}"
-  role_definition_id = azurerm_role_definition.public_vnet_reader.role_definition_resource_id
+  scope              = "${data.azurerm_subscription.jenkins.id}/resourceGroups/prod-jenkins-public-prod/providers/Microsoft.Network/virtualNetworks/prod-jenkins-public-prod"
+  role_definition_id = azurerm_role_definition.prod_public_vnet_reader.role_definition_resource_id
   principal_id       = azuread_service_principal.ci_jenkins_io.id
 }
