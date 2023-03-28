@@ -76,8 +76,7 @@ resource "azurerm_role_assignment" "ci_jenkins_io_read_packer_prod_images" {
 resource "azurerm_role_assignment" "ci_jenkins_io_manage_net_interfaces_subnet_ci_agents" {
   // TODO: manage this subnet in jenkins-infra/azure-net along with a security group
   scope = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.public.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.public.name}/subnets/ci.j-agents-vm"
-  // TODO: restrict to "Virtual Machine Contributor"
-  role_definition_name = "Contributor"
+  role_definition_name = "Virtual Machine Contributor"
   principal_id         = azuread_service_principal.ci_jenkins_io.id
 }
 resource "azurerm_role_assignment" "ci_jenkins_io_read_public_vnets" {
