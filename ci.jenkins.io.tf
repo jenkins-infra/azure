@@ -49,7 +49,7 @@ resource "azuread_application" "ci_jenkins_io" {
   }
 }
 resource "azuread_service_principal" "ci_jenkins_io" {
-  application_id               = azuread_application.infra_ci_jenkins_io.application_id
+  application_id               = azuread_application.ci_jenkins_io.application_id
   app_role_assignment_required = false
   owners = [
     data.azuread_service_principal.terraform_production.id,
