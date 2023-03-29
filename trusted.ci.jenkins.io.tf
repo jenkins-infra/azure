@@ -31,3 +31,11 @@ resource "azuread_application_password" "trusted_ci_jenkins_io" {
   display_name          = "trusted.ci.jenkins.io-tf-managed"
   end_date              = "2024-03-08T19:40:35Z"
 }
+
+# Allow Service Principal to manage AzureRM resources inside the subscription
+# TODO lower this scope to the resource group
+resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_azurerm" {
+  scope                = data.azurerm_subscription.jenkins.id
+  role_definition_name = "Contributor"
+  principal_id         = azuread_service_principal.trusted_ci_jenkins_io.id
+}
