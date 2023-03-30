@@ -44,3 +44,9 @@ resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_azurerm" {
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.trusted_ci_jenkins_io.id
 }
+
+resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_packer" {
+  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/prod-packer-images"
+  role_definition_name = "Reader"
+  principal_id         = azuread_service_principal.trusted_ci_jenkins_io.id
+}
