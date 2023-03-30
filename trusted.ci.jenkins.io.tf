@@ -1,3 +1,8 @@
+resource "azurerm_resource_group" "trusted_ci_jenkins_io_agents" {
+  name     = "jenkinsinfra-trustedvmagents"
+  location = "East US"
+}
+
 resource "azuread_application" "trusted_ci_jenkins_io" {
   display_name = "trusted.ci.jenkins.io"
   owners = [
