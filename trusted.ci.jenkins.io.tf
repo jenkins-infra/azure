@@ -40,7 +40,13 @@ resource "azuread_application_password" "trusted_ci_jenkins_io" {
 # Allow Service Principal to manage AzureRM resources inside the subscription
 # TODO lower this scope to the resource group
 resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_azurerm" {
-  scope                = data.azurerm_subscription.jenkins.id
+  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${azurerm_resource_group.trusted_ci_jenkins_io_agents.name}"
   role_definition_name = "Contributor"
+  principal_id         = azuread_service_principal.trusted_ci_jenkins_io.id
+}
+
+resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_packer" {
+  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/prod-packer-images"
+  role_definition_name = "Reader"
   principal_id         = azuread_service_principal.trusted_ci_jenkins_io.id
 }
