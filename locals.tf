@@ -8,6 +8,7 @@ locals {
       images_location = {
         "ubuntu-20"          = "eastus"
         "ubuntu-20.04"       = "eastus"
+        "ubuntu-20.04-amd64" = "eastus"
         "ubuntu-20.04-arm64" = "eastus"
         "windows-2019"       = "eastus"
         "windows-2022"       = "eastus"
