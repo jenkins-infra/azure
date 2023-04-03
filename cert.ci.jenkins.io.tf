@@ -18,8 +18,15 @@ resource "azurerm_resource_group" "cert_ci_jenkins_io_agents" {
 // TODO: import prod-certci VM
 
 /** Agent Resources **/
-
-// TODO: import certciagents2 storage account
+resource "azurerm_storage_account" "cert_ci_jenkins_io_agents" {
+  name                     = "certciagents2"
+  resource_group_name      = azurerm_resource_group.cert_ci_jenkins_io_agents.name
+  location                 = azurerm_resource_group.cert_ci_jenkins_io_agents.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+  min_tls_version          = "TLS1_2" # default value, needed for tfsec
+  tags                     = local.default_tags
+}
 // TODO: import jenkinsarm-vnet virtual network
 
 # Azure AD resources to allow controller to spawn agents in Azure
