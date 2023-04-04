@@ -10,6 +10,8 @@ locals {
         "ubuntu-20.04"       = "eastus"
         "ubuntu-20.04-amd64" = "eastus"
         "ubuntu-20.04-arm64" = "eastus"
+        "ubuntu-22.04-amd64" = "eastus"
+        "ubuntu-22.04-arm64" = "eastus"
         "windows-2019"       = "eastus"
         "windows-2022"       = "eastus"
       }
@@ -22,6 +24,8 @@ locals {
         "ubuntu-20.04"       = "eastus"
         "ubuntu-20.04-amd64" = "eastus"
         "ubuntu-20.04-arm64" = "eastus"
+        "ubuntu-22.04-amd64" = "eastus"
+        "ubuntu-22.04-arm64" = "eastus"
         "windows-2019"       = "eastus2"
         "windows-2022"       = "eastus"
       }
@@ -34,6 +38,8 @@ locals {
         "ubuntu-20.04"       = "eastus"
         "ubuntu-20.04-amd64" = "eastus"
         "ubuntu-20.04-arm64" = "eastus"
+        "ubuntu-22.04-amd64" = "eastus"
+        "ubuntu-22.04-arm64" = "eastus"
         "windows-2019"       = "eastus"
         "windows-2022"       = "eastus"
       }
