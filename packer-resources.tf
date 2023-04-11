@@ -83,6 +83,8 @@ resource "azurerm_shared_image" "jenkins_agent_images" {
   resource_group_name = azurerm_resource_group.packer_images[split("_", each.value)[0]].name
   location            = local.shared_galleries[split("_", each.value)[0]].images_location[split("_", each.value)[1]]
 
+  architecture = endswith(split("_", each.value)[1], "arm64") ? "Arm64" : "x64"
+
   hyper_v_generation     = "V2"
   os_type                = length(regexall(".*windows.*", lower(split("_", each.value)[1]))) > 0 ? "Windows" : "Linux"
   specialized            = false
