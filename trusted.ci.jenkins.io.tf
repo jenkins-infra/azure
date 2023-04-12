@@ -63,7 +63,9 @@ resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_packer" {
 
 
 
-############################## VMS ####################################
+############################# VMS ####################################
+
+# NETWORKING TO BE MOVED TO azure-net repository
 resource "azurerm_virtual_network" "trusted" {
   name                = "trusted-controller-network"
   address_space       = ["10.0.0.0/24"]
@@ -71,7 +73,8 @@ resource "azurerm_virtual_network" "trusted" {
   resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
   tags                = local.default_tags
 }
-
+### Trusted VNet Address Plan:
+# TO BE COMPLETED
 resource "azurerm_subnet" "trusted_controller" {
   name                 = "trusted-controller-subnet"
   resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
@@ -89,6 +92,41 @@ resource "azurerm_subnet" "trusted_permanent_agents" {
   resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.name
   virtual_network_name = azurerm_virtual_network.trusted.name
   address_prefixes     = ["10.0.3.0/24"]
+}
+
+
+resource "azurerm_network_security_group" "trusted_bounce" {
+  name                = "TrustedBounceSecurityGroup"
+  location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
+  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
+}
+
+resource "azurerm_network_security_rule" "trusted_bounce_inbound" {
+  name                        = "bounce-rule-inbound"
+  priority                    = 100
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "10.0.1.0/24"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_bounce.name
+}
+
+resource "azurerm_network_security_rule" "trusted_bounce_outbound" {
+  name                        = "bounce-rule-outbound"
+  priority                    = 101
+  direction                   = "Outbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "*"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_bounce.name
 }
 
 resource "azurerm_network_interface" "trusted_controller" {
