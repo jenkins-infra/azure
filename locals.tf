@@ -13,7 +13,11 @@ locals {
         "ubuntu-22.04-amd64" = "eastus"
         "ubuntu-22.04-arm64" = "eastus"
         "windows-2019"       = "eastus"
+        "windows-2019-amd64" = "eastus"
+        "windows-2019-arm64" = "eastus"
         "windows-2022"       = "eastus"
+        "windows-2022-amd64" = "eastus"
+        "windows-2022-arm64" = "eastus"
       }
     }
     "staging" = {
@@ -26,8 +30,12 @@ locals {
         "ubuntu-20.04-arm64" = "eastus"
         "ubuntu-22.04-amd64" = "eastus"
         "ubuntu-22.04-arm64" = "eastus"
-        "windows-2019"       = "eastus2"
+        "windows-2019"       = "eastus"
+        "windows-2019-amd64" = "eastus"
+        "windows-2019-arm64" = "eastus"
         "windows-2022"       = "eastus"
+        "windows-2022-amd64" = "eastus"
+        "windows-2022-arm64" = "eastus"
       }
     }
     "prod" = {
@@ -41,7 +49,11 @@ locals {
         "ubuntu-22.04-amd64" = "eastus"
         "ubuntu-22.04-arm64" = "eastus"
         "windows-2019"       = "eastus"
+        "windows-2019-amd64" = "eastus"
+        "windows-2019-arm64" = "eastus"
         "windows-2022"       = "eastus"
+        "windows-2022-amd64" = "eastus"
+        "windows-2022-arm64" = "eastus"
       }
     }
   }
