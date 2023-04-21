@@ -111,13 +111,13 @@ resource "azurerm_network_interface" "trusted_controller" {
   }
 }
 
-## MACHINE (contoller)
+## MACHINE (controller)
 resource "azurerm_linux_virtual_machine" "trusted_controller" {
   name                            = "trusted-controller"
   resource_group_name             = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
   location                        = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
   tags                            = local.default_tags
-  size                            = "Standard_F2"
+  size                            = "Standard_D2as_v5"
   admin_username                  = "adminuser"
   disable_password_authentication = true
   network_interface_ids = [
@@ -140,6 +140,24 @@ resource "azurerm_linux_virtual_machine" "trusted_controller" {
     sku       = "22.04-LTS"
     version   = "latest"
   }
+}
+
+resource "azurerm_managed_disk" "trusted_controller_data_disk" {
+  name                 = "trusted-controller-data-disk"
+  location             = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
+  resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
+  storage_account_type = "Standard_LRS"
+  create_option        = "Empty"
+  disk_size_gb         = "100"
+
+  tags                 = local.default_tags
+}
+
+resource "azurerm_virtual_machine_data_disk_attachment" "trusted_controller_data_disk" {
+  managed_disk_id    = azurerm_managed_disk.trusted_controller_data_disk.id
+  virtual_machine_id = azurerm_virtual_machine.trusted_controller.id
+  lun                = "10"
+  caching            = "ReadWrite"
 }
 
 # BOUNCE VM
