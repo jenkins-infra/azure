@@ -1,18 +1,47 @@
+####################################################################################
+## TRUSTED NETWORK Defined in https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
+####################################################################################
+data "azurerm_resource_group" "trusted" {
+  name = "trusted"
+}
+data "azurerm_virtual_network" "trusted" {
+  name                = "${data.azurerm_resource_group.trusted.name}-vnet"
+  resource_group_name = data.azurerm_resource_group.trusted.name
+}
+data "azurerm_subnet" "trusted_controller" {
+  name                 = "${data.azurerm_virtual_network.trusted.name}-trusted-jenkins-ci-io-controller"
+  virtual_network_name = data.azurerm_virtual_network.trusted.name
+  resource_group_name  = data.azurerm_resource_group.trusted.name
+}
+data "azurerm_subnet" "trusted_vmagents" {
+  name                 = "${data.azurerm_virtual_network.trusted.name}-trusted-jenkins-ci-io-ephemeral-agents"
+  virtual_network_name = data.azurerm_virtual_network.trusted.name
+  resource_group_name  = data.azurerm_resource_group.trusted.name
+}
+data "azurerm_subnet" "trusted_permanent_agents" {
+  name                 = "${data.azurerm_virtual_network.trusted.name}-trusted-jenkins-ci-io-permanent-agents"
+  virtual_network_name = data.azurerm_virtual_network.trusted.name
+  resource_group_name  = data.azurerm_resource_group.trusted.name
+}
+
+####################################################################################
+## TRUSTED RESOURCES
+####################################################################################
+# Resources groups for TRUSTED Agents
 resource "azurerm_resource_group" "trusted_ci_jenkins_io_agents" {
   name     = "jenkinsinfra-trustedvmagents"
   location = "East US"
 }
-
 resource "azurerm_resource_group" "trusted_ci_jenkins_io_permanent_agents" {
   name     = "jenkinsinfra-trusted-permanent-vmagents"
   location = "East US"
 }
-
 resource "azurerm_resource_group" "trusted_ci_jenkins_io_controller" {
   name     = "jenkinsinfra-trusted-controller"
   location = "East US"
 }
 
+#APPLICATION azureAD
 resource "azuread_application" "trusted_ci_jenkins_io" {
   display_name = "trusted.ci.jenkins.io"
   owners = [
@@ -33,6 +62,7 @@ resource "azuread_application" "trusted_ci_jenkins_io" {
   }
 }
 
+#SERVICE PRINCIPAL azureAD
 resource "azuread_service_principal" "trusted_ci_jenkins_io" {
   application_id               = azuread_application.trusted_ci_jenkins_io.application_id
   app_role_assignment_required = false
@@ -48,7 +78,6 @@ resource "azuread_application_password" "trusted_ci_jenkins_io" {
 }
 
 # Allow Service Principal to manage AzureRM resources inside the subscription
-# TODO lower this scope to the resource group
 resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_azurerm" {
   scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${azurerm_resource_group.trusted_ci_jenkins_io_agents.name}"
   role_definition_name = "Contributor"
@@ -61,74 +90,14 @@ resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_packer" {
   principal_id         = azuread_service_principal.trusted_ci_jenkins_io.id
 }
 
+############################# VMs ####################################
 
+# NETWORKING FROM azure-net repository
+# check in vnets.tf
+#
 
-############################# VMS ####################################
-
-# NETWORKING TO BE MOVED TO azure-net repository
-resource "azurerm_virtual_network" "trusted" {
-  name                = "trusted-controller-network"
-  address_space       = ["10.0.0.0/24"]
-  location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
-  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
-  tags                = local.default_tags
-}
-### Trusted VNet Address Plan:
-# TO BE COMPLETED
-resource "azurerm_subnet" "trusted_controller" {
-  name                 = "trusted-controller-subnet"
-  resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
-  virtual_network_name = azurerm_virtual_network.trusted.name
-  address_prefixes     = ["10.0.1.0/24"]
-}
-resource "azurerm_subnet" "trusted_vmagents" {
-  name                 = "trusted-vmagents-subnet"
-  resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_agents.name
-  virtual_network_name = azurerm_virtual_network.trusted.name
-  address_prefixes     = ["10.0.2.0/24"]
-}
-resource "azurerm_subnet" "trusted_permanent_agents" {
-  name                 = "trusted-permanent-agents-subnet"
-  resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.name
-  virtual_network_name = azurerm_virtual_network.trusted.name
-  address_prefixes     = ["10.0.3.0/24"]
-}
-
-
-resource "azurerm_network_security_group" "trusted_bounce" {
-  name                = "TrustedBounceSecurityGroup"
-  location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
-  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
-}
-
-resource "azurerm_network_security_rule" "trusted_bounce_inbound" {
-  name                        = "bounce-rule-inbound"
-  priority                    = 100
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "10.0.1.0/24"
-  source_address_prefix       = "*"
-  destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
-  network_security_group_name = azurerm_network_security_group.trusted_bounce.name
-}
-
-resource "azurerm_network_security_rule" "trusted_bounce_outbound" {
-  name                        = "bounce-rule-outbound"
-  priority                    = 101
-  direction                   = "Outbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "*"
-  source_address_prefix       = "*"
-  destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
-  network_security_group_name = azurerm_network_security_group.trusted_bounce.name
-}
-
+# CONTROLLER VM
+## NETWORK INTERFACE with internal ip
 resource "azurerm_network_interface" "trusted_controller" {
   name                = "trusted-controller-nic"
   location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
@@ -137,21 +106,12 @@ resource "azurerm_network_interface" "trusted_controller" {
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_subnet.trusted_controller.id
+    subnet_id                     = data.azurerm_subnet.trusted_controller.id
     private_ip_address_allocation = "Dynamic"
   }
 }
 
-/*
-  NOT SURE ABOUT THIS as
-  The private key generated by this resource will be stored unencrypted in your Terraform state file. Use of this resource for production deployments is not recommended. Instead, generate a private key file outside of Terraform and distribute it securely to the system where Terraform will be run.
-*/
-resource "tls_private_key" "trusted_controller" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-
+## MACHINE (contoller)
 resource "azurerm_linux_virtual_machine" "trusted_controller" {
   name                            = "trusted-controller"
   resource_group_name             = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
@@ -164,10 +124,9 @@ resource "azurerm_linux_virtual_machine" "trusted_controller" {
     azurerm_network_interface.trusted_controller.id,
   ]
 
-  //TODO (check with ddu) add all public ssh keys used today to access the controller
   admin_ssh_key {
     username   = "adminuser"
-    public_key = tls_private_key.trusted_controller.public_key_openssh
+    public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5K7Ro7jBl5Kc68RdzG6EXHstIBFSxO5Da8SQJSMeCbb4cHTYuBBH8jNsAFcnkN64kEu+YhmlxaWEVEIrPgfGfs13ZL7v9p+Nt76tsz6gnVdAy2zCz607pAWe7p4bBn6T9zdZcBSnvjawO+8t/5ue4ngcfAjanN5OsOgLeD6yqVyP8YTERjW78jvp2TFrIYmgWMI5ES1ln32PQmRZwc1eAOsyGJW/YIBdOxaSkZ41qUvb9b3dCorGuCovpSK2EeNphjLPpVX/NRpVY4YlDqAcTCdLdDrEeVqkiA/VDCYNhudZTDa8f1iHwBE/GEtlKmoO6dxJ5LAkRk3RIVHYrmI6XXSw5l0tHhW5D12MNwzUfDxQEzBpGK5iSfOBt5zJ5OiI9ftnsq/GV7vCXfvMVGDLUC551P5/s/wM70QmHwhlGQNLNeJxRTvd6tL11bof3K+29ivFYUmpU17iVxYOWhkNY86WyngHU6Ux0zaczF3H6H0tpg1Ca/cFO428AVPw/RTJpcAe6OVKq5zwARNApQ/p6fJKUAdXap+PpQGZlQhPLkUbwtFXGTrpX9ePTcdzryCYjgrZouvy4ZMzruJiIbFUH8mRY3xVREVaIsJakruvgw3b14oQgcB4BwYVBBqi62xIvbRzAv7Su9t2jK6OR2z3sM/hLJRqIJ5oILMORa7XqrQ== smerle@MacBook-Pro-de-Stephane.local"
   }
 
   os_disk {
@@ -183,6 +142,8 @@ resource "azurerm_linux_virtual_machine" "trusted_controller" {
   }
 }
 
+# BOUNCE VM
+## PUBLIC IP
 resource "azurerm_public_ip" "trusted_bounce" {
   name                = "trusted-bounce-external-ip"
   location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
@@ -190,7 +151,7 @@ resource "azurerm_public_ip" "trusted_bounce" {
   allocation_method   = "Static"
   tags                = local.default_tags
 }
-
+## NETWORK INTERFACE with public ip and internal ip
 resource "azurerm_network_interface" "trusted_bounce" {
   name                = "trusted-bounce-internal-nic"
   location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
@@ -199,7 +160,7 @@ resource "azurerm_network_interface" "trusted_bounce" {
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_subnet.trusted_controller.id
+    subnet_id                     = data.azurerm_subnet.trusted_controller.id
     private_ip_address_allocation = "Dynamic"
   }
   ip_configuration {
@@ -209,6 +170,7 @@ resource "azurerm_network_interface" "trusted_bounce" {
     primary                       = true
   }
 }
+## MACHINE (bounce)
 resource "azurerm_linux_virtual_machine" "trusted_bounce" {
   name                            = "trusted-bounce"
   resource_group_name             = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
@@ -223,7 +185,7 @@ resource "azurerm_linux_virtual_machine" "trusted_bounce" {
   //TODO (check with ddu) add all public ssh keys used today to access the controller
   admin_ssh_key {
     username   = "adminuser"
-    public_key = tls_private_key.trusted_controller.public_key_openssh
+    public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5K7Ro7jBl5Kc68RdzG6EXHstIBFSxO5Da8SQJSMeCbb4cHTYuBBH8jNsAFcnkN64kEu+YhmlxaWEVEIrPgfGfs13ZL7v9p+Nt76tsz6gnVdAy2zCz607pAWe7p4bBn6T9zdZcBSnvjawO+8t/5ue4ngcfAjanN5OsOgLeD6yqVyP8YTERjW78jvp2TFrIYmgWMI5ES1ln32PQmRZwc1eAOsyGJW/YIBdOxaSkZ41qUvb9b3dCorGuCovpSK2EeNphjLPpVX/NRpVY4YlDqAcTCdLdDrEeVqkiA/VDCYNhudZTDa8f1iHwBE/GEtlKmoO6dxJ5LAkRk3RIVHYrmI6XXSw5l0tHhW5D12MNwzUfDxQEzBpGK5iSfOBt5zJ5OiI9ftnsq/GV7vCXfvMVGDLUC551P5/s/wM70QmHwhlGQNLNeJxRTvd6tL11bof3K+29ivFYUmpU17iVxYOWhkNY86WyngHU6Ux0zaczF3H6H0tpg1Ca/cFO428AVPw/RTJpcAe6OVKq5zwARNApQ/p6fJKUAdXap+PpQGZlQhPLkUbwtFXGTrpX9ePTcdzryCYjgrZouvy4ZMzruJiIbFUH8mRY3xVREVaIsJakruvgw3b14oQgcB4BwYVBBqi62xIvbRzAv7Su9t2jK6OR2z3sM/hLJRqIJ5oILMORa7XqrQ== smerle@MacBook-Pro-de-Stephane.local"
   }
 
   os_disk {
