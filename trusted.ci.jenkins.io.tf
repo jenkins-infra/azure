@@ -1,5 +1,5 @@
 ####################################################################################
-## TRUSTED NETWORK Defined in https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
+## TRUSTED NETWORK Define in https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
 ####################################################################################
 data "azurerm_resource_group" "trusted" {
   name = "trusted"
@@ -150,12 +150,12 @@ resource "azurerm_managed_disk" "trusted_controller_data_disk" {
   create_option        = "Empty"
   disk_size_gb         = "100"
 
-  tags                 = local.default_tags
+  tags = local.default_tags
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "trusted_controller_data_disk" {
   managed_disk_id    = azurerm_managed_disk.trusted_controller_data_disk.id
-  virtual_machine_id = azurerm_virtual_machine.trusted_controller.id
+  virtual_machine_id = azurerm_linux_virtual_machine.trusted_controller.id
   lun                = "10"
   caching            = "ReadWrite"
 }
@@ -217,4 +217,68 @@ resource "azurerm_linux_virtual_machine" "trusted_bounce" {
     sku       = "22.04-LTS"
     version   = "latest"
   }
+}
+
+# PERMANENT AGENT VM
+## NETWORK INTERFACE with internal ip
+resource "azurerm_network_interface" "trusted_permanent_agent" {
+  name                = "trusted-permanent-agent-nic"
+  location            = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.location
+  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.name
+  tags                = local.default_tags
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = data.azurerm_subnet.trusted_permanent_agents.id
+    private_ip_address_allocation = "Dynamic"
+  }
+}
+
+## MACHINE (permanent agent)
+resource "azurerm_linux_virtual_machine" "trusted_permanent_agent" {
+  name                            = "trusted-permanent-agents"
+  resource_group_name             = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.name
+  location                        = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.location
+  tags                            = local.default_tags
+  size                            = "Standard_D2as_v5"
+  admin_username                  = "adminuser"
+  disable_password_authentication = true
+  network_interface_ids = [
+    azurerm_network_interface.trusted_permanent_agent.id,
+  ]
+
+  admin_ssh_key {
+    username   = "adminuser"
+    public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5K7Ro7jBl5Kc68RdzG6EXHstIBFSxO5Da8SQJSMeCbb4cHTYuBBH8jNsAFcnkN64kEu+YhmlxaWEVEIrPgfGfs13ZL7v9p+Nt76tsz6gnVdAy2zCz607pAWe7p4bBn6T9zdZcBSnvjawO+8t/5ue4ngcfAjanN5OsOgLeD6yqVyP8YTERjW78jvp2TFrIYmgWMI5ES1ln32PQmRZwc1eAOsyGJW/YIBdOxaSkZ41qUvb9b3dCorGuCovpSK2EeNphjLPpVX/NRpVY4YlDqAcTCdLdDrEeVqkiA/VDCYNhudZTDa8f1iHwBE/GEtlKmoO6dxJ5LAkRk3RIVHYrmI6XXSw5l0tHhW5D12MNwzUfDxQEzBpGK5iSfOBt5zJ5OiI9ftnsq/GV7vCXfvMVGDLUC551P5/s/wM70QmHwhlGQNLNeJxRTvd6tL11bof3K+29ivFYUmpU17iVxYOWhkNY86WyngHU6Ux0zaczF3H6H0tpg1Ca/cFO428AVPw/RTJpcAe6OVKq5zwARNApQ/p6fJKUAdXap+PpQGZlQhPLkUbwtFXGTrpX9ePTcdzryCYjgrZouvy4ZMzruJiIbFUH8mRY3xVREVaIsJakruvgw3b14oQgcB4BwYVBBqi62xIvbRzAv7Su9t2jK6OR2z3sM/hLJRqIJ5oILMORa7XqrQ== smerle@MacBook-Pro-de-Stephane.local"
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "22.04-LTS"
+    version   = "latest"
+  }
+}
+
+resource "azurerm_managed_disk" "trusted_permanent_agent_data_disk" {
+  name                 = "trusted-permanent-agent-data-disk"
+  location             = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.location
+  resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.name
+  storage_account_type = "Standard_LRS"
+  create_option        = "Empty"
+  disk_size_gb         = "600"
+
+  tags = local.default_tags
+}
+
+resource "azurerm_virtual_machine_data_disk_attachment" "trusted_permanent_agent_data_disk" {
+  managed_disk_id    = azurerm_managed_disk.trusted_permanent_agent_data_disk.id
+  virtual_machine_id = azurerm_linux_virtual_machine.trusted_permanent_agent.id
+  lun                = "20"
+  caching            = "ReadWrite"
 }
