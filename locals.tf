@@ -8,9 +8,7 @@ locals {
       images_location = {
         "ubuntu-22.04-amd64" = "eastus"
         "ubuntu-22.04-arm64" = "eastus"
-        "windows-2019"       = "eastus"
         "windows-2019-amd64" = "eastus"
-        "windows-2022"       = "eastus"
         "windows-2022-amd64" = "eastus"
       }
     }
@@ -20,9 +18,7 @@ locals {
       images_location = {
         "ubuntu-22.04-amd64" = "eastus"
         "ubuntu-22.04-arm64" = "eastus"
-        "windows-2019"       = "eastus"
         "windows-2019-amd64" = "eastus"
-        "windows-2022"       = "eastus"
         "windows-2022-amd64" = "eastus"
       }
     }
@@ -32,9 +28,7 @@ locals {
       images_location = {
         "ubuntu-22.04-amd64" = "eastus"
         "ubuntu-22.04-arm64" = "eastus"
-        "windows-2019"       = "eastus"
         "windows-2019-amd64" = "eastus"
-        "windows-2022"       = "eastus"
         "windows-2022-amd64" = "eastus"
       }
     }
