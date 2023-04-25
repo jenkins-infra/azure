@@ -106,6 +106,7 @@ resource "azurerm_public_ip" "trusted_bounce" {
   location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
   resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
   allocation_method   = "Static"
+  sku                 = "Standard"
   tags                = local.default_tags
 }
 ## NETWORK INTERFACE with public ip and internal ip
