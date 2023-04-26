@@ -1,6 +1,4 @@
-####################################################################################
-## TRUSTED NETWORK Define in https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
-####################################################################################
+# Network resources defined in https://github.com/jenkins-infra/azure-net
 data "azurerm_resource_group" "trusted" {
   name = "trusted"
 }
@@ -13,30 +11,10 @@ data "azurerm_subnet" "trusted_controller" {
   virtual_network_name = data.azurerm_virtual_network.trusted.name
   resource_group_name  = data.azurerm_resource_group.trusted.name
 }
-data "azurerm_subnet" "trusted_vmagents" {
-  name                 = "${data.azurerm_virtual_network.trusted.name}-trusted-jenkins-ci-io-ephemeral-agents"
-  virtual_network_name = data.azurerm_virtual_network.trusted.name
-  resource_group_name  = data.azurerm_resource_group.trusted.name
-}
-data "azurerm_subnet" "trusted_permanent_agents" {
-  name                 = "${data.azurerm_virtual_network.trusted.name}-trusted-jenkins-ci-io-permanent-agents"
-  virtual_network_name = data.azurerm_virtual_network.trusted.name
-  resource_group_name  = data.azurerm_resource_group.trusted.name
-}
 
-####################################################################################
-## TRUSTED RESOURCES
-####################################################################################
-# Resources groups for TRUSTED Agents
 resource "azurerm_resource_group" "trusted_ci_jenkins_io_agents" {
   name     = "jenkinsinfra-trustedvmagents"
-  location = var.location
-  tags     = local.default_tags
-}
-resource "azurerm_resource_group" "trusted_ci_jenkins_io_permanent_agents" {
-  name     = "jenkinsinfra-trusted-permanent-vmagents"
-  location = var.location
-  tags     = local.default_tags
+  location = "East US"
 }
 resource "azurerm_resource_group" "trusted_ci_jenkins_io_controller" {
   name     = "jenkinsinfra-trusted-controller"
@@ -44,7 +22,6 @@ resource "azurerm_resource_group" "trusted_ci_jenkins_io_controller" {
   tags     = local.default_tags
 }
 
-#APPLICATION azureAD
 resource "azuread_application" "trusted_ci_jenkins_io" {
   display_name = "trusted.ci.jenkins.io"
   owners = [
@@ -65,7 +42,6 @@ resource "azuread_application" "trusted_ci_jenkins_io" {
   }
 }
 
-#SERVICE PRINCIPAL azureAD
 resource "azuread_service_principal" "trusted_ci_jenkins_io" {
   application_id               = azuread_application.trusted_ci_jenkins_io.application_id
   app_role_assignment_required = false
@@ -93,16 +69,8 @@ resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_packer" {
   principal_id         = azuread_service_principal.trusted_ci_jenkins_io.id
 }
 
-############################# VMs ####################################
-
-# NETWORKING FROM azure-net repository
-# check in vnets.tf
-#
-
-# BOUNCE VM
-## PUBLIC IP
 resource "azurerm_public_ip" "trusted_bounce" {
-  name                = "trusted-bounce-external-ip"
+  name                = "trusted-bounce"
   location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
   resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
   allocation_method   = "Static"
@@ -111,7 +79,7 @@ resource "azurerm_public_ip" "trusted_bounce" {
 }
 ## NETWORK INTERFACE with public ip and internal ip
 resource "azurerm_network_interface" "trusted_bounce" {
-  name                = "trusted-bounce-internal-nic"
+  name                = "trusted-bounce"
   location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
   resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
   tags                = local.default_tags
@@ -129,21 +97,21 @@ resource "azurerm_linux_virtual_machine" "trusted_bounce" {
   resource_group_name             = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
   location                        = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
   size                            = "Standard_B1s"
-  admin_username                  = "adminuser"
+  admin_username                  = local.trusted.admin_username
   disable_password_authentication = true
   network_interface_ids = [
     azurerm_network_interface.trusted_bounce.id,
   ]
 
   admin_ssh_key {
-    username   = "adminuser"
-    public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5K7Ro7jBl5Kc68RdzG6EXHstIBFSxO5Da8SQJSMeCbb4cHTYuBBH8jNsAFcnkN64kEu+YhmlxaWEVEIrPgfGfs13ZL7v9p+Nt76tsz6gnVdAy2zCz607pAWe7p4bBn6T9zdZcBSnvjawO+8t/5ue4ngcfAjanN5OsOgLeD6yqVyP8YTERjW78jvp2TFrIYmgWMI5ES1ln32PQmRZwc1eAOsyGJW/YIBdOxaSkZ41qUvb9b3dCorGuCovpSK2EeNphjLPpVX/NRpVY4YlDqAcTCdLdDrEeVqkiA/VDCYNhudZTDa8f1iHwBE/GEtlKmoO6dxJ5LAkRk3RIVHYrmI6XXSw5l0tHhW5D12MNwzUfDxQEzBpGK5iSfOBt5zJ5OiI9ftnsq/GV7vCXfvMVGDLUC551P5/s/wM70QmHwhlGQNLNeJxRTvd6tL11bof3K+29ivFYUmpU17iVxYOWhkNY86WyngHU6Ux0zaczF3H6H0tpg1Ca/cFO428AVPw/RTJpcAe6OVKq5zwARNApQ/p6fJKUAdXap+PpQGZlQhPLkUbwtFXGTrpX9ePTcdzryCYjgrZouvy4ZMzruJiIbFUH8mRY3xVREVaIsJakruvgw3b14oQgcB4BwYVBBqi62xIvbRzAv7Su9t2jK6OR2z3sM/hLJRqIJ5oILMORa7XqrQ== smerle@MacBook-Pro-de-Stephane.local"
+    username   = local.trusted.admin_username
+    public_key = local.trusted.admin_public_key
   }
 
   os_disk {
     caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
-    disk_size_gb         = 32 #minimal size for ubuntu 22.04 image
+    storage_account_type = "Standard_LRS" # Use HDD (cheaper than SSD) as this machine does not need performances
+    disk_size_gb         = 32             # Minimal size for ubuntu 22.04 image
   }
 
   source_image_reference {
