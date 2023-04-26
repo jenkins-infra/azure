@@ -46,4 +46,8 @@ locals {
     scope      = "terraform-managed"
     repository = "jenkins-infra/azure"
   }
+
+  trusted_ci_jenkins_io = {
+    admin_username = "jenkins-infra-team"
+  }
 }
