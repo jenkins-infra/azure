@@ -157,6 +157,7 @@ resource "azurerm_network_security_rule" "deny_all_to_vnet" {
   network_security_group_name  = azurerm_network_security_group.trusted_controller.name
 }
 
+# TODO: add all used ips or remove the rule at final migration.
 resource "azurerm_network_security_rule" "allow_ssh_from_admins_to_bounce" {
   for_each = local.admin_allowed_ips
 
