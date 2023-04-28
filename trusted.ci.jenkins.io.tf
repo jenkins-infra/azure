@@ -157,7 +157,7 @@ resource "azurerm_network_security_rule" "deny_all_to_vnet" {
   network_security_group_name  = azurerm_network_security_group.trusted_controller.name
 }
 
-# TODO: add all used ips or remove the rule at final migration.
+# TODO: add all ips from people needing access to trusted.ci.jenkins.io, or remove the rule at final migration. (Cf https://github.com/jenkins-infra/azure/pull/334#discussion_r1179955821)
 resource "azurerm_network_security_rule" "allow_ssh_from_admins_to_bounce" {
   for_each = local.admin_allowed_ips
 
