@@ -121,3 +121,54 @@ resource "azurerm_linux_virtual_machine" "trusted_bounce" {
     version   = "latest"
   }
 }
+
+####################################################################################
+## Network Security Groups for TRUSTED subnets
+####################################################################################
+# subnet trusted_controller
+resource "azurerm_network_security_group" "trusted_controller" {
+  name                = data.azurerm_subnet.trusted_controller.name
+  location            = data.azurerm_resource_group.trusted.location
+  resource_group_name = data.azurerm_resource_group.trusted.name
+
+  # No security rule: using 'azurerm_network_security_rule' to allow composition across files
+
+  tags = local.default_tags
+}
+
+resource "azurerm_subnet_network_security_group_association" "trusted_controller" {
+  subnet_id                 = data.azurerm_subnet.trusted_controller.id
+  network_security_group_id = azurerm_network_security_group.trusted_controller.id
+}
+
+resource "azurerm_network_security_rule" "deny_all_to_vnet" {
+  name = "deny-all-to-vnet"
+  # Priority should be the highest value possible (lower than the default 65000 "default" rules not overidable) but higher than the other security rules
+  # ref. https://github.com/hashicorp/terraform-provider-azurerm/issues/11137 and https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_rule#priority
+  priority                     = 4095
+  direction                    = "Outbound"
+  access                       = "Deny"
+  protocol                     = "*"
+  source_port_range            = "*"
+  destination_port_range       = "*"
+  source_address_prefix        = "*"
+  destination_address_prefixes = data.azurerm_virtual_network.trusted.address_space
+  resource_group_name          = data.azurerm_resource_group.trusted.name
+  network_security_group_name  = azurerm_network_security_group.trusted_controller.name
+}
+
+resource "azurerm_network_security_rule" "allow_ssh_from_admins_to_bounce" {
+  for_each = local.admin_allowed_ips
+
+  name                        = "allow-22-from-${each.key}-to-bounce"
+  priority                    = 4000 + index(keys(local.admin_allowed_ips), each.key)
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefix       = each.value
+  destination_address_prefix  = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_controller.name
+}
