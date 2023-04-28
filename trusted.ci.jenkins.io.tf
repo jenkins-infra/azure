@@ -69,6 +69,8 @@ resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_packer" {
   principal_id         = azuread_service_principal.trusted_ci_jenkins_io.id
 }
 
+# VMs
+# BOUNCE VM
 resource "azurerm_public_ip" "trusted_bounce" {
   name                = "trusted-bounce"
   location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
@@ -121,6 +123,72 @@ resource "azurerm_linux_virtual_machine" "trusted_bounce" {
     version   = "latest"
   }
 }
+
+# CONTROLLER VM
+## NETWORK INTERFACE with internal ip
+resource "azurerm_network_interface" "trusted_controller" {
+  name                = "trusted-controller"
+  location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
+  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
+  tags                = local.default_tags
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = data.azurerm_subnet.trusted_controller.id
+    private_ip_address_allocation = "Dynamic"
+  }
+}
+
+## MACHINE (controller)
+resource "azurerm_linux_virtual_machine" "trusted_controller" {
+  name                            = "trusted-controller"
+  resource_group_name             = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
+  location                        = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
+  tags                            = local.default_tags
+  size                            = "Standard_D2as_v5"
+  admin_username                  = local.trusted_ci_jenkins_io.admin_username
+  disable_password_authentication = true
+  network_interface_ids = [
+    azurerm_network_interface.trusted_controller.id,
+  ]
+
+  admin_ssh_key {
+    username   = local.trusted_ci_jenkins_io.admin_username
+    public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5K7Ro7jBl5Kc68RdzG6EXHstIBFSxO5Da8SQJSMeCbb4cHTYuBBH8jNsAFcnkN64kEu+YhmlxaWEVEIrPgfGfs13ZL7v9p+Nt76tsz6gnVdAy2zCz607pAWe7p4bBn6T9zdZcBSnvjawO+8t/5ue4ngcfAjanN5OsOgLeD6yqVyP8YTERjW78jvp2TFrIYmgWMI5ES1ln32PQmRZwc1eAOsyGJW/YIBdOxaSkZ41qUvb9b3dCorGuCovpSK2EeNphjLPpVX/NRpVY4YlDqAcTCdLdDrEeVqkiA/VDCYNhudZTDa8f1iHwBE/GEtlKmoO6dxJ5LAkRk3RIVHYrmI6XXSw5l0tHhW5D12MNwzUfDxQEzBpGK5iSfOBt5zJ5OiI9ftnsq/GV7vCXfvMVGDLUC551P5/s/wM70QmHwhlGQNLNeJxRTvd6tL11bof3K+29ivFYUmpU17iVxYOWhkNY86WyngHU6Ux0zaczF3H6H0tpg1Ca/cFO428AVPw/RTJpcAe6OVKq5zwARNApQ/p6fJKUAdXap+PpQGZlQhPLkUbwtFXGTrpX9ePTcdzryCYjgrZouvy4ZMzruJiIbFUH8mRY3xVREVaIsJakruvgw3b14oQgcB4BwYVBBqi62xIvbRzAv7Su9t2jK6OR2z3sM/hLJRqIJ5oILMORa7XqrQ=="
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+    disk_size_gb         = 32 # Minimal size for ubuntu 22.04 image
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-minimal-jammy"
+    sku       = "minimal-22_04-lts-gen2"
+    version   = "latest"
+  }
+}
+
+resource "azurerm_managed_disk" "trusted_controller_data_disk" {
+  name                 = "trusted-controller-data-disk"
+  location             = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
+  resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
+  storage_account_type = "Standard_LRS"
+  create_option        = "Empty"
+  disk_size_gb         = "100"
+
+  tags = local.default_tags
+}
+
+resource "azurerm_virtual_machine_data_disk_attachment" "trusted_controller_data_disk" {
+  managed_disk_id    = azurerm_managed_disk.trusted_controller_data_disk.id
+  virtual_machine_id = azurerm_linux_virtual_machine.trusted_controller.id
+  lun                = "10"
+  caching            = "ReadWrite"
+}
+
 
 ####################################################################################
 ## Network Security Groups for TRUSTED subnets
