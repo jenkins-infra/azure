@@ -135,7 +135,9 @@ resource "azurerm_network_interface" "trusted_controller" {
   ip_configuration {
     name                          = "internal"
     subnet_id                     = data.azurerm_subnet.trusted_controller.id
-    private_ip_address_allocation = "Dynamic"
+    private_ip_address_allocation = "Static"
+    # TODO add a dns record to point on this private ip
+    private_ip_address            = "10.252.0.1" # Manually chosen first IP of the controller subnet
   }
 }
 
@@ -159,7 +161,7 @@ resource "azurerm_linux_virtual_machine" "trusted_controller" {
 
   os_disk {
     caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
+    storage_account_type = "StandardSSD_LRS"
     disk_size_gb         = 32 # Minimal size for ubuntu 22.04 image
   }
 
@@ -175,7 +177,7 @@ resource "azurerm_managed_disk" "trusted_controller_data_disk" {
   name                 = "trusted-controller-data-disk"
   location             = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
   resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
-  storage_account_type = "Standard_LRS"
+  storage_account_type = "StandardSSD_LRS"
   create_option        = "Empty"
   disk_size_gb         = "100"
 
