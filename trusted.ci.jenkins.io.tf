@@ -135,10 +135,16 @@ resource "azurerm_network_interface" "trusted_ci_controller" {
   ip_configuration {
     name                          = "internal"
     subnet_id                     = data.azurerm_subnet.trusted_ci_controller.id
-    private_ip_address_allocation = "Static"
-    # TODO add a dns record to point on this private ip
-    private_ip_address = "10.252.0.1" # Manually chosen first IP of the controller subnet
+    private_ip_address_allocation = "Dynamic"
   }
+}
+resource "azurerm_dns_a_record" "trusted_ci_controller" {
+  name                = "trusted-ci-controller"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 300
+  records             = [azurerm_network_interface.trusted_ci_controller.private_ip_address]
+  tags                = local.default_tags
 }
 
 ## MACHINE (controller)
