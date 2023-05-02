@@ -6,7 +6,7 @@ data "azurerm_virtual_network" "trusted" {
   name                = "${data.azurerm_resource_group.trusted.name}-vnet"
   resource_group_name = data.azurerm_resource_group.trusted.name
 }
-data "azurerm_subnet" "trusted_controller" {
+data "azurerm_subnet" "trusted_ci_controller" {
   name                 = "${data.azurerm_virtual_network.trusted.name}-trusted-jenkins-ci-io-controller"
   virtual_network_name = data.azurerm_virtual_network.trusted.name
   resource_group_name  = data.azurerm_resource_group.trusted.name
@@ -17,7 +17,7 @@ resource "azurerm_resource_group" "trusted_ci_jenkins_io_agents" {
   location = "East US"
 }
 resource "azurerm_resource_group" "trusted_ci_jenkins_io_controller" {
-  name     = "jenkinsinfra-trusted-controller"
+  name     = "jenkinsinfra-trusted-ci-controller"
   location = var.location
   tags     = local.default_tags
 }
@@ -90,7 +90,7 @@ resource "azurerm_network_interface" "trusted_bounce" {
     name                          = "external"
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.trusted_bounce.id
-    subnet_id                     = data.azurerm_subnet.trusted_controller.id
+    subnet_id                     = data.azurerm_subnet.trusted_ci_controller.id
   }
 }
 ## MACHINE (bounce)
@@ -126,15 +126,15 @@ resource "azurerm_linux_virtual_machine" "trusted_bounce" {
 
 # CONTROLLER VM
 ## NETWORK INTERFACE with internal ip
-resource "azurerm_network_interface" "trusted_controller" {
-  name                = "trusted-controller"
+resource "azurerm_network_interface" "trusted_ci_controller" {
+  name                = "trusted-ci-controller"
   location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
   resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
   tags                = local.default_tags
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = data.azurerm_subnet.trusted_controller.id
+    subnet_id                     = data.azurerm_subnet.trusted_ci_controller.id
     private_ip_address_allocation = "Static"
     # TODO add a dns record to point on this private ip
     private_ip_address = "10.252.0.1" # Manually chosen first IP of the controller subnet
@@ -142,8 +142,8 @@ resource "azurerm_network_interface" "trusted_controller" {
 }
 
 ## MACHINE (controller)
-resource "azurerm_linux_virtual_machine" "trusted_controller" {
-  name                            = "trusted-controller"
+resource "azurerm_linux_virtual_machine" "trusted_ci_controller" {
+  name                            = "trusted-ci-controller"
   resource_group_name             = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
   location                        = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
   tags                            = local.default_tags
@@ -151,7 +151,7 @@ resource "azurerm_linux_virtual_machine" "trusted_controller" {
   admin_username                  = local.trusted_ci_jenkins_io.admin_username
   disable_password_authentication = true
   network_interface_ids = [
-    azurerm_network_interface.trusted_controller.id,
+    azurerm_network_interface.trusted_ci_controller.id,
   ]
 
   admin_ssh_key {
@@ -173,20 +173,20 @@ resource "azurerm_linux_virtual_machine" "trusted_controller" {
   }
 }
 
-resource "azurerm_managed_disk" "trusted_controller_data_disk" {
-  name                 = "trusted-controller-data-disk"
+resource "azurerm_managed_disk" "trusted_ci_controller_data_disk" {
+  name                 = "trusted-ci-controller-data-disk"
   location             = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
   resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
   storage_account_type = "StandardSSD_LRS"
   create_option        = "Empty"
-  disk_size_gb         = "100"
+  disk_size_gb         = "128"
 
   tags = local.default_tags
 }
 
-resource "azurerm_virtual_machine_data_disk_attachment" "trusted_controller_data_disk" {
-  managed_disk_id    = azurerm_managed_disk.trusted_controller_data_disk.id
-  virtual_machine_id = azurerm_linux_virtual_machine.trusted_controller.id
+resource "azurerm_virtual_machine_data_disk_attachment" "trusted_ci_controller_data_disk" {
+  managed_disk_id    = azurerm_managed_disk.trusted_ci_controller_data_disk.id
+  virtual_machine_id = azurerm_linux_virtual_machine.trusted_ci_controller.id
   lun                = "10"
   caching            = "ReadWrite"
 }
@@ -195,9 +195,9 @@ resource "azurerm_virtual_machine_data_disk_attachment" "trusted_controller_data
 ####################################################################################
 ## Network Security Groups for TRUSTED subnets
 ####################################################################################
-# subnet trusted_controller
-resource "azurerm_network_security_group" "trusted_controller" {
-  name                = data.azurerm_subnet.trusted_controller.name
+# subnet trusted_ci_controller
+resource "azurerm_network_security_group" "trusted_ci_controller" {
+  name                = data.azurerm_subnet.trusted_ci_controller.name
   location            = data.azurerm_resource_group.trusted.location
   resource_group_name = data.azurerm_resource_group.trusted.name
 
@@ -206,9 +206,9 @@ resource "azurerm_network_security_group" "trusted_controller" {
   tags = local.default_tags
 }
 
-resource "azurerm_subnet_network_security_group_association" "trusted_controller" {
-  subnet_id                 = data.azurerm_subnet.trusted_controller.id
-  network_security_group_id = azurerm_network_security_group.trusted_controller.id
+resource "azurerm_subnet_network_security_group_association" "trusted_ci_controller" {
+  subnet_id                 = data.azurerm_subnet.trusted_ci_controller.id
+  network_security_group_id = azurerm_network_security_group.trusted_ci_controller.id
 }
 
 resource "azurerm_network_security_rule" "deny_all_to_vnet" {
@@ -224,7 +224,7 @@ resource "azurerm_network_security_rule" "deny_all_to_vnet" {
   source_address_prefix        = "*"
   destination_address_prefixes = data.azurerm_virtual_network.trusted.address_space
   resource_group_name          = data.azurerm_resource_group.trusted.name
-  network_security_group_name  = azurerm_network_security_group.trusted_controller.name
+  network_security_group_name  = azurerm_network_security_group.trusted_ci_controller.name
 }
 
 # TODO: add all ips from people needing access to trusted.ci.jenkins.io, or remove the rule at final migration. (Cf https://github.com/jenkins-infra/azure/pull/334#discussion_r1179955821)
@@ -241,5 +241,5 @@ resource "azurerm_network_security_rule" "allow_ssh_from_admins_to_bounce" {
   source_address_prefix       = each.value
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
 }
