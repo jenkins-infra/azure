@@ -202,7 +202,7 @@ resource "azurerm_virtual_machine_data_disk_attachment" "trusted_ci_controller_d
 }
 
 resource "azurerm_private_dns_a_record" "trusted_ci_controller" {
-  name                = "trusted-ci-controller"
+  name                = "@"
   zone_name           = azurerm_private_dns_zone.trusted.name
   resource_group_name = data.azurerm_resource_group.trusted.name
   ttl                 = 300
