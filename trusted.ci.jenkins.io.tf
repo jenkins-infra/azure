@@ -283,6 +283,13 @@ resource "azurerm_virtual_machine_data_disk_attachment" "trusted_permanent_agent
   caching            = "ReadWrite"
 }
 
+resource "azurerm_private_dns_a_record" "trusted_permanent_agent" {
+  name                = "permanent.agent"
+  zone_name           = azurerm_private_dns_zone.trusted.name
+  resource_group_name = data.azurerm_resource_group.trusted.name
+  ttl                 = 300
+  records             = [azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address]
+}
 
 ####################################################################################
 ## Network Security Groups for TRUSTED subnets
