@@ -71,7 +71,7 @@ resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_packer" {
 
 # DNS
 resource "azurerm_private_dns_zone" "trusted" {
-  name                = "controller.trusted.ci.jenkins.io"
+  name                = "trusted.ci.jenkins.io"
   resource_group_name = data.azurerm_resource_group.trusted.name
 }
 resource "azurerm_private_dns_zone_virtual_network_link" "trusted" {
