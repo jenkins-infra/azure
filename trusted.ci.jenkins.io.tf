@@ -69,6 +69,18 @@ resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_packer" {
   principal_id         = azuread_service_principal.trusted_ci_jenkins_io.id
 }
 
+# DNS
+resource "azurerm_private_dns_zone" "trusted" {
+  name                = "trusted.ci.jenkins.io"
+  resource_group_name = data.azurerm_resource_group.trusted.name
+}
+resource "azurerm_private_dns_zone_virtual_network_link" "trusted" {
+  name                  = "trustedDNS"
+  resource_group_name   = data.azurerm_resource_group.trusted.name
+  private_dns_zone_name = azurerm_private_dns_zone.trusted.name
+  virtual_network_id    = data.azurerm_virtual_network.trusted.id
+}
+
 # VMs
 # BOUNCE VM
 resource "azurerm_public_ip" "trusted_bounce" {
@@ -189,6 +201,13 @@ resource "azurerm_virtual_machine_data_disk_attachment" "trusted_ci_controller_d
   caching            = "ReadWrite"
 }
 
+resource "azurerm_private_dns_a_record" "trusted_ci_controller" {
+  name                = "@"
+  zone_name           = azurerm_private_dns_zone.trusted.name
+  resource_group_name = data.azurerm_resource_group.trusted.name
+  ttl                 = 300
+  records             = [azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address]
+}
 
 ####################################################################################
 ## Network Security Groups for TRUSTED subnets
