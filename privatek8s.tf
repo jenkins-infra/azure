@@ -63,7 +63,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
   name                  = "linuxpool"
   vm_size               = "Standard_D4s_v3"
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 50
+  os_disk_size_gb       = 64 # 32 or 64: https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
   min_count             = 0
