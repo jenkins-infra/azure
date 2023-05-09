@@ -84,7 +84,7 @@ resource "azurerm_private_dns_zone" "trusted" {
   resource_group_name = data.azurerm_resource_group.trusted.name
 }
 resource "azurerm_private_dns_zone_virtual_network_link" "trusted" {
-  name                  = "trustedDNS"
+  name                  = "trusted-vnet"
   resource_group_name   = data.azurerm_resource_group.trusted.name
   private_dns_zone_name = azurerm_private_dns_zone.trusted.name
   virtual_network_id    = data.azurerm_virtual_network.trusted.id
