@@ -59,6 +59,25 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   tags = local.default_tags
 }
 
+# This node pool is used to try to resize the default_node_pool
+resource "azurerm_kubernetes_cluster_node_pool" "systempool_secondary" {
+  name                  = "systempool2"
+  mode                  = "System"
+  vm_size               = "Standard_D2as_v4"
+  os_sku                = "Ubuntu"
+  os_type               = "Linux"
+  os_disk_type          = "Ephemeral"
+  os_disk_size_gb       = 50 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dav4-dasv4-series#dasv4-series (depends on the instance size)
+  kubelet_disk_type     = "OS"
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
+  enable_auto_scaling   = true
+  min_count             = 0
+  max_count             = 3
+  zones                 = [3]
+  vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
+  tags                  = local.default_tags
+}
+
 resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
   name                  = "linuxpool"
   vm_size               = "Standard_D4s_v3"
