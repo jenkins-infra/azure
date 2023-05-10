@@ -63,7 +63,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
   name                  = "linuxpool"
   vm_size               = "Standard_D4s_v3"
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 64 # 32 or 64: https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types
+  os_disk_size_gb       = 100 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
   min_count             = 0
@@ -77,7 +77,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   name                  = "infracipool"
   vm_size               = "Standard_D8s_v3"
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 30
+  os_disk_size_gb       = 200 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
   min_count             = 0
@@ -105,7 +105,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "releasepool" {
   name                  = "releasepool"
   vm_size               = "Standard_D8s_v3" # 8 vCPU 32 GiB RAM
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 100
+  os_disk_size_gb       = 200 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
   min_count             = 0
@@ -123,7 +123,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "windows2019pool" {
   name                  = "w2019"
   vm_size               = "Standard_D4s_v3" # 4 vCPU 16 GiB RAM
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 100
+  os_disk_size_gb       = 100 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   os_type               = "Windows"
   os_sku                = "Windows2019"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
