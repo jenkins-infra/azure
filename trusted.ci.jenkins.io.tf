@@ -133,7 +133,6 @@ resource "azurerm_linux_virtual_machine" "trusted_bounce" {
 
   # Use cloud-init to configure the VM
   user_data = base64encode(templatefile("./.shared-tools/terraform/cloudinit.tftpl", { hostname = "bounce.trusted.ci.jenkins.io" }))
-  # Force VM recreation when the VPN URL change
   computer_name = "bounce-trusted-ci-jenkins-io"
 
   # Encrypt all disks (ephemeral, temp dirs and data volumes) - https://learn.microsoft.com/en-us/azure/virtual-machines/disks-enable-host-based-encryption-portal?tabs=azure-powershell
