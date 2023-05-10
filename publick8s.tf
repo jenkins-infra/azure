@@ -71,7 +71,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "publicpool" {
   name                  = "publicpool"
   vm_size               = "Standard_D8s_v3" # 8 vCPU, 32 GB RAM, 64 GB disk, 16 000 IOPS
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 100 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
+  os_disk_size_gb       = 200 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   enable_auto_scaling   = true
   min_count             = 0
