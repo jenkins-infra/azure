@@ -384,7 +384,7 @@ resource "azurerm_network_security_rule" "allow_ssh_from_controller_to_ephemeral
   source_port_range           = "22"
   destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
-  destination_address_prefix  = data.secazurerm_subnet.trusted_ephemeral_agents.address_prefix
+  destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
 }
