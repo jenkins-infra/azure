@@ -42,14 +42,18 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   }
 
   default_node_pool {
-    name            = "systempool"
-    vm_size         = "Standard_D2as_v4"
-    os_disk_type    = "Ephemeral"
-    os_disk_size_gb = 30
-    node_count      = 1
-    vnet_subnet_id  = data.azurerm_subnet.privatek8s_tier.id
-    tags            = local.default_tags
-    zones           = [3]
+    name                = "syspool"
+    vm_size             = "Standard_D2as_v4"
+    os_sku              = "Ubuntu"
+    os_disk_type        = "Ephemeral"
+    os_disk_size_gb     = 50 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dav4-dasv4-series#dasv4-series (depends on the instance size)
+    kubelet_disk_type   = "OS"
+    enable_auto_scaling = true
+    min_count           = 1
+    max_count           = 3
+    vnet_subnet_id      = data.azurerm_subnet.privatek8s_tier.id
+    tags                = local.default_tags
+    zones               = [3]
   }
 
   identity {
