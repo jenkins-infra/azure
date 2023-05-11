@@ -71,7 +71,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "systempool_secondary" {
   kubelet_disk_type     = "OS"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
-  min_count             = 0
+  min_count             = 1
   max_count             = 3
   zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
