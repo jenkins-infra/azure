@@ -16,7 +16,11 @@ data "azurerm_subnet" "trusted_permanent_agents" {
   virtual_network_name = data.azurerm_virtual_network.trusted.name
   resource_group_name  = data.azurerm_resource_group.trusted.name
 }
-
+data "azurerm_subnet" "trusted_ephemeral_agents" {
+  name                 = "${data.azurerm_virtual_network.trusted.name}-trusted-jenkins-ci-io-ephemeral-agents"
+  resource_group_name  = data.azurerm_resource_group.trusted.name
+  virtual_network_name = data.azurerm_virtual_network.trusted.name
+}
 resource "azurerm_resource_group" "trusted_ci_jenkins_io_agents" {
   name     = "jenkinsinfra-trustedvmagents"
   location = "East US"
@@ -362,6 +366,48 @@ resource "azurerm_network_security_rule" "allow_ssh_from_admins_to_bounce" {
   destination_port_range      = "22"
   source_address_prefix       = each.value
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+}
+
+resource "azurerm_network_security_rule" "allow_ssh_from_bounce_to_controller" {
+  name                        = "allow-22-from-bounce-to-controller"
+  priority                    = 3500
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "22"
+  destination_port_range      = "22"
+  source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
+  destination_address_prefix  = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+}
+
+resource "azurerm_network_security_rule" "allow_ssh_from_controller_to_permanent_agent" {
+  name                        = "allow-22-from-controller-to-permanent-agent"
+  priority                    = 3600
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "22"
+  destination_port_range      = "22"
+  source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
+  destination_address_prefix  = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+}
+
+resource "azurerm_network_security_rule" "allow_ssh_from_controller_to_ephemeral_agents" {
+  name                        = "allow-22-from-controller-to-ephemeral-agents"
+  priority                    = 3700
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "22"
+  destination_port_range      = "22"
+  source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
+  destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
 }
