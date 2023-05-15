@@ -73,7 +73,7 @@ resource "azurerm_linux_virtual_machine" "ci_jenkins_io" {
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "StandardSSD_LRS"
-    disk_size_gb         = 32 # Minimal size for ubuntu 22.04 image
+    disk_size_gb         = 64 # Minimal size for ubuntu 22.04 image
   }
 
   source_image_reference {
