@@ -47,7 +47,5 @@ locals {
     repository = "jenkins-infra/azure"
   }
 
-  trusted_ci_jenkins_io = {
-    admin_username = "jenkins-infra-team"
-  }
+  admin_username = "jenkins-infra-team"
 }
