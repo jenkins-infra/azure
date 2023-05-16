@@ -2,6 +2,8 @@
 resource "azurerm_resource_group" "ci_jenkins_io_controller" {
   name     = "ci-jenkins-io-controller"
   location = "East US 2"
+  
+  tags = local.default_tags
 }
 
 resource "azurerm_resource_group" "ci_jenkins_io_agents" {
