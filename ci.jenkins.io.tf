@@ -43,8 +43,7 @@ resource "azurerm_network_security_group" "ci_jenkins_io" {
   name                = "ci-jenkins-io"
   location            = azurerm_resource_group.ci_jenkins_io_controller.location
   resource_group_name = azurerm_resource_group.ci_jenkins_io_controller.name
-  # No security rule: using 'azurerm_resource_group.ci_jenkins_io_controller.' to allow composition across files
-  tags = local.default_tags
+  tags                = local.default_tags
 }
 resource "azurerm_subnet_network_security_group_association" "ci_jenkins_io" {
   subnet_id                 = data.azurerm_subnet.ci_jenkins_io_controller.id

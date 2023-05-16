@@ -326,10 +326,7 @@ resource "azurerm_network_security_group" "trusted_ci_controller" {
   name                = data.azurerm_subnet.trusted_ci_controller.name
   location            = data.azurerm_resource_group.trusted.location
   resource_group_name = data.azurerm_resource_group.trusted.name
-
-  # No security rule: using 'azurerm_network_security_rule' to allow composition across files
-
-  tags = local.default_tags
+  tags                = local.default_tags
 }
 
 resource "azurerm_subnet_network_security_group_association" "trusted_ci_controller" {
