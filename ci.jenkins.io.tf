@@ -2,7 +2,7 @@
 resource "azurerm_resource_group" "ci_jenkins_io_controller" {
   name     = "ci-jenkins-io-controller"
   location = "East US 2"
-  
+
   tags = local.default_tags
 }
 
@@ -38,6 +38,47 @@ resource "azurerm_network_interface" "ci_jenkins_io" {
     public_ip_address_id          = azurerm_public_ip.ci_jenkins_io.id
     subnet_id                     = data.azurerm_subnet.ci_jenkins_io_controller.id
   }
+}
+resource "azurerm_network_security_group" "ci_jenkins_io" {
+  name                = "ci-jenkins-io"
+  location            = azurerm_resource_group.ci_jenkins_io_controller.location
+  resource_group_name = azurerm_resource_group.ci_jenkins_io_controller.name
+  tags                = local.default_tags
+}
+resource "azurerm_subnet_network_security_group_association" "ci_jenkins_io" {
+  subnet_id                 = data.azurerm_subnet.ci_jenkins_io_controller.id
+  network_security_group_id = azurerm_network_security_group.ci_jenkins_io.id
+}
+resource "azurerm_network_security_rule" "allow_ssh_from_private_vpn" {
+  name                        = "allow-ssh-from-private-vpn"
+  priority                    = 4000 # Higher priority wins
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefixes     = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
+  destination_address_prefix  = azurerm_linux_virtual_machine.ci_jenkins_io.private_ip_address
+  resource_group_name         = azurerm_resource_group.ci_jenkins_io_controller.name
+  network_security_group_name = azurerm_network_security_group.ci_jenkins_io.name
+}
+#tfsec:ignore:azure-network-no-public-ingress
+resource "azurerm_network_security_rule" "allow_jenkins_from_internet" {
+  name              = "allow-jenkins-from-internet"
+  priority          = 3999 # Higher priority wins
+  direction         = "Inbound"
+  access            = "Allow"
+  protocol          = "Tcp"
+  source_port_range = "*"
+  destination_port_ranges = [
+    "80",    # HTTP
+    "443",   # HTTPS
+    "50000", # Inbound protocol
+  ]
+  source_address_prefix       = "*"
+  destination_address_prefix  = azurerm_linux_virtual_machine.ci_jenkins_io.public_ip_address
+  resource_group_name         = azurerm_resource_group.ci_jenkins_io_controller.name
+  network_security_group_name = azurerm_network_security_group.ci_jenkins_io.name
 }
 resource "azurerm_managed_disk" "ci_jenkins_io_data" {
   name                 = "ci-jenkins-io-data"
