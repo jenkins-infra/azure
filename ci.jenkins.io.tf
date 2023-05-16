@@ -63,6 +63,7 @@ resource "azurerm_network_security_rule" "allow_ssh_from_private_vpn" {
   resource_group_name         = azurerm_resource_group.ci_jenkins_io_controller.name
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io.name
 }
+#tfsec:ignore:azure-network-no-public-ingress
 resource "azurerm_network_security_rule" "allow_jenkins_from_internet" {
   name              = "allow-jenkins-from-internet"
   priority          = 3999 # Higher priority wins
