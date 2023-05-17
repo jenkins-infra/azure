@@ -334,8 +334,8 @@ resource "azurerm_subnet_network_security_group_association" "trusted_ci_control
   network_security_group_id = azurerm_network_security_group.trusted_ci_controller.id
 }
 
-resource "azurerm_network_security_rule" "allow_outbound_from_bounce_to_controller" {
-  name = "allow-outbound-from-bounce-to-controller"
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_bounce_to_controller" {
+  name = "allow-outbound-ssh-from-bounce-to-controller"
   # Priority should be the highest value possible (lower than the default 65000 "default" rules not overidable) but higher than the other security rules
   # ref. https://github.com/hashicorp/terraform-provider-azurerm/issues/11137 and https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_rule#priority
   priority                     = 4090
@@ -402,7 +402,7 @@ resource "azurerm_network_security_rule" "deny_all_to_vnet" {
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_admins_to_bounce" {
   for_each = local.admin_allowed_ips
 
-  name                        = "allow-inbound-ssh-from-${each.key}-to-bounce"
+  name                        = "allow-inbound-ssh-from-admin-${each.key}-to-bounce"
   priority                    = 4000 + index(keys(local.admin_allowed_ips), each.key)
   direction                   = "Inbound"
   access                      = "Allow"
