@@ -373,7 +373,7 @@ resource "azurerm_network_security_rule" "allow_ssh_from_bounce_to_controller" {
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
-  source_port_range           = "22"
+  source_port_range           = "*"
   destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
@@ -387,7 +387,7 @@ resource "azurerm_network_security_rule" "allow_ssh_from_controller_to_permanent
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
-  source_port_range           = "22"
+  source_port_range           = "*"
   destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
@@ -401,7 +401,7 @@ resource "azurerm_network_security_rule" "allow_ssh_from_controller_to_ephemeral
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
-  source_port_range           = "22"
+  source_port_range           = "*"
   destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
   destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
