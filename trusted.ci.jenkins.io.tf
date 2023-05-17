@@ -334,58 +334,50 @@ resource "azurerm_subnet_network_security_group_association" "trusted_ci_control
   network_security_group_id = azurerm_network_security_group.trusted_ci_controller.id
 }
 
-resource "azurerm_network_security_rule" "allow_outbound_ssh_from_bounce_to_controller" {
-  name = "allow-outbound-ssh-from-bounce-to-controller"
-  # Priority should be the highest value possible (lower than the default 65000 "default" rules not overidable) but higher than the other security rules
-  # ref. https://github.com/hashicorp/terraform-provider-azurerm/issues/11137 and https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_rule#priority
-  priority                     = 4090
-  direction                    = "Outbound"
-  access                       = "Allow"
-  protocol                     = "Tcp"
-  source_port_range            = "*"
-  destination_port_range       = "22"
+resource "azurerm_network_security_rule" "allow_outbound_from_bounce_to_controller" {
+  name                        = "allow-outbound-from-bounce-to-controller"
+  priority                    = 4090
+  direction                   = "Outbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
-  resource_group_name          = data.azurerm_resource_group.trusted.name
-  network_security_group_name  = azurerm_network_security_group.trusted_ci_controller.name
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
 }
 
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_controller_to_permanent_agent" {
-  name = "allow-outbound-ssh-from-controller-to-permanent-agent"
-  # Priority should be the highest value possible (lower than the default 65000 "default" rules not overidable) but higher than the other security rules
-  # ref. https://github.com/hashicorp/terraform-provider-azurerm/issues/11137 and https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_rule#priority
-  priority                     = 4091
-  direction                    = "Outbound"
-  access                       = "Allow"
-  protocol                     = "Tcp"
-  source_port_range            = "*"
-  destination_port_range       = "22"
+  name                        = "allow-outbound-ssh-from-controller-to-permanent-agent"
+  priority                    = 4091
+  direction                   = "Outbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
-  resource_group_name          = data.azurerm_resource_group.trusted.name
-  network_security_group_name  = azurerm_network_security_group.trusted_ci_controller.name
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
 }
 
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_controller_to_ephemeral_agents" {
-  name = "allow-outbound-ssh-from-controller-to-ephemeral-agents"
-  # Priority should be the highest value possible (lower than the default 65000 "default" rules not overidable) but higher than the other security rules
-  # ref. https://github.com/hashicorp/terraform-provider-azurerm/issues/11137 and https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_rule#priority
-  priority                     = 4092
-  direction                    = "Outbound"
-  access                       = "Allow"
-  protocol                     = "Tcp"
-  source_port_range            = "*"
-  destination_port_range       = "22"
+  name                        = "allow-outbound-ssh-from-controller-to-ephemeral-agents"
+  priority                    = 4092
+  direction                   = "Outbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
   destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
-  resource_group_name          = data.azurerm_resource_group.trusted.name
-  network_security_group_name  = azurerm_network_security_group.trusted_ci_controller.name
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
 }
 
 resource "azurerm_network_security_rule" "deny_all_to_vnet" {
-  name = "deny-all-to-vnet"
-  # Priority should be the highest value possible (lower than the default 65000 "default" rules not overidable) but higher than the other security rules
-  # ref. https://github.com/hashicorp/terraform-provider-azurerm/issues/11137 and https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_rule#priority
+  name                         = "deny-all-to-vnet"
   priority                     = 4095
   direction                    = "Outbound"
   access                       = "Deny"
@@ -398,7 +390,6 @@ resource "azurerm_network_security_rule" "deny_all_to_vnet" {
   network_security_group_name  = azurerm_network_security_group.trusted_ci_controller.name
 }
 
-# TODO: add all ips from people needing access to trusted.ci.jenkins.io, or remove the rule at final migration. (Cf https://github.com/jenkins-infra/azure/pull/334#discussion_r1179955821)
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_admins_to_bounce" {
   for_each = local.admin_allowed_ips
 
