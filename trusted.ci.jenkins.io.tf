@@ -399,10 +399,10 @@ resource "azurerm_network_security_rule" "deny_all_to_vnet" {
 }
 
 # TODO: add all ips from people needing access to trusted.ci.jenkins.io, or remove the rule at final migration. (Cf https://github.com/jenkins-infra/azure/pull/334#discussion_r1179955821)
-resource "azurerm_network_security_rule" "allow_ssh_from_admins_to_bounce" {
+resource "azurerm_network_security_rule" "allow_inbound_ssh_from_admins_to_bounce" {
   for_each = local.admin_allowed_ips
 
-  name                        = "allow-22-from-${each.key}-to-bounce"
+  name                        = "allow-inbound-ssh-from-${each.key}-to-bounce"
   priority                    = 4000 + index(keys(local.admin_allowed_ips), each.key)
   direction                   = "Inbound"
   access                      = "Allow"
@@ -415,8 +415,8 @@ resource "azurerm_network_security_rule" "allow_ssh_from_admins_to_bounce" {
   network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
 }
 
-resource "azurerm_network_security_rule" "allow_ssh_from_bounce_to_controller" {
-  name                        = "allow-22-from-bounce-to-controller"
+resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_controller" {
+  name                        = "allow-inbound-ssh-from-bounce-to-controller"
   priority                    = 3500
   direction                   = "Inbound"
   access                      = "Allow"
@@ -429,8 +429,8 @@ resource "azurerm_network_security_rule" "allow_ssh_from_bounce_to_controller" {
   network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
 }
 
-resource "azurerm_network_security_rule" "allow_ssh_from_controller_to_permanent_agent" {
-  name                        = "allow-22-from-controller-to-permanent-agent"
+resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_permanent_agent" {
+  name                        = "allow-inbound-ssh-from-controller-to-permanent-agent"
   priority                    = 3600
   direction                   = "Inbound"
   access                      = "Allow"
@@ -443,8 +443,8 @@ resource "azurerm_network_security_rule" "allow_ssh_from_controller_to_permanent
   network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
 }
 
-resource "azurerm_network_security_rule" "allow_ssh_from_controller_to_ephemeral_agents" {
-  name                        = "allow-22-from-controller-to-ephemeral-agents"
+resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_ephemeral_agents" {
+  name                        = "allow-inbound-ssh-from-controller-to-ephemeral-agents"
   priority                    = 3700
   direction                   = "Inbound"
   access                      = "Allow"
