@@ -311,7 +311,7 @@ resource "azurerm_virtual_machine_data_disk_attachment" "trusted_permanent_agent
 }
 
 resource "azurerm_private_dns_a_record" "trusted_permanent_agent" {
-  name                = "permanent.agent"
+  name                = "agent"
   zone_name           = azurerm_private_dns_zone.trusted.name
   resource_group_name = data.azurerm_resource_group.trusted.name
   ttl                 = 300
@@ -371,6 +371,34 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_controller_to_
   source_port_range           = "*"
   destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
+  destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+}
+
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_bounce_to_permanent_agent" {
+  name                        = "allow-outbound-ssh-from-bounce-to-permanent-agent"
+  priority                    = 4093
+  direction                   = "Outbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
+  destination_address_prefix  = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+}
+
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_bounce_to_ephemeral_agent" {
+  name                        = "allow-outbound-ssh-from-bounce-to-ephemeral-agent"
+  priority                    = 4094
+  direction                   = "Outbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
@@ -443,6 +471,34 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_e
   source_port_range           = "*"
   destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
+  destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+}
+
+resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_permanent_agent" {
+  name                        = "allow-inbound-ssh-from-bounce-to-permanent-agent"
+  priority                    = 3800
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
+  destination_address_prefix  = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+}
+
+resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_ephemeral_agent" {
+  name                        = "allow-inbound-ssh-from-bounce-to-ephemeral-agent"
+  priority                    = 3900
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
