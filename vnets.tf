@@ -56,6 +56,7 @@ data "azurerm_subnet" "private_vnet_data_tier" {
 
 # "pgsql-tier" subnet is reserved as "delegated" for the pgsql server on the public network
 # Ref. https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking
+# TODO: remove after migration from prodpublick8s to publick8s is completed (ref: https://github.com/jenkins-infra/helpdesk/issues/3351)
 resource "azurerm_subnet" "pgsql_tier" {
   name                 = "pgsql-tier"
   resource_group_name  = data.azurerm_resource_group.public_prod.name
@@ -72,7 +73,22 @@ resource "azurerm_subnet" "pgsql_tier" {
   }
 }
 
+# TODO: remove after migration from prodpublick8s to publick8s is completed (ref: https://github.com/jenkins-infra/helpdesk/issues/3351)
 resource "azurerm_subnet_network_security_group_association" "public_pgsql" {
   subnet_id                 = azurerm_subnet.pgsql_tier.id
   network_security_group_id = azurerm_network_security_group.public_pgsql_tier.id
+}
+
+# Dedicated subnet is reserved as "delegated" for the pgsql server on the public network
+# Ref. https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking
+# Defined in https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
+data "azurerm_subnet" "public_vnet_postgres_tier" {
+  name                 = "${data.azurerm_virtual_network.public.name}-postgres-tier"
+  virtual_network_name = data.azurerm_virtual_network.public.name
+  resource_group_name  = data.azurerm_resource_group.public.name
+}
+
+resource "azurerm_subnet_network_security_group_association" "data_pgsql" {
+  subnet_id                 = data.azurerm_subnet.public_vnet_postgres_tier.id
+  network_security_group_id = azurerm_network_security_group.data_pgsql_tier.id
 }
