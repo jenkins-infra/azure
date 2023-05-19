@@ -36,11 +36,6 @@ resource "azurerm_postgresql_flexible_server" "data" {
   ]
 }
 
-resource "azurerm_private_dns_zone" "data_pgsql" {
-  name                = "data-pgsql.jenkins-infra.postgres.database.azure.com"
-  resource_group_name = data.azurerm_resource_group.public.name
-}
-
 resource "azurerm_private_dns_zone_virtual_network_link" "publicvnet_to_datapgsql" {
   name                  = "publicvnet-to-datapgsql"
   resource_group_name   = data.azurerm_resource_group.public.name
