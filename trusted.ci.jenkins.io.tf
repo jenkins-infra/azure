@@ -344,7 +344,7 @@ resource "azurerm_network_security_rule" "allow_outbound_puppet_from_vnet_to_pup
   access                      = "Allow"
   protocol                    = "Tcp"
   source_port_range           = "*"
-  source_address_prefix       = "VirtualNet"
+  source_address_prefix       = "VirtualNetwork"
   destination_port_range      = "8140" # Puppet over TLS
   destination_address_prefix  = local.external_services["puppet.jenkins.io"]
   resource_group_name         = data.azurerm_resource_group.trusted.name
@@ -476,7 +476,7 @@ resource "azurerm_network_security_rule" "deny_all_outbound_to_vnet" {
   protocol                     = "*"
   source_port_range            = "*"
   destination_port_range       = "*"
-  source_address_prefix        = "VirtualNet"
+  source_address_prefix        = "VirtualNetwork"
   destination_address_prefixes = data.azurerm_virtual_network.trusted.address_space
   resource_group_name          = data.azurerm_resource_group.trusted.name
   network_security_group_name  = azurerm_network_security_group.trusted_ci_controller.name
@@ -555,16 +555,15 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_ephem
 }
 
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_admins_to_bounce" {
-  for_each = local.admin_allowed_ips
-
-  name                        = "allow-inbound-ssh-from-admin-${each.key}-to-bounce"
-  priority                    = 4000 + index(keys(local.admin_allowed_ips), each.key)
+  # for_each = local.admin_allowed_ips
+  name                        = "allow-inbound-ssh-from-admins-to-bounce"
+  priority                    = 4000
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefix       = each.value
+  source_address_prefixes     = values(local.admin_allowed_ips)
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
@@ -605,13 +604,13 @@ resource "azurerm_network_security_rule" "deny_all_inbound_from_internet" {
 # This rule overrides an Azure-Default rule. its priority must be < 65000
 resource "azurerm_network_security_rule" "deny_all_inbound_from_vnet" {
   name                        = "deny-all-inbound-from-vnet"
-  priority                    = 4096 # Maximum value allowed by the
+  priority                    = 4096 # Maximum value allowed by the Azure Terraform Provider
   direction                   = "Inbound"
   access                      = "Deny"
   protocol                    = "*"
-  source_port_range           = "VirtualNet"
+  source_port_range           = "*"
   destination_port_range      = "*"
-  source_address_prefixes     = data.azurerm_virtual_network.trusted.address_space
+  source_address_prefix       = "VirtualNetwork"
   destination_address_prefix  = "*"
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
