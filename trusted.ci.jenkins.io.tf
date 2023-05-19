@@ -336,6 +336,7 @@ resource "azurerm_subnet_network_security_group_association" "trusted_ci_control
 
 ## Outbound Rules (different set of priorities than Inbound rules) ##
 
+#tfsec:ignore:azure-network-no-public-egress
 resource "azurerm_network_security_rule" "allow_outbound_puppet_from_vnet_to_puppetmaster" {
   name                        = "allow-outbound-puppet-from-vnet-to-puppetmaster"
   priority                    = 4087
