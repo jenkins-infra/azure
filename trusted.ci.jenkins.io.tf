@@ -334,6 +334,54 @@ resource "azurerm_subnet_network_security_group_association" "trusted_ci_control
   network_security_group_id = azurerm_network_security_group.trusted_ci_controller.id
 }
 
+## Outbound Rules (different set of priorities than Inbound rules) ##
+
+#tfsec:ignore:azure-network-no-public-egress
+resource "azurerm_network_security_rule" "allow_outbound_puppet_from_vnet_to_puppetmaster" {
+  name                        = "allow-outbound-puppet-from-vnet-to-puppetmaster"
+  priority                    = 4087
+  direction                   = "Outbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  source_address_prefix       = "VirtualNet"
+  destination_port_range      = "8140" # Puppet over TLS
+  destination_address_prefix  = local.external_services["puppet.jenkins.io"]
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+}
+
+resource "azurerm_network_security_rule" "allow_outbound_jenkins_usage_from_vnet_to_controller" {
+  name                  = "allow-outbound-jenkins-usage-from-vnet-to-controller"
+  priority              = 4088
+  direction             = "Outbound"
+  access                = "Allow"
+  protocol              = "Tcp"
+  source_port_range     = "*"
+  source_address_prefix = "VirtualNetwork"
+  destination_port_ranges = [
+    "443",   # Only HTTPS
+    "50000", # Direct TCP Inbound protocol
+  ]
+  destination_address_prefix  = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+}
+
+resource "azurerm_network_security_rule" "allow_outbound_http_from_vnet_to_internet" {
+  name                        = "allow-outbound-http-from-vnet-to-internet"
+  priority                    = 4089
+  direction                   = "Outbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  source_address_prefix       = "VirtualNetwork"
+  destination_port_ranges     = ["80", "443"]
+  destination_address_prefix  = "Internet"
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+}
+
 resource "azurerm_network_security_rule" "allow_outbound_from_bounce_to_controller" {
   name                        = "allow-outbound-from-bounce-to-controller"
   priority                    = 4090
@@ -341,8 +389,8 @@ resource "azurerm_network_security_rule" "allow_outbound_from_bounce_to_controll
   access                      = "Allow"
   protocol                    = "Tcp"
   source_port_range           = "*"
-  destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
+  destination_port_range      = "22"
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
@@ -404,35 +452,37 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_bounce_to_ephe
   network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
 }
 
-resource "azurerm_network_security_rule" "deny_all_to_vnet" {
-  name                         = "deny-all-to-vnet"
-  priority                     = 4095
+# This rule overrides an Azure-Default rule. its priority must be < 65000.
+resource "azurerm_network_security_rule" "deny_all_outbound_to_internet" {
+  name                        = "deny-all-outbound-to-internet"
+  priority                    = 4095
+  direction                   = "Outbound"
+  access                      = "Deny"
+  protocol                    = "*"
+  source_port_range           = "*"
+  destination_port_range      = "*"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "Internet"
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+}
+
+# This rule overrides an Azure-Default rule. its priority must be < 65000.
+resource "azurerm_network_security_rule" "deny_all_outbound_to_vnet" {
+  name                         = "deny-all-outbound-to-vnet"
+  priority                     = 4096 # Maximum value allowed by the provider
   direction                    = "Outbound"
   access                       = "Deny"
   protocol                     = "*"
   source_port_range            = "*"
   destination_port_range       = "*"
-  source_address_prefix        = "*"
+  source_address_prefix        = "VirtualNet"
   destination_address_prefixes = data.azurerm_virtual_network.trusted.address_space
   resource_group_name          = data.azurerm_resource_group.trusted.name
   network_security_group_name  = azurerm_network_security_group.trusted_ci_controller.name
 }
 
-resource "azurerm_network_security_rule" "allow_inbound_ssh_from_admins_to_bounce" {
-  for_each = local.admin_allowed_ips
-
-  name                        = "allow-inbound-ssh-from-admin-${each.key}-to-bounce"
-  priority                    = 4000 + index(keys(local.admin_allowed_ips), each.key)
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "22"
-  source_address_prefix       = each.value
-  destination_address_prefix  = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
-  resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
-}
+## Inbound Rules (different set of priorities than Outbound rules) ##
 
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_controller" {
   name                        = "allow-inbound-ssh-from-bounce-to-controller"
@@ -500,6 +550,69 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_ephem
   destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+}
+
+resource "azurerm_network_security_rule" "allow_inbound_ssh_from_admins_to_bounce" {
+  for_each = local.admin_allowed_ips
+
+  name                        = "allow-inbound-ssh-from-admin-${each.key}-to-bounce"
+  priority                    = 4000 + index(keys(local.admin_allowed_ips), each.key)
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefix       = each.value
+  destination_address_prefix  = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+}
+
+resource "azurerm_network_security_rule" "allow_inbound_jenkins_usage_from_vnet_to_controller" {
+  name                  = "allow-inbound-jenkins-usage-from-vnet-to-controller"
+  priority              = 4094
+  direction             = "Inbound"
+  access                = "Allow"
+  protocol              = "Tcp"
+  source_port_range     = "*"
+  source_address_prefix = "VirtualNetwork"
+  destination_port_ranges = [
+    "443",   # Only HTTPS
+    "50000", # Direct TCP Inbound protocol
+  ]
+  destination_address_prefix  = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+}
+
+# This rule overrides an Azure-Default rule. its priority must be < 65000.
+resource "azurerm_network_security_rule" "deny_all_inbound_from_internet" {
+  name                        = "deny-all-inbound-from-internet"
+  priority                    = 4095
+  direction                   = "Inbound"
+  access                      = "Deny"
+  protocol                    = "*"
+  source_port_range           = "*"
+  destination_port_range      = "*"
+  source_address_prefix       = "Internet"
+  destination_address_prefix  = "*"
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+}
+
+# This rule overrides an Azure-Default rule. its priority must be < 65000
+resource "azurerm_network_security_rule" "deny_all_inbound_from_vnet" {
+  name                        = "deny-all-inbound-from-vnet"
+  priority                    = 4096 # Maximum value allowed by the
+  direction                   = "Inbound"
+  access                      = "Deny"
+  protocol                    = "*"
+  source_port_range           = "VirtualNet"
+  destination_port_range      = "*"
+  source_address_prefixes     = data.azurerm_virtual_network.trusted.address_space
+  destination_address_prefix  = "*"
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
 }
