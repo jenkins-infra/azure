@@ -604,7 +604,7 @@ resource "azurerm_network_security_rule" "deny_all_inbound_from_internet" {
 # This rule overrides an Azure-Default rule. its priority must be < 65000
 resource "azurerm_network_security_rule" "deny_all_inbound_from_vnet" {
   name                        = "deny-all-inbound-from-vnet"
-  priority                    = 4096 # Maximum value allowed by the
+  priority                    = 4096 # Maximum value allowed by the Azure Terraform Provider
   direction                   = "Inbound"
   access                      = "Deny"
   protocol                    = "*"
