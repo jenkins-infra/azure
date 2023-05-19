@@ -344,7 +344,7 @@ resource "azurerm_network_security_rule" "allow_outbound_puppet_from_vnet_to_pup
   access                      = "Allow"
   protocol                    = "Tcp"
   source_port_range           = "*"
-  source_address_prefix       = "VirtualNet"
+  source_address_prefix       = "VirtualNetwork"
   destination_port_range      = "8140" # Puppet over TLS
   destination_address_prefix  = local.external_services["puppet.jenkins.io"]
   resource_group_name         = data.azurerm_resource_group.trusted.name
@@ -476,7 +476,7 @@ resource "azurerm_network_security_rule" "deny_all_outbound_to_vnet" {
   protocol                     = "*"
   source_port_range            = "*"
   destination_port_range       = "*"
-  source_address_prefix        = "VirtualNet"
+  source_address_prefix        = "VirtualNetwork"
   destination_address_prefixes = data.azurerm_virtual_network.trusted.address_space
   resource_group_name          = data.azurerm_resource_group.trusted.name
   network_security_group_name  = azurerm_network_security_group.trusted_ci_controller.name
@@ -609,9 +609,9 @@ resource "azurerm_network_security_rule" "deny_all_inbound_from_vnet" {
   direction                   = "Inbound"
   access                      = "Deny"
   protocol                    = "*"
-  source_port_range           = "VirtualNet"
+  source_port_range           = "*"
   destination_port_range      = "*"
-  source_address_prefixes     = data.azurerm_virtual_network.trusted.address_space
+  source_address_prefix       = "VirtualNetwork"
   destination_address_prefix  = "*"
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
