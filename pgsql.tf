@@ -39,11 +39,19 @@ resource "azurerm_private_dns_zone" "public_pgsql" {
   resource_group_name = data.azurerm_resource_group.public_prod.name
 }
 
+# TODO: remove after migration from prodpublick8s to publick8s is completed (ref: https://github.com/jenkins-infra/helpdesk/issues/3351)
 resource "azurerm_private_dns_zone_virtual_network_link" "publicvnet_to_publicpgsql" {
   name                  = "publicvnet-to-publicpgsql"
   resource_group_name   = data.azurerm_resource_group.public_prod.name
   private_dns_zone_name = azurerm_private_dns_zone.public_pgsql.name
   virtual_network_id    = data.azurerm_virtual_network.public_prod.id
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "publicpgsql_to_publicvnet" {
+  name                  = "publicpgsql-to-publicvnet"
+  resource_group_name   = data.azurerm_resource_group.public_prod.name
+  private_dns_zone_name = azurerm_private_dns_zone.public_pgsql.name
+  virtual_network_id    = data.azurerm_virtual_network.public.id
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "privatevnet_to_publicpgsql" {
