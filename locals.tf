@@ -40,6 +40,10 @@ locals {
     smerle33    = "82.64.5.129"
   }
 
+  external_services = {
+    "puppet.jenkins.io" = "140.211.9.94" # Puppet Master
+  }
+
   privatek8s_outbound_ip_cidr = "20.96.66.246/32"
 
   default_tags = {
