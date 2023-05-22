@@ -568,6 +568,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_admins_to_bounc
   network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
 }
 
+# TODO: remove when data migration is complete
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_legacy_trusted_to_bounce" {
   name                        = "allow-inbound-ssh-from-legacy-trusted-to-bounce"
   priority                    = 4001
