@@ -1,3 +1,4 @@
+# TODO: remove this file after migration from prodpublick8s to publick8s is completed (ref: https://github.com/jenkins-infra/helpdesk/issues/3351)
 ################################################################################
 ## Public Network
 ################################################################################

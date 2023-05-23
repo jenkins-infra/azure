@@ -1,5 +1,6 @@
 locals {
-  public_pgsql_admin_login = "psqladmin${random_password.pgsql_admin_login.result}"
+  public_pgsql_admin_login    = "psqladmin${random_password.pgsql_admin_login.result}"
+  public_db_pgsql_admin_login = "psqladmin${random_password.public_db_pgsql_admin_login.result}"
 
   shared_galleries = {
     "dev" = {
