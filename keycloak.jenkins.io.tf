@@ -28,7 +28,7 @@ secrets:
             DB_USER: ${base64encode(postgresql_role.keycloak.name)}
             DB_PASSWORD: ${base64encode(random_password.pgsql_keycloak_user_password.result)}
             DB_VENDOR: ${base64encode("postgres")}
-            DB_ADDR: ${base64encode(azurerm_postgresql_flexible_server.public.fqdn)}
+            DB_ADDR: ${base64encode(azurerm_postgresql_flexible_server.public_db.fqdn)}
             DB_PORT: ${base64encode("5432")}
             DB_DATABASE: ${base64encode(postgresql_database.keycloak.name)}
 EOT
