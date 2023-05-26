@@ -131,7 +131,12 @@ resource "azurerm_public_ip" "publick8s_ipv6" {
   tags                = local.default_tags
 }
 
-resource "azurerm_dns_a_record" "publick8s_a" {
+moved {
+  from = azurerm_dns_a_record.publick8s_a
+  to   = azurerm_dns_a_record.public_publick8s
+}
+
+resource "azurerm_dns_a_record" "public_publick8s" {
   name                = "public.publick8s"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
@@ -140,12 +145,26 @@ resource "azurerm_dns_a_record" "publick8s_a" {
   tags                = local.default_tags
 }
 
-resource "azurerm_dns_aaaa_record" "publick8s_aaaa" {
+moved {
+  from = azurerm_dns_aaaa_record.publick8s_aaaa
+  to   = azurerm_dns_aaaa_record.public_publick8s
+}
+
+resource "azurerm_dns_aaaa_record" "public_publick8s" {
   name                = "public.publick8s"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 300
   records             = [azurerm_public_ip.publick8s_ipv6.ip_address]
+  tags                = local.default_tags
+}
+
+resource "azurerm_dns_a_record" "private_publick8s" {
+  name                = "private.publick8s"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 300
+  records             = ["10.245.1.4"] # External IP of the private-nginx ingress LoadBalancer, created by https://github.com/jenkins-infra/kubernetes-management/blob/54a0d4aa72b15f4236abcfbde00a080905bbb890/clusters/publick8s.yaml#L63-L69
   tags                = local.default_tags
 }
 
