@@ -577,7 +577,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_legacy_trusted_
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefixes     = ["3.209.43.20"]
+  source_address_prefixes     = ["3.209.43.20", "67.202.34.237"]
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
