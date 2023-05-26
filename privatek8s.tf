@@ -204,6 +204,15 @@ resource "azurerm_dns_a_record" "public_privatek8s" {
   tags                = local.default_tags
 }
 
+resource "azurerm_dns_a_record" "private_privatek8s" {
+  name                = "private.privatek8s"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 300
+  records             = ["10.248.1.5"] # External IP of the private-nginx ingress LoadBalancer, created by https://github.com/jenkins-infra/kubernetes-management/blob/54a0d4aa72b15f4236abcfbde00a080905bbb890/clusters/privatek8s.yaml#L112-L118
+  tags                = local.default_tags
+}
+
 output "privatek8s_kube_config" {
   value     = azurerm_kubernetes_cluster.privatek8s.kube_config_raw
   sensitive = true
