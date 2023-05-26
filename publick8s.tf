@@ -131,11 +131,6 @@ resource "azurerm_public_ip" "publick8s_ipv6" {
   tags                = local.default_tags
 }
 
-moved {
-  from = azurerm_dns_a_record.publick8s_a
-  to   = azurerm_dns_a_record.public_publick8s
-}
-
 resource "azurerm_dns_a_record" "public_publick8s" {
   name                = "public.publick8s"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
@@ -143,11 +138,6 @@ resource "azurerm_dns_a_record" "public_publick8s" {
   ttl                 = 300
   records             = [azurerm_public_ip.publick8s_ipv4.ip_address]
   tags                = local.default_tags
-}
-
-moved {
-  from = azurerm_dns_aaaa_record.publick8s_aaaa
-  to   = azurerm_dns_aaaa_record.public_publick8s
 }
 
 resource "azurerm_dns_aaaa_record" "public_publick8s" {

@@ -4,6 +4,7 @@
 provider "registry.terraform.io/cyrilgdn/postgresql" {
   version = "1.19.0"
   hashes = [
+    "h1:HO5EHbffnHKU02PDcwMwh571hCzBog9w+5QLQHyrBhI=",
     "h1:TnyNonQsf+M7uOP9lxHGymiLP1VE5mPIMEsk8FspD8k=",
     "zh:00f946e9e657556234b1ab6b11ff94c1f67d2dec20a0643f5f70fd4b612167e4",
     "zh:01cac73ff59c3ee3cc3716b006266a81d182f2622e944c08081551a2688ee5bb",
