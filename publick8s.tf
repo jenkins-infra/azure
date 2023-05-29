@@ -81,6 +81,20 @@ resource "azurerm_kubernetes_cluster_node_pool" "publicpool" {
   tags                  = local.default_tags
 }
 
+resource "azurerm_kubernetes_cluster_node_pool" "publicarmpool" {
+  name                  = "publicarmpool"
+  vm_size               = "Standard_D8ps_v5" # 8 vCPU, 32 GB RAM, 0 GB disk, 12 800 IOPS
+  os_disk_type          = "Ephemeral"
+  //os_disk_size_gb       = 0 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv5-dsv5-series#dsv5-series (depends on the instance size)
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
+  enable_auto_scaling   = true
+  min_count             = 0
+  max_count             = 10
+  zones                 = [3]
+  vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
+  tags                  = local.default_tags
+}
+
 # Allow cluster to manage LBs in the publick8s-tier subnet (Public LB)
 resource "azurerm_role_assignment" "publick8s_networkcontributor" {
   scope                            = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.public.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.public.name}/subnets/${data.azurerm_subnet.publick8s_tier.name}"
