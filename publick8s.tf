@@ -81,11 +81,11 @@ resource "azurerm_kubernetes_cluster_node_pool" "publicpool" {
   tags                  = local.default_tags
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "publicarmpool" {
-  name                  = "pubarmpool"
-  vm_size               = "Standard_D8pds_v5" # 8 vCPU, 32 GB RAM, 300 GB disk, 38 000 IOPS
+resource "azurerm_kubernetes_cluster_node_pool" "arm64medium" {
+  name                  = "arm64medium"
+  vm_size               = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 300 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
+  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   enable_auto_scaling   = true
   min_count             = 0
