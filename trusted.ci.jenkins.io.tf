@@ -36,7 +36,7 @@ resource "azurerm_resource_group" "trusted_ci_jenkins_io_permanent_agents" {
   tags     = local.default_tags
 }
 resource "azuread_application" "trusted_ci_jenkins_io" {
-  display_name = "trusted.ci.jenkins.io"
+  display_name = azurerm_private_dns_zone.trusted.name
   owners = [
     data.azuread_service_principal.terraform_production.id,
   ]
@@ -65,7 +65,7 @@ resource "azuread_service_principal" "trusted_ci_jenkins_io" {
 
 resource "azuread_application_password" "trusted_ci_jenkins_io" {
   application_object_id = azuread_application.trusted_ci_jenkins_io.object_id
-  display_name          = "trusted.ci.jenkins.io-tf-managed"
+  display_name          = "${azurerm_private_dns_zone.trusted.name}-tf-managed"
   end_date              = "2024-03-08T19:40:35Z"
 }
 
@@ -82,7 +82,6 @@ resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_packer" {
   principal_id         = azuread_service_principal.trusted_ci_jenkins_io.id
 }
 
-# DNS
 resource "azurerm_private_dns_zone" "trusted" {
   name                = "trusted.ci.jenkins.io"
   resource_group_name = data.azurerm_resource_group.trusted.name
@@ -94,8 +93,9 @@ resource "azurerm_private_dns_zone_virtual_network_link" "trusted" {
   virtual_network_id    = data.azurerm_virtual_network.trusted.id
 }
 
-# VMs
-# BOUNCE VM
+####################################################################################
+## Resources for the bounce (SSH bastion) VM
+####################################################################################
 resource "azurerm_public_ip" "trusted_bounce" {
   name                = "trusted-bounce"
   location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
@@ -104,7 +104,6 @@ resource "azurerm_public_ip" "trusted_bounce" {
   sku                 = "Standard"
   tags                = local.default_tags
 }
-## NETWORK INTERFACE with public ip and internal ip
 resource "azurerm_network_interface" "trusted_bounce" {
   name                = "trusted-bounce"
   location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
@@ -118,7 +117,6 @@ resource "azurerm_network_interface" "trusted_bounce" {
     subnet_id                     = data.azurerm_subnet.trusted_ci_controller.id
   }
 }
-## MACHINE (bounce)
 resource "azurerm_linux_virtual_machine" "trusted_bounce" {
   name                            = "trusted-bounce"
   resource_group_name             = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
@@ -136,8 +134,8 @@ resource "azurerm_linux_virtual_machine" "trusted_bounce" {
   }
 
   # Use cloud-init to configure the VM
-  user_data     = base64encode(templatefile("./.shared-tools/terraform/cloudinit.tftpl", { hostname = "bounce.trusted.ci.jenkins.io" }))
-  computer_name = "bounce-trusted-ci-jenkins-io"
+  user_data     = base64encode(templatefile("./.shared-tools/terraform/cloudinit.tftpl", { hostname = "bounce.${azurerm_private_dns_zone.trusted.name}" }))
+  computer_name = "bounce.${azurerm_private_dns_zone.trusted.name}"
 
   # Encrypt all disks (ephemeral, temp dirs and data volumes) - https://learn.microsoft.com/en-us/azure/virtual-machines/disks-enable-host-based-encryption-portal?tabs=azure-powershell
   encryption_at_host_enabled = true
@@ -156,8 +154,9 @@ resource "azurerm_linux_virtual_machine" "trusted_bounce" {
   }
 }
 
-# CONTROLLER VM
-## NETWORK INTERFACE with internal ip
+####################################################################################
+## Resources for the controller VM
+####################################################################################
 resource "azurerm_network_interface" "trusted_ci_controller" {
   name                = "trusted-ci-controller"
   location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
@@ -170,8 +169,6 @@ resource "azurerm_network_interface" "trusted_ci_controller" {
     private_ip_address_allocation = "Dynamic"
   }
 }
-
-## MACHINE (controller)
 resource "azurerm_linux_virtual_machine" "trusted_ci_controller" {
   name                            = "trusted-ci-controller"
   resource_group_name             = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
@@ -190,9 +187,9 @@ resource "azurerm_linux_virtual_machine" "trusted_ci_controller" {
   }
 
   # Use cloud-init to configure the VM
-  user_data = base64encode(templatefile("./.shared-tools/terraform/cloudinit.tftpl", { hostname = "trusted.ci.jenkins.io" }))
+  user_data = base64encode(templatefile("./.shared-tools/terraform/cloudinit.tftpl", { hostname = "controller.${azurerm_private_dns_zone.trusted.name}" }))
   # Force VM recreation when the VPN URL change
-  computer_name = "trusted-ci-jenkins-io"
+  computer_name = "controller.${azurerm_private_dns_zone.trusted.name}"
 
   # Encrypt all disks (ephemeral, temp dirs and data volumes) - https://learn.microsoft.com/en-us/azure/virtual-machines/disks-enable-host-based-encryption-portal?tabs=azure-powershell
   encryption_at_host_enabled = true
@@ -210,7 +207,6 @@ resource "azurerm_linux_virtual_machine" "trusted_ci_controller" {
     version   = "latest"
   }
 }
-
 resource "azurerm_managed_disk" "trusted_ci_controller_data_disk" {
   name                 = "trusted-ci-controller-data-disk"
   location             = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
@@ -221,14 +217,12 @@ resource "azurerm_managed_disk" "trusted_ci_controller_data_disk" {
 
   tags = local.default_tags
 }
-
 resource "azurerm_virtual_machine_data_disk_attachment" "trusted_ci_controller_data_disk" {
   managed_disk_id    = azurerm_managed_disk.trusted_ci_controller_data_disk.id
   virtual_machine_id = azurerm_linux_virtual_machine.trusted_ci_controller.id
   lun                = "10"
   caching            = "ReadWrite"
 }
-
 resource "azurerm_private_dns_a_record" "trusted_ci_controller" {
   name                = "@"
   zone_name           = azurerm_private_dns_zone.trusted.name
@@ -237,8 +231,9 @@ resource "azurerm_private_dns_a_record" "trusted_ci_controller" {
   records             = [azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address]
 }
 
-# PERMANENT AGENT VM
-## NETWORK INTERFACE with internal ip
+####################################################################################
+## Resources for the permanent agent VM
+####################################################################################
 resource "azurerm_network_interface" "trusted_permanent_agent" {
   name                = "trusted-permanent-agent"
   location            = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.location
@@ -251,8 +246,6 @@ resource "azurerm_network_interface" "trusted_permanent_agent" {
     private_ip_address_allocation = "Dynamic"
   }
 }
-
-## MACHINE (permanent agent)
 resource "azurerm_linux_virtual_machine" "trusted_permanent_agent" {
   name                            = "trusted-permanent-agent"
   resource_group_name             = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.name
@@ -271,9 +264,9 @@ resource "azurerm_linux_virtual_machine" "trusted_permanent_agent" {
   }
 
   # Use cloud-init to configure the VM
-  user_data = base64encode(templatefile("./.shared-tools/terraform/cloudinit.tftpl", { hostname = "agent.trusted.ci.jenkins.io" }))
+  user_data = base64encode(templatefile("./.shared-tools/terraform/cloudinit.tftpl", { hostname = "agent.${azurerm_private_dns_zone.trusted.name}" }))
   # Force VM recreation when the VPN URL change
-  computer_name = "agent-trusted-ci-jenkins-io"
+  computer_name = "agent.${azurerm_private_dns_zone.trusted.name}"
 
   # Encrypt all disks (ephemeral, temp dirs and data volumes) - https://learn.microsoft.com/en-us/azure/virtual-machines/disks-enable-host-based-encryption-portal?tabs=azure-powershell
   encryption_at_host_enabled = true
@@ -291,7 +284,6 @@ resource "azurerm_linux_virtual_machine" "trusted_permanent_agent" {
     version   = "latest"
   }
 }
-
 resource "azurerm_managed_disk" "trusted_permanent_agent_data_disk" {
   name                 = "trusted-permanent-agent-data-disk"
   location             = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.location
@@ -302,14 +294,12 @@ resource "azurerm_managed_disk" "trusted_permanent_agent_data_disk" {
 
   tags = local.default_tags
 }
-
 resource "azurerm_virtual_machine_data_disk_attachment" "trusted_permanent_agent_data_disk" {
   managed_disk_id    = azurerm_managed_disk.trusted_permanent_agent_data_disk.id
   virtual_machine_id = azurerm_linux_virtual_machine.trusted_permanent_agent.id
   lun                = "20"
   caching            = "ReadWrite"
 }
-
 resource "azurerm_private_dns_a_record" "trusted_permanent_agent" {
   name                = "agent"
   zone_name           = azurerm_private_dns_zone.trusted.name
