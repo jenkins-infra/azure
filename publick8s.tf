@@ -82,7 +82,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "publicpool" {
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "x86medium" {
-  name                  = "x86medimum"
+  name                  = "x86medium"
   vm_size               = "Standard_D8s_v3" # 8 vCPU, 32 GB RAM, 64 GB disk, 16 000 IOPS
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 200 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
