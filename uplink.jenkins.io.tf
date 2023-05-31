@@ -21,6 +21,6 @@ output "uplink_dbconfig" {
   description = "YAML (secret) values for the Helm chart jenkins-infra/uplink"
   value       = <<-EOT
 postgresql:
-    url: postgres://${postgresql_role.uplink.name}@${postgresql_database.uplink.name}:${random_password.pgsql_uplink_user_password.result}@${azurerm_postgresql_flexible_server.public_db.fqdn}:5432/${postgresql_database.uplink.name}
+    url: postgres://${postgresql_role.uplink.name}:${random_password.pgsql_uplink_user_password.result}@${azurerm_postgresql_flexible_server.public_db.fqdn}:5432/${postgresql_database.uplink.name}
   EOT
 }
