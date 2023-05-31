@@ -10,7 +10,7 @@ resource "random_password" "pgsql_uplink_user_password" {
 }
 
 resource "postgresql_role" "uplink" {
-  name     = "uplink"
+  name     = "uplinkadmin"
   login    = true
   password = random_password.pgsql_uplink_user_password.result
 }
