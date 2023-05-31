@@ -81,7 +81,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "publicpool" {
   tags                  = local.default_tags
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "x86medimum" {
+resource "azurerm_kubernetes_cluster_node_pool" "x86medium" {
   name                  = "x86medimum"
   vm_size               = "Standard_D8s_v3" # 8 vCPU, 32 GB RAM, 64 GB disk, 16 000 IOPS
   os_disk_type          = "Ephemeral"
