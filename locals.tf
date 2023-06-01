@@ -42,7 +42,7 @@ locals {
   }
 
   external_services = {
-    "puppet.jenkins.io" = "140.211.9.94" # Puppet Master
+    "puppet.jenkins.io" = azurerm_public_ip.puppet_jenkins_io.ip_address
   }
 
   privatek8s_outbound_ip_cidr = "20.96.66.246/32"
