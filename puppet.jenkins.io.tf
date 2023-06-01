@@ -111,3 +111,21 @@ resource "azurerm_linux_virtual_machine" "puppet_jenkins_io" {
     version   = "latest"
   }
 }
+
+resource "azurerm_dns_a_record" "azure_puppet_jenkins_io" {
+  name                = "azure.puppet" #azure.puppet.jenkins.io --> A
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 300
+  records             = [azurerm_public_ip.puppet_jenkins_io.ip_address]
+  tags                = local.default_tags
+}
+
+resource "azurerm_dns_cname_record" "jenkinsio_target_puppet_jenkins_io" {
+  name                = "puppet" #puppet.jenkins.io --> CNAME vers azure.puppet.jenkins.io
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  record              = azurerm_dns_a_record.azure_puppet_jenkins_io.fqdn
+  tags                = local.default_tags
+}
