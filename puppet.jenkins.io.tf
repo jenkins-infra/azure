@@ -113,7 +113,7 @@ resource "azurerm_linux_virtual_machine" "puppet_jenkins_io" {
 }
 
 resource "azurerm_dns_a_record" "azure_puppet_jenkins_io" {
-  name                = "azure.puppet" #azure.puppet.jenkins.io --> A
+  name                = "azure.puppet"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 300
@@ -122,7 +122,7 @@ resource "azurerm_dns_a_record" "azure_puppet_jenkins_io" {
 }
 
 resource "azurerm_dns_cname_record" "jenkinsio_target_puppet_jenkins_io" {
-  name                = "puppet" #puppet.jenkins.io --> CNAME vers azure.puppet.jenkins.io
+  name                = "puppet"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
