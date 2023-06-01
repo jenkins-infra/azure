@@ -116,7 +116,7 @@ resource "azurerm_dns_a_record" "azure_puppet_jenkins_io" {
   name                = "azure.puppet"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 300
+  ttl                 = 60
   records             = [azurerm_public_ip.puppet_jenkins_io.ip_address]
   tags                = local.default_tags
 }
