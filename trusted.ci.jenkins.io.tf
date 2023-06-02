@@ -666,11 +666,16 @@ resource "azurerm_subnet_nat_gateway_association" "trusted_outbound_ephemeral_ag
 }
 
 ####################################################################################
-## DNS records
+## Public DNS records
 ####################################################################################
+# Managed in jenkins-infra/azure-net for the letsencrypt IDP
+data "azurerm_dns_zone" "trusted_ci_jenkins_io" {
+  name                = azurerm_private_dns_zone.trusted.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+}
 resource "azurerm_dns_a_record" "trusted_bounce" {
-  name                = "bounce.trusted.ci"
-  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  name                = "bounce"
+  zone_name           = data.azurerm_dns_zone.trusted_ci_jenkins_io.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
   records             = [azurerm_public_ip.trusted_bounce.ip_address]
