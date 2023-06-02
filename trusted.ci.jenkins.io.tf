@@ -97,7 +97,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "trusted" {
 ## Resources for the bounce (SSH bastion) VM
 ####################################################################################
 resource "azurerm_public_ip" "trusted_bounce" {
-  name                = "trusted-bounce"
+  name                = "bounce.${azurerm_private_dns_zone.trusted.name}"
   location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
   resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
   allocation_method   = "Static"
@@ -105,7 +105,7 @@ resource "azurerm_public_ip" "trusted_bounce" {
   tags                = local.default_tags
 }
 resource "azurerm_network_interface" "trusted_bounce" {
-  name                = "trusted-bounce"
+  name                = "bounce.${azurerm_private_dns_zone.trusted.name}"
   location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
   resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
   tags                = local.default_tags
@@ -118,7 +118,7 @@ resource "azurerm_network_interface" "trusted_bounce" {
   }
 }
 resource "azurerm_linux_virtual_machine" "trusted_bounce" {
-  name                            = "trusted-bounce"
+  name                            = "bounce.${azurerm_private_dns_zone.trusted.name}"
   resource_group_name             = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
   location                        = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
   size                            = "Standard_B1s"
@@ -133,7 +133,6 @@ resource "azurerm_linux_virtual_machine" "trusted_bounce" {
     public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5K7Ro7jBl5Kc68RdzG6EXHstIBFSxO5Da8SQJSMeCbb4cHTYuBBH8jNsAFcnkN64kEu+YhmlxaWEVEIrPgfGfs13ZL7v9p+Nt76tsz6gnVdAy2zCz607pAWe7p4bBn6T9zdZcBSnvjawO+8t/5ue4ngcfAjanN5OsOgLeD6yqVyP8YTERjW78jvp2TFrIYmgWMI5ES1ln32PQmRZwc1eAOsyGJW/YIBdOxaSkZ41qUvb9b3dCorGuCovpSK2EeNphjLPpVX/NRpVY4YlDqAcTCdLdDrEeVqkiA/VDCYNhudZTDa8f1iHwBE/GEtlKmoO6dxJ5LAkRk3RIVHYrmI6XXSw5l0tHhW5D12MNwzUfDxQEzBpGK5iSfOBt5zJ5OiI9ftnsq/GV7vCXfvMVGDLUC551P5/s/wM70QmHwhlGQNLNeJxRTvd6tL11bof3K+29ivFYUmpU17iVxYOWhkNY86WyngHU6Ux0zaczF3H6H0tpg1Ca/cFO428AVPw/RTJpcAe6OVKq5zwARNApQ/p6fJKUAdXap+PpQGZlQhPLkUbwtFXGTrpX9ePTcdzryCYjgrZouvy4ZMzruJiIbFUH8mRY3xVREVaIsJakruvgw3b14oQgcB4BwYVBBqi62xIvbRzAv7Su9t2jK6OR2z3sM/hLJRqIJ5oILMORa7XqrQ=="
   }
 
-  # Use cloud-init to configure the VM
   user_data     = base64encode(templatefile("./.shared-tools/terraform/cloudinit.tftpl", { hostname = "bounce.${azurerm_private_dns_zone.trusted.name}" }))
   computer_name = "bounce.${azurerm_private_dns_zone.trusted.name}"
 
@@ -158,7 +157,7 @@ resource "azurerm_linux_virtual_machine" "trusted_bounce" {
 ## Resources for the controller VM
 ####################################################################################
 resource "azurerm_network_interface" "trusted_ci_controller" {
-  name                = "trusted-ci-controller"
+  name                = "controller.${azurerm_private_dns_zone.trusted.name}"
   location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
   resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
   tags                = local.default_tags
@@ -170,7 +169,7 @@ resource "azurerm_network_interface" "trusted_ci_controller" {
   }
 }
 resource "azurerm_linux_virtual_machine" "trusted_ci_controller" {
-  name                            = "trusted-ci-controller"
+  name                            = "controller.${azurerm_private_dns_zone.trusted.name}"
   resource_group_name             = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
   location                        = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
   tags                            = local.default_tags
@@ -186,9 +185,7 @@ resource "azurerm_linux_virtual_machine" "trusted_ci_controller" {
     public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5K7Ro7jBl5Kc68RdzG6EXHstIBFSxO5Da8SQJSMeCbb4cHTYuBBH8jNsAFcnkN64kEu+YhmlxaWEVEIrPgfGfs13ZL7v9p+Nt76tsz6gnVdAy2zCz607pAWe7p4bBn6T9zdZcBSnvjawO+8t/5ue4ngcfAjanN5OsOgLeD6yqVyP8YTERjW78jvp2TFrIYmgWMI5ES1ln32PQmRZwc1eAOsyGJW/YIBdOxaSkZ41qUvb9b3dCorGuCovpSK2EeNphjLPpVX/NRpVY4YlDqAcTCdLdDrEeVqkiA/VDCYNhudZTDa8f1iHwBE/GEtlKmoO6dxJ5LAkRk3RIVHYrmI6XXSw5l0tHhW5D12MNwzUfDxQEzBpGK5iSfOBt5zJ5OiI9ftnsq/GV7vCXfvMVGDLUC551P5/s/wM70QmHwhlGQNLNeJxRTvd6tL11bof3K+29ivFYUmpU17iVxYOWhkNY86WyngHU6Ux0zaczF3H6H0tpg1Ca/cFO428AVPw/RTJpcAe6OVKq5zwARNApQ/p6fJKUAdXap+PpQGZlQhPLkUbwtFXGTrpX9ePTcdzryCYjgrZouvy4ZMzruJiIbFUH8mRY3xVREVaIsJakruvgw3b14oQgcB4BwYVBBqi62xIvbRzAv7Su9t2jK6OR2z3sM/hLJRqIJ5oILMORa7XqrQ=="
   }
 
-  # Use cloud-init to configure the VM
   user_data = base64encode(templatefile("./.shared-tools/terraform/cloudinit.tftpl", { hostname = "controller.${azurerm_private_dns_zone.trusted.name}" }))
-  # Force VM recreation when the VPN URL change
   computer_name = "controller.${azurerm_private_dns_zone.trusted.name}"
 
   # Encrypt all disks (ephemeral, temp dirs and data volumes) - https://learn.microsoft.com/en-us/azure/virtual-machines/disks-enable-host-based-encryption-portal?tabs=azure-powershell
@@ -208,7 +205,7 @@ resource "azurerm_linux_virtual_machine" "trusted_ci_controller" {
   }
 }
 resource "azurerm_managed_disk" "trusted_ci_controller_data_disk" {
-  name                 = "trusted-ci-controller-data-disk"
+  name                 =   "trusted-ci-controller-data-disk"
   location             = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
   resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
   storage_account_type = "StandardSSD_LRS"
@@ -235,7 +232,7 @@ resource "azurerm_private_dns_a_record" "trusted_ci_controller" {
 ## Resources for the permanent agent VM
 ####################################################################################
 resource "azurerm_network_interface" "trusted_permanent_agent" {
-  name                = "trusted-permanent-agent"
+  name                = "agent.${azurerm_private_dns_zone.trusted.name}"
   location            = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.location
   resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.name
   tags                = local.default_tags
@@ -247,7 +244,7 @@ resource "azurerm_network_interface" "trusted_permanent_agent" {
   }
 }
 resource "azurerm_linux_virtual_machine" "trusted_permanent_agent" {
-  name                            = "trusted-permanent-agent"
+  name                            = "agent.${azurerm_private_dns_zone.trusted.name}"
   resource_group_name             = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.name
   location                        = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.location
   tags                            = local.default_tags
@@ -263,9 +260,7 @@ resource "azurerm_linux_virtual_machine" "trusted_permanent_agent" {
     public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5K7Ro7jBl5Kc68RdzG6EXHstIBFSxO5Da8SQJSMeCbb4cHTYuBBH8jNsAFcnkN64kEu+YhmlxaWEVEIrPgfGfs13ZL7v9p+Nt76tsz6gnVdAy2zCz607pAWe7p4bBn6T9zdZcBSnvjawO+8t/5ue4ngcfAjanN5OsOgLeD6yqVyP8YTERjW78jvp2TFrIYmgWMI5ES1ln32PQmRZwc1eAOsyGJW/YIBdOxaSkZ41qUvb9b3dCorGuCovpSK2EeNphjLPpVX/NRpVY4YlDqAcTCdLdDrEeVqkiA/VDCYNhudZTDa8f1iHwBE/GEtlKmoO6dxJ5LAkRk3RIVHYrmI6XXSw5l0tHhW5D12MNwzUfDxQEzBpGK5iSfOBt5zJ5OiI9ftnsq/GV7vCXfvMVGDLUC551P5/s/wM70QmHwhlGQNLNeJxRTvd6tL11bof3K+29ivFYUmpU17iVxYOWhkNY86WyngHU6Ux0zaczF3H6H0tpg1Ca/cFO428AVPw/RTJpcAe6OVKq5zwARNApQ/p6fJKUAdXap+PpQGZlQhPLkUbwtFXGTrpX9ePTcdzryCYjgrZouvy4ZMzruJiIbFUH8mRY3xVREVaIsJakruvgw3b14oQgcB4BwYVBBqi62xIvbRzAv7Su9t2jK6OR2z3sM/hLJRqIJ5oILMORa7XqrQ== smerle@MacBook-Pro-de-Stephane.local"
   }
 
-  # Use cloud-init to configure the VM
   user_data = base64encode(templatefile("./.shared-tools/terraform/cloudinit.tftpl", { hostname = "agent.${azurerm_private_dns_zone.trusted.name}" }))
-  # Force VM recreation when the VPN URL change
   computer_name = "agent.${azurerm_private_dns_zone.trusted.name}"
 
   # Encrypt all disks (ephemeral, temp dirs and data volumes) - https://learn.microsoft.com/en-us/azure/virtual-machines/disks-enable-host-based-encryption-portal?tabs=azure-powershell
