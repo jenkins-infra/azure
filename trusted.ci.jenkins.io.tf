@@ -21,9 +21,10 @@ data "azurerm_subnet" "trusted_ephemeral_agents" {
   resource_group_name  = data.azurerm_resource_group.trusted.name
   virtual_network_name = data.azurerm_virtual_network.trusted.name
 }
-resource "azurerm_resource_group" "trusted_ci_jenkins_io_agents" {
-  name     = "jenkinsinfra-trustedvmagents"
-  location = "East US"
+resource "azurerm_resource_group" "trusted_ci_jenkins_io_ephemeral_agents" {
+  name     = "jenkinsinfra-trusted-ephemeral-agents"
+  location = var.location
+  tags     = local.default_tags
 }
 resource "azurerm_resource_group" "trusted_ci_jenkins_io_controller" {
   name     = "jenkinsinfra-trusted-ci-controller"
@@ -35,6 +36,17 @@ resource "azurerm_resource_group" "trusted_ci_jenkins_io_permanent_agents" {
   location = var.location
   tags     = local.default_tags
 }
+
+resource "azurerm_storage_account" "trusted_ci_jenkins_io_ephemeral_agents" {
+  name                     = "trustedciagents"
+  resource_group_name      = azurerm_resource_group.trusted_ci_jenkins_io_ephemeral_agents.name
+  location                 = azurerm_resource_group.trusted_ci_jenkins_io_ephemeral_agents.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+  min_tls_version          = "TLS1_2" # default value, needed for tfsec
+  tags                     = local.default_tags
+}
+
 resource "azuread_application" "trusted_ci_jenkins_io" {
   display_name = azurerm_private_dns_zone.trusted.name
   owners = [
@@ -54,7 +66,6 @@ resource "azuread_application" "trusted_ci_jenkins_io" {
     homepage_url = "https://github.com/jenkins-infra/azure"
   }
 }
-
 resource "azuread_service_principal" "trusted_ci_jenkins_io" {
   application_id               = azuread_application.trusted_ci_jenkins_io.application_id
   app_role_assignment_required = false
@@ -62,24 +73,38 @@ resource "azuread_service_principal" "trusted_ci_jenkins_io" {
     data.azuread_service_principal.terraform_production.id,
   ]
 }
-
 resource "azuread_application_password" "trusted_ci_jenkins_io" {
   application_object_id = azuread_application.trusted_ci_jenkins_io.object_id
   display_name          = "${azurerm_private_dns_zone.trusted.name}-tf-managed"
   end_date              = "2024-03-08T19:40:35Z"
 }
-
-# Allow Service Principal to manage AzureRM resources inside the subscription
-resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_azurerm" {
-  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${azurerm_resource_group.trusted_ci_jenkins_io_agents.name}"
-  role_definition_name = "Contributor"
+resource "azurerm_role_definition" "trusted_vnet_reader" {
+  name  = "ReadTrustedVNET"
+  scope = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.trusted.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.trusted.name}"
+  permissions {
+    actions = ["Microsoft.Network/virtualNetworks/read"]
+  }
+}
+# Allow Service Principal to manage AzureRM resources inside the ephemeral agents resource group
+resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_vmcontribution_in_ephemeralagents_rg" {
+  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${azurerm_resource_group.trusted_ci_jenkins_io_ephemeral_agents.name}"
+  role_definition_name = "Virtual Machine Contributor"
   principal_id         = azuread_service_principal.trusted_ci_jenkins_io.id
 }
-
 resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_packer" {
   scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/prod-packer-images"
   role_definition_name = "Reader"
   principal_id         = azuread_service_principal.trusted_ci_jenkins_io.id
+}
+resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_azurevm_agents_subnet" {
+  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.trusted.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.trusted.name}/subnets/${data.azurerm_subnet.trusted_ephemeral_agents.name}"
+  role_definition_name = "Virtual Machine Contributor"
+  principal_id         = azuread_service_principal.trusted_ci_jenkins_io.id
+}
+resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_read_trustedvnet" {
+  scope              = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.trusted.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.trusted.name}"
+  role_definition_id = azurerm_role_definition.trusted_vnet_reader.role_definition_resource_id
+  principal_id       = azuread_service_principal.trusted_ci_jenkins_io.id
 }
 
 resource "azurerm_private_dns_zone" "trusted" {
