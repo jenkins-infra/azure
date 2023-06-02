@@ -185,7 +185,7 @@ resource "azurerm_linux_virtual_machine" "trusted_ci_controller" {
     public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5K7Ro7jBl5Kc68RdzG6EXHstIBFSxO5Da8SQJSMeCbb4cHTYuBBH8jNsAFcnkN64kEu+YhmlxaWEVEIrPgfGfs13ZL7v9p+Nt76tsz6gnVdAy2zCz607pAWe7p4bBn6T9zdZcBSnvjawO+8t/5ue4ngcfAjanN5OsOgLeD6yqVyP8YTERjW78jvp2TFrIYmgWMI5ES1ln32PQmRZwc1eAOsyGJW/YIBdOxaSkZ41qUvb9b3dCorGuCovpSK2EeNphjLPpVX/NRpVY4YlDqAcTCdLdDrEeVqkiA/VDCYNhudZTDa8f1iHwBE/GEtlKmoO6dxJ5LAkRk3RIVHYrmI6XXSw5l0tHhW5D12MNwzUfDxQEzBpGK5iSfOBt5zJ5OiI9ftnsq/GV7vCXfvMVGDLUC551P5/s/wM70QmHwhlGQNLNeJxRTvd6tL11bof3K+29ivFYUmpU17iVxYOWhkNY86WyngHU6Ux0zaczF3H6H0tpg1Ca/cFO428AVPw/RTJpcAe6OVKq5zwARNApQ/p6fJKUAdXap+PpQGZlQhPLkUbwtFXGTrpX9ePTcdzryCYjgrZouvy4ZMzruJiIbFUH8mRY3xVREVaIsJakruvgw3b14oQgcB4BwYVBBqi62xIvbRzAv7Su9t2jK6OR2z3sM/hLJRqIJ5oILMORa7XqrQ=="
   }
 
-  user_data = base64encode(templatefile("./.shared-tools/terraform/cloudinit.tftpl", { hostname = "controller.${azurerm_private_dns_zone.trusted.name}" }))
+  user_data     = base64encode(templatefile("./.shared-tools/terraform/cloudinit.tftpl", { hostname = "controller.${azurerm_private_dns_zone.trusted.name}" }))
   computer_name = "controller.${azurerm_private_dns_zone.trusted.name}"
 
   # Encrypt all disks (ephemeral, temp dirs and data volumes) - https://learn.microsoft.com/en-us/azure/virtual-machines/disks-enable-host-based-encryption-portal?tabs=azure-powershell
@@ -205,7 +205,7 @@ resource "azurerm_linux_virtual_machine" "trusted_ci_controller" {
   }
 }
 resource "azurerm_managed_disk" "trusted_ci_controller_data_disk" {
-  name                 =   "trusted-ci-controller-data-disk"
+  name                 = "trusted-ci-controller-data-disk"
   location             = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
   resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
   storage_account_type = "StandardSSD_LRS"
@@ -260,7 +260,7 @@ resource "azurerm_linux_virtual_machine" "trusted_permanent_agent" {
     public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5K7Ro7jBl5Kc68RdzG6EXHstIBFSxO5Da8SQJSMeCbb4cHTYuBBH8jNsAFcnkN64kEu+YhmlxaWEVEIrPgfGfs13ZL7v9p+Nt76tsz6gnVdAy2zCz607pAWe7p4bBn6T9zdZcBSnvjawO+8t/5ue4ngcfAjanN5OsOgLeD6yqVyP8YTERjW78jvp2TFrIYmgWMI5ES1ln32PQmRZwc1eAOsyGJW/YIBdOxaSkZ41qUvb9b3dCorGuCovpSK2EeNphjLPpVX/NRpVY4YlDqAcTCdLdDrEeVqkiA/VDCYNhudZTDa8f1iHwBE/GEtlKmoO6dxJ5LAkRk3RIVHYrmI6XXSw5l0tHhW5D12MNwzUfDxQEzBpGK5iSfOBt5zJ5OiI9ftnsq/GV7vCXfvMVGDLUC551P5/s/wM70QmHwhlGQNLNeJxRTvd6tL11bof3K+29ivFYUmpU17iVxYOWhkNY86WyngHU6Ux0zaczF3H6H0tpg1Ca/cFO428AVPw/RTJpcAe6OVKq5zwARNApQ/p6fJKUAdXap+PpQGZlQhPLkUbwtFXGTrpX9ePTcdzryCYjgrZouvy4ZMzruJiIbFUH8mRY3xVREVaIsJakruvgw3b14oQgcB4BwYVBBqi62xIvbRzAv7Su9t2jK6OR2z3sM/hLJRqIJ5oILMORa7XqrQ== smerle@MacBook-Pro-de-Stephane.local"
   }
 
-  user_data = base64encode(templatefile("./.shared-tools/terraform/cloudinit.tftpl", { hostname = "agent.${azurerm_private_dns_zone.trusted.name}" }))
+  user_data     = base64encode(templatefile("./.shared-tools/terraform/cloudinit.tftpl", { hostname = "agent.${azurerm_private_dns_zone.trusted.name}" }))
   computer_name = "agent.${azurerm_private_dns_zone.trusted.name}"
 
   # Encrypt all disks (ephemeral, temp dirs and data volumes) - https://learn.microsoft.com/en-us/azure/virtual-machines/disks-enable-host-based-encryption-portal?tabs=azure-powershell
@@ -613,4 +613,49 @@ resource "azurerm_network_security_rule" "deny_all_inbound_from_vnet" {
   destination_address_prefix  = "*"
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+}
+
+####################################################################################
+## NAT gateway to allow outbound connection on a centralized and scalable appliance
+####################################################################################
+resource "azurerm_public_ip" "trusted_outbound" {
+  name                = "trusted-outbound"
+  location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
+  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+}
+resource "azurerm_nat_gateway" "trusted_outbound" {
+  name                = "trusted-outbound"
+  location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
+  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
+  sku_name            = "Standard"
+}
+resource "azurerm_nat_gateway_public_ip_association" "trusted_outbound" {
+  nat_gateway_id       = azurerm_nat_gateway.trusted_outbound.id
+  public_ip_address_id = azurerm_public_ip.trusted_outbound.id
+}
+resource "azurerm_subnet_nat_gateway_association" "trusted_outbound_controller" {
+  subnet_id      = data.azurerm_subnet.trusted_ci_controller.id
+  nat_gateway_id = azurerm_nat_gateway.trusted_outbound.id
+}
+resource "azurerm_subnet_nat_gateway_association" "trusted_outbound_permanent_agents" {
+  subnet_id      = data.azurerm_subnet.trusted_permanent_agents.id
+  nat_gateway_id = azurerm_nat_gateway.trusted_outbound.id
+}
+resource "azurerm_subnet_nat_gateway_association" "trusted_outbound_ephemeral_agents" {
+  subnet_id      = data.azurerm_subnet.trusted_ephemeral_agents.id
+  nat_gateway_id = azurerm_nat_gateway.trusted_outbound.id
+}
+
+####################################################################################
+## DNS records
+####################################################################################
+resource "azurerm_dns_a_record" "trusted_bounce" {
+  name                = "bounce.trusted.ci"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  records             = [azurerm_public_ip.trusted_bounce.ip_address]
+  tags                = local.default_tags
 }
