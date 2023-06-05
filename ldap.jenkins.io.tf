@@ -5,7 +5,7 @@ resource "azurerm_resource_group" "ldap" {
 }
 
 resource "azurerm_storage_account" "ldap_backups" {
-  name                     = "jenkinsciinfraldapbackups"
+  name                     = "ldapjenkinsiobackups"
   resource_group_name      = azurerm_resource_group.ldap.name
   location                 = azurerm_resource_group.ldap.location
   account_tier             = "Standard"
