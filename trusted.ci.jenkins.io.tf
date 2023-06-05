@@ -350,6 +350,19 @@ resource "azurerm_subnet_network_security_group_association" "trusted_ci_permane
   network_security_group_id = azurerm_network_security_group.trusted_ci.id
 }
 ## Outbound Rules (different set of priorities than Inbound rules) ##
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_permanent_agent_to_updatecenter" {
+  name                        = "allow-outbound-ssh-from-permanent-agent-to-updatecenter"
+  priority                    = 4085
+  direction                   = "Outbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefix       = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
+  destination_address_prefix  = local.external_services["updates.jenkins.io"]
+  resource_group_name         = data.azurerm_resource_group.trusted.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
+}
 #tfsec:ignore:azure-network-no-public-egress
 resource "azurerm_network_security_rule" "allow_outbound_ldap_from_controller_to_jenkinsldap" {
   name                        = "allow-outbound-ldap-from-controller-to-jenkinsldap"
