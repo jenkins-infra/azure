@@ -104,7 +104,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "arm64small" {
   enable_auto_scaling   = true
   min_count             = 0
   max_count             = 10
-  zones                 = [3]
+  zones                 = [1]
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
   tags                  = local.default_tags
 }
