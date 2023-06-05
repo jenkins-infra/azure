@@ -5,7 +5,7 @@ resource "azurerm_resource_group" "ldap" {
 }
 
 resource "azurerm_storage_account" "ldap_backups" {
-  name                     = "ldap-backups"
+  name                     = "ldapbackups"
   resource_group_name      = azurerm_resource_group.ldap.name
   location                 = azurerm_resource_group.ldap.location
   account_tier             = "Standard"
@@ -19,7 +19,7 @@ resource "azurerm_storage_account" "ldap_backups" {
     ip_rules                   = values(local.admin_allowed_ips)
     virtual_network_subnet_ids = [data.azurerm_subnet.publick8s_tier.id]
     # Grant access to trusted Azure Services like Azure Backup (see # https://learn.microsoft.com/en-gb/azure/storage/common/storage-network-security?tabs=azure-portal#exceptions)
-    bypass                     = ["AzureServices"]
+    bypass = ["AzureServices"]
   }
 
   tags = local.default_tags
