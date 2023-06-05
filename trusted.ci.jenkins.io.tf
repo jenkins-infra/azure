@@ -331,8 +331,11 @@ resource "azurerm_private_dns_a_record" "trusted_permanent_agent" {
 ####################################################################################
 ## Network Security Groups for TRUSTED subnets
 ####################################################################################
-# subnet trusted_ci_controller
-resource "azurerm_network_security_group" "trusted_ci_controller" {
+moved {
+  from = azurerm_network_security_group.trusted_ci_controller
+  to   = azurerm_network_security_group.trusted_ci
+}
+resource "azurerm_network_security_group" "trusted_ci" {
   name                = data.azurerm_subnet.trusted_ci_controller.name
   location            = data.azurerm_resource_group.trusted.location
   resource_group_name = data.azurerm_resource_group.trusted.name
@@ -340,12 +343,16 @@ resource "azurerm_network_security_group" "trusted_ci_controller" {
 }
 resource "azurerm_subnet_network_security_group_association" "trusted_ci_controller" {
   subnet_id                 = data.azurerm_subnet.trusted_ci_controller.id
-  network_security_group_id = azurerm_network_security_group.trusted_ci_controller.id
+  network_security_group_id = azurerm_network_security_group.trusted_ci.id
+}
+resource "azurerm_subnet_network_security_group_association" "trusted_ci_permanent_agent" {
+  subnet_id                 = data.azurerm_subnet.trusted_permanent_agents.id
+  network_security_group_id = azurerm_network_security_group.trusted_ci.id
 }
 ## Outbound Rules (different set of priorities than Inbound rules) ##
 #tfsec:ignore:azure-network-no-public-egress
-resource "azurerm_network_security_rule" "allow_outbound_ldap_from_vnet_to_jenkinsldap" {
-  name                        = "allow-outbound-ldap-from-vnet-to-jenkinsldap"
+resource "azurerm_network_security_rule" "allow_outbound_ldap_from_controller_to_jenkinsldap" {
+  name                        = "allow-outbound-ldap-from-controller-to-jenkinsldap"
   priority                    = 4086
   direction                   = "Outbound"
   access                      = "Allow"
@@ -355,7 +362,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ldap_from_vnet_to_jenki
   destination_port_range      = "636" # LDAP over TLS
   destination_address_prefix  = local.external_services["ldap.jenkins.io"]
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
 #tfsec:ignore:azure-network-no-public-egress
 resource "azurerm_network_security_rule" "allow_outbound_puppet_from_vnet_to_puppetmaster" {
@@ -369,7 +376,7 @@ resource "azurerm_network_security_rule" "allow_outbound_puppet_from_vnet_to_pup
   destination_port_range      = "8140" # Puppet over TLS
   destination_address_prefix  = local.external_services["puppet.jenkins.io"]
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
 resource "azurerm_network_security_rule" "allow_outbound_jenkins_usage_from_vnet_to_controller" {
   name                  = "allow-outbound-jenkins-usage-from-vnet-to-controller"
@@ -385,7 +392,7 @@ resource "azurerm_network_security_rule" "allow_outbound_jenkins_usage_from_vnet
   ]
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
 resource "azurerm_network_security_rule" "allow_outbound_http_from_vnet_to_internet" {
   name                        = "allow-outbound-http-from-vnet-to-internet"
@@ -398,7 +405,7 @@ resource "azurerm_network_security_rule" "allow_outbound_http_from_vnet_to_inter
   destination_port_ranges     = ["80", "443"]
   destination_address_prefix  = "Internet"
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
 resource "azurerm_network_security_rule" "allow_outbound_from_bounce_to_controller" {
   name                        = "allow-outbound-from-bounce-to-controller"
@@ -411,7 +418,7 @@ resource "azurerm_network_security_rule" "allow_outbound_from_bounce_to_controll
   destination_port_range      = "22"
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_controller_to_permanent_agent" {
   name                        = "allow-outbound-ssh-from-controller-to-permanent-agent"
@@ -424,7 +431,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_controller_to_
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_controller_to_ephemeral_agents" {
   name                        = "allow-outbound-ssh-from-controller-to-ephemeral-agents"
@@ -437,7 +444,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_controller_to_
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
   destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_bounce_to_permanent_agent" {
   name                        = "allow-outbound-ssh-from-bounce-to-permanent-agent"
@@ -450,10 +457,10 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_bounce_to_perm
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
-resource "azurerm_network_security_rule" "allow_outbound_ssh_from_bounce_to_ephemeral_agent" {
-  name                        = "allow-outbound-ssh-from-bounce-to-ephemeral-agent"
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_bounce_to_ephemeral_agents" {
+  name                        = "allow-outbound-ssh-from-bounce-to-ephemeral-agents"
   priority                    = 4094
   direction                   = "Outbound"
   access                      = "Allow"
@@ -463,7 +470,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_bounce_to_ephe
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
 # This rule overrides an Azure-Default rule. its priority must be < 65000.
 resource "azurerm_network_security_rule" "deny_all_outbound_to_internet" {
@@ -477,7 +484,7 @@ resource "azurerm_network_security_rule" "deny_all_outbound_to_internet" {
   source_address_prefix       = "*"
   destination_address_prefix  = "Internet"
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
 # This rule overrides an Azure-Default rule. its priority must be < 65000.
 resource "azurerm_network_security_rule" "deny_all_outbound_to_vnet" {
@@ -491,7 +498,7 @@ resource "azurerm_network_security_rule" "deny_all_outbound_to_vnet" {
   source_address_prefix        = "VirtualNetwork"
   destination_address_prefixes = data.azurerm_virtual_network.trusted.address_space
   resource_group_name          = data.azurerm_resource_group.trusted.name
-  network_security_group_name  = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name  = azurerm_network_security_group.trusted_ci.name
 }
 
 ## Inbound Rules (different set of priorities than Outbound rules) ##
@@ -506,7 +513,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_contr
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_permanent_agent" {
   name                        = "allow-inbound-ssh-from-controller-to-permanent-agent"
@@ -519,7 +526,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_p
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_ephemeral_agents" {
   name                        = "allow-inbound-ssh-from-controller-to-ephemeral-agents"
@@ -532,7 +539,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_e
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
   destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_permanent_agent" {
   name                        = "allow-inbound-ssh-from-bounce-to-permanent-agent"
@@ -545,10 +552,10 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_perma
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
-resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_ephemeral_agent" {
-  name                        = "allow-inbound-ssh-from-bounce-to-ephemeral-agent"
+resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_ephemeral_agents" {
+  name                        = "allow-inbound-ssh-from-bounce-to-ephemeral-agents"
   priority                    = 3900
   direction                   = "Inbound"
   access                      = "Allow"
@@ -558,7 +565,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_ephem
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_admins_to_bounce" {
   name                        = "allow-inbound-ssh-from-admins-to-bounce"
@@ -571,7 +578,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_admins_to_bounc
   source_address_prefixes     = values(local.admin_allowed_ips)
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
 # TODO: remove when data migration is complete
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_legacy_trusted_to_bounce" {
@@ -585,7 +592,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_legacy_trusted_
   source_address_prefixes     = ["3.209.43.20", "67.202.34.237"]
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
 resource "azurerm_network_security_rule" "allow_inbound_jenkins_usage_from_vnet_to_controller" {
   name                  = "allow-inbound-jenkins-usage-from-vnet-to-controller"
@@ -601,7 +608,7 @@ resource "azurerm_network_security_rule" "allow_inbound_jenkins_usage_from_vnet_
   ]
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
 # This rule overrides an Azure-Default rule. its priority must be < 65000.
 resource "azurerm_network_security_rule" "deny_all_inbound_from_internet" {
@@ -615,7 +622,7 @@ resource "azurerm_network_security_rule" "deny_all_inbound_from_internet" {
   source_address_prefix       = "Internet"
   destination_address_prefix  = "*"
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
 # This rule overrides an Azure-Default rule. its priority must be < 65000
 resource "azurerm_network_security_rule" "deny_all_inbound_from_vnet" {
@@ -629,7 +636,7 @@ resource "azurerm_network_security_rule" "deny_all_inbound_from_vnet" {
   source_address_prefix       = "VirtualNetwork"
   destination_address_prefix  = "*"
   resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = azurerm_network_security_group.trusted_ci_controller.name
+  network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
 
 ####################################################################################
