@@ -350,6 +350,8 @@ resource "azurerm_subnet_network_security_group_association" "trusted_ci_permane
   network_security_group_id = azurerm_network_security_group.trusted_ci.id
 }
 ## Outbound Rules (different set of priorities than Inbound rules) ##
+# Ignore the rule as it does not detect the IP restriction to only update.jenkins.io"s host
+#tfsec:ignore:azure-network-no-public-egress
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_permanent_agent_to_updatecenter" {
   name                        = "allow-outbound-ssh-from-permanent-agent-to-updatecenter"
   priority                    = 4085
@@ -363,6 +365,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_permanent_agen
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
+# Ignore the rule as it does not detect the IP restriction to only ldap.jenkins.io"s host
 #tfsec:ignore:azure-network-no-public-egress
 resource "azurerm_network_security_rule" "allow_outbound_ldap_from_controller_to_jenkinsldap" {
   name                        = "allow-outbound-ldap-from-controller-to-jenkinsldap"
@@ -377,6 +380,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ldap_from_controller_to
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
+# Ignore the rule as it does not detect the IP restriction to only puppet.jenkins.io"s host
 #tfsec:ignore:azure-network-no-public-egress
 resource "azurerm_network_security_rule" "allow_outbound_puppet_from_vnet_to_puppetmaster" {
   name                        = "allow-outbound-puppet-from-vnet-to-puppetmaster"
