@@ -26,3 +26,8 @@ resource "azurerm_storage_account_network_rules" "ldap_access" {
   # Grant access to trusted Azure Services like Azure Backup (see # https://learn.microsoft.com/en-gb/azure/storage/common/storage-network-security?tabs=azure-portal#exceptions)
   bypass = ["AzureServices"]
 }
+
+output "ldap_backups_primary_access_key" {
+  value     = azurerm_storage_account.ldap_backups.primary_access_key
+  sensitive = true
+}
