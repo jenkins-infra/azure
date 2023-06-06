@@ -27,6 +27,12 @@ resource "azurerm_storage_account_network_rules" "ldap_access" {
   bypass = ["AzureServices"]
 }
 
+resource "azurerm_storage_share" "ldap" {
+  name                 = "ldap"
+  storage_account_name = azurerm_storage_account.ldap_backups.name
+  quota                = 5120 # 5To
+}
+
 output "ldap_backups_primary_access_key" {
   value     = azurerm_storage_account.ldap_backups.primary_access_key
   sensitive = true
