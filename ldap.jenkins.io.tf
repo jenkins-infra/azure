@@ -31,16 +31,6 @@ resource "azurerm_storage_share" "ldap" {
   name                 = "ldap"
   storage_account_name = azurerm_storage_account.ldap_backups.name
   quota                = 5120 # 5To
-
-  acl {
-    id = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI"
-
-    access_policy {
-      permissions = "rwdl"
-      start       = "2019-07-02T09:38:21.0000000Z"
-      expiry      = "2019-07-02T10:38:21.0000000Z"
-    }
-  }
 }
 
 output "ldap_backups_primary_access_key" {
