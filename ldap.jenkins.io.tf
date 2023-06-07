@@ -22,16 +22,9 @@ resource "azurerm_storage_account_network_rules" "ldap_access" {
 
   default_action             = "Deny"
   ip_rules                   = values(local.admin_allowed_ips)
-  # Allow cluster where the consumer service is, and also privatek8s so it can create the File Share inside
-  virtual_network_subnet_ids = [data.azurerm_subnet.publick8s_tier.id, data.azurerm_subnet.privatek8s_tier.id]
+  virtual_network_subnet_ids = [data.azurerm_subnet.publick8s_tier.id]
   # Grant access to trusted Azure Services like Azure Backup (see # https://learn.microsoft.com/en-gb/azure/storage/common/storage-network-security?tabs=azure-portal#exceptions)
   bypass = ["AzureServices"]
-}
-
-resource "azurerm_storage_share" "ldap" {
-  name                 = "ldap"
-  storage_account_name = azurerm_storage_account.ldap_backups.name
-  quota                = 5120 # 5To
 }
 
 output "ldap_backups_primary_access_key" {
