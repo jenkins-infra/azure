@@ -149,6 +149,18 @@ resource "azurerm_public_ip" "publick8s_ipv4" {
   tags                = local.default_tags
 }
 
+# The LDAP service deployed on this cluster is using TCP not HTTP/HTTPS, it needs its own load balancer
+# Setting it with this determined public IP will ease DNS setup and changes
+resource "azurerm_public_ip" "ldap_jenkins_io_ipv4" {
+  name                = "ldap-jenkins-io-ipv4"
+  resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
+  location            = var.location
+  ip_version          = "IPv4"
+  allocation_method   = "Static"
+  sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
+  tags                = local.default_tags
+}
+
 resource "azurerm_public_ip" "publick8s_ipv6" {
   name                = "public-publick8s-ipv6"
   resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
@@ -197,6 +209,10 @@ output "publick8s_public_ipv4_address" {
 
 output "publick8s_public_ipv6_address" {
   value = azurerm_public_ip.publick8s_ipv6.ip_address
+}
+
+output "ldap_jenkins_io_ipv4_address" {
+  value = azurerm_public_ip.ldap_jenkins_io_ipv4.ip_address
 }
 
 output "publick8s_kube_config_command" {
