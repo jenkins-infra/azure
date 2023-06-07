@@ -38,7 +38,7 @@ locals {
     dduportal   = "85.27.58.68"
     lemeurherve = "176.185.227.180"
     smerle33    = "82.64.5.129"
-    dduportal-2 = "91.182.56.152"
+    dduportal-2 = "92.184.105.22"
   }
 
   external_services = {
