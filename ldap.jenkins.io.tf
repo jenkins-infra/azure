@@ -34,21 +34,7 @@ resource "azurerm_storage_account_network_rules" "ldap_access" {
 #   quota                = 5120 # 5To
 # }
 
-resource "azurerm_public_ip" "ldap_jenkins_io_ipv4" {
-  name                = "ldap-jenkins-io-ipv4"
-  resource_group_name = azurerm_resource_group.ldap.name
-  location            = var.location
-  ip_version          = "IPv4"
-  allocation_method   = "Static"
-  sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
-  tags                = local.default_tags
-}
-
 output "ldap_backups_primary_access_key" {
   value     = azurerm_storage_account.ldap_backups.primary_access_key
   sensitive = true
-}
-
-output "ldap_public_ipv4_address" {
-  value = azurerm_public_ip.ldap_jenkins_io_ipv4.ip_address
 }
