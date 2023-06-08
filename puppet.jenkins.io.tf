@@ -36,6 +36,22 @@ data "azurerm_network_security_group" "private_dmz" {
   resource_group_name = data.azurerm_resource_group.private.name
 }
 ## Inbound Rules (different set of priorities than Outbound rules) ##
+#tfsec:ignore:azure-network-no-public-ingress
+resource "azurerm_network_security_rule" "allow_inbound_webhooks_from_github_to_puppet" {
+  name              = "allow-inbound-webhooks-from-github-to-puppet"
+  priority          = 3999
+  direction         = "Inbound"
+  access            = "Allow"
+  protocol          = "Tcp"
+  source_port_range = "*"
+  # https://github.com/jenkins-infra/jenkins-infra/blob/51c90220ec19ed688a0605dce4a98eddd212844a/dist/profile/manifests/r10k.pp
+  # https://forge.puppet.com/modules/puppet/r10k/readme
+  destination_port_range      = "8088" # r10k webhook default port
+  source_address_prefixes     = local.github_ips.webhooks
+  destination_address_prefix  = azurerm_linux_virtual_machine.puppet_jenkins_io.private_ip_address
+  resource_group_name         = data.azurerm_resource_group.private.name
+  network_security_group_name = data.azurerm_network_security_group.private_dmz.name
+}
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_admins_to_puppet" {
   name                        = "allow-inbound-ssh-from-admins-to-puppet"
   priority                    = 4000
