@@ -45,7 +45,6 @@ locals {
   }
 
   external_services = {
-    "puppet.jenkins.io"  = azurerm_public_ip.puppet_jenkins_io.ip_address
     "updates.jenkins.io" = "52.202.51.185"
   }
 
