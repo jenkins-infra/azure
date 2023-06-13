@@ -391,7 +391,7 @@ resource "azurerm_network_security_rule" "allow_outbound_puppet_from_vnet_to_pup
   source_port_range           = "*"
   source_address_prefix       = "VirtualNetwork"
   destination_port_range      = "8140" # Puppet over TLS
-  destination_address_prefix  = local.external_services["puppet.jenkins.io"]
+  destination_address_prefix  = azurerm_public_ip.puppet_jenkins_io.ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
