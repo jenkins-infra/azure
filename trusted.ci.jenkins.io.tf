@@ -376,7 +376,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ldap_from_controller_to
   source_port_range           = "*"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
   destination_port_range      = "636" # LDAP over TLS
-  destination_address_prefix  = local.external_services["ldap.jenkins.io"]
+  destination_address_prefix  = azurerm_public_ip.ldap_jenkins_io_ipv4.ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
