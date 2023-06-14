@@ -37,8 +37,7 @@ locals {
   admin_allowed_ips = {
     dduportal     = "85.27.58.68"
     lemeurherve   = "176.185.227.180"
-    lemeurherve-2 = "37.170.208.133"
-    lemeurherve-3 = "176.145.123.59"
+    lemeurherve-2 = "176.145.123.59"
     smerle33      = "82.64.5.129"
   }
 
