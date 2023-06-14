@@ -42,6 +42,7 @@ locals {
     lemeurherve-2 = "37.170.208.133"
     lemeurherve-3 = "176.145.123.59"
     smerle33      = "82.64.5.129"
+    danielbeck    = "95.208.175.232"
   }
 
   external_services = {
