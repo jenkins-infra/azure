@@ -189,7 +189,11 @@ resource "azuread_application_password" "ci_jenkins_io" {
 }
 
 # Allow application to manage AzureRM resources inside the agents resource groups
-resource "azurerm_role_assignment" "ci_jenkins_io_contributor_in_agent_resourcegroup" {
+moved {
+  from = azurerm_role_assignment.ci_jenkins_io_contributor_in_agent_resourcegroup
+  to   = azurerm_role_assignment.ci_jenkins_io_contributor_in_eastus_agent_resourcegroup
+}
+resource "azurerm_role_assignment" "ci_jenkins_io_contributor_in_eastus_agent_resourcegroup" {
   scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${azurerm_resource_group.eastus_ci_jenkins_io_agents.name}"
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.ci_jenkins_io.id
