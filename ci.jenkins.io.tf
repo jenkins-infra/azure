@@ -173,7 +173,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_ci_jenkins_io_
 }
 #tfsec:ignore:azure-network-no-public-egress
 resource "azurerm_network_security_rule" "allow_outbound_jenkins_usage_from_ci_jenkins_io_ephemeral_agents_subnet_to_controller" {
-  name                  = "allow-outbound-jenkins-usage-from-ci_jenkins_io_ephemeral_agents-subnet-to-controller"
+  name                  = "allow-outbound-jenkins-from-ci_jenkins_io_ephemeral_agents-subnet-to-controller"
   priority              = 4093
   direction             = "Outbound"
   access                = "Allow"
@@ -343,7 +343,7 @@ resource "azurerm_role_assignment" "ci_jenkins_io_manage_net_interfaces_subnet_c
 }
 resource "azurerm_role_assignment" "ci_jenkins_io_read_publicvnet_subnets" {
   scope              = data.azurerm_virtual_network.public.id
-  role_definition_id = azurerm_role_definition.prod_public_vnet_reader.role_definition_resource_id
+  role_definition_id = azurerm_role_definition.public_vnet_reader.role_definition_resource_id
   principal_id       = azuread_service_principal.ci_jenkins_io.id
 }
 ###

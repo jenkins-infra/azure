@@ -15,3 +15,12 @@ resource "azurerm_role_definition" "prod_public_vnet_reader" {
     actions = ["Microsoft.Network/virtualNetworks/read"]
   }
 }
+
+resource "azurerm_role_definition" "public_vnet_reader" {
+  name  = "ReadPublicVNET"
+  scope = data.azurerm_virtual_network.public.id
+
+  permissions {
+    actions = ["Microsoft.Network/virtualNetworks/read"]
+  }
+}
