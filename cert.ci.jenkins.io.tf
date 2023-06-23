@@ -62,12 +62,12 @@ resource "azuread_application_password" "cert_ci_jenkins_io" {
 }
 # Allow Service Principal to manage AzureRM resources inside the agents resource groups
 resource "azurerm_role_assignment" "cert_ci_jenkins_io_allow_azurerm" {
-  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${azurerm_resource_group.cert_ci_jenkins_io_agents.name}"
+  scope                = azurerm_resource_group.cert_ci_jenkins_io_agents.id
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.cert_ci_jenkins_io.id
 }
 resource "azurerm_role_assignment" "cert_ci_jenkins_io_allow_packer" {
-  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/prod-packer-images"
+  scope                = azurerm_resource_group.packer_images["prod"].id
   role_definition_name = "Reader"
   principal_id         = azuread_service_principal.cert_ci_jenkins_io.id
 }
