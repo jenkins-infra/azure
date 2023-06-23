@@ -6,7 +6,15 @@ resource "azurerm_resource_group" "ci_jenkins_io_controller" {
   tags = local.default_tags
 }
 
-resource "azurerm_resource_group" "ci_jenkins_io_agents" {
+# resource "azurerm_resource_group" "ci_jenkins_io_agents" {
+#   name     = "eastus-cijenkinsio"
+#   location = "East US"
+# }
+moved {
+  from = azurerm_resource_group.ci_jenkins_io_agents
+  to   = azurerm_resource_group.eastus_ci_jenkins_io_agents
+}
+resource "azurerm_resource_group" "eastus_ci_jenkins_io_agents" {
   name     = "eastus-cijenkinsio"
   location = "East US"
 }
@@ -134,10 +142,14 @@ resource "azurerm_virtual_machine_data_disk_attachment" "ci_jenkins_io_data" {
 }
 
 /** Agent Resources **/
-resource "azurerm_storage_account" "ci_jenkins_io_agents" {
+moved {
+  from = azurerm_storage_account.ci_jenkins_io_agents
+  to   = azurerm_storage_account.eastus_ci_jenkins_io_agents
+}
+resource "azurerm_storage_account" "eastus_ci_jenkins_io_agents" {
   name                     = "cijenkinsiovmagents"
-  resource_group_name      = azurerm_resource_group.ci_jenkins_io_agents.name
-  location                 = azurerm_resource_group.ci_jenkins_io_agents.location
+  resource_group_name      = azurerm_resource_group.eastus_ci_jenkins_io_agents.name
+  location                 = azurerm_resource_group.eastus_ci_jenkins_io_agents.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
   min_tls_version          = "TLS1_2" # default value, needed for tfsec
@@ -178,7 +190,7 @@ resource "azuread_application_password" "ci_jenkins_io" {
 
 # Allow application to manage AzureRM resources inside the agents resource groups
 resource "azurerm_role_assignment" "ci_jenkins_io_contributor_in_agent_resourcegroup" {
-  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${azurerm_resource_group.ci_jenkins_io_agents.name}"
+  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${azurerm_resource_group.eastus_ci_jenkins_io_agents.name}"
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.ci_jenkins_io.id
 }
