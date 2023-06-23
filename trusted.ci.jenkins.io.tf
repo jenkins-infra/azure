@@ -331,10 +331,6 @@ resource "azurerm_private_dns_a_record" "trusted_permanent_agent" {
 ####################################################################################
 ## Network Security Groups for TRUSTED subnets
 ####################################################################################
-moved {
-  from = azurerm_network_security_group.trusted_ci_controller
-  to   = azurerm_network_security_group.trusted_ci
-}
 resource "azurerm_network_security_group" "trusted_ci" {
   name                = data.azurerm_subnet.trusted_ci_controller.name
   location            = data.azurerm_resource_group.trusted.location
