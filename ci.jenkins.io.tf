@@ -182,24 +182,27 @@ resource "azuread_application_password" "ci_jenkins_io" {
 
 # Allow application to manage AzureRM resources inside the agents resource groups
 resource "azurerm_role_assignment" "ci_jenkins_io_contributor_in_eastus_agent_resourcegroup" {
-  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${azurerm_resource_group.eastus_ci_jenkins_io_agents.name}"
+  scope                = azurerm_resource_group.eastus_ci_jenkins_io_agents.id
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.ci_jenkins_io.id
 }
 resource "azurerm_role_assignment" "ci_jenkins_io_read_packer_prod_images" {
-  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${azurerm_resource_group.packer_images["prod"].name}"
+  scope                = azurerm_resource_group.packer_images["prod"].id
   role_definition_name = "Reader"
   principal_id         = azuread_service_principal.ci_jenkins_io.id
 }
-# Allow application to create/delete VM network interfaces in this subnet
+data "azurerm_subnet" "eastus_ci_jenkins_io_agents" {
+  name                 = "ci.j-agents-vm"
+  virtual_network_name = data.azurerm_virtual_network.public_prod.name
+  resource_group_name  = data.azurerm_resource_group.public_prod.name
+}
 resource "azurerm_role_assignment" "ci_jenkins_io_manage_net_interfaces_subnet_ci_agents" {
-  // TODO: manage this subnet in jenkins-infra/azure-net along with a security group
-  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/prod-jenkins-public-prod/providers/Microsoft.Network/virtualNetworks/prod-jenkins-public-prod/subnets/ci.j-agents-vm"
+  scope                = data.azurerm_subnet.eastus_ci_jenkins_io_agents.id
   role_definition_name = "Virtual Machine Contributor"
   principal_id         = azuread_service_principal.ci_jenkins_io.id
 }
 resource "azurerm_role_assignment" "ci_jenkins_io_read_public_vnets" {
-  scope              = "${data.azurerm_subscription.jenkins.id}/resourceGroups/prod-jenkins-public-prod/providers/Microsoft.Network/virtualNetworks/prod-jenkins-public-prod"
+  scope              = data.azurerm_virtual_network.public_prod.id
   role_definition_id = azurerm_role_definition.prod_public_vnet_reader.role_definition_resource_id
   principal_id       = azuread_service_principal.ci_jenkins_io.id
 }

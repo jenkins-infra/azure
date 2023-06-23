@@ -80,29 +80,29 @@ resource "azuread_application_password" "trusted_ci_jenkins_io" {
 }
 resource "azurerm_role_definition" "trusted_vnet_reader" {
   name  = "ReadTrustedVNET"
-  scope = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.trusted.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.trusted.name}"
+  scope = data.azurerm_virtual_network.trusted.id
   permissions {
     actions = ["Microsoft.Network/virtualNetworks/read"]
   }
 }
 # Allow Service Principal to manage AzureRM resources inside the ephemeral agents resource group
 resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_vmcontribution_in_ephemeralagents_rg" {
-  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${azurerm_resource_group.trusted_ci_jenkins_io_ephemeral_agents.name}"
+  scope                = azurerm_resource_group.trusted_ci_jenkins_io_ephemeral_agents.id
   role_definition_name = "Virtual Machine Contributor"
   principal_id         = azuread_service_principal.trusted_ci_jenkins_io.id
 }
 resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_packer" {
-  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/prod-packer-images"
+  scope                = azurerm_resource_group.packer_images["prod"].id
   role_definition_name = "Reader"
   principal_id         = azuread_service_principal.trusted_ci_jenkins_io.id
 }
 resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_azurevm_agents_subnet" {
-  scope                = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.trusted.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.trusted.name}/subnets/${data.azurerm_subnet.trusted_ephemeral_agents.name}"
+  scope                = data.azurerm_subnet.trusted_ephemeral_agents.id
   role_definition_name = "Virtual Machine Contributor"
   principal_id         = azuread_service_principal.trusted_ci_jenkins_io.id
 }
 resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_read_trustedvnet" {
-  scope              = "${data.azurerm_subscription.jenkins.id}/resourceGroups/${data.azurerm_resource_group.trusted.name}/providers/Microsoft.Network/virtualNetworks/${data.azurerm_virtual_network.trusted.name}"
+  scope              = data.azurerm_virtual_network.trusted.id
   role_definition_id = azurerm_role_definition.trusted_vnet_reader.role_definition_resource_id
   principal_id       = azuread_service_principal.trusted_ci_jenkins_io.id
 }
