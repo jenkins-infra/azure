@@ -35,10 +35,11 @@ locals {
   }
 
   admin_allowed_ips = {
-    dduportal     = "85.26.116.129"
-    lemeurherve   = "176.185.227.180"
-    lemeurherve-2 = "176.145.123.59"
-    smerle33      = "82.64.5.129"
+    dduportal        = "85.26.116.129"
+    lemeurherve      = "176.185.227.180"
+    lemeurherve-2    = "176.145.123.59"
+    smerle33         = "82.64.5.129"
+    dduportal-cowork = "91.182.56.152"
   }
 
   external_services = {
