@@ -109,6 +109,23 @@ resource "azurerm_kubernetes_cluster_node_pool" "arm64small" {
   tags                  = local.default_tags
 }
 
+resource "azurerm_kubernetes_cluster_node_pool" "arm64small_20230629" {
+  name                  = "arm64small-20230629"
+  vm_size               = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
+  os_disk_type          = "Ephemeral"
+  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
+  enable_auto_scaling   = true
+  min_count             = 0
+  max_count             = 10
+  zones                 = [1]
+  vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
+  tags                  = local.default_tags
+  node_taints = [
+    "pool=small:NoSchedule",
+  ]
+}
+
 # Allow cluster to manage LBs in the publick8s-tier subnet (Public LB)
 resource "azurerm_role_assignment" "publick8s_networkcontributor" {
   scope                            = data.azurerm_subnet.publick8s_tier.id
