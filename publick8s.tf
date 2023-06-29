@@ -122,7 +122,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "arm64small2" {
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
   tags                  = local.default_tags
   node_taints = [
-    "pool=small:NoSchedule",
+    "kubernetes.io/arch=arm64:NoSchedule",
   ]
 }
 
