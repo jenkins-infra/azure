@@ -1,13 +1,13 @@
 ####################################################################################
 ## Resources for the Controller VM
 ####################################################################################
+locals {
+  service_fqdn = "ci.jenkins.io"
+}
 resource "azurerm_resource_group" "ci_jenkins_io_controller" {
   name     = "ci-jenkins-io-controller"
   location = data.azurerm_virtual_network.public.location
   tags     = local.default_tags
-}
-locals {
-  service_fqdn = "ci.jenkins.io"
 }
 resource "azurerm_dns_a_record" "ci_jenkins_io_controller" {
   name                = trimsuffix(azurerm_public_ip.ci_jenkins_io_controller.name, ".jenkins.io")
@@ -79,8 +79,8 @@ resource "azurerm_linux_virtual_machine" "ci_jenkins_io_controller" {
     public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDKvZ23dkvhjSU0Gxl5+mKcBOwmR7gqJDYeA1/Xzl3otV4CtC5te5Vx7YnNEFDXD6BsNkFaliXa34yE37WMdWl+exIURBMhBLmOPxEP/cWA5ZbXP//78ejZsxawBpBJy27uQhdcR0zVoMJc8Q9ShYl5YT/Tq1UcPq2wTNFvnrBJL1FrpGT+6l46BTHI+Wpso8BK64LsfX3hKnJEGuHSM0GAcYQSpXAeGS9zObKyZpk3of/Qw/2sVilIOAgNODbwqyWgEBTjMUln71Mjlt1hsEkv3K/VdvpFNF8VNq5k94VX6Rvg5FQBRL5IrlkuNwGWcBbl8Ydqk4wrD3b/PrtuLBEUsqbNhLnlEvFcjak+u2kzCov73csN/oylR0Tkr2y9x2HfZgDJVtvKjkkc4QERo7AqlTuy1whGfDYsioeabVLjZ9ahPjakv9qwcBrEEF+pAya7Q3AgNFVSdPgLDEwEO8GUHaxAjtyXXv9+yPdoDGmG3Pfn3KqM6UZjHCxne3Dr5ZE="
   }
 
-  user_data     = base64encode(templatefile("./.shared-tools/terraform/cloudinit.tftpl", { hostname = "ci.jenkins.io" }))
-  computer_name = "ci-jenkins-io"
+  user_data     = base64encode(templatefile("./.shared-tools/terraform/cloudinit.tftpl", { hostname = "controller.${local.service_fqdn}" }))
+  computer_name = "controller.${local.service_fqdn}"
 
   # Encrypt all disks (ephemeral, temp dirs and data volumes) - https://learn.microsoft.com/en-us/azure/virtual-machines/disks-enable-host-based-encryption-portal?tabs=azure-powershell
   encryption_at_host_enabled = true
