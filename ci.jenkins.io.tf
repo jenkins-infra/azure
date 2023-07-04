@@ -163,14 +163,14 @@ resource "azurerm_network_security_rule" "allow_outbound_http_from_ci_controller
 }
 # This rule overrides an Azure-Default rule. its priority must be < 65000.
 resource "azurerm_network_security_rule" "deny_all_outbound_from_ci_controller_subnet" {
-  name                        = "deny-all-outbound-from-ci-controller-to-internet"
+  name                        = "deny-all-outbound-from-ci-controller-subnet"
   priority                    = 4096 # Maximum value allowed by the provider
   direction                   = "Outbound"
   access                      = "Deny"
   protocol                    = "*"
   source_port_range           = "*"
   destination_port_range      = "*"
-  source_address_prefixes     = data.azurerm_subnet.ci_jenkins_io_controller.address_prefixes
+  source_address_prefixes     = "VirtualNetwork"
   destination_address_prefix  = "*"
   resource_group_name         = azurerm_resource_group.ci_jenkins_io_controller.name
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
