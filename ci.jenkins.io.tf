@@ -142,7 +142,7 @@ resource "azurerm_network_security_rule" "allow_outbound_puppet_from_ci_controll
   access                      = "Allow"
   protocol                    = "Tcp"
   source_port_range           = "*"
-  source_address_prefixes     = data.azurerm_subnet.ci_jenkins_io_controller.address_prefixes
+  source_address_prefix       = azurerm_linux_virtual_machine.ci_jenkins_io_controller.private_ip_address
   destination_port_range      = "8140" # Puppet over TLS
   destination_address_prefix  = azurerm_public_ip.puppet_jenkins_io.ip_address
   resource_group_name         = azurerm_resource_group.ci_jenkins_io_controller.name
