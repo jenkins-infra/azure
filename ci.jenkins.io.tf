@@ -250,6 +250,19 @@ resource "azurerm_network_security_rule" "allow_inbound_jenkins_usage_from_every
   resource_group_name         = azurerm_resource_group.ci_jenkins_io_controller.name
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
 }
+resource "azurerm_network_security_rule" "allow_inbound_ssh_from_privatevpn_to_ci_controller" {
+  name                         = "allow-inbound-ssh-from-privatevpn-to-ci-controller"
+  priority                     = 4094
+  direction                    = "Inbound"
+  access                       = "Allow"
+  protocol                     = "Tcp"
+  source_port_range            = "*"
+  destination_port_range       = "22"
+  source_address_prefixes      = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
+  destination_address_prefix   = azurerm_linux_virtual_machine.ci_jenkins_io_controller.private_ip_address
+  resource_group_name          = data.azurerm_resource_group.public.name
+  network_security_group_name  = azurerm_network_security_group.ci_jenkins_io_ephemeral_agents.name
+}
 # This rule overrides an Azure-Default rule. its priority must be < 65000
 # Please note that Azure NSG default to "deny all inbound from Internet"
 resource "azurerm_network_security_rule" "deny_all_inbound_from_vnet_to_ci_controller" {
