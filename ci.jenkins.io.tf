@@ -210,9 +210,13 @@ resource "azurerm_network_security_rule" "deny_all_outbound_from_ci_controller_s
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
 }
 ## Inbound Rules (different set of priorities than Outbound rules) ##
+moved {
+  from = azurerm_network_security_rule.allow_inbound_web_from_everywhere_to_controller
+  to   = azurerm_network_security_rule.allow_inbound_web_from_everywhere_to_ci_controller
+}
 #tfsec:ignore:azure-network-no-public-ingress
-resource "azurerm_network_security_rule" "allow_inbound_web_from_everywhere_to_controller" {
-  name                  = "allow-inbound-web-from-everywhere-to-controller"
+resource "azurerm_network_security_rule" "allow_inbound_web_from_everywhere_to_ci_controller" {
+  name                  = "allow-inbound-web-from-everywhere-to-ci-controller"
   priority              = 4080
   direction             = "Inbound"
   access                = "Allow"
@@ -230,9 +234,13 @@ resource "azurerm_network_security_rule" "allow_inbound_web_from_everywhere_to_c
   resource_group_name         = azurerm_resource_group.ci_jenkins_io_controller.name
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
 }
+moved {
+  from = azurerm_network_security_rule.allow_inbound_jenkins_usage_from_everywhere_to_controller
+  to   = azurerm_network_security_rule.allow_inbound_jenkins_usage_from_everywhere_to_ci_controller
+}
 #tfsec:ignore:azure-network-no-public-ingress
-resource "azurerm_network_security_rule" "allow_inbound_jenkins_usage_from_everywhere_to_controller" {
-  name                  = "allow-inbound-jenkins-usage-from-everywhere-to-controller"
+resource "azurerm_network_security_rule" "allow_inbound_jenkins_usage_from_everywhere_to_ci_controller" {
+  name                  = "allow-inbound-jenkins-usage-from-everywhere-to-ci-controller"
   priority              = 4090
   direction             = "Inbound"
   access                = "Allow"
@@ -323,8 +331,12 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_ci_jenkins_io_
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_ephemeral_agents.name
 }
 #tfsec:ignore:azure-network-no-public-egress
-resource "azurerm_network_security_rule" "allow_outbound_jenkins_usage_from_ci_jenkins_io_ephemeral_agents_subnet_to_controller" {
-  name                  = "allow-outbound-jenkins-from-ci_jenkins_io_ephemeral_agents-subnet-to-controller"
+moved {
+  from = azurerm_network_security_rule.allow_outbound_jenkins_usage_from_ci_jenkins_io_ephemeral_agents_subnet_to_controller
+  to   = azurerm_network_security_rule.allow_outbound_jenkins_usage_from_ci_jenkins_io_ephemeral_agents_subnet_to_ci_controller
+}
+resource "azurerm_network_security_rule" "allow_outbound_jenkins_usage_from_ci_jenkins_io_ephemeral_agents_subnet_to_ci_controller" {
+  name                  = "allow-outbound-jenkins-from-ci_jenkins_io_ephemeral_agents-subnet-to-ci-controller"
   priority              = 4093
   direction             = "Outbound"
   access                = "Allow"
