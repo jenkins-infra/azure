@@ -335,8 +335,8 @@ moved {
   from = azurerm_network_security_rule.allow_outbound_jenkins_usage_from_ci_jenkins_io_ephemeral_agents_subnet_to_controller
   to   = azurerm_network_security_rule.allow_outbound_jenkins_usage_from_ci_jenkins_io_ephemeral_agents_subnet_to_ci_controller
 }
-resource "azurerm_network_security_rule" "allow_outbound_jenkins_usage_from_ci_jenkins_io_ephemeral_agents_subnet_to_ci_controller" {
-  name                  = "allow-outbound-jenkins-from-ci_jenkins_io_ephemeral_agents-subnet-to-ci-controller"
+resource "azurerm_network_security_rule" "allow_outbound_jenkins_usage_from_ci_agents_subnet_to_ci_controller" {
+  name                  = "allow-outbound-jenkins-usage-from-ci-agents-subnet-to-ci-controller"
   priority              = 4093
   direction             = "Outbound"
   access                = "Allow"
