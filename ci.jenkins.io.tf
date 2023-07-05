@@ -252,7 +252,7 @@ resource "azurerm_network_security_rule" "allow_inbound_jenkins_usage_from_every
 }
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_privatevpn_to_ci_controller" {
   name                         = "allow-inbound-ssh-from-privatevpn-to-ci-controller"
-  priority                     = 4094
+  priority                     = 4093
   direction                    = "Inbound"
   access                       = "Allow"
   protocol                     = "Tcp"
