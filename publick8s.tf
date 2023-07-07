@@ -28,7 +28,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   name                              = "publick8s-${random_pet.suffix_publick8s.id}"
   location                          = azurerm_resource_group.publick8s.location
   resource_group_name               = azurerm_resource_group.publick8s.name
-  kubernetes_version                = "1.24.9"
+  kubernetes_version                = local.kubernetes_versions["publick8s"]
   dns_prefix                        = "publick8s-${random_pet.suffix_publick8s.id}"
   role_based_access_control_enabled = true # default value, added to please tfsec
   api_server_access_profile {
@@ -46,18 +46,22 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   #tfsec:ignore:azure-container-configured-network-policy
   network_profile {
     network_plugin = "kubenet"
-    ip_versions    = ["IPv4", "IPv6"]
+    # These ranges must NOT overlap with any of the subnets
+    pod_cidrs   = ["10.100.0.0/16", "fd12:3456:789a::/64"]
+    ip_versions = ["IPv4", "IPv6"]
   }
 
   default_node_pool {
-    name            = "systempool"
-    vm_size         = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
-    os_disk_type    = "Ephemeral"
-    os_disk_size_gb = 30
-    node_count      = 1
-    vnet_subnet_id  = data.azurerm_subnet.publick8s_tier.id
-    tags            = local.default_tags
-    zones           = [3]
+    name                        = "systempool"
+    vm_size                     = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
+    os_disk_type                = "Ephemeral"
+    os_disk_size_gb             = 30
+    orchestrator_version        = local.kubernetes_versions["publick8s"]
+    node_count                  = 1
+    vnet_subnet_id              = data.azurerm_subnet.publick8s_tier.id
+    tags                        = local.default_tags
+    temporary_name_for_rotation = "systempool2"
+    zones                       = [3]
   }
 
   identity {
@@ -72,6 +76,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "publicpool" {
   vm_size               = "Standard_D8s_v3" # 8 vCPU, 32 GB RAM, 64 GB disk, 16 000 IOPS
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 200 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
+  orchestrator_version  = local.kubernetes_versions["publick8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   enable_auto_scaling   = true
   min_count             = 0
@@ -86,6 +91,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "x86medium" {
   vm_size               = "Standard_D8s_v3" # 8 vCPU, 32 GB RAM, 64 GB disk, 16 000 IOPS
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 200 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
+  orchestrator_version  = local.kubernetes_versions["publick8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   enable_auto_scaling   = true
   min_count             = 0
@@ -100,6 +106,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "arm64small" {
   vm_size               = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
+  orchestrator_version  = local.kubernetes_versions["publick8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   enable_auto_scaling   = true
   min_count             = 0
@@ -114,6 +121,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "arm64small2" {
   vm_size               = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
+  orchestrator_version  = local.kubernetes_versions["publick8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   enable_auto_scaling   = true
   min_count             = 0
@@ -153,6 +161,19 @@ resource "kubernetes_storage_class" "managed_csi_premium_retain_public" {
   }
   provider               = kubernetes.publick8s
   allow_volume_expansion = true
+}
+
+resource "kubernetes_storage_class" "azurefile_csi_premium_retain_public" {
+  metadata {
+    name = "azurefile-csi-premium-retain"
+  }
+  storage_provisioner = "file.csi.azure.com"
+  reclaim_policy      = "Retain"
+  parameters = {
+    skuname = "Premium_LRS"
+  }
+  mount_options = ["dir_mode=0777", "file_mode=0777", "uid=1000", "gid=1000", "mfsymlinks", "nobrl"]
+  provider      = kubernetes.publick8s
 }
 
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/publick8s.yaml
