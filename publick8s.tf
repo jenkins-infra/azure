@@ -46,20 +46,22 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   #tfsec:ignore:azure-container-configured-network-policy
   network_profile {
     network_plugin = "kubenet"
-    ip_versions    = ["IPv4", "IPv6"]
+    # These ranges must NOT overlap with any of the subnets
+    pod_cidrs   = ["10.100.0.0/16", "fd12:3456:789a::/64"]
+    ip_versions = ["IPv4", "IPv6"]
   }
 
   default_node_pool {
-    name                 = "systempool"
-    vm_size              = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
-    os_disk_type         = "Ephemeral"
-    os_disk_size_gb      = 30
-    orchestrator_version = local.kubernetes_versions["publick8s"]
-    node_count           = 1
-    vnet_subnet_id       = data.azurerm_subnet.publick8s_tier.id
-    pod_subnet_id        = data.azurerm_subnet.publick8s_tier.id
-    tags                 = local.default_tags
-    zones                = [3]
+    name                        = "systempool"
+    vm_size                     = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
+    os_disk_type                = "Ephemeral"
+    os_disk_size_gb             = 30
+    orchestrator_version        = local.kubernetes_versions["publick8s"]
+    node_count                  = 1
+    vnet_subnet_id              = data.azurerm_subnet.publick8s_tier.id
+    tags                        = local.default_tags
+    temporary_name_for_rotation = "systempool2"
+    zones                       = [3]
   }
 
   identity {
@@ -81,7 +83,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "publicpool" {
   max_count             = 10
   zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
-  pod_subnet_id         = data.azurerm_subnet.publick8s_tier.id
   tags                  = local.default_tags
 }
 
@@ -97,7 +98,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "x86medium" {
   max_count             = 10
   zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
-  pod_subnet_id         = data.azurerm_subnet.publick8s_tier.id
   tags                  = local.default_tags
 }
 
@@ -113,7 +113,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "arm64small" {
   max_count             = 10
   zones                 = [1]
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
-  pod_subnet_id         = data.azurerm_subnet.publick8s_tier.id
   tags                  = local.default_tags
 }
 
@@ -129,7 +128,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "arm64small2" {
   max_count             = 10
   zones                 = [1]
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
-  pod_subnet_id         = data.azurerm_subnet.publick8s_tier.id
   tags                  = local.default_tags
   node_taints = [
     "kubernetes.io/arch=arm64:NoSchedule",
@@ -163,6 +161,19 @@ resource "kubernetes_storage_class" "managed_csi_premium_retain_public" {
   }
   provider               = kubernetes.publick8s
   allow_volume_expansion = true
+}
+
+resource "kubernetes_storage_class" "azurefile_csi_premium_retain_public" {
+  metadata {
+    name = "azurefile-csi-premium-retain"
+  }
+  storage_provisioner = "file.csi.azure.com"
+  reclaim_policy      = "Retain"
+  parameters = {
+    skuname = "Premium_LRS"
+  }
+  mount_options = ["dir_mode=0777", "file_mode=0777", "uid=1000", "gid=1000", "mfsymlinks", "nobrl"]
+  provider      = kubernetes.publick8s
 }
 
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/publick8s.yaml
