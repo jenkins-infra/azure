@@ -20,16 +20,12 @@ data "azurerm_subnet" "privatek8s_release_tier" {
   virtual_network_name = data.azurerm_virtual_network.private.name
 }
 
-locals {
-  privatek8s_kubernetes_version = "1.25.6"
-}
-
 #tfsec:ignore:azure-container-logging #tfsec:ignore:azure-container-limit-authorized-ips
 resource "azurerm_kubernetes_cluster" "privatek8s" {
   name                              = "privatek8s-${random_pet.suffix_privatek8s.id}"
   location                          = azurerm_resource_group.privatek8s.location
   resource_group_name               = azurerm_resource_group.privatek8s.name
-  kubernetes_version                = local.privatek8s_kubernetes_version
+  kubernetes_version                = local.kubernetes_versions["privatek8s"]
   dns_prefix                        = "privatek8s-${random_pet.suffix_privatek8s.id}"
   role_based_access_control_enabled = true # default value, added to please tfsec
 
@@ -46,19 +42,19 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   }
 
   default_node_pool {
-    name                = "syspool"
-    vm_size             = "Standard_D2as_v4"
-    os_sku              = "Ubuntu"
-    os_disk_type        = "Ephemeral"
-    os_disk_size_gb     = 50 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dav4-dasv4-series#dasv4-series (depends on the instance size)
-    orchestrator_version  = local.privatek8s_kubernetes_version
-    kubelet_disk_type   = "OS"
-    enable_auto_scaling = true
-    min_count           = 1
-    max_count           = 3
-    vnet_subnet_id      = data.azurerm_subnet.privatek8s_tier.id
-    tags                = local.default_tags
-    zones               = [3]
+    name                 = "syspool"
+    vm_size              = "Standard_D2as_v4"
+    os_sku               = "Ubuntu"
+    os_disk_type         = "Ephemeral"
+    os_disk_size_gb      = 50 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dav4-dasv4-series#dasv4-series (depends on the instance size)
+    orchestrator_version = local.kubernetes_versions["privatek8s"]
+    kubelet_disk_type    = "OS"
+    enable_auto_scaling  = true
+    min_count            = 1
+    max_count            = 3
+    vnet_subnet_id       = data.azurerm_subnet.privatek8s_tier.id
+    tags                 = local.default_tags
+    zones                = [3]
   }
 
   identity {
@@ -73,7 +69,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
   vm_size               = "Standard_D4s_v3"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 100 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
-  orchestrator_version  = local.privatek8s_kubernetes_version
+  orchestrator_version  = local.kubernetes_versions["privatek8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
   min_count             = 0
@@ -88,7 +84,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   vm_size               = "Standard_D8s_v3"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 200 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
-  orchestrator_version  = local.privatek8s_kubernetes_version
+  orchestrator_version  = local.kubernetes_versions["privatek8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
   min_count             = 0
@@ -117,7 +113,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "releasepool" {
   vm_size               = "Standard_D8s_v3" # 8 vCPU 32 GiB RAM
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 200 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
-  orchestrator_version  = local.privatek8s_kubernetes_version
+  orchestrator_version  = local.kubernetes_versions["privatek8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
   min_count             = 0
@@ -136,7 +132,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "windows2019pool" {
   vm_size               = "Standard_D4s_v3" # 4 vCPU 16 GiB RAM
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 100 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
-  orchestrator_version  = local.privatek8s_kubernetes_version
+  orchestrator_version  = local.kubernetes_versions["privatek8s"]
   os_type               = "Windows"
   os_sku                = "Windows2019"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id

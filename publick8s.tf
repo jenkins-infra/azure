@@ -28,7 +28,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   name                              = "publick8s-${random_pet.suffix_publick8s.id}"
   location                          = azurerm_resource_group.publick8s.location
   resource_group_name               = azurerm_resource_group.publick8s.name
-  kubernetes_version                = "1.24.9"
+  kubernetes_version                = local.kubernetes_versions["publick8s"]
   dns_prefix                        = "publick8s-${random_pet.suffix_publick8s.id}"
   role_based_access_control_enabled = true # default value, added to please tfsec
   api_server_access_profile {
@@ -50,14 +50,15 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   }
 
   default_node_pool {
-    name            = "systempool"
-    vm_size         = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
-    os_disk_type    = "Ephemeral"
-    os_disk_size_gb = 30
-    node_count      = 1
-    vnet_subnet_id  = data.azurerm_subnet.publick8s_tier.id
-    tags            = local.default_tags
-    zones           = [3]
+    name                 = "systempool"
+    vm_size              = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
+    os_disk_type         = "Ephemeral"
+    os_disk_size_gb      = 30
+    orchestrator_version = local.kubernetes_versions["publick8s"]
+    node_count           = 1
+    vnet_subnet_id       = data.azurerm_subnet.publick8s_tier.id
+    tags                 = local.default_tags
+    zones                = [3]
   }
 
   identity {
@@ -72,6 +73,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "publicpool" {
   vm_size               = "Standard_D8s_v3" # 8 vCPU, 32 GB RAM, 64 GB disk, 16 000 IOPS
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 200 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
+  orchestrator_version  = local.kubernetes_versions["publick8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   enable_auto_scaling   = true
   min_count             = 0
@@ -86,6 +88,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "x86medium" {
   vm_size               = "Standard_D8s_v3" # 8 vCPU, 32 GB RAM, 64 GB disk, 16 000 IOPS
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 200 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
+  orchestrator_version  = local.kubernetes_versions["publick8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   enable_auto_scaling   = true
   min_count             = 0
@@ -100,6 +103,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "arm64small" {
   vm_size               = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
+  orchestrator_version  = local.kubernetes_versions["publick8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   enable_auto_scaling   = true
   min_count             = 0
@@ -114,6 +118,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "arm64small2" {
   vm_size               = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
+  orchestrator_version  = local.kubernetes_versions["publick8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   enable_auto_scaling   = true
   min_count             = 0
