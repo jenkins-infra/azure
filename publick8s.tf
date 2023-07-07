@@ -57,6 +57,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     orchestrator_version = local.kubernetes_versions["publick8s"]
     node_count           = 1
     vnet_subnet_id       = data.azurerm_subnet.publick8s_tier.id
+    pod_subnet_id        = data.azurerm_subnet.publick8s_tier.id
     tags                 = local.default_tags
     zones                = [3]
   }
@@ -80,6 +81,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "publicpool" {
   max_count             = 10
   zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
+  pod_subnet_id         = data.azurerm_subnet.publick8s_tier.id
   tags                  = local.default_tags
 }
 
@@ -95,6 +97,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "x86medium" {
   max_count             = 10
   zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
+  pod_subnet_id         = data.azurerm_subnet.publick8s_tier.id
   tags                  = local.default_tags
 }
 
@@ -110,6 +113,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "arm64small" {
   max_count             = 10
   zones                 = [1]
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
+  pod_subnet_id         = data.azurerm_subnet.publick8s_tier.id
   tags                  = local.default_tags
 }
 
@@ -125,6 +129,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "arm64small2" {
   max_count             = 10
   zones                 = [1]
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
+  pod_subnet_id         = data.azurerm_subnet.publick8s_tier.id
   tags                  = local.default_tags
   node_taints = [
     "kubernetes.io/arch=arm64:NoSchedule",
