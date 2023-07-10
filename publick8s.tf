@@ -186,6 +186,12 @@ resource "azurerm_public_ip" "publick8s_ipv4" {
   sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
   tags                = local.default_tags
 }
+resource "azurerm_management_lock" "publick8s_ipv4" {
+  name       = "public-publick8s-ipv4"
+  scope      = azurerm_public_ip.publick8s_ipv4.id
+  lock_level = "CanNotDelete"
+  notes      = "Locked because this is a sensitive resource that should not be removed when publick8s cluster is re-created"
+}
 
 # The LDAP service deployed on this cluster is using TCP not HTTP/HTTPS, it needs its own load balancer
 # Setting it with this determined public IP will ease DNS setup and changes
@@ -198,6 +204,12 @@ resource "azurerm_public_ip" "ldap_jenkins_io_ipv4" {
   sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
   tags                = local.default_tags
 }
+resource "azurerm_management_lock" "ldap_jenkins_io_ipv4" {
+  name       = "ldap-jenkins-io-ipv4"
+  scope      = azurerm_public_ip.ldap_jenkins_io_ipv4.id
+  lock_level = "CanNotDelete"
+  notes      = "Locked because this is a sensitive resource that should not be removed when publick8s cluster is re-created"
+}
 
 resource "azurerm_public_ip" "publick8s_ipv6" {
   name                = "public-publick8s-ipv6"
@@ -207,6 +219,12 @@ resource "azurerm_public_ip" "publick8s_ipv6" {
   allocation_method   = "Static"
   sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
   tags                = local.default_tags
+}
+resource "azurerm_management_lock" "publick8s_ipv6" {
+  name       = "public-publick8s-ipv6"
+  scope      = azurerm_public_ip.publick8s_ipv6.id
+  lock_level = "CanNotDelete"
+  notes      = "Locked because this is a sensitive resource that should not be removed when publick8s cluster is re-created"
 }
 
 resource "azurerm_dns_a_record" "public_publick8s" {

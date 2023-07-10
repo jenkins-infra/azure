@@ -11,6 +11,12 @@ resource "azurerm_public_ip" "puppet_jenkins_io" {
   sku                 = "Standard"
   tags                = local.default_tags
 }
+resource "azurerm_management_lock" "puppet_jenkins_io_publicip" {
+  name       = "puppet.jenkins.io-publicip"
+  scope      = azurerm_public_ip.puppet_jenkins_io.id
+  lock_level = "CanNotDelete"
+  notes      = "Locked because this is a sensitive resource that should not be removed"
+}
 # Defined in https://github.com/jenkins-infra/azure-net/tree/main/vnets.tf
 data "azurerm_subnet" "dmz" {
   name                 = "${data.azurerm_virtual_network.private.name}-dmz"
