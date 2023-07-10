@@ -199,6 +199,12 @@ resource "azurerm_public_ip" "public_privatek8s" {
   sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
   tags                = local.default_tags
 }
+resource "azurerm_management_lock" "public_privatek8s_publicip" {
+  name       = "public-privatek8s-publicip"
+  scope      = azurerm_public_ip.public_privatek8s.id
+  lock_level = "CanNotDelete"
+  notes      = "Locked because this is a sensitive resource that should not be removed when privatek8s is removed"
+}
 
 resource "azurerm_dns_a_record" "public_privatek8s" {
   name                = "public.privatek8s"

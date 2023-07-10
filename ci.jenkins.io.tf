@@ -58,6 +58,12 @@ resource "azurerm_public_ip" "ci_jenkins_io_controller" {
   sku                 = "Standard"
   tags                = local.default_tags
 }
+resource "azurerm_management_lock" "ci_jenkins_io_controller_publicip" {
+  name       = "ci-jenkins-io-controller-publicip"
+  scope      = azurerm_public_ip.ci_jenkins_io_controller.id
+  lock_level = "CanNotDelete"
+  notes      = "Locked because this is a sensitive resource that should not be removed"
+}
 resource "azurerm_network_interface" "ci_jenkins_io_controller" {
   name                = "controller.${local.service_fqdn}"
   location            = azurerm_resource_group.ci_jenkins_io_controller.location
