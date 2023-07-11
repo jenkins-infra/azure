@@ -296,11 +296,6 @@ resource "azurerm_network_security_rule" "deny_all_inbound_from_vnet_to_ci_contr
 ####################################################################################
 ## Resources for the Ephemeral Agents
 ####################################################################################
-# TODO: remove when https://github.com/jenkins-infra/helpdesk/issues/3535 is done
-resource "azurerm_resource_group" "eastus_ci_jenkins_io_agents" {
-  name     = "eastus-cijenkinsio"
-  location = "East US"
-}
 resource "azurerm_resource_group" "ci_jenkins_io_ephemeral_agents" {
   name     = "ci-jenkins-io-ephemeral-agents"
   location = data.azurerm_virtual_network.public.location
@@ -442,15 +437,6 @@ resource "azurerm_network_security_rule" "deny_all_inbound_from_vnet_to_ci_jenki
   resource_group_name         = data.azurerm_resource_group.public.name
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_ephemeral_agents.name
 }
-resource "azurerm_storage_account" "eastus_ci_jenkins_io_agents" {
-  name                     = "cijenkinsiovmagents"
-  resource_group_name      = azurerm_resource_group.eastus_ci_jenkins_io_agents.name
-  location                 = azurerm_resource_group.eastus_ci_jenkins_io_agents.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  min_tls_version          = "TLS1_2" # default value, needed for tfsec
-  tags                     = local.default_tags
-}
 resource "azurerm_storage_account" "ci_jenkins_io_ephemeral_agents" {
   name                     = "cijenkinsioagents"
   resource_group_name      = azurerm_resource_group.ci_jenkins_io_ephemeral_agents.name
@@ -512,30 +498,5 @@ resource "azurerm_role_assignment" "ci_jenkins_io_manage_net_interfaces_subnet_c
 resource "azurerm_role_assignment" "ci_jenkins_io_read_publicvnet_subnets" {
   scope              = data.azurerm_virtual_network.public.id
   role_definition_id = azurerm_role_definition.public_vnet_reader.role_definition_resource_id
-  principal_id       = azuread_service_principal.ci_jenkins_io.id
-}
-###
-# TODO: remove when https://github.com/jenkins-infra/helpdesk/issues/3535 is done
-resource "azurerm_role_assignment" "ci_jenkins_io_contributor_in_eastus_agent_resourcegroup" {
-  scope                = azurerm_resource_group.eastus_ci_jenkins_io_agents.id
-  role_definition_name = "Contributor"
-  principal_id         = azuread_service_principal.ci_jenkins_io.id
-}
-# TODO: remove when https://github.com/jenkins-infra/helpdesk/issues/3535 is done
-data "azurerm_subnet" "eastus_ci_jenkins_io_agents" {
-  name                 = "ci.j-agents-vm"
-  virtual_network_name = data.azurerm_virtual_network.public_prod.name
-  resource_group_name  = data.azurerm_resource_group.public_prod.name
-}
-# TODO: remove when https://github.com/jenkins-infra/helpdesk/issues/3535 is done
-resource "azurerm_role_assignment" "ci_jenkins_io_manage_net_interfaces_subnet_ci_agents" {
-  scope                = data.azurerm_subnet.eastus_ci_jenkins_io_agents.id
-  role_definition_name = "Virtual Machine Contributor"
-  principal_id         = azuread_service_principal.ci_jenkins_io.id
-}
-# TODO: remove when https://github.com/jenkins-infra/helpdesk/issues/3535 is done
-resource "azurerm_role_assignment" "ci_jenkins_io_read_public_vnets" {
-  scope              = data.azurerm_virtual_network.public_prod.id
-  role_definition_id = azurerm_role_definition.prod_public_vnet_reader.role_definition_resource_id
   principal_id       = azuread_service_principal.ci_jenkins_io.id
 }
