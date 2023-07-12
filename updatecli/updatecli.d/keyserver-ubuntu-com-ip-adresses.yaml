@@ -23,7 +23,7 @@ targets:
   upgradeActualLockFile:
     name: Update `keyserver.ubuntu.com` IP addresses
     kind: file
-    sourceid: getLatestLockFileContent
+    sourceid: getIPs
     spec:
       file: locals.tf
       matchpattern: >-
