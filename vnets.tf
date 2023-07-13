@@ -7,11 +7,6 @@ data "azurerm_resource_group" "public_prod" {
   name = "prod-jenkins-public-prod"
 }
 
-# Deprecation notice: not included in https://github.com/jenkins-infra/azure-net
-data "azurerm_resource_group" "private_prod" {
-  name = "prod-jenkins-private-prod"
-}
-
 # Defined in https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
 data "azurerm_resource_group" "public" {
   name = "public"
@@ -25,12 +20,6 @@ data "azurerm_resource_group" "private" {
 data "azurerm_virtual_network" "public_prod" {
   name                = "prod-jenkins-public-prod"
   resource_group_name = data.azurerm_resource_group.public_prod.name
-}
-
-# Deprecation notice: not included in https://github.com/jenkins-infra/azure-net
-data "azurerm_virtual_network" "private_prod" {
-  name                = "prod-jenkins-private-prod-vnet"
-  resource_group_name = data.azurerm_resource_group.private_prod.name
 }
 
 # Defined in https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf

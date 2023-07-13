@@ -52,6 +52,9 @@ locals {
   github_ips = {
     webhooks = ["140.82.112.0/20", "143.55.64.0/20", "185.199.108.0/22", "192.30.252.0/22"]
   }
+  gpg_keyserver_ips = {
+    "keyserver.ubuntu.com" = ["162.213.33.8", "162.213.33.9"]
+  }
 
   privatek8s_outbound_ip_cidr = "20.96.66.246/32"
 

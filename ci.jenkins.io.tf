@@ -216,10 +216,6 @@ resource "azurerm_network_security_rule" "deny_all_outbound_from_ci_controller_s
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
 }
 ## Inbound Rules (different set of priorities than Outbound rules) ##
-moved {
-  from = azurerm_network_security_rule.allow_inbound_web_from_everywhere_to_controller
-  to   = azurerm_network_security_rule.allow_inbound_web_from_everywhere_to_ci_controller
-}
 #tfsec:ignore:azure-network-no-public-ingress
 resource "azurerm_network_security_rule" "allow_inbound_web_from_everywhere_to_ci_controller" {
   name                  = "allow-inbound-web-from-everywhere-to-ci-controller"
@@ -239,10 +235,6 @@ resource "azurerm_network_security_rule" "allow_inbound_web_from_everywhere_to_c
   ]
   resource_group_name         = azurerm_resource_group.ci_jenkins_io_controller.name
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
-}
-moved {
-  from = azurerm_network_security_rule.allow_inbound_jenkins_usage_from_everywhere_to_controller
-  to   = azurerm_network_security_rule.allow_inbound_jenkins_usage_from_everywhere_to_ci_controller
 }
 #tfsec:ignore:azure-network-no-public-ingress
 resource "azurerm_network_security_rule" "allow_inbound_jenkins_usage_from_everywhere_to_ci_controller" {
@@ -317,7 +309,38 @@ resource "azurerm_subnet_network_security_group_association" "ci_jenkins_io_ephe
   network_security_group_id = azurerm_network_security_group.ci_jenkins_io_ephemeral_agents.id
 }
 ## Outbound Rules (different set of priorities than Inbound rules) ##
-# This rule overrides an Azure-Default rule. its priority must be < 65000.
+#tfsec:ignore:azure-network-no-public-egress
+resource "azurerm_network_security_rule" "allow_outbound_hkp_udp_from_ci_jenkins_io_ephemeral_agents_subnet_to_internet" {
+  name                    = "allow-outbound-hkp-udp-from-ci_jenkins_io_ephemeral_agents-subnet-to-internet"
+  priority                = 4090
+  direction               = "Outbound"
+  access                  = "Allow"
+  protocol                = "Udp"
+  source_port_range       = "*"
+  source_address_prefixes = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents.address_prefixes
+  destination_port_ranges = [
+    "11371", # HKP (OpenPGP KeyServer) - https://github.com/jenkins-infra/helpdesk/issues/3664
+  ]
+  destination_address_prefixes = local.gpg_keyserver_ips["keyserver.ubuntu.com"]
+  resource_group_name          = data.azurerm_resource_group.public.name
+  network_security_group_name  = azurerm_network_security_group.ci_jenkins_io_ephemeral_agents.name
+}
+#tfsec:ignore:azure-network-no-public-egress
+resource "azurerm_network_security_rule" "allow_outbound_hkp_tcp_from_ci_jenkins_io_ephemeral_agents_subnet_to_internet" {
+  name                    = "allow-outbound-hkp-tcp-from-ci_jenkins_io_ephemeral_agents-subnet-to-internet"
+  priority                = 4091
+  direction               = "Outbound"
+  access                  = "Allow"
+  protocol                = "Tcp"
+  source_port_range       = "*"
+  source_address_prefixes = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents.address_prefixes
+  destination_port_ranges = [
+    "11371", # HKP (OpenPGP KeyServer) - https://github.com/jenkins-infra/helpdesk/issues/3664
+  ]
+  destination_address_prefixes = local.gpg_keyserver_ips["keyserver.ubuntu.com"]
+  resource_group_name          = data.azurerm_resource_group.public.name
+  network_security_group_name  = azurerm_network_security_group.ci_jenkins_io_ephemeral_agents.name
+}
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_ci_jenkins_io_ephemeral_agents_subnet_to_internet" {
   name                        = "allow-outbound-ssh-from-ci_jenkins_io_ephemeral_agents-subnet-to-internet"
   priority                    = 4092
@@ -332,10 +355,6 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_ci_jenkins_io_
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_ephemeral_agents.name
 }
 #tfsec:ignore:azure-network-no-public-egress
-moved {
-  from = azurerm_network_security_rule.allow_outbound_jenkins_usage_from_ci_jenkins_io_ephemeral_agents_subnet_to_controller
-  to   = azurerm_network_security_rule.allow_outbound_jenkins_usage_from_ci_jenkins_io_ephemeral_agents_subnet_to_ci_controller
-}
 resource "azurerm_network_security_rule" "allow_outbound_jenkins_usage_from_ci_agents_subnet_to_ci_controller" {
   name                  = "allow-outbound-jenkins-usage-from-ci-agents-subnet-to-ci-controller"
   priority              = 4093
@@ -356,14 +375,17 @@ resource "azurerm_network_security_rule" "allow_outbound_jenkins_usage_from_ci_a
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_ephemeral_agents.name
 }
 resource "azurerm_network_security_rule" "allow_outbound_http_from_ci_jenkins_io_ephemeral_agents_subnet_to_internet" {
-  name                        = "allow-outbound-http-from-ci_jenkins_io_ephemeral_agents-subnet-to-internet"
-  priority                    = 4094
-  direction                   = "Outbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  source_address_prefixes     = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents.address_prefixes
-  destination_port_ranges     = ["80", "443"]
+  name                    = "allow-outbound-http-from-ci_jenkins_io_ephemeral_agents-subnet-to-internet"
+  priority                = 4094
+  direction               = "Outbound"
+  access                  = "Allow"
+  protocol                = "Tcp"
+  source_port_range       = "*"
+  source_address_prefixes = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents.address_prefixes
+  destination_port_ranges = [
+    "80",  # HTTP
+    "443", # HTTPS
+  ]
   destination_address_prefix  = "Internet"
   resource_group_name         = data.azurerm_resource_group.public.name
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_ephemeral_agents.name
