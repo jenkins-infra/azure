@@ -40,6 +40,7 @@ locals {
     lemeurherve-2    = "176.145.123.59"
     smerle33         = "82.64.5.129"
     dduportal-cowork = "91.182.56.152"
+    dduportal-cell   = "92.184.105.163"
   }
 
   external_services = {
