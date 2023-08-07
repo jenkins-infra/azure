@@ -6,7 +6,7 @@ resource "azurerm_resource_group" "updates_jenkins_io" {
 }
 
 resource "azurerm_storage_account" "updates_jenkins_io" {
-  name                          = "updatesjenkinsiofiles"
+  name                          = "updatesjenkinsio"
   resource_group_name           = azurerm_resource_group.updates_jenkins_io.name
   location                      = azurerm_resource_group.updates_jenkins_io.location
   account_tier                  = "Standard"
