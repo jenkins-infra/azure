@@ -17,7 +17,7 @@ resource "azurerm_storage_account" "updates_jenkins_io" {
   tags = local.default_tags
 }
 
-output "updates_jenkins_io_primary_access_key" {
+output "updates_jenkins_io_storage_account_primary_access_key" {
   sensitive = true
   value     = azurerm_storage_account.updates_jenkins_io.primary_access_key
 }
