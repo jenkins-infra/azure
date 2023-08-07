@@ -42,7 +42,7 @@ output "updates_jenkins_io_database_hostname" {
 
 output "updates_jenkins_io_database_primary_access_key" {
   sensitive = true
-  value     = azurerm_redis_cache.updates_jenkins_io_files.primary_access_key
+  value     = azurerm_redis_cache.updates_jenkins_io_database.primary_access_key
 }
 
 # Service DNS record
