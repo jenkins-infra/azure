@@ -10,7 +10,7 @@ resource "azurerm_storage_account" "updates_jenkins_io" {
   resource_group_name           = azurerm_resource_group.updates_jenkins_io.name
   location                      = azurerm_resource_group.updates_jenkins_io.location
   account_tier                  = "Standard"
-  account_replication_type      = "LRS"    # recommended for backups
+  account_replication_type      = "LRS"
   min_tls_version               = "TLS1_2" # default value, needed for tfsec
   public_network_access_enabled = "true"   # Explicit default value, we want this storage account to be readable from anywhere
 
