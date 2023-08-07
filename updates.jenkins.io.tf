@@ -23,7 +23,7 @@ output "updates_jenkins_io_primary_access_key" {
 }
 
 # Redis database
-resource "azurerm_redis_cache" "database" {
+resource "azurerm_redis_cache" "updates_jenkins_io" {
   name                = "updates-jenkins-io"
   location            = azurerm_resource_group.updates_jenkins_io.location
   resource_group_name = azurerm_resource_group.updates_jenkins_io.name
@@ -36,13 +36,13 @@ resource "azurerm_redis_cache" "database" {
   tags = local.default_tags
 }
 
-output "database_hostname" {
-  value = azurerm_redis_cache.database.hostname
+output "updates_jenkins_io_redis_hostname" {
+  value = azurerm_redis_cache.updates_jenkins_io.hostname
 }
 
-output "database_primary_access_key" {
+output "updates_jenkins_io_redis_primary_access_key" {
   sensitive = true
-  value     = azurerm_redis_cache.database.primary_access_key
+  value     = azurerm_redis_cache.updates_jenkins_io.primary_access_key
 }
 
 # Service DNS record
