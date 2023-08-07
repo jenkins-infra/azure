@@ -6,7 +6,7 @@ resource "azurerm_resource_group" "updates_jenkins_io" {
 }
 
 resource "azurerm_storage_account" "updates_jenkins_io_files" {
-  name                          = "updates-jenkins-io-files"
+  name                          = "updatesjenkinsiofiles"
   resource_group_name           = azurerm_resource_group.updates_jenkins_io.name
   location                      = azurerm_resource_group.updates_jenkins_io.location
   account_tier                  = "Standard"
@@ -45,7 +45,7 @@ output "updates_jenkins_io_database_primary_access_key" {
   value     = azurerm_redis_cache.updates_jenkins_io_files.primary_access_key
 }
 
-# Service DNS records
+# Service DNS record
 resource "azurerm_dns_cname_record" "azure_updates_jenkins_io" {
   name                = "azure.updates"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
