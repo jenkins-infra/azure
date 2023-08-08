@@ -36,7 +36,7 @@ resource "azurerm_redis_cache" "updates_jenkins_io" {
   capacity            = 1
   family              = "C"        # Basic/Standard SKU family
   sku_name            = "Standard" # A replicated cache in a two node Primary/Secondary configuration managed by Microsoft, with a high availability SLA.
-  enable_non_ssl_port = false
+  enable_non_ssl_port = true
   minimum_tls_version = "1.2"
 
   tags = local.default_tags
