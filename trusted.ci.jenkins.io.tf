@@ -21,32 +21,59 @@ data "azurerm_subnet" "trusted_ephemeral_agents" {
   resource_group_name  = data.azurerm_resource_group.trusted.name
   virtual_network_name = data.azurerm_virtual_network.trusted.name
 }
-resource "azurerm_resource_group" "trusted_ci_jenkins_io_ephemeral_agents" {
-  name     = "jenkinsinfra-trusted-ephemeral-agents"
-  location = var.location
-  tags     = local.default_tags
+####################################################################################
+## Resources for the Controller VM
+####################################################################################
+module "trusted_ci_jenkins_io" {
+  source = "./.shared-tools/terraform/modules/azure-jenkins-controller"
+
+  controller_short_hostname    = "trusted.ci"
+  location                     = data.azurerm_virtual_network.trusted.location
+  admin_username               = local.admin_username
+  admin_ssh_publickey          = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5K7Ro7jBl5Kc68RdzG6EXHstIBFSxO5Da8SQJSMeCbb4cHTYuBBH8jNsAFcnkN64kEu+YhmlxaWEVEIrPgfGfs13ZL7v9p+Nt76tsz6gnVdAy2zCz607pAWe7p4bBn6T9zdZcBSnvjawO+8t/5ue4ngcfAjanN5OsOgLeD6yqVyP8YTERjW78jvp2TFrIYmgWMI5ES1ln32PQmRZwc1eAOsyGJW/YIBdOxaSkZ41qUvb9b3dCorGuCovpSK2EeNphjLPpVX/NRpVY4YlDqAcTCdLdDrEeVqkiA/VDCYNhudZTDa8f1iHwBE/GEtlKmoO6dxJ5LAkRk3RIVHYrmI6XXSw5l0tHhW5D12MNwzUfDxQEzBpGK5iSfOBt5zJ5OiI9ftnsq/GV7vCXfvMVGDLUC551P5/s/wM70QmHwhlGQNLNeJxRTvd6tL11bof3K+29ivFYUmpU17iVxYOWhkNY86WyngHU6Ux0zaczF3H6H0tpg1Ca/cFO428AVPw/RTJpcAe6OVKq5zwARNApQ/p6fJKUAdXap+PpQGZlQhPLkUbwtFXGTrpX9ePTcdzryCYjgrZouvy4ZMzruJiIbFUH8mRY3xVREVaIsJakruvgw3b14oQgcB4BwYVBBqi62xIvbRzAv7Su9t2jK6OR2z3sM/hLJRqIJ5oILMORa7XqrQ=="
+  dns_zone_name                = azurerm_private_dns_zone.trusted.name
+  dns_resourcegroup_name       = data.azurerm_resource_group.trusted.name
+  controller_subnet_id         = data.azurerm_subnet.trusted_ci_controller.id
+  controller_data_disk_size_gb = 128
+  controller_vm_size           = "Standard_D2as_v5"
+  default_tags                 = local.default_tags
+
+  controller_resourcegroup_name = "jenkinsinfra-trusted-ci-controller"
+  controller_vm_name            = ""
+  controller_datadisk_name      = "trusted-ci-controller-data-disk"
 }
-resource "azurerm_resource_group" "trusted_ci_jenkins_io_controller" {
-  name     = "jenkinsinfra-trusted-ci-controller"
-  location = var.location
-  tags     = local.default_tags
+moved {
+  from = azurerm_resource_group.trusted_ci_jenkins_io_controller
+  to   = module.trusted_ci_jenkins_io.azurerm_resource_group.controller
 }
-resource "azurerm_resource_group" "trusted_ci_jenkins_io_permanent_agents" {
-  name     = "jenkinsinfra-trusted-permanent-agents"
-  location = var.location
-  tags     = local.default_tags
+moved {
+  from = azurerm_network_interface.trusted_ci_controller
+  to   = module.trusted_ci_jenkins_io.azurerm_network_interface.controller
+}
+moved {
+  from = azurerm_linux_virtual_machine.trusted_ci_controller
+  to   = module.trusted_ci_jenkins_io.azurerm_linux_virtual_machine.controller
+}
+moved {
+  from = azurerm_managed_disk.trusted_ci_controller_data_disk
+  to   = module.trusted_ci_jenkins_io.azurerm_managed_disk.controller_data
+}
+moved {
+  from = azurerm_virtual_machine_data_disk_attachment.trusted_ci_controller_data_disk
+  to   = module.trusted_ci_jenkins_io.azurerm_virtual_machine_data_disk_attachment.controller_data
 }
 
-resource "azurerm_storage_account" "trusted_ci_jenkins_io_ephemeral_agents" {
-  name                     = "trustedciagents"
-  resource_group_name      = azurerm_resource_group.trusted_ci_jenkins_io_ephemeral_agents.name
-  location                 = azurerm_resource_group.trusted_ci_jenkins_io_ephemeral_agents.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  min_tls_version          = "TLS1_2" # default value, needed for tfsec
-  tags                     = local.default_tags
+resource "azurerm_private_dns_a_record" "trusted_ci_controller" {
+  name                = "@"
+  zone_name           = azurerm_private_dns_zone.trusted.name
+  resource_group_name = data.azurerm_resource_group.trusted.name
+  ttl                 = 300
+  records             = [module.trusted_ci_jenkins_io.controller_private_ipv4]
 }
 
+####################################################################################
+## Azure Active Directory Resources to allow controller spawning ephemeral agents
+####################################################################################
 resource "azuread_application" "trusted_ci_jenkins_io" {
   display_name = azurerm_private_dns_zone.trusted.name
   owners = [
@@ -123,16 +150,16 @@ resource "azurerm_private_dns_zone_virtual_network_link" "trusted" {
 ####################################################################################
 resource "azurerm_public_ip" "trusted_bounce" {
   name                = "bounce.${azurerm_private_dns_zone.trusted.name}"
-  location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
-  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
+  location            = data.azurerm_virtual_network.trusted.location
+  resource_group_name = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   allocation_method   = "Static"
   sku                 = "Standard"
   tags                = local.default_tags
 }
 resource "azurerm_network_interface" "trusted_bounce" {
   name                = "bounce.${azurerm_private_dns_zone.trusted.name}"
-  location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
-  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
+  location            = data.azurerm_virtual_network.trusted.location
+  resource_group_name = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   tags                = local.default_tags
 
   ip_configuration {
@@ -144,8 +171,8 @@ resource "azurerm_network_interface" "trusted_bounce" {
 }
 resource "azurerm_linux_virtual_machine" "trusted_bounce" {
   name                            = "bounce.${azurerm_private_dns_zone.trusted.name}"
-  resource_group_name             = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
-  location                        = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
+  resource_group_name             = module.trusted_ci_jenkins_io.controller_resourcegroup_name
+  location                        = data.azurerm_virtual_network.trusted.location
   size                            = "Standard_B1s"
   admin_username                  = local.admin_username
   disable_password_authentication = true
@@ -179,83 +206,13 @@ resource "azurerm_linux_virtual_machine" "trusted_bounce" {
 }
 
 ####################################################################################
-## Resources for the controller VM
-####################################################################################
-resource "azurerm_network_interface" "trusted_ci_controller" {
-  name                = "controller.${azurerm_private_dns_zone.trusted.name}"
-  location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
-  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
-  tags                = local.default_tags
-
-  ip_configuration {
-    name                          = "internal"
-    subnet_id                     = data.azurerm_subnet.trusted_ci_controller.id
-    private_ip_address_allocation = "Dynamic"
-  }
-}
-resource "azurerm_linux_virtual_machine" "trusted_ci_controller" {
-  name                            = "controller.${azurerm_private_dns_zone.trusted.name}"
-  resource_group_name             = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
-  location                        = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
-  tags                            = local.default_tags
-  size                            = "Standard_D2as_v5"
-  admin_username                  = local.admin_username
-  disable_password_authentication = true
-  network_interface_ids = [
-    azurerm_network_interface.trusted_ci_controller.id,
-  ]
-
-  admin_ssh_key {
-    username   = local.admin_username
-    public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5K7Ro7jBl5Kc68RdzG6EXHstIBFSxO5Da8SQJSMeCbb4cHTYuBBH8jNsAFcnkN64kEu+YhmlxaWEVEIrPgfGfs13ZL7v9p+Nt76tsz6gnVdAy2zCz607pAWe7p4bBn6T9zdZcBSnvjawO+8t/5ue4ngcfAjanN5OsOgLeD6yqVyP8YTERjW78jvp2TFrIYmgWMI5ES1ln32PQmRZwc1eAOsyGJW/YIBdOxaSkZ41qUvb9b3dCorGuCovpSK2EeNphjLPpVX/NRpVY4YlDqAcTCdLdDrEeVqkiA/VDCYNhudZTDa8f1iHwBE/GEtlKmoO6dxJ5LAkRk3RIVHYrmI6XXSw5l0tHhW5D12MNwzUfDxQEzBpGK5iSfOBt5zJ5OiI9ftnsq/GV7vCXfvMVGDLUC551P5/s/wM70QmHwhlGQNLNeJxRTvd6tL11bof3K+29ivFYUmpU17iVxYOWhkNY86WyngHU6Ux0zaczF3H6H0tpg1Ca/cFO428AVPw/RTJpcAe6OVKq5zwARNApQ/p6fJKUAdXap+PpQGZlQhPLkUbwtFXGTrpX9ePTcdzryCYjgrZouvy4ZMzruJiIbFUH8mRY3xVREVaIsJakruvgw3b14oQgcB4BwYVBBqi62xIvbRzAv7Su9t2jK6OR2z3sM/hLJRqIJ5oILMORa7XqrQ=="
-  }
-
-  user_data     = base64encode(templatefile("./.shared-tools/terraform/cloudinit.tftpl", { hostname = "controller.${azurerm_private_dns_zone.trusted.name}" }))
-  computer_name = "controller.${azurerm_private_dns_zone.trusted.name}"
-
-  # Encrypt all disks (ephemeral, temp dirs and data volumes) - https://learn.microsoft.com/en-us/azure/virtual-machines/disks-enable-host-based-encryption-portal?tabs=azure-powershell
-  encryption_at_host_enabled = true
-
-  os_disk {
-    caching              = "ReadWrite"
-    storage_account_type = "StandardSSD_LRS"
-    disk_size_gb         = 32 # Minimal size for ubuntu 22.04 image
-  }
-
-  source_image_reference {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-minimal-jammy"
-    sku       = "minimal-22_04-lts-gen2"
-    version   = "latest"
-  }
-}
-resource "azurerm_managed_disk" "trusted_ci_controller_data_disk" {
-  name                 = "trusted-ci-controller-data-disk"
-  location             = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
-  resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
-  storage_account_type = "StandardSSD_LRS"
-  create_option        = "Empty"
-  disk_size_gb         = "128"
-
-  tags = local.default_tags
-}
-resource "azurerm_virtual_machine_data_disk_attachment" "trusted_ci_controller_data_disk" {
-  managed_disk_id    = azurerm_managed_disk.trusted_ci_controller_data_disk.id
-  virtual_machine_id = azurerm_linux_virtual_machine.trusted_ci_controller.id
-  lun                = "10"
-  caching            = "ReadWrite"
-}
-resource "azurerm_private_dns_a_record" "trusted_ci_controller" {
-  name                = "@"
-  zone_name           = azurerm_private_dns_zone.trusted.name
-  resource_group_name = data.azurerm_resource_group.trusted.name
-  ttl                 = 300
-  records             = [azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address]
-}
-
-####################################################################################
 ## Resources for the permanent agent VM
 ####################################################################################
+resource "azurerm_resource_group" "trusted_ci_jenkins_io_permanent_agents" {
+  name     = "jenkinsinfra-trusted-permanent-agents"
+  location = var.location
+  tags     = local.default_tags
+}
 resource "azurerm_network_interface" "trusted_permanent_agent" {
   name                = "agent.${azurerm_private_dns_zone.trusted.name}"
   location            = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.location
@@ -329,6 +286,25 @@ resource "azurerm_private_dns_a_record" "trusted_permanent_agent" {
 }
 
 ####################################################################################
+## Resources for the ephemeral agent VMs
+####################################################################################
+resource "azurerm_resource_group" "trusted_ci_jenkins_io_ephemeral_agents" {
+  name     = "jenkinsinfra-trusted-ephemeral-agents"
+  location = var.location
+  tags     = local.default_tags
+}
+
+resource "azurerm_storage_account" "trusted_ci_jenkins_io_ephemeral_agents" {
+  name                     = "trustedciagents"
+  resource_group_name      = azurerm_resource_group.trusted_ci_jenkins_io_ephemeral_agents.name
+  location                 = azurerm_resource_group.trusted_ci_jenkins_io_ephemeral_agents.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+  min_tls_version          = "TLS1_2" # default value, needed for tfsec
+  tags                     = local.default_tags
+}
+
+####################################################################################
 ## Network Security Groups for TRUSTED subnets
 ####################################################################################
 resource "azurerm_network_security_group" "trusted_ci" {
@@ -370,7 +346,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ldap_from_controller_to
   access                      = "Allow"
   protocol                    = "Tcp"
   source_port_range           = "*"
-  source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
+  source_address_prefix       = module.trusted_ci_jenkins_io.controller_private_ipv4
   destination_port_range      = "636" # LDAP over TLS
   destination_address_prefix  = azurerm_public_ip.ldap_jenkins_io_ipv4.ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
@@ -403,7 +379,7 @@ resource "azurerm_network_security_rule" "allow_outbound_jenkins_usage_from_vnet
     "443",   # Only HTTPS
     "50000", # Direct TCP Inbound protocol
   ]
-  destination_address_prefix  = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
+  destination_address_prefix  = module.trusted_ci_jenkins_io.controller_private_ipv4
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
@@ -429,7 +405,7 @@ resource "azurerm_network_security_rule" "allow_outbound_from_bounce_to_controll
   source_port_range           = "*"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   destination_port_range      = "22"
-  destination_address_prefix  = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
+  destination_address_prefix  = module.trusted_ci_jenkins_io.controller_private_ipv4
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
@@ -441,7 +417,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_controller_to_
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
+  source_address_prefix       = module.trusted_ci_jenkins_io.controller_private_ipv4
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci.name
@@ -454,7 +430,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_controller_to_
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
+  source_address_prefix       = module.trusted_ci_jenkins_io.controller_private_ipv4
   destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci.name
@@ -524,7 +500,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_contr
   source_port_range           = "*"
   destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
-  destination_address_prefix  = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
+  destination_address_prefix  = module.trusted_ci_jenkins_io.controller_private_ipv4
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
@@ -536,7 +512,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_p
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
+  source_address_prefix       = module.trusted_ci_jenkins_io.controller_private_ipv4
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci.name
@@ -549,7 +525,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_e
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefix       = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
+  source_address_prefix       = module.trusted_ci_jenkins_io.controller_private_ipv4
   destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci.name
@@ -606,7 +582,7 @@ resource "azurerm_network_security_rule" "allow_inbound_jenkins_usage_from_vnet_
     "443",   # Only HTTPS
     "50000", # Direct TCP Inbound protocol
   ]
-  destination_address_prefix  = azurerm_linux_virtual_machine.trusted_ci_controller.private_ip_address
+  destination_address_prefix  = module.trusted_ci_jenkins_io.controller_private_ipv4
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
@@ -644,15 +620,15 @@ resource "azurerm_network_security_rule" "deny_all_inbound_from_vnet" {
 ####################################################################################
 resource "azurerm_public_ip" "trusted_outbound" {
   name                = "trusted-outbound"
-  location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
-  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
+  location            = data.azurerm_virtual_network.trusted.location
+  resource_group_name = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   allocation_method   = "Static"
   sku                 = "Standard"
 }
 resource "azurerm_nat_gateway" "trusted_outbound" {
   name                = "trusted-outbound"
-  location            = azurerm_resource_group.trusted_ci_jenkins_io_controller.location
-  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller.name
+  location            = data.azurerm_virtual_network.trusted.location
+  resource_group_name = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   sku_name            = "Standard"
 }
 resource "azurerm_nat_gateway_public_ip_association" "trusted_outbound" {
