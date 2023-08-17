@@ -1,141 +1,89 @@
-####################################################################################
-## Resources for the Controller VM
-####################################################################################
-locals {
-  service_fqdn = "ci.jenkins.io"
-}
-resource "azurerm_resource_group" "ci_jenkins_io_controller" {
-  name     = "ci-jenkins-io-controller"
-  location = data.azurerm_virtual_network.public.location
-  tags     = local.default_tags
-}
-# Service DNS records
-resource "azurerm_dns_cname_record" "ci_jenkins_io" {
-  name                = "ci"
-  zone_name           = data.azurerm_dns_zone.jenkinsio.name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 60
-  record              = azurerm_dns_a_record.ci_jenkins_io_controller.fqdn
-  tags                = local.default_tags
-}
-resource "azurerm_dns_cname_record" "assets_ci_jenkins_io" {
-  name                = "assets.ci"
-  zone_name           = data.azurerm_dns_zone.jenkinsio.name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 60
-  record              = azurerm_dns_a_record.ci_jenkins_io_controller.fqdn
-  tags                = local.default_tags
-}
-# Public VM access
-resource "azurerm_dns_a_record" "ci_jenkins_io_controller" {
-  name                = trimsuffix(azurerm_public_ip.ci_jenkins_io_controller.name, ".jenkins.io")
-  zone_name           = data.azurerm_dns_zone.jenkinsio.name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 60
-  records             = [azurerm_public_ip.ci_jenkins_io_controller.ip_address]
-  tags                = local.default_tags
-}
-# Private (through VPN) VM access
-resource "azurerm_dns_a_record" "private_ci_jenkins_io_controller" {
-  name                = "private.${trimsuffix(azurerm_public_ip.ci_jenkins_io_controller.name, ".jenkins.io")}"
-  zone_name           = data.azurerm_dns_zone.jenkinsio.name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 60
-  records             = [azurerm_network_interface.ci_jenkins_io_controller.private_ip_address]
-  tags                = local.default_tags
-}
 # Defined in https://github.com/jenkins-infra/azure-net/blob/d30a37c27b649aebd158ecb5d631ff8d7f1bab4e/vnets.tf#L175-L183
 data "azurerm_subnet" "ci_jenkins_io_controller" {
   name                 = "${data.azurerm_virtual_network.public.name}-ci_jenkins_io_controller"
   virtual_network_name = data.azurerm_virtual_network.public.name
   resource_group_name  = data.azurerm_resource_group.public.name
 }
-resource "azurerm_public_ip" "ci_jenkins_io_controller" {
-  name                = "controller.${local.service_fqdn}"
-  location            = azurerm_resource_group.ci_jenkins_io_controller.location
-  resource_group_name = azurerm_resource_group.ci_jenkins_io_controller.name
-  allocation_method   = "Static"
-  sku                 = "Standard"
+
+####################################################################################
+## Resources for the Controller VM
+####################################################################################
+## Service DNS records
+resource "azurerm_dns_cname_record" "ci_jenkins_io" {
+  name                = module.ci_jenkins_io.service_short_hostname
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  record              = module.ci_jenkins_io.controller_public_fqdn
   tags                = local.default_tags
 }
-resource "azurerm_management_lock" "ci_jenkins_io_controller_publicip" {
-  name       = "ci-jenkins-io-controller-publicip"
-  scope      = azurerm_public_ip.ci_jenkins_io_controller.id
-  lock_level = "CanNotDelete"
-  notes      = "Locked because this is a sensitive resource that should not be removed"
-}
-resource "azurerm_network_interface" "ci_jenkins_io_controller" {
-  name                = "controller.${local.service_fqdn}"
-  location            = azurerm_resource_group.ci_jenkins_io_controller.location
-  resource_group_name = azurerm_resource_group.ci_jenkins_io_controller.name
+resource "azurerm_dns_cname_record" "assets_ci_jenkins_io" {
+  name                = "assets.${module.ci_jenkins_io.service_short_hostname}"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  record              = module.ci_jenkins_io.controller_public_fqdn
   tags                = local.default_tags
-
-  ip_configuration {
-    name                          = "external"
-    private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.ci_jenkins_io_controller.id
-    subnet_id                     = data.azurerm_subnet.ci_jenkins_io_controller.id
-  }
 }
-resource "azurerm_managed_disk" "ci_jenkins_io_controller_data" {
-  name                 = "controller.${local.service_fqdn}-data"
-  location             = azurerm_resource_group.ci_jenkins_io_controller.location
-  resource_group_name  = azurerm_resource_group.ci_jenkins_io_controller.name
-  storage_account_type = "StandardSSD_LRS"
-  create_option        = "Empty"
-  disk_size_gb         = "512"
+module "ci_jenkins_io" {
+  source = "./.shared-tools/terraform/modules/azure-jenkins-controller"
 
-  tags = local.default_tags
+  controller_short_hostname    = "ci"
+  location                     = data.azurerm_virtual_network.public.location
+  admin_username               = local.admin_username
+  admin_ssh_publickey          = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDKvZ23dkvhjSU0Gxl5+mKcBOwmR7gqJDYeA1/Xzl3otV4CtC5te5Vx7YnNEFDXD6BsNkFaliXa34yE37WMdWl+exIURBMhBLmOPxEP/cWA5ZbXP//78ejZsxawBpBJy27uQhdcR0zVoMJc8Q9ShYl5YT/Tq1UcPq2wTNFvnrBJL1FrpGT+6l46BTHI+Wpso8BK64LsfX3hKnJEGuHSM0GAcYQSpXAeGS9zObKyZpk3of/Qw/2sVilIOAgNODbwqyWgEBTjMUln71Mjlt1hsEkv3K/VdvpFNF8VNq5k94VX6Rvg5FQBRL5IrlkuNwGWcBbl8Ydqk4wrD3b/PrtuLBEUsqbNhLnlEvFcjak+u2kzCov73csN/oylR0Tkr2y9x2HfZgDJVtvKjkkc4QERo7AqlTuy1whGfDYsioeabVLjZ9ahPjakv9qwcBrEEF+pAya7Q3AgNFVSdPgLDEwEO8GUHaxAjtyXXv9+yPdoDGmG3Pfn3KqM6UZjHCxne3Dr5ZE="
+  dns_zone_name                = data.azurerm_dns_zone.jenkinsio.name
+  dns_resourcegroup_name       = data.azurerm_resource_group.proddns_jenkinsio.name
+  controller_subnet_id         = data.azurerm_subnet.ci_jenkins_io_controller.id
+  controller_os_disk_size_gb   = 64
+  controller_data_disk_size_gb = 512
+  controller_vm_size           = "Standard_D8as_v5"
+  is_public                    = true
+  default_tags                 = local.default_tags
 }
-resource "azurerm_linux_virtual_machine" "ci_jenkins_io_controller" {
-  name                            = "controller.${local.service_fqdn}"
-  resource_group_name             = azurerm_resource_group.ci_jenkins_io_controller.name
-  location                        = azurerm_resource_group.ci_jenkins_io_controller.location
-  tags                            = local.default_tags
-  size                            = "Standard_D8as_v5"
-  admin_username                  = local.admin_username
-  disable_password_authentication = true
-  network_interface_ids = [
-    azurerm_network_interface.ci_jenkins_io_controller.id,
-  ]
-
-  admin_ssh_key {
-    username   = local.admin_username
-    public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDKvZ23dkvhjSU0Gxl5+mKcBOwmR7gqJDYeA1/Xzl3otV4CtC5te5Vx7YnNEFDXD6BsNkFaliXa34yE37WMdWl+exIURBMhBLmOPxEP/cWA5ZbXP//78ejZsxawBpBJy27uQhdcR0zVoMJc8Q9ShYl5YT/Tq1UcPq2wTNFvnrBJL1FrpGT+6l46BTHI+Wpso8BK64LsfX3hKnJEGuHSM0GAcYQSpXAeGS9zObKyZpk3of/Qw/2sVilIOAgNODbwqyWgEBTjMUln71Mjlt1hsEkv3K/VdvpFNF8VNq5k94VX6Rvg5FQBRL5IrlkuNwGWcBbl8Ydqk4wrD3b/PrtuLBEUsqbNhLnlEvFcjak+u2kzCov73csN/oylR0Tkr2y9x2HfZgDJVtvKjkkc4QERo7AqlTuy1whGfDYsioeabVLjZ9ahPjakv9qwcBrEEF+pAya7Q3AgNFVSdPgLDEwEO8GUHaxAjtyXXv9+yPdoDGmG3Pfn3KqM6UZjHCxne3Dr5ZE="
-  }
-
-  user_data     = base64encode(templatefile("./.shared-tools/terraform/cloudinit.tftpl", { hostname = "controller.${local.service_fqdn}" }))
-  computer_name = "controller.${local.service_fqdn}"
-
-  # Encrypt all disks (ephemeral, temp dirs and data volumes) - https://learn.microsoft.com/en-us/azure/virtual-machines/disks-enable-host-based-encryption-portal?tabs=azure-powershell
-  encryption_at_host_enabled = true
-
-  os_disk {
-    caching              = "ReadWrite"
-    storage_account_type = "StandardSSD_LRS"
-    disk_size_gb         = 64 # Minimal size for ubuntu 22.04 image
-  }
-
-  source_image_reference {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-minimal-jammy"
-    sku       = "minimal-22_04-lts-gen2"
-    version   = "latest"
-  }
+moved {
+  from = azurerm_resource_group.ci_jenkins_io_controller
+  to   = module.ci_jenkins_io.azurerm_resource_group.controller
 }
-resource "azurerm_virtual_machine_data_disk_attachment" "ci_jenkins_io_data" {
-  managed_disk_id    = azurerm_managed_disk.ci_jenkins_io_controller_data.id
-  virtual_machine_id = azurerm_linux_virtual_machine.ci_jenkins_io_controller.id
-  lun                = "10"
-  caching            = "ReadWrite"
+moved {
+  from = azurerm_dns_a_record.ci_jenkins_io_controller
+  to   = module.ci_jenkins_io.azurerm_dns_a_record.controller
+}
+moved {
+  from = azurerm_dns_a_record.private_ci_jenkins_io_controller
+  to   = module.ci_jenkins_io.azurerm_dns_a_record.private_controller[0]
+}
+moved {
+  from = azurerm_public_ip.ci_jenkins_io_controller
+  to   = module.ci_jenkins_io.azurerm_public_ip.controller[0]
+}
+moved {
+  from = azurerm_management_lock.ci_jenkins_io_controller_publicip
+  to   = module.ci_jenkins_io.azurerm_management_lock.controller_publicip[0]
+}
+moved {
+  from = azurerm_network_interface.ci_jenkins_io_controller
+  to   = module.ci_jenkins_io.azurerm_network_interface.controller
+}
+moved {
+  from = azurerm_managed_disk.ci_jenkins_io_controller_data
+  to   = module.ci_jenkins_io.azurerm_managed_disk.controller_data
+}
+moved {
+  from = azurerm_linux_virtual_machine.ci_jenkins_io_controller
+  to   = module.ci_jenkins_io.azurerm_linux_virtual_machine.controller
+}
+moved {
+  from = azurerm_virtual_machine_data_disk_attachment.ci_jenkins_io_data
+  to   = module.ci_jenkins_io.azurerm_virtual_machine_data_disk_attachment.controller_data
 }
 ####################################################################################
 ## Network Security Group and rules
 ####################################################################################
 resource "azurerm_network_security_group" "ci_jenkins_io_controller" {
-  name                = local.service_fqdn
-  location            = azurerm_resource_group.ci_jenkins_io_controller.location
-  resource_group_name = azurerm_resource_group.ci_jenkins_io_controller.name
+  name                = module.ci_jenkins_io.service_fqdn
+  location            = data.azurerm_virtual_network.public.location
+  resource_group_name = module.ci_jenkins_io.controller_resourcegroup_name
   tags                = local.default_tags
 }
 resource "azurerm_subnet_network_security_group_association" "ci_jenkins_io" {
@@ -152,10 +100,10 @@ resource "azurerm_network_security_rule" "allow_outbound_ldap_from_ci_controller
   access                      = "Allow"
   protocol                    = "Tcp"
   source_port_range           = "*"
-  source_address_prefix       = azurerm_linux_virtual_machine.ci_jenkins_io_controller.private_ip_address
+  source_address_prefix       = module.ci_jenkins_io.controller_private_ipv4
   destination_port_range      = "636" # LDAP over TLS
   destination_address_prefix  = azurerm_public_ip.ldap_jenkins_io_ipv4.ip_address
-  resource_group_name         = azurerm_resource_group.ci_jenkins_io_controller.name
+  resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
 }
 # Ignore the rule as it does not detect the IP restriction to only puppet.jenkins.io"s host
@@ -167,10 +115,10 @@ resource "azurerm_network_security_rule" "allow_outbound_puppet_from_ci_controll
   access                      = "Allow"
   protocol                    = "Tcp"
   source_port_range           = "*"
-  source_address_prefix       = azurerm_linux_virtual_machine.ci_jenkins_io_controller.private_ip_address
+  source_address_prefix       = module.ci_jenkins_io.controller_private_ipv4
   destination_port_range      = "8140" # Puppet over TLS
   destination_address_prefix  = azurerm_public_ip.puppet_jenkins_io.ip_address
-  resource_group_name         = azurerm_resource_group.ci_jenkins_io_controller.name
+  resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
 }
 # Ignore the rule as it does not detect the IP restriction to only puppet.jenkins.io"s host
@@ -182,10 +130,10 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_ci_controller_
   access                      = "Allow"
   protocol                    = "Tcp"
   source_port_range           = "*"
-  source_address_prefix       = azurerm_linux_virtual_machine.ci_jenkins_io_controller.private_ip_address
+  source_address_prefix       = module.ci_jenkins_io.controller_private_ipv4
   destination_port_ranges     = ["22"]
   destination_address_prefix  = local.external_services["s390x.jenkins.io"]
-  resource_group_name         = azurerm_resource_group.ci_jenkins_io_controller.name
+  resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
 }
 resource "azurerm_network_security_rule" "allow_outbound_http_from_ci_controller_to_internet" {
@@ -195,10 +143,10 @@ resource "azurerm_network_security_rule" "allow_outbound_http_from_ci_controller
   access                      = "Allow"
   protocol                    = "Tcp"
   source_port_range           = "*"
-  source_address_prefix       = azurerm_linux_virtual_machine.ci_jenkins_io_controller.private_ip_address
+  source_address_prefix       = module.ci_jenkins_io.controller_private_ipv4
   destination_port_ranges     = ["80", "443"]
   destination_address_prefix  = "Internet"
-  resource_group_name         = azurerm_resource_group.ci_jenkins_io_controller.name
+  resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
 }
 # This rule overrides an Azure-Default rule. its priority must be < 65000.
@@ -212,7 +160,7 @@ resource "azurerm_network_security_rule" "deny_all_outbound_from_ci_controller_s
   destination_port_range      = "*"
   source_address_prefix       = "VirtualNetwork"
   destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.ci_jenkins_io_controller.name
+  resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
 }
 ## Inbound Rules (different set of priorities than Outbound rules) ##
@@ -230,10 +178,10 @@ resource "azurerm_network_security_rule" "allow_inbound_web_from_everywhere_to_c
     "443", # HTTPS
   ]
   destination_address_prefixes = [
-    azurerm_linux_virtual_machine.ci_jenkins_io_controller.private_ip_address,
-    azurerm_public_ip.ci_jenkins_io_controller.ip_address,
+    module.ci_jenkins_io.controller_private_ipv4,
+    module.ci_jenkins_io.controller_public_ipv4,
   ]
-  resource_group_name         = azurerm_resource_group.ci_jenkins_io_controller.name
+  resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
 }
 #tfsec:ignore:azure-network-no-public-ingress
@@ -250,10 +198,10 @@ resource "azurerm_network_security_rule" "allow_inbound_jenkins_usage_from_every
     "50000", # Direct TCP Inbound protocol
   ]
   destination_address_prefixes = [
-    azurerm_linux_virtual_machine.ci_jenkins_io_controller.private_ip_address,
-    azurerm_public_ip.ci_jenkins_io_controller.ip_address,
+    module.ci_jenkins_io.controller_private_ipv4,
+    module.ci_jenkins_io.controller_public_ipv4,
   ]
-  resource_group_name         = azurerm_resource_group.ci_jenkins_io_controller.name
+  resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
 }
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_privatevpn_to_ci_controller" {
@@ -265,8 +213,8 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_privatevpn_to_c
   source_port_range           = "*"
   destination_port_range      = "22"
   source_address_prefixes     = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
-  destination_address_prefix  = azurerm_linux_virtual_machine.ci_jenkins_io_controller.private_ip_address
-  resource_group_name         = azurerm_resource_group.ci_jenkins_io_controller.name
+  destination_address_prefix  = module.ci_jenkins_io.controller_private_ipv4
+  resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
 }
 # This rule overrides an Azure-Default rule. its priority must be < 65000
@@ -281,7 +229,7 @@ resource "azurerm_network_security_rule" "deny_all_inbound_from_vnet_to_ci_contr
   destination_port_range      = "*"
   source_address_prefix       = "VirtualNetwork"
   destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.ci_jenkins_io_controller.name
+  resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
 }
 
@@ -368,8 +316,8 @@ resource "azurerm_network_security_rule" "allow_outbound_jenkins_usage_from_ci_a
     "50000", # Direct TCP Inbound protocol
   ]
   destination_address_prefixes = [
-    azurerm_linux_virtual_machine.ci_jenkins_io_controller.private_ip_address,
-    azurerm_public_ip.ci_jenkins_io_controller.ip_address,
+    module.ci_jenkins_io.controller_private_ipv4,
+    module.ci_jenkins_io.controller_public_ipv4,
   ]
   resource_group_name         = data.azurerm_resource_group.public.name
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_ephemeral_agents.name
