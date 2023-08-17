@@ -50,6 +50,10 @@ moved {
   to   = module.ci_jenkins_io.azurerm_dns_a_record.controller
 }
 moved {
+  from = module.ci_jenkins_io.azurerm_dns_a_record.controller
+  to   = module.ci_jenkins_io.azurerm_dns_a_record.controller[0]
+}
+moved {
   from = azurerm_dns_a_record.private_ci_jenkins_io_controller
   to   = module.ci_jenkins_io.azurerm_dns_a_record.private_controller[0]
 }
