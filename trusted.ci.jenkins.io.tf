@@ -287,36 +287,12 @@ resource "azurerm_storage_account" "trusted_ci_jenkins_io_ephemeral_agents" {
 ####################################################################################
 ## Network Security Group and rules
 ####################################################################################
-moved {
-  from = azurerm_network_security_group.trusted_ci
-  to   = module.trusted_ci_jenkins_io.azurerm_network_security_group.controller
-}
-moved {
-  from = azurerm_subnet_network_security_group_association.trusted_ci_controller
-  to   = module.trusted_ci_jenkins_io.azurerm_subnet_network_security_group_association.controller
-}
 resource "azurerm_subnet_network_security_group_association" "trusted_ci_permanent_agent" {
   subnet_id                 = data.azurerm_subnet.trusted_permanent_agents.id
   network_security_group_id = module.trusted_ci_jenkins_io.controller_nsg_id
 }
 
 ## Outbound Rules (different set of priorities than Inbound rules) ##
-moved {
-  from = azurerm_network_security_rule.allow_outbound_ldap_from_controller_to_jenkinsldap
-  to   = module.trusted_ci_jenkins_io.azurerm_network_security_rule.allow_outbound_ldap_from_controller_to_jenkinsldap
-}
-moved {
-  from = azurerm_network_security_rule.allow_outbound_puppet_from_vnet_to_puppetmaster
-  to   = module.trusted_ci_jenkins_io.azurerm_network_security_rule.allow_outbound_puppet_from_controller_to_puppetmaster
-}
-moved {
-  from = azurerm_network_security_rule.allow_outbound_http_from_vnet_to_internet
-  to   = module.trusted_ci_jenkins_io.azurerm_network_security_rule.allow_outbound_http_from_controller_to_internet
-}
-moved {
-  from = azurerm_network_security_rule.deny_all_outbound_to_vnet
-  to   = module.trusted_ci_jenkins_io.azurerm_network_security_rule.deny_all_outbound_from_controller_subnet
-}
 # Ignore the rule as it does not detect the IP restriction to only update.jenkins.io"s host
 #tfsec:ignore:azure-network-no-public-egress
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_permanent_agent_to_updatecenter" {
@@ -329,7 +305,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_permanent_agen
   destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
   destination_address_prefix  = local.external_services["updates.${data.azurerm_dns_zone.jenkinsio.name}"]
-  resource_group_name         = data.azurerm_resource_group.trusted.name
+  resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_outbound_from_bounce_to_controller" {
@@ -342,7 +318,7 @@ resource "azurerm_network_security_rule" "allow_outbound_from_bounce_to_controll
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   destination_port_range      = "22"
   destination_address_prefix  = module.trusted_ci_jenkins_io.controller_private_ipv4
-  resource_group_name         = data.azurerm_resource_group.trusted.name
+  resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_controller_to_permanent_agent" {
@@ -355,7 +331,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_controller_to_
   destination_port_range      = "22"
   source_address_prefix       = module.trusted_ci_jenkins_io.controller_private_ipv4
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
-  resource_group_name         = data.azurerm_resource_group.trusted.name
+  resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_controller_to_ephemeral_agents" {
@@ -368,7 +344,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_controller_to_
   destination_port_range      = "22"
   source_address_prefix       = module.trusted_ci_jenkins_io.controller_private_ipv4
   destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
-  resource_group_name         = data.azurerm_resource_group.trusted.name
+  resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_bounce_to_permanent_agent" {
@@ -381,7 +357,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_bounce_to_perm
   destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
-  resource_group_name         = data.azurerm_resource_group.trusted.name
+  resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_bounce_to_ephemeral_agents" {
@@ -394,7 +370,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_bounce_to_ephe
   destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
-  resource_group_name         = data.azurerm_resource_group.trusted.name
+  resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
 }
 
@@ -409,7 +385,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_contr
   destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   destination_address_prefix  = module.trusted_ci_jenkins_io.controller_private_ipv4
-  resource_group_name         = data.azurerm_resource_group.trusted.name
+  resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_permanent_agent" {
@@ -422,7 +398,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_p
   destination_port_range      = "22"
   source_address_prefix       = module.trusted_ci_jenkins_io.controller_private_ipv4
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
-  resource_group_name         = data.azurerm_resource_group.trusted.name
+  resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_ephemeral_agents" {
@@ -435,7 +411,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_e
   destination_port_range      = "22"
   source_address_prefix       = module.trusted_ci_jenkins_io.controller_private_ipv4
   destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
-  resource_group_name         = data.azurerm_resource_group.trusted.name
+  resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_permanent_agent" {
@@ -448,7 +424,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_perma
   destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
-  resource_group_name         = data.azurerm_resource_group.trusted.name
+  resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_ephemeral_agents" {
@@ -461,7 +437,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_ephem
   destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   destination_address_prefix  = data.azurerm_subnet.trusted_ephemeral_agents.address_prefix
-  resource_group_name         = data.azurerm_resource_group.trusted.name
+  resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
 }
 #tfsec:ignore:azure-network-no-public-ingress
@@ -475,7 +451,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_internet_to_bou
   destination_port_range      = "22"
   source_address_prefix       = "Internet"
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
-  resource_group_name         = data.azurerm_resource_group.trusted.name
+  resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_inbound_jenkins_usage_from_vnet_to_controller" {
@@ -491,35 +467,21 @@ resource "azurerm_network_security_rule" "allow_inbound_jenkins_usage_from_vnet_
     "50000", # Direct TCP Inbound protocol
   ]
   destination_address_prefix  = module.trusted_ci_jenkins_io.controller_private_ipv4
-  resource_group_name         = data.azurerm_resource_group.trusted.name
+  resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
 }
 # This rule overrides an Azure-Default rule. its priority must be < 65000.
-resource "azurerm_network_security_rule" "deny_all_inbound_from_internet" {
-  name                        = "deny-all-inbound-from-internet"
+resource "azurerm_network_security_rule" "deny_all_inbound_from_everywhere_to_trusted_controller_subnet" {
+  name                        = "deny-all-inbound-from-everywhere-to-trusted-controller-subnet"
   priority                    = 4095
   direction                   = "Inbound"
   access                      = "Deny"
   protocol                    = "*"
   source_port_range           = "*"
   destination_port_range      = "*"
-  source_address_prefix       = "Internet"
+  source_address_prefix       = "*"
   destination_address_prefix  = "*"
-  resource_group_name         = data.azurerm_resource_group.trusted.name
-  network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
-}
-# This rule overrides an Azure-Default rule. its priority must be < 65000
-resource "azurerm_network_security_rule" "deny_all_inbound_from_vnet" {
-  name                        = "deny-all-inbound-from-vnet"
-  priority                    = 4096 # Maximum value allowed by the Azure Terraform Provider
-  direction                   = "Inbound"
-  access                      = "Deny"
-  protocol                    = "*"
-  source_port_range           = "*"
-  destination_port_range      = "*"
-  source_address_prefix       = "VirtualNetwork"
-  destination_address_prefix  = "*"
-  resource_group_name         = data.azurerm_resource_group.trusted.name
+  resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
 }
 
