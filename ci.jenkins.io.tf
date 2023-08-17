@@ -8,27 +8,10 @@ data "azurerm_subnet" "ci_jenkins_io_controller" {
 ####################################################################################
 ## Resources for the Controller VM
 ####################################################################################
-## Service DNS records
-resource "azurerm_dns_cname_record" "ci_jenkins_io" {
-  name                = module.ci_jenkins_io.service_short_hostname
-  zone_name           = data.azurerm_dns_zone.jenkinsio.name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 60
-  record              = module.ci_jenkins_io.controller_public_fqdn
-  tags                = local.default_tags
-}
-resource "azurerm_dns_cname_record" "assets_ci_jenkins_io" {
-  name                = "assets.${module.ci_jenkins_io.service_short_hostname}"
-  zone_name           = data.azurerm_dns_zone.jenkinsio.name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 60
-  record              = module.ci_jenkins_io.controller_public_fqdn
-  tags                = local.default_tags
-}
 module "ci_jenkins_io" {
   source = "./.shared-tools/terraform/modules/azure-jenkins-controller"
 
-  controller_short_hostname    = "ci"
+  service_fqdn                 = "ci.jenkins.io"
   location                     = data.azurerm_virtual_network.public.location
   admin_username               = local.admin_username
   admin_ssh_publickey          = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDKvZ23dkvhjSU0Gxl5+mKcBOwmR7gqJDYeA1/Xzl3otV4CtC5te5Vx7YnNEFDXD6BsNkFaliXa34yE37WMdWl+exIURBMhBLmOPxEP/cWA5ZbXP//78ejZsxawBpBJy27uQhdcR0zVoMJc8Q9ShYl5YT/Tq1UcPq2wTNFvnrBJL1FrpGT+6l46BTHI+Wpso8BK64LsfX3hKnJEGuHSM0GAcYQSpXAeGS9zObKyZpk3of/Qw/2sVilIOAgNODbwqyWgEBTjMUln71Mjlt1hsEkv3K/VdvpFNF8VNq5k94VX6Rvg5FQBRL5IrlkuNwGWcBbl8Ydqk4wrD3b/PrtuLBEUsqbNhLnlEvFcjak+u2kzCov73csN/oylR0Tkr2y9x2HfZgDJVtvKjkkc4QERo7AqlTuy1whGfDYsioeabVLjZ9ahPjakv9qwcBrEEF+pAya7Q3AgNFVSdPgLDEwEO8GUHaxAjtyXXv9+yPdoDGmG3Pfn3KqM6UZjHCxne3Dr5ZE="
@@ -41,41 +24,22 @@ module "ci_jenkins_io" {
   is_public                    = true
   default_tags                 = local.default_tags
 }
-moved {
-  from = azurerm_resource_group.ci_jenkins_io_controller
-  to   = module.ci_jenkins_io.azurerm_resource_group.controller
+## Service DNS records
+resource "azurerm_dns_cname_record" "ci_jenkins_io" {
+  name                = trimsuffix(trimsuffix(module.ci_jenkins_io.service_fqdn, data.azurerm_dns_zone.jenkinsio.name), ".")
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  record              = module.ci_jenkins_io.controller_public_fqdn
+  tags                = local.default_tags
 }
-moved {
-  from = azurerm_dns_a_record.ci_jenkins_io_controller
-  to   = module.ci_jenkins_io.azurerm_dns_a_record.controller
-}
-moved {
-  from = azurerm_dns_a_record.private_ci_jenkins_io_controller
-  to   = module.ci_jenkins_io.azurerm_dns_a_record.private_controller[0]
-}
-moved {
-  from = azurerm_public_ip.ci_jenkins_io_controller
-  to   = module.ci_jenkins_io.azurerm_public_ip.controller[0]
-}
-moved {
-  from = azurerm_management_lock.ci_jenkins_io_controller_publicip
-  to   = module.ci_jenkins_io.azurerm_management_lock.controller_publicip[0]
-}
-moved {
-  from = azurerm_network_interface.ci_jenkins_io_controller
-  to   = module.ci_jenkins_io.azurerm_network_interface.controller
-}
-moved {
-  from = azurerm_managed_disk.ci_jenkins_io_controller_data
-  to   = module.ci_jenkins_io.azurerm_managed_disk.controller_data
-}
-moved {
-  from = azurerm_linux_virtual_machine.ci_jenkins_io_controller
-  to   = module.ci_jenkins_io.azurerm_linux_virtual_machine.controller
-}
-moved {
-  from = azurerm_virtual_machine_data_disk_attachment.ci_jenkins_io_data
-  to   = module.ci_jenkins_io.azurerm_virtual_machine_data_disk_attachment.controller_data
+resource "azurerm_dns_cname_record" "assets_ci_jenkins_io" {
+  name                = "assets.${azurerm_dns_cname_record.ci_jenkins_io.name}"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  record              = module.ci_jenkins_io.controller_public_fqdn
+  tags                = local.default_tags
 }
 ####################################################################################
 ## Network Security Group and rules
@@ -132,7 +96,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_ci_controller_
   source_port_range           = "*"
   source_address_prefix       = module.ci_jenkins_io.controller_private_ipv4
   destination_port_ranges     = ["22"]
-  destination_address_prefix  = local.external_services["s390x.jenkins.io"]
+  destination_address_prefix  = local.external_services["s390x.${data.azurerm_dns_zone.jenkinsio.name}"]
   resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
 }
@@ -421,7 +385,7 @@ resource "azurerm_storage_account" "ci_jenkins_io_ephemeral_agents" {
 ## Azure Active Directory Resources to allow controller spawning ephemeral agents
 ####################################################################################
 resource "azuread_application" "ci_jenkins_io" {
-  display_name = "ci.jenkins.io"
+  display_name = module.ci_jenkins_io.service_fqdn
   owners = [
     data.azuread_service_principal.terraform_production.id,
   ]
@@ -447,7 +411,7 @@ resource "azuread_service_principal" "ci_jenkins_io" {
 }
 resource "azuread_application_password" "ci_jenkins_io" {
   application_object_id = azuread_application.ci_jenkins_io.object_id
-  display_name          = "ci.jenkins.io-tf-managed"
+  display_name          = "${module.ci_jenkins_io.service_fqdn}-tf-managed"
   end_date              = "2024-03-28T00:00:00Z"
 }
 resource "azurerm_role_assignment" "ci_jenkins_io_read_packer_prod_images" {
