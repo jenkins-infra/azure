@@ -21,16 +21,27 @@ data "azurerm_subnet" "trusted_ephemeral_agents" {
   resource_group_name  = data.azurerm_resource_group.trusted.name
   virtual_network_name = data.azurerm_virtual_network.trusted.name
 }
+resource "azurerm_private_dns_zone" "trusted" {
+  name                = "trusted.ci.jenkins.io"
+  resource_group_name = data.azurerm_resource_group.trusted.name
+}
+resource "azurerm_private_dns_zone_virtual_network_link" "trusted" {
+  name                  = "trusted-vnet"
+  resource_group_name   = data.azurerm_resource_group.trusted.name
+  private_dns_zone_name = azurerm_private_dns_zone.trusted.name
+  virtual_network_id    = data.azurerm_virtual_network.trusted.id
+}
 ####################################################################################
 ## Resources for the Controller VM
 ####################################################################################
 module "trusted_ci_jenkins_io" {
   source = "./.shared-tools/terraform/modules/azure-jenkins-controller"
 
-  controller_short_hostname    = "trusted.ci"
+  service_fqdn                 = azurerm_private_dns_zone.trusted.name
   location                     = data.azurerm_virtual_network.trusted.location
   admin_username               = local.admin_username
   admin_ssh_publickey          = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5K7Ro7jBl5Kc68RdzG6EXHstIBFSxO5Da8SQJSMeCbb4cHTYuBBH8jNsAFcnkN64kEu+YhmlxaWEVEIrPgfGfs13ZL7v9p+Nt76tsz6gnVdAy2zCz607pAWe7p4bBn6T9zdZcBSnvjawO+8t/5ue4ngcfAjanN5OsOgLeD6yqVyP8YTERjW78jvp2TFrIYmgWMI5ES1ln32PQmRZwc1eAOsyGJW/YIBdOxaSkZ41qUvb9b3dCorGuCovpSK2EeNphjLPpVX/NRpVY4YlDqAcTCdLdDrEeVqkiA/VDCYNhudZTDa8f1iHwBE/GEtlKmoO6dxJ5LAkRk3RIVHYrmI6XXSw5l0tHhW5D12MNwzUfDxQEzBpGK5iSfOBt5zJ5OiI9ftnsq/GV7vCXfvMVGDLUC551P5/s/wM70QmHwhlGQNLNeJxRTvd6tL11bof3K+29ivFYUmpU17iVxYOWhkNY86WyngHU6Ux0zaczF3H6H0tpg1Ca/cFO428AVPw/RTJpcAe6OVKq5zwARNApQ/p6fJKUAdXap+PpQGZlQhPLkUbwtFXGTrpX9ePTcdzryCYjgrZouvy4ZMzruJiIbFUH8mRY3xVREVaIsJakruvgw3b14oQgcB4BwYVBBqi62xIvbRzAv7Su9t2jK6OR2z3sM/hLJRqIJ5oILMORa7XqrQ=="
+  dns_zone                     = azurerm_private_dns_zone.trusted.name
   dns_zone_name                = azurerm_private_dns_zone.trusted.name
   dns_resourcegroup_name       = data.azurerm_resource_group.trusted.name
   controller_subnet_id         = data.azurerm_subnet.trusted_ci_controller.id
@@ -39,7 +50,6 @@ module "trusted_ci_jenkins_io" {
   default_tags                 = local.default_tags
 
   controller_resourcegroup_name = "jenkinsinfra-trusted-ci-controller"
-  controller_vm_name            = ""
   controller_datadisk_name      = "trusted-ci-controller-data-disk"
 }
 moved {
@@ -132,17 +142,6 @@ resource "azurerm_role_assignment" "trusted_ci_jenkins_io_allow_read_trustedvnet
   scope              = data.azurerm_virtual_network.trusted.id
   role_definition_id = azurerm_role_definition.trusted_vnet_reader.role_definition_resource_id
   principal_id       = azuread_service_principal.trusted_ci_jenkins_io.id
-}
-
-resource "azurerm_private_dns_zone" "trusted" {
-  name                = "trusted.ci.jenkins.io"
-  resource_group_name = data.azurerm_resource_group.trusted.name
-}
-resource "azurerm_private_dns_zone_virtual_network_link" "trusted" {
-  name                  = "trusted-vnet"
-  resource_group_name   = data.azurerm_resource_group.trusted.name
-  private_dns_zone_name = azurerm_private_dns_zone.trusted.name
-  virtual_network_id    = data.azurerm_virtual_network.trusted.id
 }
 
 ####################################################################################
@@ -333,7 +332,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_permanent_agen
   source_port_range           = "*"
   destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
-  destination_address_prefix  = local.external_services["updates.jenkins.io"]
+  destination_address_prefix  = local.external_services["updates.${data.azurerm_dns_zone.jenkinsio.name}"]
   resource_group_name         = data.azurerm_resource_group.trusted.name
   network_security_group_name = azurerm_network_security_group.trusted_ci.name
 }
