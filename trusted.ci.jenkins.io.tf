@@ -49,27 +49,6 @@ module "trusted_ci_jenkins_io" {
   controller_resourcegroup_name = "jenkinsinfra-trusted-ci-controller"
   controller_datadisk_name      = "trusted-ci-controller-data-disk"
 }
-moved {
-  from = azurerm_resource_group.trusted_ci_jenkins_io_controller
-  to   = module.trusted_ci_jenkins_io.azurerm_resource_group.controller
-}
-moved {
-  from = azurerm_network_interface.trusted_ci_controller
-  to   = module.trusted_ci_jenkins_io.azurerm_network_interface.controller
-}
-moved {
-  from = azurerm_linux_virtual_machine.trusted_ci_controller
-  to   = module.trusted_ci_jenkins_io.azurerm_linux_virtual_machine.controller
-}
-moved {
-  from = azurerm_managed_disk.trusted_ci_controller_data_disk
-  to   = module.trusted_ci_jenkins_io.azurerm_managed_disk.controller_data
-}
-moved {
-  from = azurerm_virtual_machine_data_disk_attachment.trusted_ci_controller_data_disk
-  to   = module.trusted_ci_jenkins_io.azurerm_virtual_machine_data_disk_attachment.controller_data
-}
-
 resource "azurerm_private_dns_a_record" "trusted_ci_controller" {
   name                = "@"
   zone_name           = azurerm_private_dns_zone.trusted.name

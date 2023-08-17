@@ -41,46 +41,6 @@ resource "azurerm_dns_cname_record" "assets_ci_jenkins_io" {
   record              = module.ci_jenkins_io.controller_public_fqdn
   tags                = local.default_tags
 }
-moved {
-  from = azurerm_resource_group.ci_jenkins_io_controller
-  to   = module.ci_jenkins_io.azurerm_resource_group.controller
-}
-moved {
-  from = azurerm_dns_a_record.ci_jenkins_io_controller
-  to   = module.ci_jenkins_io.azurerm_dns_a_record.controller
-}
-moved {
-  from = module.ci_jenkins_io.azurerm_dns_a_record.controller
-  to   = module.ci_jenkins_io.azurerm_dns_a_record.controller[0]
-}
-moved {
-  from = azurerm_dns_a_record.private_ci_jenkins_io_controller
-  to   = module.ci_jenkins_io.azurerm_dns_a_record.private_controller[0]
-}
-moved {
-  from = azurerm_public_ip.ci_jenkins_io_controller
-  to   = module.ci_jenkins_io.azurerm_public_ip.controller[0]
-}
-moved {
-  from = azurerm_management_lock.ci_jenkins_io_controller_publicip
-  to   = module.ci_jenkins_io.azurerm_management_lock.controller_publicip[0]
-}
-moved {
-  from = azurerm_network_interface.ci_jenkins_io_controller
-  to   = module.ci_jenkins_io.azurerm_network_interface.controller
-}
-moved {
-  from = azurerm_managed_disk.ci_jenkins_io_controller_data
-  to   = module.ci_jenkins_io.azurerm_managed_disk.controller_data
-}
-moved {
-  from = azurerm_linux_virtual_machine.ci_jenkins_io_controller
-  to   = module.ci_jenkins_io.azurerm_linux_virtual_machine.controller
-}
-moved {
-  from = azurerm_virtual_machine_data_disk_attachment.ci_jenkins_io_data
-  to   = module.ci_jenkins_io.azurerm_virtual_machine_data_disk_attachment.controller_data
-}
 ####################################################################################
 ## Network Security Group and rules
 ####################################################################################
