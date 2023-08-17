@@ -23,6 +23,10 @@ module "ci_jenkins_io" {
   controller_vm_size           = "Standard_D8as_v5"
   is_public                    = true
   default_tags                 = local.default_tags
+  jenkins_infra_ips = {
+    ldap_ipv4   = azurerm_public_ip.ldap_jenkins_io_ipv4.ip_address
+    puppet_ipv4 = azurerm_public_ip.puppet_jenkins_io.ip_address
+  }
 }
 ## Service DNS records
 resource "azurerm_dns_cname_record" "ci_jenkins_io" {
@@ -44,46 +48,31 @@ resource "azurerm_dns_cname_record" "assets_ci_jenkins_io" {
 ####################################################################################
 ## Network Security Group and rules
 ####################################################################################
-resource "azurerm_network_security_group" "ci_jenkins_io_controller" {
-  name                = module.ci_jenkins_io.service_fqdn
-  location            = data.azurerm_virtual_network.public.location
-  resource_group_name = module.ci_jenkins_io.controller_resourcegroup_name
-  tags                = local.default_tags
+moved {
+  from = azurerm_network_security_group.ci_jenkins_io_controller
+  to   = module.ci_jenkins_io.azurerm_network_security_group.controller
 }
-resource "azurerm_subnet_network_security_group_association" "ci_jenkins_io" {
-  subnet_id                 = data.azurerm_subnet.ci_jenkins_io_controller.id
-  network_security_group_id = azurerm_network_security_group.ci_jenkins_io_controller.id
+moved {
+  from = azurerm_subnet_network_security_group_association.ci_jenkins_io
+  to   = module.ci_jenkins_io.azurerm_subnet_network_security_group_association.controller
 }
+moved {
+  from = azurerm_network_security_rule.allow_outbound_ldap_from_ci_controller_to_jenkinsldap
+  to   = module.ci_jenkins_io.azurerm_network_security_rule.allow_outbound_ldap_from_controller_to_jenkinsldap
+}
+
 ## Outbound Rules (different set of priorities than Inbound rules) ##
-# Ignore the rule as it does not detect the IP restriction to only ldap.jenkins.io"s host
-#tfsec:ignore:azure-network-no-public-egress
-resource "azurerm_network_security_rule" "allow_outbound_ldap_from_ci_controller_to_jenkinsldap" {
-  name                        = "allow-outbound-ldap-from-ci-controller-to-jenkinsldap"
-  priority                    = 4086
-  direction                   = "Outbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  source_address_prefix       = module.ci_jenkins_io.controller_private_ipv4
-  destination_port_range      = "636" # LDAP over TLS
-  destination_address_prefix  = azurerm_public_ip.ldap_jenkins_io_ipv4.ip_address
-  resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
-  network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
+moved {
+  from = azurerm_network_security_rule.allow_outbound_puppet_from_ci_controller_to_puppetmaster
+  to   = module.ci_jenkins_io.azurerm_network_security_rule.allow_outbound_puppet_from_controller_to_puppetmaster
 }
-# Ignore the rule as it does not detect the IP restriction to only puppet.jenkins.io"s host
-#tfsec:ignore:azure-network-no-public-egress
-resource "azurerm_network_security_rule" "allow_outbound_puppet_from_ci_controller_to_puppetmaster" {
-  name                        = "allow-outbound-puppet-from-ci-controller-subnet-to-puppetmaster"
-  priority                    = 4087
-  direction                   = "Outbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  source_address_prefix       = module.ci_jenkins_io.controller_private_ipv4
-  destination_port_range      = "8140" # Puppet over TLS
-  destination_address_prefix  = azurerm_public_ip.puppet_jenkins_io.ip_address
-  resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
-  network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
+moved {
+  from = azurerm_network_security_rule.allow_outbound_http_from_ci_controller_to_internet
+  to   = module.ci_jenkins_io.azurerm_network_security_rule.allow_outbound_http_from_controller_to_internet
+}
+moved {
+  from = azurerm_network_security_rule.deny_all_outbound_from_ci_controller_subnet
+  to   = module.ci_jenkins_io.azurerm_network_security_rule.deny_all_outbound_from_controller_subnet
 }
 # Ignore the rule as it does not detect the IP restriction to only puppet.jenkins.io"s host
 #tfsec:ignore:azure-network-no-public-egress
@@ -98,75 +87,13 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_ci_controller_
   destination_port_ranges     = ["22"]
   destination_address_prefix  = local.external_services["s390x.${data.azurerm_dns_zone.jenkinsio.name}"]
   resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
-  network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
+  network_security_group_name = module.ci_jenkins_io.controller_nsg_name
 }
-resource "azurerm_network_security_rule" "allow_outbound_http_from_ci_controller_to_internet" {
-  name                        = "allow-outbound-http-from-ci-controller-to-internet"
-  priority                    = 4089
-  direction                   = "Outbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  source_address_prefix       = module.ci_jenkins_io.controller_private_ipv4
-  destination_port_ranges     = ["80", "443"]
-  destination_address_prefix  = "Internet"
-  resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
-  network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
-}
-# This rule overrides an Azure-Default rule. its priority must be < 65000.
-resource "azurerm_network_security_rule" "deny_all_outbound_from_ci_controller_subnet" {
-  name                        = "deny-all-outbound-from-ci-controller-subnet"
-  priority                    = 4096 # Maximum value allowed by the provider
-  direction                   = "Outbound"
-  access                      = "Deny"
-  protocol                    = "*"
-  source_port_range           = "*"
-  destination_port_range      = "*"
-  source_address_prefix       = "VirtualNetwork"
-  destination_address_prefix  = "*"
-  resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
-  network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
-}
+
 ## Inbound Rules (different set of priorities than Outbound rules) ##
-#tfsec:ignore:azure-network-no-public-ingress
-resource "azurerm_network_security_rule" "allow_inbound_web_from_everywhere_to_ci_controller" {
-  name                  = "allow-inbound-web-from-everywhere-to-ci-controller"
-  priority              = 4080
-  direction             = "Inbound"
-  access                = "Allow"
-  protocol              = "Tcp"
-  source_port_range     = "*"
-  source_address_prefix = "*"
-  destination_port_ranges = [
-    "80",  # HTTP (for redirections to HTTPS)
-    "443", # HTTPS
-  ]
-  destination_address_prefixes = [
-    module.ci_jenkins_io.controller_private_ipv4,
-    module.ci_jenkins_io.controller_public_ipv4,
-  ]
-  resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
-  network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
-}
-#tfsec:ignore:azure-network-no-public-ingress
-resource "azurerm_network_security_rule" "allow_inbound_jenkins_usage_from_everywhere_to_ci_controller" {
-  name                  = "allow-inbound-jenkins-usage-from-everywhere-to-ci-controller"
-  priority              = 4090
-  direction             = "Inbound"
-  access                = "Allow"
-  protocol              = "Tcp"
-  source_port_range     = "*"
-  source_address_prefix = "*"
-  destination_port_ranges = [
-    "443",   # HTTPS for websocket agents
-    "50000", # Direct TCP Inbound protocol
-  ]
-  destination_address_prefixes = [
-    module.ci_jenkins_io.controller_private_ipv4,
-    module.ci_jenkins_io.controller_public_ipv4,
-  ]
-  resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
-  network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
+moved {
+  from = azurerm_network_security_rule.allow_inbound_web_from_everywhere_to_ci_controller
+  to   = module.ci_jenkins_io.azurerm_network_security_rule.allow_inbound_jenkins_to_controller
 }
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_privatevpn_to_ci_controller" {
   name                        = "allow-inbound-ssh-from-privatevpn-to-ci-controller"
@@ -179,22 +106,11 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_privatevpn_to_c
   source_address_prefixes     = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   destination_address_prefix  = module.ci_jenkins_io.controller_private_ipv4
   resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
-  network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
+  network_security_group_name = module.ci_jenkins_io.controller_nsg_name
 }
-# This rule overrides an Azure-Default rule. its priority must be < 65000
-# Please note that Azure NSG default to "deny all inbound from Internet"
-resource "azurerm_network_security_rule" "deny_all_inbound_from_vnet_to_ci_controller" {
-  name                        = "deny-all-inbound-from-vnet-to-ci-controller"
-  priority                    = 4096 # Maximum value allowed by the Azure Terraform Provider
-  direction                   = "Inbound"
-  access                      = "Deny"
-  protocol                    = "*"
-  source_port_range           = "*"
-  destination_port_range      = "*"
-  source_address_prefix       = "VirtualNetwork"
-  destination_address_prefix  = "*"
-  resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
-  network_security_group_name = azurerm_network_security_group.ci_jenkins_io_controller.name
+moved {
+  from = azurerm_network_security_rule.deny_all_inbound_from_vnet_to_ci_controller
+  to   = module.ci_jenkins_io.azurerm_network_security_rule.deny_all_inbound_to_controller
 }
 
 ####################################################################################
@@ -220,6 +136,7 @@ resource "azurerm_subnet_network_security_group_association" "ci_jenkins_io_ephe
   subnet_id                 = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents.id
   network_security_group_id = azurerm_network_security_group.ci_jenkins_io_ephemeral_agents.id
 }
+
 ## Outbound Rules (different set of priorities than Inbound rules) ##
 #tfsec:ignore:azure-network-no-public-egress
 resource "azurerm_network_security_rule" "allow_outbound_hkp_udp_from_ci_jenkins_io_ephemeral_agents_subnet_to_internet" {
