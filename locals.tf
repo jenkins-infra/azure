@@ -39,7 +39,7 @@ locals {
     lemeurherve      = "176.185.227.180"
     lemeurherve-2    = "176.145.123.59"
     smerle33         = "82.64.5.129"
-    dduportal-cowork = "91.182.56.152"
+    dduportal-cowork = "86.202.255.126"
     dduportal-cell   = "92.184.123.91"
   }
 
