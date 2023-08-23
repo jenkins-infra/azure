@@ -41,7 +41,7 @@ locals {
     smerle33         = "82.64.5.129"
     dduportal-cowork = "86.202.255.126"
     dduportal-cell   = "92.184.123.91"
-    dduportal-2      = "88.175.15.95"
+    dduportal-2      = "92.184.107.223"
   }
 
   external_services = {
