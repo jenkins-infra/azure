@@ -61,6 +61,10 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
     type = "SystemAssigned"
   }
 
+  lifecycle {
+    ignore_changes = [default_node_pool.node_count]
+  }
+
   tags = local.default_tags
 }
 
@@ -76,7 +80,12 @@ resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
   max_count             = 5
   zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
-  tags                  = local.default_tags
+
+  lifecycle {
+    ignore_changes = [node_count]
+  }
+
+  tags = local.default_tags
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
@@ -105,6 +114,10 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
     "kubernetes.azure.com/scalesetpriority=spot:NoSchedule",
   ]
 
+  lifecycle {
+    ignore_changes = [node_count]
+  }
+
   tags = local.default_tags
 }
 
@@ -123,6 +136,10 @@ resource "azurerm_kubernetes_cluster_node_pool" "releasepool" {
   node_taints = [
     "jenkins=release.ci.jenkins.io:NoSchedule",
   ]
+
+  lifecycle {
+    ignore_changes = [node_count]
+  }
 
   tags = local.default_tags
 }
@@ -145,6 +162,10 @@ resource "azurerm_kubernetes_cluster_node_pool" "windows2019pool" {
     "os=windows:NoSchedule",
     "jenkins=release.ci.jenkins.io:NoSchedule",
   ]
+
+  lifecycle {
+    ignore_changes = [node_count]
+  }
 
   tags = local.default_tags
 }

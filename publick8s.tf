@@ -83,7 +83,12 @@ resource "azurerm_kubernetes_cluster_node_pool" "publicpool" {
   max_count             = 10
   zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
-  tags                  = local.default_tags
+
+  lifecycle {
+    ignore_changes = [node_count]
+  }
+
+  tags = local.default_tags
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "x86medium" {
@@ -98,7 +103,12 @@ resource "azurerm_kubernetes_cluster_node_pool" "x86medium" {
   max_count             = 10
   zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
-  tags                  = local.default_tags
+
+  lifecycle {
+    ignore_changes = [node_count]
+  }
+
+  tags = local.default_tags
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "arm64small2" {
@@ -113,10 +123,16 @@ resource "azurerm_kubernetes_cluster_node_pool" "arm64small2" {
   max_count             = 10
   zones                 = [1]
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
-  tags                  = local.default_tags
+
   node_taints = [
     "kubernetes.io/arch=arm64:NoSchedule",
   ]
+
+  lifecycle {
+    ignore_changes = [node_count]
+  }
+
+  tags = local.default_tags
 }
 
 # Allow cluster to manage LBs in the publick8s-tier subnet (Public LB)
