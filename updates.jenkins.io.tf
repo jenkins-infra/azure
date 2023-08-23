@@ -60,3 +60,13 @@ resource "azurerm_dns_cname_record" "azure_updates_jenkins_io" {
   record              = azurerm_dns_a_record.public_publick8s.fqdn
   tags                = local.default_tags
 }
+
+# Rsyncd service DNS record
+resource "azurerm_dns_cname_record" "rsyncd_updates_jenkins_io" {
+  name                = "rsyncd.updates"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  record              = azurerm_dns_a_record.public_publick8s.fqdn
+  tags                = local.default_tags
+}
