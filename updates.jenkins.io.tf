@@ -51,7 +51,7 @@ output "updates_jenkins_io_redis_primary_access_key" {
   value     = azurerm_redis_cache.updates_jenkins_io.primary_access_key
 }
 
-# Service DNS record
+# Service CNAME record
 resource "azurerm_dns_cname_record" "azure_updates_jenkins_io" {
   name                = "azure.updates"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
@@ -61,12 +61,12 @@ resource "azurerm_dns_cname_record" "azure_updates_jenkins_io" {
   tags                = local.default_tags
 }
 
-# Rsyncd service DNS record
-resource "azurerm_dns_cname_record" "rsyncd_updates_jenkins_io" {
+# Rsyncd service A record for rsyncd.updates.jenkins.io pointing to its own public LB IP defined in ./publick8s.tf
+resource "azurerm_dns_a_record" "rsyncd_updates_jenkins_io" {
   name                = "rsyncd.updates"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
-  record              = azurerm_dns_a_record.public_publick8s.fqdn
+  records             = [azurerm_public_ip.rsyncd_jenkins_io_ipv4.ip_address]
   tags                = local.default_tags
 }
