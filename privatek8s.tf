@@ -62,7 +62,7 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   }
 
   lifecycle {
-    ignore_changes = [default_node_pool.node_count]
+    ignore_changes = [default_node_pool[0].node_count]
   }
 
   tags = local.default_tags
