@@ -1,10 +1,3 @@
-# Defined in https://github.com/jenkins-infra/azure-net/blob/d30a37c27b649aebd158ecb5d631ff8d7f1bab4e/vnets.tf#L175-L183
-data "azurerm_subnet" "ci_jenkins_io_controller" {
-  name                 = "${data.azurerm_virtual_network.public.name}-ci_jenkins_io_controller"
-  virtual_network_name = data.azurerm_virtual_network.public.name
-  resource_group_name  = data.azurerm_resource_group.public.name
-}
-
 ####################################################################################
 ## Resources for the Controller VM
 ####################################################################################
@@ -19,7 +12,7 @@ module "ci_jenkins_io" {
   dns_resourcegroup_name       = data.azurerm_resource_group.proddns_jenkinsio.name
   controller_network_name      = "${data.azurerm_resource_group.public.name}-vnet"
   controller_network_rg_name   = data.azurerm_resource_group.public.name
-  controller_subnet_name       = data.azurerm_subnet.ci_jenkins_io_controller.name
+  controller_subnet_name       = "${data.azurerm_virtual_network.public.name}-ci_jenkins_io_controller"
   ephemeral_agents_subnet_name = "${data.azurerm_virtual_network.public.name}-ci_jenkins_io_agents"
   controller_os_disk_size_gb   = 64
   controller_data_disk_size_gb = 512
@@ -30,6 +23,7 @@ module "ci_jenkins_io" {
     ldap_ipv4           = azurerm_public_ip.ldap_jenkins_io_ipv4.ip_address
     puppet_ipv4         = azurerm_public_ip.puppet_jenkins_io.ip_address
     gpg_keyserver_ipv4s = local.gpg_keyserver_ips["keyserver.ubuntu.com"]
+    privatevpn_subnet   = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   }
   controller_service_principal_ids = [
     data.azuread_service_principal.terraform_production.id,
@@ -76,35 +70,11 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_ci_controller_
   network_security_group_name = module.ci_jenkins_io.controller_nsg_name
 }
 
-## Inbound Rules (different set of priorities than Outbound rules) ##
-resource "azurerm_network_security_rule" "allow_inbound_ssh_from_privatevpn_to_ci_controller" {
-  name                        = "allow-inbound-ssh-from-privatevpn-to-ci-controller"
-  priority                    = 4085
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "22"
-  source_address_prefixes     = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
-  destination_address_prefix  = module.ci_jenkins_io.controller_private_ipv4
-  resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
-  network_security_group_name = module.ci_jenkins_io.controller_nsg_name
+moved {
+  from = azurerm_network_security_rule.allow_inbound_ssh_from_privatevpn_to_ci_controller
+  to   = module.ci_jenkins_io.azurerm_network_security_rule.allow_inbound_ssh_from_privatevpn_to_controller
 }
-
-# ####################################################################################
-# ## Resources for the Ephemeral Agents
-# ####################################################################################
-# ## Inbound Rules (different set of priorities than Outbound rules) ##
-resource "azurerm_network_security_rule" "allow_inbound_ssh_from_privatevpn_to_ephemeral_agents" {
-  name                         = "allow-inbound-ssh-from-privatevpn-to-ephemeral-agents"
-  priority                     = 4094
-  direction                    = "Inbound"
-  access                       = "Allow"
-  protocol                     = "Tcp"
-  source_port_range            = "*"
-  destination_port_range       = "22"
-  source_address_prefixes      = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
-  destination_address_prefixes = module.ci_jenkins_io.ephemeral_agents_subnet_prefixes
-  resource_group_name          = module.ci_jenkins_io.controller_resourcegroup_name
-  network_security_group_name  = module.ci_jenkins_io.ephemeral_agents_nsg_name
+moved {
+  from = azurerm_network_security_rule.allow_inbound_ssh_from_privatevpn_to_ephemeral_agents
+  to   = module.ci_jenkins_io.azurerm_network_security_rule.allow_inbound_ssh_from_privatevpn_to_ephemeral_agents
 }
