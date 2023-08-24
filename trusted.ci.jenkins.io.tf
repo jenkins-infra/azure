@@ -1,4 +1,4 @@
-# Network resources defined in https://github.com/jenkins-infra/azure-net
+# Data of resources defined in https://github.com/jenkins-infra/azure-net
 data "azurerm_resource_group" "trusted" {
   name = "trusted"
 }
