@@ -38,7 +38,7 @@ module "cert_ci_jenkins_io" {
   ]
 }
 ## Service DNS records
-resource "azurerm_private_dns_a_record" "cert_ci_jenkins_io_controller" {
+resource "azurerm_dns_a_record" "cert_ci_jenkins_io_controller" {
   name                = "controller"
   zone_name           = data.azurerm_dns_zone.cert_ci_jenkins_io.name
   resource_group_name = data.azurerm_dns_zone.cert_ci_jenkins_io.resource_group_name
