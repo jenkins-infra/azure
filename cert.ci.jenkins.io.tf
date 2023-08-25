@@ -2,11 +2,15 @@
 data "azurerm_resource_group" "cert_ci_jenkins_io" {
   name = "cert-ci-jenkins-io"
 }
+data "azurerm_dns_zone" "cert_ci_jenkins_io" {
+  name                = "cert.ci.jenkins.io"
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+}
 
 module "cert_ci_jenkins_io" {
   source = "./.shared-tools/terraform/modules/azure-jenkins-controller"
 
-  service_fqdn                 = "cert.ci.jenkins.io"
+  service_fqdn                 = data.azurerm_dns_zone.cert_ci_jenkins_io.name
   location                     = data.azurerm_resource_group.cert_ci_jenkins_io.location
   admin_username               = local.admin_username
   admin_ssh_publickey          = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDDpxwvySus2OWViWfJ02XMYr+Qa/uPADhjt/4el2SmEf7NlJXzq5vc8imcw8YxQZKwuuKJhonlTYTpk1Cjka4bJKWNOSQ8+Kx0O2ZnNjKn3ZETWJB90bZXHVqbrNHDtu6lN6S/yRW9Q+6fuDbHBW0MXWI8Lsv+bU5v8Zll6m62rc00/I/IT9c1TX1qjCtjf5XHMFw7nVxQiTX2Zf5UKG3RI7mkCMDIvx2H9kXdzM8jtYwATZPHKHuLzffARmvy1FpNPVuLLEGYE3hljP82rll1WZbbl1ZrhjzbFUUYO4fsA7AOQHWhHiVLvtnreB269JOl/ZkHgk37zcdwJMkqKpqoEbjP9z8PURf5uMA7TiDGcpgcFMzoaFk1ueqoHM2JaM2AZQAkPhbUfT7MSOFYRx91OEg5pg5N17zNeaBM6fyxl3v7mkxSOTkKlzjAXPRyo7XsosUVQ4qb4DfsAAJ0Rynts2olRQLEzJku0ZxbbXotuoppI8HivRl7PoTsAASJRpc="
@@ -34,14 +38,20 @@ module "cert_ci_jenkins_io" {
   ]
 }
 ## Service DNS records
+resource "azurerm_private_dns_a_record" "cert_ci_jenkins_io_controller" {
+  name                = "controller"
+  zone_name           = data.azurerm_dns_zone.cert_ci_jenkins_io.name
+  resource_group_name = data.azurerm_dns_zone.cert_ci_jenkins_io.resource_group_name
+  ttl                 = 60
+  records             = [module.cert_ci_jenkins_io.controller_private_ipv4]
+}
 ## TODO: uncomment and import when migrating
-# resource "azurerm_dns_cname_record" "cert_ci_jenkins_io" {
-#   name                = trimsuffix(trimsuffix(module.cert_ci_jenkins_io.service_fqdn, data.azurerm_dns_zone.jenkinsio.name), ".")
-#   zone_name           = data.azurerm_dns_zone.jenkinsio.name
-#   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+# resource "azurerm_private_dns_a_record" "cert_ci_jenkins_io" {
+#   name                = "@" # Child zone: no CNAME possible!
+#   zone_name           = data.azurerm_dns_zone.cert_ci_jenkins_io.name
+#   resource_group_name = data.azurerm_dns_zone.cert_ci_jenkins_io.resource_group_name
 #   ttl                 = 60
-#   record              = module.cert_ci_jenkins_io.controller_public_fqdn
-#   tags                = local.default_tags
+#   records             = [module.cert_ci_jenkins_io.controller_private_ipv4]
 # }
 
 ######### Legacy resources (TODO: delete everything below once https://github.com/jenkins-infra/helpdesk/issues/3688 is migrated)
