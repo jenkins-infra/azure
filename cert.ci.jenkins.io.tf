@@ -45,7 +45,7 @@ resource "azurerm_dns_a_record" "cert_ci_jenkins_io_controller" {
   ttl                 = 60
   records             = [module.cert_ci_jenkins_io.controller_private_ipv4]
 }
-resource "azurerm_private_dns_a_record" "cert_ci_jenkins_io" {
+resource "azurerm_dns_a_record" "cert_ci_jenkins_io" {
   name                = "@" # Child zone: no CNAME possible!
   zone_name           = data.azurerm_dns_zone.cert_ci_jenkins_io.name
   resource_group_name = data.azurerm_dns_zone.cert_ci_jenkins_io.resource_group_name
