@@ -45,14 +45,13 @@ resource "azurerm_dns_a_record" "cert_ci_jenkins_io_controller" {
   ttl                 = 60
   records             = [module.cert_ci_jenkins_io.controller_private_ipv4]
 }
-## TODO: uncomment and import when migrating
-# resource "azurerm_private_dns_a_record" "cert_ci_jenkins_io" {
-#   name                = "@" # Child zone: no CNAME possible!
-#   zone_name           = data.azurerm_dns_zone.cert_ci_jenkins_io.name
-#   resource_group_name = data.azurerm_dns_zone.cert_ci_jenkins_io.resource_group_name
-#   ttl                 = 60
-#   records             = [module.cert_ci_jenkins_io.controller_private_ipv4]
-# }
+resource "azurerm_dns_a_record" "cert_ci_jenkins_io" {
+  name                = "@" # Child zone: no CNAME possible!
+  zone_name           = data.azurerm_dns_zone.cert_ci_jenkins_io.name
+  resource_group_name = data.azurerm_dns_zone.cert_ci_jenkins_io.resource_group_name
+  ttl                 = 60
+  records             = [module.cert_ci_jenkins_io.controller_private_ipv4]
+}
 
 ######### Legacy resources (TODO: delete everything below once https://github.com/jenkins-infra/helpdesk/issues/3688 is migrated)
 /** Two resources groups: one for the controller, the second for the agents **/

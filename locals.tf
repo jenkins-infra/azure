@@ -35,8 +35,8 @@ locals {
   }
 
   admin_allowed_ips = {
-    dduportal     = "85.27.34.43"     # Home
-    dduportal-2   = "86.202.255.126"  # Cowork
+    dduportal     = "85.27.34.43"    # Home
+    dduportal-2   = "86.202.255.126" # Cowork
     lemeurherve   = "176.185.227.180"
     lemeurherve-2 = "176.145.123.59"
     smerle33      = "82.64.5.129"
