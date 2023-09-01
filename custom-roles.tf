@@ -7,15 +7,6 @@ resource "azurerm_role_definition" "private_vnet_reader" {
   }
 }
 
-resource "azurerm_role_definition" "prod_public_vnet_reader" {
-  name  = "ReadProdPublicVNET"
-  scope = data.azurerm_virtual_network.public_prod.id
-
-  permissions {
-    actions = ["Microsoft.Network/virtualNetworks/read"]
-  }
-}
-
 resource "azurerm_role_definition" "public_vnet_reader" {
   name  = "ReadPublicVNET"
   scope = data.azurerm_virtual_network.public.id
