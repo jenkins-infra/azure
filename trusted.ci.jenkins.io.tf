@@ -81,14 +81,6 @@ resource "azurerm_private_dns_a_record" "trusted_ci_controller" {
 ####################################################################################
 ## Resources for the bounce (SSH bastion) VM
 ####################################################################################
-resource "azurerm_public_ip" "trusted_bounce" {
-  name                = "bounce.${azurerm_private_dns_zone.trusted.name}"
-  location            = data.azurerm_virtual_network.trusted_ci_jenkins_io.location
-  resource_group_name = module.trusted_ci_jenkins_io.controller_resourcegroup_name
-  allocation_method   = "Static"
-  sku                 = "Standard"
-  tags                = local.default_tags
-}
 resource "azurerm_network_interface" "trusted_bounce" {
   name                = "bounce.${azurerm_private_dns_zone.trusted.name}"
   location            = data.azurerm_virtual_network.trusted_ci_jenkins_io.location
@@ -96,9 +88,8 @@ resource "azurerm_network_interface" "trusted_bounce" {
   tags                = local.default_tags
 
   ip_configuration {
-    name                          = "external"
+    name                          = "internal"
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.trusted_bounce.id
     subnet_id                     = data.azurerm_subnet.trusted_ci_jenkins_io_controller.id
   }
 }
