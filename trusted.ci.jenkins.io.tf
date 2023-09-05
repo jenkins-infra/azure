@@ -357,7 +357,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_internet_to_bou
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
-  source_address_prefix       = "Internet"
+  source_address_prefixes     = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   destination_address_prefix  = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
   resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
@@ -409,6 +409,6 @@ resource "azurerm_dns_a_record" "trusted_bounce" {
   zone_name           = data.azurerm_dns_zone.trusted_ci_jenkins_io.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
-  records             = [azurerm_public_ip.trusted_bounce.ip_address]
+  records             = [azurerm_linux_virtual_machine.trusted_bounce.private_ip_address]
   tags                = local.default_tags
 }
