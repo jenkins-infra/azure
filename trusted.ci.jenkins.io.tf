@@ -88,7 +88,7 @@ resource "azurerm_network_interface" "trusted_bounce" {
   tags                = local.default_tags
 
   ip_configuration {
-    name                          = "internal"
+    name                          = "external"
     private_ip_address_allocation = "Dynamic"
     subnet_id                     = data.azurerm_subnet.trusted_ci_jenkins_io_controller.id
   }
