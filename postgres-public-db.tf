@@ -1,4 +1,4 @@
-# Reference to the PostgreSQL dedciated network external resources
+# Reference to the PostgreSQL/MySql dedicated network external resources
 data "azurerm_virtual_network" "public_db" {
   name                = "${data.azurerm_resource_group.public.name}-db-vnet"
   resource_group_name = data.azurerm_resource_group.public.name
