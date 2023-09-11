@@ -51,13 +51,28 @@ output "updates_jenkins_io_redis_primary_access_key" {
   value     = azurerm_redis_cache.updates_jenkins_io.primary_access_key
 }
 
-# Service CNAME record
+# Azure service CNAME record
 resource "azurerm_dns_cname_record" "azure_updates_jenkins_io" {
   name                = "azure.updates"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
   record              = azurerm_dns_a_record.public_publick8s.fqdn
+  tags                = local.default_tags
+}
+
+# DigitalOcean service CNAME record pointing to the doks-public A record defined in https://github.com/jenkins-infra/azure-net/blob/main/dns-records.tf
+data "azurerm_dns_a_record" "doks_public_public_ipv4_address" {
+  name                = "doks-public-public-ipv4-address"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+}
+resource "azurerm_dns_cname_record" "digitalocean_updates_jenkins_io" {
+  name                = "digitalocean.updates"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  record              = data.azurerm_dns_a_record.doks_public_public_ipv4_address.fqdn
   tags                = local.default_tags
 }
 
