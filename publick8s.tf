@@ -119,7 +119,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "arm64small2" {
   orchestrator_version  = local.kubernetes_versions["publick8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   enable_auto_scaling   = true
-  min_count             = 0
+  min_count             = 2
   max_count             = 10
   zones                 = [1]
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
