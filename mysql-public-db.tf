@@ -49,16 +49,11 @@ resource "azurerm_mysql_flexible_server" "public_db_mysql" {
   administrator_login          = local.public_db_mysql_admin_login
   administrator_password       = random_password.public_db_mysql_admin_password.result
   sku_name                     = "B_Standard_B1ms" # 1vCore / 2 Gb - https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-b-series-burstable
-  version                      = "8.0.21"          # TODO can be 5.7 as per https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/mysql_flexible_server
+  version                      = "8.0.21"
   zone                         = "1"
-  geo_redundant_backup_enabled = false #TODO  Changing this forces a new MySQL Flexible Server to be created
+  geo_redundant_backup_enabled = false
   private_dns_zone_id          = azurerm_private_dns_zone.public_db_mysql.id
   delegated_subnet_id          = data.azurerm_subnet.public_db_vnet_mysql_tier.id
-
-  high_availability { # TODO  Changing this forces a new MySQL Flexible Server to be recreated
-    mode                      = "ZoneRedundant"
-    standby_availability_zone = "2"
-  }
 
   depends_on = [
     /**
