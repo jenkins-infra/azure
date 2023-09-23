@@ -1,0 +1,47 @@
+name: "Bump Terraform `random` provider version"
+
+scms:
+  default:
+    kind: github
+    spec:
+      user: "{{ .github.user }}"
+      email: "{{ .github.email }}"
+      owner: "{{ .github.owner }}"
+      repository: "{{ .github.repository }}"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ .github.username }}"
+      branch: "{{ .github.branch }}"
+
+sources:
+  lastVersion:
+    name: Get latest version of the `random` provider
+    kind: terraform/registry
+    spec:
+      type: provider
+      namespace: hashicorp
+      name: random
+
+targets:
+  updateTerraformLockFile:
+    name: Update Terraform lock file
+    kind: terraform/lock
+    sourceid: lastVersion
+    spec:
+      file: .terraform.lock.hcl
+      provider: hashicorp/random
+      platforms:
+        - linux_amd64
+        - linux_arm64
+        - darwin_amd64
+        - darwin_arm64
+    scmid: default
+
+actions:
+  default:
+    kind: github/pullrequest
+    scmid: default
+    spec:
+      title: Bump Terraform `random` provider version to {{ source "lastVersion" }}
+      labels:
+        - terraform-providers
+        - hashicorp/random

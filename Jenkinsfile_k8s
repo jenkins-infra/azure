@@ -31,10 +31,9 @@ parallel(
     )
   },
   'updatecli': {
-    def updatecliImage = 'jenkinsciinfra/hashicorp-tools:latest'
-    updatecli(action: 'diff', updatecliDockerImage: updatecliImage)
+    updatecli(action: 'diff')
     if (env.BRANCH_IS_PRIMARY) {
-      updatecli(action: 'apply', cronTriggerExpression: '@daily', updatecliDockerImage: updatecliImage)
+      updatecli(action: 'apply', cronTriggerExpression: '@daily')
     }
   },
 )
