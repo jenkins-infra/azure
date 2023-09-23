@@ -20,7 +20,7 @@ data "azurerm_subnet" "privatek8s_release_tier" {
   virtual_network_name = data.azurerm_virtual_network.private.name
 }
 
-#tfsec:ignore:azure-container-logging #tfsec:ignore:azure-container-limit-authorized-ips
+#trivy:ignore:azure-container-logging #trivy:ignore:azure-container-limit-authorized-ips
 resource "azurerm_kubernetes_cluster" "privatek8s" {
   name                              = "privatek8s-${random_pet.suffix_privatek8s.id}"
   location                          = azurerm_resource_group.privatek8s.location

@@ -42,7 +42,7 @@ data "azurerm_network_security_group" "private_dmz" {
   resource_group_name = data.azurerm_resource_group.private.name
 }
 ## Inbound Rules (different set of priorities than Outbound rules) ##
-#tfsec:ignore:azure-network-no-public-ingress
+#trivy:ignore:azure-network-no-public-ingress
 resource "azurerm_network_security_rule" "allow_inbound_webhooks_from_github_to_puppet" {
   name              = "allow-inbound-webhooks-from-github-to-puppet"
   priority          = 3999
@@ -71,7 +71,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_admins_to_puppe
   resource_group_name         = data.azurerm_resource_group.private.name
   network_security_group_name = data.azurerm_network_security_group.private_dmz.name
 }
-#tfsec:ignore:azure-network-no-public-ingress
+#trivy:ignore:azure-network-no-public-ingress
 resource "azurerm_network_security_rule" "allow_inbound_puppet_from_vms" {
   name                        = "allow-inbound-puppet-from-vms"
   priority                    = 4001

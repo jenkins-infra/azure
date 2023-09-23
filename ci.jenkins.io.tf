@@ -55,7 +55,7 @@ resource "azurerm_dns_cname_record" "assets_ci_jenkins_io" {
 ####################################################################################
 ## Outbound Rules (different set of priorities than Inbound rules) ##
 # Ignore the rule as it does not detect the IP restriction to only puppet.jenkins.io"s host
-#tfsec:ignore:azure-network-no-public-egress
+#trivy:ignore:azure-network-no-public-egress
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_ci_controller_to_s390x" {
   name                        = "allow-outbound-ssh-from-ci-controller-to-s390x"
   priority                    = 4088
