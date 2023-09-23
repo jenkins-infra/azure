@@ -219,7 +219,7 @@ resource "azurerm_subnet_network_security_group_association" "trusted_ci_permane
 
 ## Outbound Rules (different set of priorities than Inbound rules) ##
 # Ignore the rule as it does not detect the IP restriction to only update.jenkins.io"s host
-#tfsec:ignore:azure-network-no-public-egress
+#trivy:ignore:azure-network-no-public-egress
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_permanent_agent_to_updatecenter" {
   name                        = "allow-outbound-ssh-from-permanent-agent-to-updatecenter"
   priority                    = 4080
@@ -339,7 +339,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_ephem
   resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
 }
-#tfsec:ignore:azure-network-no-public-ingress
+#trivy:ignore:azure-network-no-public-ingress
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_internet_to_bounce" {
   name                        = "allow-inbound-ssh-from-internet-to-bounce"
   priority                    = 4000

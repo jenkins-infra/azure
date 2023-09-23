@@ -23,7 +23,7 @@ data "azurerm_subnet" "public_vnet_data_tier" {
   virtual_network_name = data.azurerm_virtual_network.public.name
 }
 
-#tfsec:ignore:azure-container-logging #tfsec:ignore:azure-container-limit-authorized-ips
+#trivy:ignore:azure-container-logging #trivy:ignore:azure-container-limit-authorized-ips
 resource "azurerm_kubernetes_cluster" "publick8s" {
   name                              = "publick8s-${random_pet.suffix_publick8s.id}"
   location                          = azurerm_resource_group.publick8s.location
@@ -43,7 +43,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     )
   }
 
-  #tfsec:ignore:azure-container-configured-network-policy
+  #trivy:ignore:azure-container-configured-network-policy
   network_profile {
     network_plugin = "kubenet"
     # These ranges must NOT overlap with any of the subnets
