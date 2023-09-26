@@ -88,7 +88,7 @@ resource "azurerm_dns_a_record" "rsyncd_updates_jenkins_io" {
 
 ## NS records for each CloudFlare zone defined in https://github.com/jenkins-infra/cloudflare/blob/main/updates.jenkins.io.tf
 # West Europe
-resource "azurerm_dns_ns_record" "updates_jenkins_io_cloudflare_zones" {
+resource "azurerm_dns_ns_record" "updates_jenkins_io_cloudflare_zone_westeurope" {
   name                = "westeurope.cloudflare"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
