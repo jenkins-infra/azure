@@ -86,14 +86,14 @@ resource "azurerm_dns_a_record" "rsyncd_updates_jenkins_io" {
   tags                = local.default_tags
 }
 
-# NS records for each CloudFlare zone defined in https://github.com/jenkins-infra/cloudflare/blob/main/updates.jenkins.io.tf
-resource "azurerm_dns_ns_record" "updates_jenkins_io_cloudflare_zones" {
-  for_each = local.updates_jenkins_io_cloudflare_regions
 
-  name                = "${each.key}.cloudflare"
+## NS records for each CloudFlare zone defined in https://github.com/jenkins-infra/cloudflare/blob/main/updates.jenkins.io.tf
+# West Europe
+resource "azurerm_dns_ns_record" "updates_jenkins_io_cloudflare_zones" {
+  name                = "westeurope.cloudflare"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
-  records             = each.value
+  records             = ["cody.ns.cloudflare.com", "kallie.ns.cloudflare.com"]
   tags                = local.default_tags
 }

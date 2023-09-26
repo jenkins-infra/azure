@@ -69,10 +69,4 @@ locals {
     "privatek8s" = "1.25.6"
     "publick8s"  = "1.25.6"
   }
-
-  # Should have the same keys as the "regions" defined in https://github.com/jenkins-infra/cloudflare/blob/main/locals.tf
-  # The values should correspond to the "zones_name_servers" output defined in https://github.com/jenkins-infra/cloudflare/blob/main/updates.jenkins.io.tf
-  updates_jenkins_io_cloudflare_regions = {
-    westeurope = ["cody.ns.cloudflare.com", "kallie.ns.cloudflare.com"]
-  }
 }
