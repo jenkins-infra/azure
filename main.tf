@@ -8,6 +8,6 @@ data "azuread_service_principal" "terraform_production" {
 data "azurerm_subscription" "jenkins" {
 }
 
-module "jenkins_infra" {
+module "jenkins_infra_shared_data" {
   source = "./.shared-tools/terraform/modules/jenkins-infra-shared-data"
 }

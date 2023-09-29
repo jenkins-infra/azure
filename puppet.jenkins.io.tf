@@ -68,7 +68,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_admins_to_puppe
   destination_port_range = "22"
   source_address_prefixes = flatten(
     concat(
-      [for key, value in module.jenkins_infra.admin_public_ips : value]
+      [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value]
     )
   )
   destination_address_prefix  = azurerm_linux_virtual_machine.puppet_jenkins_io.private_ip_address
