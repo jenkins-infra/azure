@@ -7,3 +7,7 @@ data "azuread_service_principal" "terraform_production" {
 # Data source used to retrieve the subscription id
 data "azurerm_subscription" "jenkins" {
 }
+
+module "jenkins_infra" {
+  source = "./.shared-tools/terraform/modules/jenkins-infra-shared-data"
+}
