@@ -20,8 +20,10 @@ resource "azurerm_storage_account" "ldap_backups" {
 resource "azurerm_storage_account_network_rules" "ldap_access" {
   storage_account_id = azurerm_storage_account.ldap_backups.id
 
-  default_action             = "Deny"
-  ip_rules                   = values(local.admin_allowed_ips)
+  default_action = "Deny"
+  ip_rules = flatten(concat(
+    [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value]
+  ))
   virtual_network_subnet_ids = [data.azurerm_subnet.publick8s_tier.id]
   # Grant access to trusted Azure Services like Azure Backup (see # https://learn.microsoft.com/en-gb/azure/storage/common/storage-network-security?tabs=azure-portal#exceptions)
   bypass = ["AzureServices"]

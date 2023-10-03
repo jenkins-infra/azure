@@ -34,14 +34,6 @@ locals {
     }
   }
 
-  admin_allowed_ips = {
-    dduportal     = "109.88.234.158"
-    dduportal-2   = "86.202.255.126"
-    lemeurherve   = "176.185.227.180"
-    lemeurherve-2 = "176.145.123.59"
-    smerle33      = "82.64.5.129"
-  }
-
   external_services = {
     "updates.jenkins.io" = "52.202.51.185"
     "s390x.jenkins.io"   = "148.100.84.76"

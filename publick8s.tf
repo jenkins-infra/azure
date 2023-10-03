@@ -34,7 +34,14 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   api_server_access_profile {
     authorized_ip_ranges = setunion(
       # admins
-      formatlist("%s/32", values(local.admin_allowed_ips)),
+      formatlist(
+        "%s/32",
+        flatten(
+          concat(
+            [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value]
+          )
+        )
+      ),
       # private VPN access
       data.azurerm_subnet.private_vnet_data_tier.address_prefixes,
       # privatek8s nodes subnet

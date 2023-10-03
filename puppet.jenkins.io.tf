@@ -59,14 +59,18 @@ resource "azurerm_network_security_rule" "allow_inbound_webhooks_from_github_to_
   network_security_group_name = data.azurerm_network_security_group.private_dmz.name
 }
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_admins_to_puppet" {
-  name                        = "allow-inbound-ssh-from-admins-to-puppet"
-  priority                    = 4000
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "22"
-  source_address_prefixes     = values(local.admin_allowed_ips)
+  name                   = "allow-inbound-ssh-from-admins-to-puppet"
+  priority               = 4000
+  direction              = "Inbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "22"
+  source_address_prefixes = flatten(
+    concat(
+      [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value]
+    )
+  )
   destination_address_prefix  = azurerm_linux_virtual_machine.puppet_jenkins_io.private_ip_address
   resource_group_name         = data.azurerm_resource_group.private.name
   network_security_group_name = data.azurerm_network_security_group.private_dmz.name
