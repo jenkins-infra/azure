@@ -1,12 +1,3 @@
-# Reference to the PostgreSQL/MySql dedicated network external resources
-# ALREADY LOADED IN postgres-public-db.tf
-# data "azurerm_virtual_network" "public_db"
-
-# Dedicated subnet is reserved as "delegated" for the mysql server (same as the postgres) on the public network
-# not specificaly needed as per the mysql flexible server documentation :
-# Ref. https://learn.microsoft.com/en-us/azure/mysql/flexible-server/concepts-networking
-# but seem adequate to use Private access (VNet integration) https://learn.microsoft.com/en-us/azure/mysql/flexible-server/concepts-networking#choose-a-networking-option
-# Defined in https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
 data "azurerm_subnet" "public_db_vnet_mysql_tier" {
   name                 = "${data.azurerm_virtual_network.public_db.name}-mysql-tier"
   virtual_network_name = data.azurerm_virtual_network.public_db.name

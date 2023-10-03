@@ -1,8 +1,3 @@
-# Reference to the PostgreSQL/MySql dedicated network external resources
-data "azurerm_virtual_network" "public_db" {
-  name                = "${data.azurerm_resource_group.public.name}-db-vnet"
-  resource_group_name = data.azurerm_resource_group.public.name
-}
 # Dedicated subnet is reserved as "delegated" for the pgsql server on the public network
 # Ref. https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking
 # Defined in https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
