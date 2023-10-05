@@ -23,6 +23,48 @@ resource "azurerm_storage_share" "updates_jenkins_io" {
   quota                = 2 # updates.jenkins.io total size in /www/updates.jenkins.io: 400Mo (Mid 2023)
 }
 
+data "azurerm_storage_account_sas" "updates_jenkins_io" {
+  connection_string = azurerm_storage_account.updates_jenkins_io.primary_connection_string
+
+  resource_types {
+    service   = false
+    container = true # Ex: list Files and Directories
+    object    = true # Ex: create File
+  }
+
+  # Only one IP or a range of IPs can be set for a SAS (https://stackoverflow.com/a/57147683/4074148)
+  ip_addresses = module.jenkins_infra_shared_data.outbound_ips["trusted.ci.jenkins.io"][0]
+
+  services {
+    blob  = false
+    queue = false
+    table = false
+    file  = true
+  }
+
+  start  = "2023-10-06T00:00:00Z"
+  expiry = "2023-12-22T00:00:00Z"
+
+  # https://learn.microsoft.com/en-us/rest/api/storageservices/create-account-sas#file-service
+  permissions {
+    read    = true
+    write   = true
+    delete  = true
+    list    = true
+    add     = false
+    create  = true
+    update  = false
+    process = false
+    tag     = false
+    filter  = false
+  }
+}
+
+output "updates_jenkins_io_sas_url_query_string" {
+  sensitive = true
+  value     = data.azurerm_storage_account_sas.updates_jenkins_io.sas
+}
+
 output "updates_jenkins_io_storage_account_primary_access_key" {
   sensitive = true
   value     = azurerm_storage_account.updates_jenkins_io.primary_access_key
