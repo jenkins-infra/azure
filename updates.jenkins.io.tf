@@ -33,9 +33,6 @@ data "azurerm_storage_account_sas" "updates_jenkins_io" {
     object    = true # Ex: create File
   }
 
-  # Only one IP or a range of IPs can be set for a SAS (https://stackoverflow.com/a/57147683/4074148)
-  ip_addresses = module.jenkins_infra_shared_data.outbound_ips["trusted.ci.jenkins.io"][0]
-
   services {
     blob  = false
     queue = false
