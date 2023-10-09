@@ -61,9 +61,14 @@ data "azurerm_storage_account_sas" "updates_jenkins_io" {
   }
 }
 
+output "updates_jenkins_io_primary_connection_string" {
+  sensitive = true
+  value     = azurerm_storage_account.updates_jenkins_io.primary_connection_string
+}
+
 output "updates_jenkins_io_sas_url_query_string" {
   sensitive = true
-  value     = concat(azurerm_storage_account.updates_jenkins_io.primary_connection_string, data.azurerm_storage_account_sas.updates_jenkins_io.sas)
+  value     = data.azurerm_storage_account_sas.updates_jenkins_io.sas
 }
 
 output "updates_jenkins_io_storage_account_primary_access_key" {
