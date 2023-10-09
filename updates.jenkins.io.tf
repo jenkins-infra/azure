@@ -25,9 +25,10 @@ resource "azurerm_storage_share" "updates_jenkins_io" {
 
 data "azurerm_storage_account_sas" "updates_jenkins_io" {
   connection_string = azurerm_storage_account.updates_jenkins_io.primary_connection_string
+  signed_version    = "2022-11-02"
 
   resource_types {
-    service   = false
+    service   = true # Ex: list Share
     container = true # Ex: list Files and Directories
     object    = true # Ex: create File
   }
@@ -58,6 +59,11 @@ data "azurerm_storage_account_sas" "updates_jenkins_io" {
     tag     = false
     filter  = false
   }
+}
+
+output "updates_jenkins_io_primary_connection_string" {
+  sensitive = true
+  value     = azurerm_storage_account.updates_jenkins_io.primary_connection_string
 }
 
 output "updates_jenkins_io_sas_url_query_string" {
