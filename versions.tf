@@ -20,5 +20,8 @@ terraform {
     random = {
       source = "hashicorp/random"
     }
+    mysql = {
+      source = "petoju/mysql"
+    }
   }
 }
