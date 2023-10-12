@@ -46,5 +46,5 @@ provider "mysql" {
   **/
   endpoint = "${azurerm_mysql_flexible_server.public_db_mysql.fqdn}:3306"
   username = local.public_db_mysql_admin_login
-  password = random_password.public_db_mysql_admin_login.result
+  password = random_password.public_db_mysql_admin_password.result
 }
