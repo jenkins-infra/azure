@@ -11,3 +11,10 @@ data "azurerm_subscription" "jenkins" {
 module "jenkins_infra_shared_data" {
   source = "./.shared-tools/terraform/modules/jenkins-infra-shared-data"
 }
+
+# Resource group used to store (and lock) oiur public IPs
+resource "azurerm_resource_group" "prod_public_ips" {
+  name     = "prod-public-ips"
+  location = var.location
+  tags     = local.default_tags
+}

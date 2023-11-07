@@ -193,6 +193,14 @@ resource "azurerm_role_assignment" "datatier_networkcontributor" {
   skip_service_principal_aad_check = true
 }
 
+# Allow cluster to manage LBs in the data-tier subnet (internal LBs)
+resource "azurerm_role_assignment" "publicip_networkcontributor" {
+  scope                            = azurerm_public_ip.public_privatek8s.id
+  role_definition_name             = "Network Contributor"
+  principal_id                     = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
+  skip_service_principal_aad_check = true
+}
+
 resource "kubernetes_storage_class" "managed_csi_premium_retain" {
   metadata {
     name = "managed-csi-premium-retain"
@@ -221,7 +229,7 @@ resource "kubernetes_storage_class" "azurefile_csi_premium_retain" {
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/privatek8s.yaml
 resource "azurerm_public_ip" "public_privatek8s" {
   name                = "public-privatek8s"
-  resource_group_name = azurerm_kubernetes_cluster.privatek8s.node_resource_group
+  resource_group_name = azurerm_resource_group.prod_public_ips.name
   location            = var.location
   allocation_method   = "Static"
   sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
