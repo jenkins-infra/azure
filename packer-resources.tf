@@ -21,7 +21,7 @@ resource "azuread_application" "packer" {
 }
 
 resource "azuread_service_principal" "packer" {
-  application_id               = azuread_application.packer.application_id
+  client_id                    = azuread_application.packer.client_id
   app_role_assignment_required = false
   owners = [
     data.azuread_service_principal.terraform_production.id, # terraform-production Service Principal, used by the CI system
@@ -29,9 +29,9 @@ resource "azuread_service_principal" "packer" {
 }
 
 resource "azuread_application_password" "packer" {
-  display_name          = "packer-tf-managed"
-  application_object_id = azuread_application.packer.object_id
-  end_date              = "2024-03-09T11:00:00Z"
+  display_name   = "packer-tf-managed"
+  application_id = azuread_application.packer.id
+  end_date       = "2024-03-09T11:00:00Z"
 }
 
 
