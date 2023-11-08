@@ -160,6 +160,30 @@ resource "azurerm_role_assignment" "public_vnet_data_tier_networkcontributor" {
   skip_service_principal_aad_check = true
 }
 
+# Allow cluster to manage publick8s_ipv4
+resource "azurerm_role_assignment" "publick8s_ipv4_networkcontributor" {
+  scope                            = azurerm_public_ip.publick8s_ipv4.id
+  role_definition_name             = "Network Contributor"
+  principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
+  skip_service_principal_aad_check = true
+}
+
+# Allow cluster to manage ldap_jenkins_io_ipv4
+resource "azurerm_role_assignment" "ldap_jenkins_io_ipv4_networkcontributor" {
+  scope                            = azurerm_public_ip.ldap_jenkins_io_ipv4.id
+  role_definition_name             = "Network Contributor"
+  principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
+  skip_service_principal_aad_check = true
+}
+
+# Allow cluster to manage publick8s_ipv6
+resource "azurerm_role_assignment" "publick8s_ipv6_networkcontributor" {
+  scope                            = azurerm_public_ip.publick8s_ipv6.id
+  role_definition_name             = "Network Contributor"
+  principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
+  skip_service_principal_aad_check = true
+}
+
 resource "kubernetes_storage_class" "managed_csi_premium_retain_public" {
   metadata {
     name = "managed-csi-premium-retain"
@@ -189,7 +213,7 @@ resource "kubernetes_storage_class" "azurefile_csi_premium_retain_public" {
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/publick8s.yaml
 resource "azurerm_public_ip" "publick8s_ipv4" {
   name                = "public-publick8s-ipv4"
-  resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
+  resource_group_name = azurerm_resource_group.prod_public_ips.name
   location            = var.location
   ip_version          = "IPv4"
   allocation_method   = "Static"
@@ -207,7 +231,7 @@ resource "azurerm_management_lock" "publick8s_ipv4" {
 # Setting it with this determined public IP will ease DNS setup and changes
 resource "azurerm_public_ip" "ldap_jenkins_io_ipv4" {
   name                = "ldap-jenkins-io-ipv4"
-  resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
+  resource_group_name = azurerm_resource_group.prod_public_ips.name
   location            = var.location
   ip_version          = "IPv4"
   allocation_method   = "Static"
@@ -225,7 +249,7 @@ resource "azurerm_management_lock" "ldap_jenkins_io_ipv4" {
 # Setting it with this determined public IP will ease DNS setup and changes
 resource "azurerm_public_ip" "rsyncd_jenkins_io_ipv4" {
   name                = "rsyncd-jenkins-io-ipv4"
-  resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
+  resource_group_name = azurerm_resource_group.prod_public_ips.name
   location            = var.location
   ip_version          = "IPv4"
   allocation_method   = "Static"
@@ -241,7 +265,7 @@ resource "azurerm_management_lock" "rsyncd_jenkins_io_ipv4" {
 
 resource "azurerm_public_ip" "publick8s_ipv6" {
   name                = "public-publick8s-ipv6"
-  resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
+  resource_group_name = azurerm_resource_group.prod_public_ips.name
   location            = var.location
   ip_version          = "IPv6"
   allocation_method   = "Static"
