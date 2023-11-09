@@ -116,16 +116,6 @@ resource "azurerm_dns_cname_record" "digitalocean_updates_jenkins_io" {
   tags                = local.default_tags
 }
 
-# Rsyncd service A record for rsyncd.updates.jenkins.io pointing to its own public LB IP defined in ./publick8s.tf
-resource "azurerm_dns_a_record" "rsyncd_updates_jenkins_io" {
-  name                = "rsyncd.updates"
-  zone_name           = data.azurerm_dns_zone.jenkinsio.name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 60
-  records             = [azurerm_public_ip.rsyncd_jenkins_io_ipv4.ip_address]
-  tags                = local.default_tags
-}
-
 ## NS records for each CloudFlare zone defined in https://github.com/jenkins-infra/cloudflare/blob/main/updates.jenkins.io.tf
 # West Europe
 resource "azurerm_dns_ns_record" "updates_jenkins_io_cloudflare_zone_westeurope" {
