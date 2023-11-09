@@ -249,7 +249,7 @@ resource "azurerm_management_lock" "ldap_jenkins_io_ipv4" {
 # Setting it with this determined public IP will ease DNS setup and changes
 resource "azurerm_public_ip" "rsyncd_jenkins_io_ipv4" {
   name                = "rsyncd-jenkins-io-ipv4"
-  resource_group_name = azurerm_resource_group.prod_public_ips.name
+  resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
   location            = var.location
   ip_version          = "IPv4"
   allocation_method   = "Static"
