@@ -1,8 +1,14 @@
 ####################################################################################
 ## Resources for the Controller VM
 ####################################################################################
+data "azurerm_subnet" "ci_jenkins_io_ephemeral_agents" {
+  name                 = "${data.azurerm_virtual_network.public.name}-ci_jenkins_io_agents"
+  virtual_network_name = "${data.azurerm_resource_group.public.name}-vnet"
+  resource_group_name  = data.azurerm_resource_group.public.name
+}
+
 module "ci_jenkins_io" {
-  source = "./.shared-tools/terraform/modules/azure-jenkins-controller"
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-controller"
 
   service_fqdn                 = "ci.jenkins.io"
   location                     = data.azurerm_virtual_network.public.location
@@ -13,7 +19,6 @@ module "ci_jenkins_io" {
   controller_network_name      = "${data.azurerm_resource_group.public.name}-vnet"
   controller_network_rg_name   = data.azurerm_resource_group.public.name
   controller_subnet_name       = "${data.azurerm_virtual_network.public.name}-ci_jenkins_io_controller"
-  ephemeral_agents_subnet_name = "${data.azurerm_virtual_network.public.name}-ci_jenkins_io_agents"
   controller_os_disk_size_gb   = 64
   controller_data_disk_size_gb = 512
   controller_vm_size           = "Standard_D8as_v5"
@@ -32,7 +37,132 @@ module "ci_jenkins_io" {
   controller_packer_rg_ids = [
     azurerm_resource_group.packer_images["prod"].id
   ]
+
+  agent_ip_prefixes = concat(
+    [local.external_services["s390x.${data.azurerm_dns_zone.jenkinsio.name}"]],
+    data.azurerm_subnet.ci_jenkins_io_ephemeral_agents.address_prefixes,
+  )
 }
+
+module "ci_jenkins_io_azurevm_agents" {
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-azurevm-agents"
+
+  service_fqdn                     = module.ci_jenkins_io.service_fqdn
+  service_short_stripped_name      = module.ci_jenkins_io.service_short_stripped_name
+  ephemeral_agents_network_rg_name = data.azurerm_resource_group.public.name
+  ephemeral_agents_network_name    = "${data.azurerm_resource_group.public.name}-vnet"
+  ephemeral_agents_subnet_name     = "${data.azurerm_virtual_network.public.name}-ci_jenkins_io_agents"
+  controller_rg_name               = module.ci_jenkins_io.controller_resourcegroup_name
+  controller_ips                   = compact([module.ci_jenkins_io.controller_private_ipv4, module.ci_jenkins_io.controller_public_ipv4])
+  controller_service_principal_id  = module.ci_jenkins_io.controler_service_principal_id
+  default_tags                     = local.default_tags
+  jenkins_infra_ips = {
+    gpg_keyserver_ipv4s = local.gpg_keyserver_ips["keyserver.ubuntu.com"]
+    privatevpn_subnet   = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
+  }
+}
+
+module "ci_jenkins_io_aci_agents" {
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-aci-agents"
+
+  service_short_stripped_name     = module.ci_jenkins_io.service_short_stripped_name
+  aci_agents_resource_group_name  = module.ci_jenkins_io_azurevm_agents.ephemeral_agents_resource_group_name
+  controller_service_principal_id = module.ci_jenkins_io.controler_service_principal_id
+}
+
+### ACI Agents
+moved {
+  from = module.ci_jenkins_io.azurerm_role_definition.ephemeral_agents_aci_contributor
+  to   = module.ci_jenkins_io_aci_agents.azurerm_role_definition.ephemeral_agents_aci_contributor
+}
+moved {
+  from = module.ci_jenkins_io.azurerm_role_assignment.controller_ephemeral_agents_aci_contributor
+  to   = module.ci_jenkins_io_aci_agents.azurerm_role_assignment.controller_ephemeral_agents_aci_contributor
+}
+
+### Ephemeral Agents
+# Resources
+moved {
+  from = module.ci_jenkins_io.azurerm_resource_group.ephemeral_agents
+  to   = module.ci_jenkins_io_azurevm_agents.azurerm_resource_group.ephemeral_agents
+}
+moved {
+  from = module.ci_jenkins_io.azurerm_storage_account.ephemeral_agents
+  to   = module.ci_jenkins_io_azurevm_agents.azurerm_storage_account.ephemeral_agents
+}
+
+# AzureAD
+moved {
+  from = module.ci_jenkins_io.azurerm_role_assignment.controller_contributor_in_ephemeral_agent_resourcegroup
+  to   = module.ci_jenkins_io_azurevm_agents.azurerm_role_assignment.controller_contributor_in_ephemeral_agent_resourcegroup
+}
+moved {
+  from = module.ci_jenkins_io.azurerm_role_assignment.controller_io_manage_net_interfaces_subnet_ephemeral_agents
+  to   = module.ci_jenkins_io_azurevm_agents.azurerm_role_assignment.controller_io_manage_net_interfaces_subnet_ephemeral_agents
+}
+
+# NSGs
+moved {
+  from = module.ci_jenkins_io.azurerm_network_security_group.ephemeral_agents
+  to   = module.ci_jenkins_io_azurevm_agents.azurerm_network_security_group.ephemeral_agents
+}
+moved {
+  from = module.ci_jenkins_io.azurerm_subnet_network_security_group_association.ephemeral_agents
+  to   = module.ci_jenkins_io_azurevm_agents.azurerm_subnet_network_security_group_association.ephemeral_agents
+}
+moved {
+  from = module.ci_jenkins_io.azurerm_resource_group.ephemeral_agents
+  to   = module.ci_jenkins_io_azurevm_agents.azurerm_resource_group.ephemeral_agents
+}
+moved {
+  from = module.ci_jenkins_io.azurerm_network_security_rule.allow_inbound_ssh_from_controller_to_ephemeral_agents
+  to   = module.ci_jenkins_io_azurevm_agents.azurerm_network_security_rule.allow_inbound_ssh_from_controller_to_ephemeral_agents
+}
+moved {
+  from = module.ci_jenkins_io.azurerm_network_security_rule.allow_outbound_hkp_tcp_from_ephemeral_agents_subnet_to_internet
+  to   = module.ci_jenkins_io_azurevm_agents.azurerm_network_security_rule.allow_outbound_hkp_tcp_from_ephemeral_agents_subnet_to_internet
+}
+moved {
+  from = module.ci_jenkins_io.azurerm_network_security_rule.allow_outbound_hkp_udp_from_ephemeral_agents_subnet_to_internet
+  to   = module.ci_jenkins_io_azurevm_agents.azurerm_network_security_rule.allow_outbound_hkp_udp_from_ephemeral_agents_subnet_to_internet
+}
+moved {
+  from = module.ci_jenkins_io.azurerm_network_security_rule.allow_outbound_http_from_ephemeral_agents_to_internet
+  to   = module.ci_jenkins_io_azurevm_agents.azurerm_network_security_rule.allow_outbound_http_from_ephemeral_agents_to_internet
+}
+moved {
+  from = module.ci_jenkins_io.azurerm_network_security_rule.allow_outbound_jenkins_from_ephemeral_agents_to_controller
+  to   = module.ci_jenkins_io_azurevm_agents.azurerm_network_security_rule.allow_outbound_jenkins_from_ephemeral_agents_to_controller
+}
+moved {
+  from = module.ci_jenkins_io.azurerm_network_security_rule.allow_outbound_ssh_from_ephemeral_agents_to_internet
+  to   = module.ci_jenkins_io_azurevm_agents.azurerm_network_security_rule.allow_outbound_ssh_from_ephemeral_agents_to_internet
+}
+moved {
+  from = module.ci_jenkins_io.azurerm_network_security_rule.deny_all_inbound_from_vnet_to_ephemeral_agents
+  to   = module.ci_jenkins_io_azurevm_agents.azurerm_network_security_rule.deny_all_inbound_from_vnet_to_ephemeral_agents
+}
+moved {
+  from = module.ci_jenkins_io.azurerm_network_security_rule.deny_all_outbound_from_ephemeral_agents_to_internet
+  to   = module.ci_jenkins_io_azurevm_agents.azurerm_network_security_rule.deny_all_outbound_from_ephemeral_agents_to_internet
+}
+moved {
+  from = module.ci_jenkins_io.azurerm_network_security_rule.deny_all_outbound_from_ephemeral_agents_to_vnet
+  to   = module.ci_jenkins_io_azurevm_agents.azurerm_network_security_rule.deny_all_outbound_from_ephemeral_agents_to_vnet
+}
+moved {
+  from = module.ci_jenkins_io.azurerm_network_security_rule.deny_all_outbound_from_ephemeral_agents_to_vnet
+  to   = module.ci_jenkins_io_azurevm_agents.azurerm_network_security_rule.deny_all_outbound_from_ephemeral_agents_to_vnet
+}
+moved {
+  from = module.ci_jenkins_io.azurerm_network_security_rule.allow_inbound_ssh_from_privatevpn_to_ephemeral_agents
+  to   = module.ci_jenkins_io_azurevm_agents.azurerm_network_security_rule.allow_inbound_ssh_from_privatevpn_to_ephemeral_agents
+}
+moved {
+  from = module.ci_jenkins_io.azurerm_network_security_rule.allow_outbound_ssh_from_controller_to_ephemeral_agents
+  to   = module.ci_jenkins_io.azurerm_network_security_rule.allow_outbound_ssh_from_controller_to_agents
+}
+
 ## Service DNS records
 resource "azurerm_dns_cname_record" "ci_jenkins_io" {
   name                = trimsuffix(trimsuffix(module.ci_jenkins_io.service_fqdn, data.azurerm_dns_zone.jenkinsio.name), ".")
@@ -49,32 +179,4 @@ resource "azurerm_dns_cname_record" "assets_ci_jenkins_io" {
   ttl                 = 60
   record              = module.ci_jenkins_io.controller_public_fqdn
   tags                = local.default_tags
-}
-####################################################################################
-## Network Security Group and rules
-####################################################################################
-## Outbound Rules (different set of priorities than Inbound rules) ##
-# Ignore the rule as it does not detect the IP restriction to only puppet.jenkins.io"s host
-#trivy:ignore:azure-network-no-public-egress
-resource "azurerm_network_security_rule" "allow_outbound_ssh_from_ci_controller_to_s390x" {
-  name                        = "allow-outbound-ssh-from-ci-controller-to-s390x"
-  priority                    = 4088
-  direction                   = "Outbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  source_address_prefix       = module.ci_jenkins_io.controller_private_ipv4
-  destination_port_ranges     = ["22"]
-  destination_address_prefix  = local.external_services["s390x.${data.azurerm_dns_zone.jenkinsio.name}"]
-  resource_group_name         = module.ci_jenkins_io.controller_resourcegroup_name
-  network_security_group_name = module.ci_jenkins_io.controller_nsg_name
-}
-
-moved {
-  from = azurerm_network_security_rule.allow_inbound_ssh_from_privatevpn_to_ci_controller
-  to   = module.ci_jenkins_io.azurerm_network_security_rule.allow_inbound_ssh_from_privatevpn_to_controller
-}
-moved {
-  from = azurerm_network_security_rule.allow_inbound_ssh_from_privatevpn_to_ephemeral_agents
-  to   = module.ci_jenkins_io.azurerm_network_security_rule.allow_inbound_ssh_from_privatevpn_to_ephemeral_agents
 }
