@@ -165,6 +165,10 @@ moved {
   from = module.cert_ci_jenkins_io.azurerm_network_security_rule.allow_inbound_ssh_from_privatevpn_to_ephemeral_agents
   to   = module.cert_ci_jenkins_io_azurevm_agents.azurerm_network_security_rule.allow_inbound_ssh_from_privatevpn_to_ephemeral_agents
 }
+moved {
+  from = module.cert_ci_jenkins_io.azurerm_network_security_rule.allow_outbound_ssh_from_controller_to_ephemeral_agents
+  to   = module.cert_ci_jenkins_io.azurerm_network_security_rule.allow_outbound_ssh_from_controller_to_agents
+}
 
 ## Service DNS records
 resource "azurerm_dns_a_record" "cert_ci_jenkins_io_controller" {
