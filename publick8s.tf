@@ -23,6 +23,10 @@ data "azurerm_subnet" "public_vnet_data_tier" {
   virtual_network_name = data.azurerm_virtual_network.public.name
 }
 
+locals {
+  publick8s_compute_zones = [3]
+}
+
 #trivy:ignore:azure-container-logging #trivy:ignore:azure-container-limit-authorized-ips
 resource "azurerm_kubernetes_cluster" "publick8s" {
   name                              = "publick8s-${random_pet.suffix_publick8s.id}"
@@ -70,7 +74,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     vnet_subnet_id              = data.azurerm_subnet.publick8s_tier.id
     tags                        = local.default_tags
     temporary_name_for_rotation = "systempool2"
-    zones                       = [3]
+    zones                       = local.publick8s_compute_zones
   }
 
   identity {
@@ -90,7 +94,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "publicpool" {
   enable_auto_scaling   = true
   min_count             = 0
   max_count             = 10
-  zones                 = [3]
+  zones                 = local.publick8s_compute_zones
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
 
   lifecycle {
@@ -110,8 +114,32 @@ resource "azurerm_kubernetes_cluster_node_pool" "x86medium" {
   enable_auto_scaling   = true
   min_count             = 0
   max_count             = 10
-  zones                 = [3]
+  zones                 = local.publick8s_compute_zones
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
+
+  lifecycle {
+    ignore_changes = [node_count]
+  }
+
+  tags = local.default_tags
+}
+
+resource "azurerm_kubernetes_cluster_node_pool" "arm64small1" {
+  name                  = "arm64small1"
+  vm_size               = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
+  os_disk_type          = "Ephemeral"
+  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
+  orchestrator_version  = local.kubernetes_versions["publick8s"]
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
+  enable_auto_scaling   = true
+  min_count             = 0
+  max_count             = 10
+  zones                 = local.publick8s_compute_zones
+  vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
+
+  node_taints = [
+    "kubernetes.io/arch=arm64:NoSchedule",
+  ]
 
   lifecycle {
     ignore_changes = [node_count]
