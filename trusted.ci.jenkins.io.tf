@@ -52,10 +52,9 @@ module "trusted_ci_jenkins_io" {
   controller_datadisk_name      = "trusted-ci-controller-data-disk"
 
   jenkins_infra_ips = {
-    ldap_ipv4           = azurerm_public_ip.ldap_jenkins_io_ipv4.ip_address
-    puppet_ipv4         = azurerm_public_ip.puppet_jenkins_io.ip_address
-    gpg_keyserver_ipv4s = local.gpg_keyserver_ips["keyserver.ubuntu.com"]
-    privatevpn_subnet   = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
+    ldap_ipv4         = azurerm_public_ip.ldap_jenkins_io_ipv4.ip_address
+    puppet_ipv4       = azurerm_public_ip.puppet_jenkins_io.ip_address
+    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   }
 
   controller_service_principal_ids = [
@@ -86,8 +85,7 @@ module "trusted_ci_jenkins_io_azurevm_agents" {
   controller_service_principal_id  = module.trusted_ci_jenkins_io.controler_service_principal_id
   default_tags                     = local.default_tags
   jenkins_infra_ips = {
-    gpg_keyserver_ipv4s = local.gpg_keyserver_ips["keyserver.ubuntu.com"]
-    privatevpn_subnet   = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
+    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   }
 }
 
