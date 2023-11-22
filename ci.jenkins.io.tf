@@ -68,6 +68,12 @@ module "ci_jenkins_io_azurevm_agents" {
   }
 }
 
+resource "azurerm_resource_group" "controller_jenkins_sponsorship" {
+  name     = module.ci_jenkins_io.controller_resourcegroup_name # Same name on both subscriptions
+  location = var.location
+  tags     = local.default_tags
+}
+
 module "ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
   providers = {
     azurerm = azurerm.jenkins-sponsorship
@@ -79,7 +85,7 @@ module "ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
   ephemeral_agents_network_rg_name = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents_jenkins_sponsorship.resource_group_name
   ephemeral_agents_network_name    = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents_jenkins_sponsorship.virtual_network_name
   ephemeral_agents_subnet_name     = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents_jenkins_sponsorship.name
-  controller_rg_name               = module.ci_jenkins_io.controller_resourcegroup_name
+  controller_rg_name               = azurerm_resource_group.controller_jenkins_sponsorship.name
   controller_ips                   = compact([module.ci_jenkins_io.controller_private_ipv4, module.ci_jenkins_io.controller_public_ipv4])
   controller_service_principal_id  = module.ci_jenkins_io.controler_service_principal_id
   default_tags                     = local.default_tags
