@@ -69,6 +69,7 @@ module "ci_jenkins_io_azurevm_agents" {
 }
 
 resource "azurerm_resource_group" "controller_jenkins_sponsorship" {
+  provider = azurerm.jenkins-sponsorship
   name     = module.ci_jenkins_io.controller_resourcegroup_name # Same name on both subscriptions
   location = var.location
   tags     = local.default_tags
@@ -89,6 +90,7 @@ module "ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
   controller_ips                   = compact([module.ci_jenkins_io.controller_private_ipv4, module.ci_jenkins_io.controller_public_ipv4])
   controller_service_principal_id  = module.ci_jenkins_io.controler_service_principal_id
   default_tags                     = local.default_tags
+  storage_account_name             = "cijenkinsioagentssub" # Max 24 chars
 
   jenkins_infra_ips = {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
