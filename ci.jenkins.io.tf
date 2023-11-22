@@ -3,8 +3,15 @@
 ####################################################################################
 data "azurerm_subnet" "ci_jenkins_io_ephemeral_agents" {
   name                 = "${data.azurerm_virtual_network.public.name}-ci_jenkins_io_agents"
-  virtual_network_name = "${data.azurerm_resource_group.public.name}-vnet"
-  resource_group_name  = data.azurerm_resource_group.public.name
+  virtual_network_name = data.azurerm_virtual_network.public.name
+  resource_group_name  = data.azurerm_virtual_network.public.resource_group_name
+}
+
+data "azurerm_subnet" "ci_jenkins_io_ephemeral_agents_jenkins_sponsorship" {
+  provider             = azurerm.jenkins-sponsorship
+  name                 = "${data.azurerm_virtual_network.public_jenkins_sponsorship.name}-ci_jenkins_io_agents"
+  virtual_network_name = data.azurerm_virtual_network.public_jenkins_sponsorship.name
+  resource_group_name  = data.azurerm_virtual_network.public_jenkins_sponsorship.resource_group_name
 }
 
 module "ci_jenkins_io" {
@@ -48,9 +55,30 @@ module "ci_jenkins_io_azurevm_agents" {
 
   service_fqdn                     = module.ci_jenkins_io.service_fqdn
   service_short_stripped_name      = module.ci_jenkins_io.service_short_stripped_name
-  ephemeral_agents_network_rg_name = data.azurerm_resource_group.public.name
-  ephemeral_agents_network_name    = "${data.azurerm_resource_group.public.name}-vnet"
-  ephemeral_agents_subnet_name     = "${data.azurerm_virtual_network.public.name}-ci_jenkins_io_agents"
+  ephemeral_agents_network_rg_name = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents.resource_group_name
+  ephemeral_agents_network_name    = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents.virtual_network_name
+  ephemeral_agents_subnet_name     = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents.name
+  controller_rg_name               = module.ci_jenkins_io.controller_resourcegroup_name
+  controller_ips                   = compact([module.ci_jenkins_io.controller_private_ipv4, module.ci_jenkins_io.controller_public_ipv4])
+  controller_service_principal_id  = module.ci_jenkins_io.controler_service_principal_id
+  default_tags                     = local.default_tags
+
+  jenkins_infra_ips = {
+    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
+  }
+}
+
+module "ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
+  providers = {
+    azurerm = azurerm.jenkins-sponsorship
+  }
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-azurevm-agents"
+
+  service_fqdn                     = module.ci_jenkins_io.service_fqdn
+  service_short_stripped_name      = module.ci_jenkins_io.service_short_stripped_name
+  ephemeral_agents_network_rg_name = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents_jenkins_sponsorship.resource_group_name
+  ephemeral_agents_network_name    = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents_jenkins_sponsorship.virtual_network_name
+  ephemeral_agents_subnet_name     = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents_jenkins_sponsorship.name
   controller_rg_name               = module.ci_jenkins_io.controller_resourcegroup_name
   controller_ips                   = compact([module.ci_jenkins_io.controller_private_ipv4, module.ci_jenkins_io.controller_public_ipv4])
   controller_service_principal_id  = module.ci_jenkins_io.controler_service_principal_id
