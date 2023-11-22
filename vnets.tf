@@ -6,6 +6,10 @@
 data "azurerm_resource_group" "public" {
   name = "public"
 }
+data "azurerm_resource_group" "public_jenkins_sponsorship" {
+  provider = azurerm.jenkins-sponsorship
+  name     = "public-jenkins-sponsorship"
+}
 data "azurerm_resource_group" "private" {
   name = "private"
 }
@@ -15,6 +19,11 @@ data "azurerm_resource_group" "private" {
 data "azurerm_virtual_network" "public" {
   name                = "${data.azurerm_resource_group.public.name}-vnet"
   resource_group_name = data.azurerm_resource_group.public.name
+}
+data "azurerm_virtual_network" "public_jenkins_sponsorship" {
+  provider            = azurerm.jenkins-sponsorship
+  name                = "${data.azurerm_resource_group.public_jenkins_sponsorship.name}-vnet"
+  resource_group_name = data.azurerm_resource_group.public_jenkins_sponsorship.name
 }
 data "azurerm_virtual_network" "private" {
   name                = "${data.azurerm_resource_group.private.name}-vnet"
