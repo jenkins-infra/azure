@@ -4,7 +4,11 @@ resource "azurerm_resource_group" "contributors_jenkins_io" {
   tags     = local.default_tags
 }
 
-resource "azurerm_storage_account" "contributorsjenkinsio" {
+moved {
+  from = azurerm_storage_account.contributorsjenkinsio
+  to   = azurerm_storage_account.contributors_jenkins_io
+}
+resource "azurerm_storage_account" "contributors_jenkins_io" {
   name                      = "contributorsjenkinsio"
   resource_group_name       = azurerm_resource_group.contributors_jenkins_io.name
   location                  = azurerm_resource_group.contributors_jenkins_io.location
@@ -26,3 +30,8 @@ resource "azurerm_storage_account" "contributorsjenkinsio" {
   tags = local.default_tags
 }
 
+resource "azurerm_storage_share" "contributors_jenkins_io" {
+  name                 = "contributors-jenkins-io"
+  storage_account_name = azurerm_storage_account.contributors_jenkins_io.name
+  quota                = 5
+}
