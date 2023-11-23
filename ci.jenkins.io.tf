@@ -68,11 +68,28 @@ module "ci_jenkins_io_azurevm_agents" {
   }
 }
 
+## Sponsorship subscription specific resources for controller
 resource "azurerm_resource_group" "controller_jenkins_sponsorship" {
   provider = azurerm.jenkins-sponsorship
   name     = module.ci_jenkins_io.controller_resourcegroup_name # Same name on both subscriptions
   location = var.location
   tags     = local.default_tags
+}
+# Required to allow controller to check for subnets inside the sponsorship network
+resource "azurerm_role_definition" "controller_vnet_sponsorship_reader" {
+  provider = azurerm.jenkins-sponsorship
+  name     = "Read-ci-jenkins-io-sponsorship-VNET"
+  scope    = data.azurerm_virtual_network.public_jenkins_sponsorship.id
+
+  permissions {
+    actions = ["Microsoft.Network/virtualNetworks/read"]
+  }
+}
+resource "azurerm_role_assignment" "controller_vnet_reader" {
+  provider           = azurerm.jenkins-sponsorship
+  scope              = data.azurerm_virtual_network.public_jenkins_sponsorship.id
+  role_definition_id = azurerm_role_definition.controller_vnet_sponsorship_reader.role_definition_resource_id
+  principal_id       = module.ci_jenkins_io.controler_service_principal_id
 }
 
 module "ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
