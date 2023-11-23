@@ -23,7 +23,7 @@ resource "azurerm_storage_account" "contributors_jenkins_io" {
     ip_rules = flatten(concat(
       [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value]
     ))
-    virtual_network_subnet_ids = [data.azurerm_subnet.publick8s_tier.id]
+    virtual_network_subnet_ids = [data.azurerm_subnet.privatek8s_tier.id, data.azurerm_subnet.publick8s_tier.id]
     bypass                     = ["AzureServices"]
   }
 
