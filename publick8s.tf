@@ -181,6 +181,19 @@ resource "kubernetes_storage_class" "managed_csi_premium_retain_public" {
   allow_volume_expansion = true
 }
 
+resource "kubernetes_storage_class" "managed_csi_premium_ZRS_retain_public" {
+  metadata {
+    name = "managed-csi-premium-zrs-retain"
+  }
+  storage_provisioner = "disk.csi.azure.com"
+  reclaim_policy      = "Retain"
+  parameters = {
+    skuname = "Premium_ZRS"
+  }
+  provider               = kubernetes.publick8s
+  allow_volume_expansion = true
+}
+
 resource "kubernetes_storage_class" "azurefile_csi_premium_retain_public" {
   metadata {
     name = "azurefile-csi-premium-retain"
