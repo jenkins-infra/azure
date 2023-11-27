@@ -4,10 +4,6 @@ resource "azurerm_resource_group" "contributors_jenkins_io" {
   tags     = local.default_tags
 }
 
-moved {
-  from = azurerm_storage_account.contributorsjenkinsio
-  to   = azurerm_storage_account.contributors_jenkins_io
-}
 resource "azurerm_storage_account" "contributors_jenkins_io" {
   name                      = "contributorsjenkinsio"
   resource_group_name       = azurerm_resource_group.contributors_jenkins_io.name
