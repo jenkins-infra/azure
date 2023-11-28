@@ -59,7 +59,6 @@ data "azurerm_storage_account_sas" "updates_jenkins_io" {
 }
 
 output "updates_jenkins_io_share_url" {
-  sensitive = true
   value     = azurerm_storage_share.updates_jenkins_io.url
 }
 

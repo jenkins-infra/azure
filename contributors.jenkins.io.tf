@@ -68,7 +68,6 @@ data "azurerm_storage_account_sas" "contributors_jenkins_io" {
 }
 
 output "contributors_jenkins_io_share_url" {
-  sensitive = true
   value     = azurerm_storage_share.contributors_jenkins_io.url
 }
 
