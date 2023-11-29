@@ -68,7 +68,7 @@ data "azurerm_storage_account_sas" "contributors_jenkins_io" {
 }
 
 output "contributors_jenkins_io_share_url" {
-  value     = azurerm_storage_share.contributors_jenkins_io.url
+  value = azurerm_storage_share.contributors_jenkins_io.url
 }
 
 output "contributors_jenkins_io_sas_query_string" {

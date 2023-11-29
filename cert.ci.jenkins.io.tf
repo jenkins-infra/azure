@@ -71,14 +71,6 @@ module "cert_ci_jenkins_io_azurevm_agents" {
   }
 }
 
-module "cert_ci_jenkins_io_aci_agents" {
-  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-aci-agents"
-
-  service_short_stripped_name     = module.cert_ci_jenkins_io.service_short_stripped_name
-  aci_agents_resource_group_name  = module.cert_ci_jenkins_io_azurevm_agents.ephemeral_agents_resource_group_name
-  controller_service_principal_id = module.cert_ci_jenkins_io.controler_service_principal_id
-}
-
 ## Service DNS records
 resource "azurerm_dns_a_record" "cert_ci_jenkins_io_controller" {
   name                = "controller"
