@@ -59,7 +59,7 @@ data "azurerm_storage_account_sas" "updates_jenkins_io" {
 }
 
 output "updates_jenkins_io_share_url" {
-  value     = azurerm_storage_share.updates_jenkins_io.url
+  value = azurerm_storage_share.updates_jenkins_io.url
 }
 
 output "updates_jenkins_io_sas_query_string" {
