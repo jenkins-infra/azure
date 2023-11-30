@@ -128,7 +128,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   tags = local.default_tags
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "arm64small" {
+resource "azurerm_kubernetes_cluster_node_pool" "infraciarm64" {
   name                  = "arm64small"
   vm_size               = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
   os_disk_type          = "Ephemeral"
