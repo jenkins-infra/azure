@@ -153,8 +153,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "infraciarm64" {
     "jenkins=infra.ci.jenkins.io:NoSchedule",
     "kubernetes.azure.com/scalesetpriority=spot:NoSchedule",
   ]
-
-
   lifecycle {
     ignore_changes = [node_count]
   }
