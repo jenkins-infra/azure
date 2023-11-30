@@ -128,6 +128,40 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   tags = local.default_tags
 }
 
+resource "azurerm_kubernetes_cluster_node_pool" "arm64small" {
+  name                  = "arm64small"
+  vm_size               = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
+  os_disk_type          = "Ephemeral"
+  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
+  orchestrator_version  = local.kubernetes_versions["privatek8s"]
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
+  enable_auto_scaling   = true
+  min_count             = 0
+  max_count             = 10
+  zones                 = [1]
+  vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
+
+  # Spot instances
+  priority        = "Spot"
+  eviction_policy = "Delete"
+  spot_max_price  = "-1" # in $, -1 = On demand pricing
+  # Note: label and taint added automatically when in "Spot" priority, putting it here to explicit them
+  node_labels = {
+    "kubernetes.azure.com/scalesetpriority" = "spot"
+  }
+  node_taints = [
+    "jenkins=infra.ci.jenkins.io:NoSchedule",
+    "kubernetes.azure.com/scalesetpriority=spot:NoSchedule",
+  ]
+
+
+  lifecycle {
+    ignore_changes = [node_count]
+  }
+
+  tags = local.default_tags
+}
+
 resource "azurerm_kubernetes_cluster_node_pool" "releasepool" {
   name                  = "releasepool"
   vm_size               = "Standard_D8s_v3" # 8 vCPU 32 GiB RAM
