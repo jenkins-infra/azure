@@ -131,14 +131,14 @@ resource "azurerm_kubernetes_cluster_node_pool" "x86medium" {
   os_disk_size_gb       = 200 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["publick8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
-  enable_auto_scaling   = true
-  min_count             = 0
-  max_count             = 10
+  enable_auto_scaling   = false
   zones                 = local.publick8s_compute_zones
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
 
   lifecycle {
-    ignore_changes = [node_count]
+    ignore_changes = [
+      node_count, # as per https://github.com/jenkins-infra/helpdesk/issues/3827
+    ]
   }
 
   tags = local.default_tags
