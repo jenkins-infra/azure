@@ -100,7 +100,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "systempool_secondary" {
   zones                       = local.publick8s_compute_zones
 
   node_taints = [
-    "kubernetes.azure.com/mode=system:NoSchedule",
+    "CriticalAddonsOnly=true:NoSchedule",
   ]
 }
 
