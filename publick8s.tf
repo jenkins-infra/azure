@@ -86,7 +86,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
 
 resource "azurerm_kubernetes_cluster_node_pool" "systempool_secondary" {
   name                        = "systempool3"
-  mode                        = "system"
+  mode                        = "System"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   vm_size                     = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
   kubelet_disk_type           = "OS"
