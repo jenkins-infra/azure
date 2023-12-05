@@ -112,13 +112,13 @@ resource "azurerm_kubernetes_cluster_node_pool" "x86medium" {
   orchestrator_version  = local.kubernetes_versions["publick8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   enable_auto_scaling   = false
-  min_count             = 0
-  max_count             = 10
   zones                 = local.publick8s_compute_zones
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
 
   lifecycle {
-    ignore_changes = [node_count]
+    ignore_changes = [
+      node_count, # as per https://github.com/jenkins-infra/helpdesk/issues/3827
+    ]
   }
 
   tags = local.default_tags
