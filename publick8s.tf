@@ -84,6 +84,24 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   tags = local.default_tags
 }
 
+resource "azurerm_kubernetes_cluster_node_pool" "systempool_secondary" {
+  name                        = "systempool3"
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
+  vm_size                     = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
+  os_disk_type                = "Ephemeral"
+  os_disk_size_gb             = 30
+  orchestrator_version        = local.kubernetes_versions["publick8s"]
+  enable_auto_scaling         = false
+  node_count                  = 1
+  vnet_subnet_id              = data.azurerm_subnet.publick8s_tier.id
+  tags                        = local.default_tags
+  zones                       = local.publick8s_compute_zones
+
+  node_taints = [
+    "kubernetes.azure.com/mode=system:NoSchedule",
+  ]
+}
+
 resource "azurerm_kubernetes_cluster_node_pool" "x86small" {
   name                  = "x86small"
   vm_size               = "Standard_D4s_v3" # 4 vCPU, 16 GB RAM, 32 GB disk, 8 000 IOPS
