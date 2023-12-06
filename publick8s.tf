@@ -65,16 +65,21 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   }
 
   default_node_pool {
-    name                        = "systempool"
-    vm_size                     = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
-    os_disk_type                = "Ephemeral"
-    os_disk_size_gb             = 30
-    orchestrator_version        = local.kubernetes_versions["publick8s"]
-    node_count                  = 1
-    vnet_subnet_id              = data.azurerm_subnet.publick8s_tier.id
-    tags                        = local.default_tags
-    temporary_name_for_rotation = "systempool2"
-    zones                       = local.publick8s_compute_zones
+    name                         = "systempool3"
+    only_critical_addons_enabled = true
+    vm_size                      = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
+    kubelet_disk_type            = "OS"
+    os_disk_type                 = "Ephemeral"
+    os_disk_size_gb              = 50
+    orchestrator_version         = local.kubernetes_versions["publick8s"]
+    enable_auto_scaling          = false
+    node_count                   = 1
+    vnet_subnet_id               = data.azurerm_subnet.publick8s_tier.id
+    tags                         = local.default_tags
+    zones                        = local.publick8s_compute_zones
+    # node_taints = [
+    #   "CriticalAddonsOnly=true:NoSchedule",
+    # ]
   }
 
   identity {
@@ -84,25 +89,12 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   tags = local.default_tags
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "systempool_secondary" {
-  name                        = "systempool3"
-  mode                        = "System"
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
-  vm_size                     = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
-  kubelet_disk_type           = "OS"
-  os_disk_type                = "Ephemeral"
-  os_disk_size_gb             = 50
-  orchestrator_version        = local.kubernetes_versions["publick8s"]
-  enable_auto_scaling         = false
-  node_count                  = 1
-  vnet_subnet_id              = data.azurerm_subnet.publick8s_tier.id
-  tags                        = local.default_tags
-  zones                       = local.publick8s_compute_zones
 
-  node_taints = [
-    "CriticalAddonsOnly=true:NoSchedule",
-  ]
+data "azurerm_kubernetes_cluster" "publick8s" {
+  name                = "publick8s-${random_pet.suffix_publick8s.id}"
+  resource_group_name = azurerm_resource_group.publick8s.name
 }
+
 
 resource "azurerm_kubernetes_cluster_node_pool" "x86small" {
   name                  = "x86small"
@@ -221,31 +213,31 @@ resource "kubernetes_storage_class" "managed_csi_premium_retain_public" {
   allow_volume_expansion = true
 }
 
-resource "kubernetes_storage_class" "managed_csi_premium_ZRS_retain_public" {
-  metadata {
-    name = "managed-csi-premium-zrs-retain"
-  }
-  storage_provisioner = "disk.csi.azure.com"
-  reclaim_policy      = "Retain"
-  parameters = {
-    skuname = "Premium_ZRS"
-  }
-  provider               = kubernetes.publick8s
-  allow_volume_expansion = true
-}
+# resource "kubernetes_storage_class" "managed_csi_premium_ZRS_retain_public" {
+#   metadata {
+#     name = "managed-csi-premium-zrs-retain"
+#   }
+#   storage_provisioner = "disk.csi.azure.com"
+#   reclaim_policy      = "Retain"
+#   parameters = {
+#     skuname = "Premium_ZRS"
+#   }
+#   provider               = kubernetes.publick8s
+#   allow_volume_expansion = true
+# }
 
-resource "kubernetes_storage_class" "azurefile_csi_premium_retain_public" {
-  metadata {
-    name = "azurefile-csi-premium-retain"
-  }
-  storage_provisioner = "file.csi.azure.com"
-  reclaim_policy      = "Retain"
-  parameters = {
-    skuname = "Premium_LRS"
-  }
-  mount_options = ["dir_mode=0777", "file_mode=0777", "uid=1000", "gid=1000", "mfsymlinks", "nobrl"]
-  provider      = kubernetes.publick8s
-}
+# resource "kubernetes_storage_class" "azurefile_csi_premium_retain_public" {
+#   metadata {
+#     name = "azurefile-csi-premium-retain"
+#   }
+#   storage_provisioner = "file.csi.azure.com"
+#   reclaim_policy      = "Retain"
+#   parameters = {
+#     skuname = "Premium_LRS"
+#   }
+#   mount_options = ["dir_mode=0777", "file_mode=0777", "uid=1000", "gid=1000", "mfsymlinks", "nobrl"]
+#   provider      = kubernetes.publick8s
+# }
 
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/publick8s.yaml
 resource "azurerm_public_ip" "publick8s_ipv4" {
@@ -343,20 +335,20 @@ output "ldap_jenkins_io_ipv4_address" {
 }
 
 # Configure the jenkins-infra/kubernetes-management admin service account
-module "publick8s_admin_sa" {
-  providers = {
-    kubernetes = kubernetes.publick8s
-  }
-  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
-  cluster_name               = azurerm_kubernetes_cluster.publick8s.name
-  cluster_hostname           = azurerm_kubernetes_cluster.publick8s.kube_config.0.host
-  cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.publick8s.kube_config.0.cluster_ca_certificate
-}
+# module "publick8s_admin_sa" {
+#   providers = {
+#     kubernetes = kubernetes.publick8s
+#   }
+#   source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
+#   cluster_name               = azurerm_kubernetes_cluster.publick8s.name
+#   cluster_hostname           = azurerm_kubernetes_cluster.publick8s.kube_config.0.host
+#   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.publick8s.kube_config.0.cluster_ca_certificate
+# }
 
-output "kubeconfig_publick8s" {
-  sensitive = true
-  value     = module.publick8s_admin_sa.kubeconfig
-}
+# output "kubeconfig_publick8s" {
+#   sensitive = true
+#   value     = module.publick8s_admin_sa.kubeconfig
+# }
 
 output "publick8s_kube_config_command" {
   value = "az aks get-credentials --name ${azurerm_kubernetes_cluster.publick8s.name} --resource-group ${azurerm_kubernetes_cluster.publick8s.resource_group_name}"
