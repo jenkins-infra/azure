@@ -65,16 +65,18 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   }
 
   default_node_pool {
-    name                        = "systempool"
-    vm_size                     = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
-    os_disk_type                = "Ephemeral"
-    os_disk_size_gb             = 30
-    orchestrator_version        = local.kubernetes_versions["publick8s"]
-    node_count                  = 1
-    vnet_subnet_id              = data.azurerm_subnet.publick8s_tier.id
-    tags                        = local.default_tags
-    temporary_name_for_rotation = "systempool2"
-    zones                       = local.publick8s_compute_zones
+    name                         = "systempool3"
+    only_critical_addons_enabled = true               # This property is the only valid way to add the "CriticalAddonsOnly=true:NoSchedule" taint to the default node pool
+    vm_size                      = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
+    kubelet_disk_type            = "OS"
+    os_disk_type                 = "Ephemeral"
+    os_disk_size_gb              = 50
+    orchestrator_version         = local.kubernetes_versions["publick8s"]
+    enable_auto_scaling          = false
+    node_count                   = 1
+    vnet_subnet_id               = data.azurerm_subnet.publick8s_tier.id
+    tags                         = local.default_tags
+    zones                        = local.publick8s_compute_zones
   }
 
   identity {
@@ -84,25 +86,12 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   tags = local.default_tags
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "systempool_secondary" {
-  name                        = "systempool3"
-  mode                        = "System"
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
-  vm_size                     = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
-  kubelet_disk_type           = "OS"
-  os_disk_type                = "Ephemeral"
-  os_disk_size_gb             = 50
-  orchestrator_version        = local.kubernetes_versions["publick8s"]
-  enable_auto_scaling         = false
-  node_count                  = 1
-  vnet_subnet_id              = data.azurerm_subnet.publick8s_tier.id
-  tags                        = local.default_tags
-  zones                       = local.publick8s_compute_zones
 
-  node_taints = [
-    "CriticalAddonsOnly=true:NoSchedule",
-  ]
+data "azurerm_kubernetes_cluster" "publick8s" {
+  name                = "publick8s-${random_pet.suffix_publick8s.id}"
+  resource_group_name = azurerm_resource_group.publick8s.name
 }
+
 
 resource "azurerm_kubernetes_cluster_node_pool" "x86small" {
   name                  = "x86small"
