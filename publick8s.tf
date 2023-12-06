@@ -66,7 +66,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
 
   default_node_pool {
     name                         = "systempool3"
-    only_critical_addons_enabled = true
+    only_critical_addons_enabled = true               # This property is the only valid way to add the "CriticalAddonsOnly=true:NoSchedule" taint to the default node pool
     vm_size                      = "Standard_D2as_v4" # 2 vCPU, 8 GB RAM, 16 GB disk, 4000 IOPS
     kubelet_disk_type            = "OS"
     os_disk_type                 = "Ephemeral"
@@ -77,9 +77,6 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     vnet_subnet_id               = data.azurerm_subnet.publick8s_tier.id
     tags                         = local.default_tags
     zones                        = local.publick8s_compute_zones
-    # node_taints = [
-    #   "CriticalAddonsOnly=true:NoSchedule",
-    # ]
   }
 
   identity {
@@ -213,31 +210,31 @@ resource "kubernetes_storage_class" "managed_csi_premium_retain_public" {
   allow_volume_expansion = true
 }
 
-# resource "kubernetes_storage_class" "managed_csi_premium_ZRS_retain_public" {
-#   metadata {
-#     name = "managed-csi-premium-zrs-retain"
-#   }
-#   storage_provisioner = "disk.csi.azure.com"
-#   reclaim_policy      = "Retain"
-#   parameters = {
-#     skuname = "Premium_ZRS"
-#   }
-#   provider               = kubernetes.publick8s
-#   allow_volume_expansion = true
-# }
+resource "kubernetes_storage_class" "managed_csi_premium_ZRS_retain_public" {
+  metadata {
+    name = "managed-csi-premium-zrs-retain"
+  }
+  storage_provisioner = "disk.csi.azure.com"
+  reclaim_policy      = "Retain"
+  parameters = {
+    skuname = "Premium_ZRS"
+  }
+  provider               = kubernetes.publick8s
+  allow_volume_expansion = true
+}
 
-# resource "kubernetes_storage_class" "azurefile_csi_premium_retain_public" {
-#   metadata {
-#     name = "azurefile-csi-premium-retain"
-#   }
-#   storage_provisioner = "file.csi.azure.com"
-#   reclaim_policy      = "Retain"
-#   parameters = {
-#     skuname = "Premium_LRS"
-#   }
-#   mount_options = ["dir_mode=0777", "file_mode=0777", "uid=1000", "gid=1000", "mfsymlinks", "nobrl"]
-#   provider      = kubernetes.publick8s
-# }
+resource "kubernetes_storage_class" "azurefile_csi_premium_retain_public" {
+  metadata {
+    name = "azurefile-csi-premium-retain"
+  }
+  storage_provisioner = "file.csi.azure.com"
+  reclaim_policy      = "Retain"
+  parameters = {
+    skuname = "Premium_LRS"
+  }
+  mount_options = ["dir_mode=0777", "file_mode=0777", "uid=1000", "gid=1000", "mfsymlinks", "nobrl"]
+  provider      = kubernetes.publick8s
+}
 
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/publick8s.yaml
 resource "azurerm_public_ip" "publick8s_ipv4" {
