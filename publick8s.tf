@@ -332,20 +332,20 @@ output "ldap_jenkins_io_ipv4_address" {
 }
 
 # Configure the jenkins-infra/kubernetes-management admin service account
-# module "publick8s_admin_sa" {
-#   providers = {
-#     kubernetes = kubernetes.publick8s
-#   }
-#   source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
-#   cluster_name               = azurerm_kubernetes_cluster.publick8s.name
-#   cluster_hostname           = azurerm_kubernetes_cluster.publick8s.kube_config.0.host
-#   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.publick8s.kube_config.0.cluster_ca_certificate
-# }
+module "publick8s_admin_sa" {
+  providers = {
+    kubernetes = kubernetes.publick8s
+  }
+  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
+  cluster_name               = azurerm_kubernetes_cluster.publick8s.name
+  cluster_hostname           = azurerm_kubernetes_cluster.publick8s.kube_config.0.host
+  cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.publick8s.kube_config.0.cluster_ca_certificate
+}
 
-# output "kubeconfig_publick8s" {
-#   sensitive = true
-#   value     = module.publick8s_admin_sa.kubeconfig
-# }
+output "kubeconfig_publick8s" {
+  sensitive = true
+  value     = module.publick8s_admin_sa.kubeconfig
+}
 
 output "publick8s_kube_config_command" {
   value = "az aks get-credentials --name ${azurerm_kubernetes_cluster.publick8s.name} --resource-group ${azurerm_kubernetes_cluster.publick8s.resource_group_name}"
