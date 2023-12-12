@@ -117,7 +117,7 @@ module "ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
 module "ci_jenkins_io_aci_agents" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-aci-agents"
 
-  service_short_stripped_name     = module.ci_jenkins_io.service_short_stripped_name
+  role_name                       = "${module.ci_jenkins_io.service_short_stripped_name}-ACI-Contributor"
   aci_agents_resource_group_name  = module.ci_jenkins_io_azurevm_agents.ephemeral_agents_resource_group_name
   controller_service_principal_id = module.ci_jenkins_io.controler_service_principal_id
 }
@@ -128,9 +128,8 @@ module "ci_jenkins_io_aci_agents_sponsorship" {
   }
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-aci-agents"
 
-  service_short_stripped_name     = module.ci_jenkins_io.service_short_stripped_name
+  role_name                       = "${module.ci_jenkins_io.service_short_stripped_name}-ACI-Contributor-sponsorship"
   aci_agents_resource_group_name  = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_resource_group_name
-  custom_role_id                  = module.ci_jenkins_io_aci_agents.aci_role_id
   controller_service_principal_id = module.ci_jenkins_io.controler_service_principal_id
 }
 
