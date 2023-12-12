@@ -122,6 +122,17 @@ module "ci_jenkins_io_aci_agents" {
   controller_service_principal_id = module.ci_jenkins_io.controler_service_principal_id
 }
 
+module "ci_jenkins_io_aci_agents_sponsorship" {
+  providers = {
+    azurerm = azurerm.jenkins-sponsorship
+  }
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-aci-agents"
+
+  service_short_stripped_name     = module.ci_jenkins_io.service_short_stripped_name
+  aci_agents_resource_group_name  = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_resource_group_name
+  controller_service_principal_id = module.ci_jenkins_io.controler_service_principal_id
+}
+
 ## Service DNS records
 resource "azurerm_dns_cname_record" "ci_jenkins_io" {
   name                = trimsuffix(trimsuffix(module.ci_jenkins_io.service_fqdn, data.azurerm_dns_zone.jenkinsio.name), ".")
