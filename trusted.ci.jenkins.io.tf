@@ -2,9 +2,18 @@
 data "azurerm_resource_group" "trusted_ci_jenkins_io" {
   name = "trusted-ci-jenkins-io"
 }
+data "azurerm_resource_group" "trusted_ci_jenkins_io_sponsorship" {
+  provider = azurerm.jenkins-sponsorship
+  name     = "trusted-ci-jenkins-io-sponsorship"
+}
 data "azurerm_virtual_network" "trusted_ci_jenkins_io" {
   name                = "trusted-ci-jenkins-io-vnet"
   resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
+}
+data "azurerm_virtual_network" "trusted_ci_jenkins_io_sponsorship" {
+  provider            = azurerm.jenkins-sponsorship
+  name                = "${data.azurerm_resource_group.trusted_ci_jenkins_io_sponsorship.name}-vnet"
+  resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io_sponsorship.name
 }
 data "azurerm_subnet" "trusted_ci_jenkins_io_controller" {
   name                 = "${data.azurerm_virtual_network.trusted_ci_jenkins_io.name}-controller"
@@ -20,6 +29,12 @@ data "azurerm_subnet" "trusted_ci_jenkins_io_ephemeral_agents" {
   name                 = "${data.azurerm_virtual_network.trusted_ci_jenkins_io.name}-ephemeral-agents"
   resource_group_name  = data.azurerm_resource_group.trusted_ci_jenkins_io.name
   virtual_network_name = data.azurerm_virtual_network.trusted_ci_jenkins_io.name
+}
+data "azurerm_subnet" "trusted_ci_jenkins_io_sponsorship_ephemeral_agents" {
+  provider             = azurerm.jenkins-sponsorship
+  name                 = "${data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsorship.name}-ephemeral-agents"
+  virtual_network_name = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsorship.name
+  resource_group_name  = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsorship.resource_group_name
 }
 resource "azurerm_private_dns_zone" "trusted" {
   name                = "trusted.ci.jenkins.io"
@@ -84,6 +99,51 @@ module "trusted_ci_jenkins_io_azurevm_agents" {
   controller_ips                   = compact([module.trusted_ci_jenkins_io.controller_public_ipv4])
   controller_service_principal_id  = module.trusted_ci_jenkins_io.controler_service_principal_id
   default_tags                     = local.default_tags
+  jenkins_infra_ips = {
+    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
+  }
+}
+
+## Sponsorship subscription specific resources for controller
+resource "azurerm_resource_group" "trusted_ci_jenkins_io_controller_jenkins_sponsorship" {
+  provider = azurerm.jenkins-sponsorship
+  name     = module.trusted_ci_jenkins_io.controller_resourcegroup_name # Same name on both subscriptions
+  location = var.location
+  tags     = local.default_tags
+}
+# Required to allow controller to check for subnets inside the sponsorship network
+resource "azurerm_role_definition" "trusted_ci_jenkins_io_controller_vnet_sponsorship_reader" {
+  provider = azurerm.jenkins-sponsorship
+  name     = "Read-trusted-ci-jenkins-io-sponsorship-VNET"
+  scope    = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsorship.id
+
+  permissions {
+    actions = ["Microsoft.Network/virtualNetworks/read"]
+  }
+}
+resource "azurerm_role_assignment" "trusted_controller_vnet_reader" {
+  provider           = azurerm.jenkins-sponsorship
+  scope              = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsorship.id
+  role_definition_id = azurerm_role_definition.trusted_ci_jenkins_io_controller_vnet_sponsorship_reader.role_definition_resource_id
+  principal_id       = module.trusted_ci_jenkins_io.controler_service_principal_id
+}
+module "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
+  providers = {
+    azurerm = azurerm.jenkins-sponsorship
+  }
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-azurevm-agents"
+
+  service_fqdn                     = module.trusted_ci_jenkins_io.service_fqdn
+  service_short_stripped_name      = module.trusted_ci_jenkins_io.service_short_stripped_name
+  ephemeral_agents_network_rg_name = data.azurerm_subnet.trusted_ci_jenkins_io_sponsorship_ephemeral_agents.resource_group_name
+  ephemeral_agents_network_name    = data.azurerm_subnet.trusted_ci_jenkins_io_sponsorship_ephemeral_agents.virtual_network_name
+  ephemeral_agents_subnet_name     = data.azurerm_subnet.trusted_ci_jenkins_io_sponsorship_ephemeral_agents.name
+  controller_rg_name               = azurerm_resource_group.trusted_ci_jenkins_io_controller_jenkins_sponsorship.name
+  controller_ips                   = compact([module.trusted_ci_jenkins_io.controller_public_ipv4])
+  controller_service_principal_id  = module.trusted_ci_jenkins_io.controler_service_principal_id
+  default_tags                     = local.default_tags
+  storage_account_name             = "trustedciagentssub" # Max 24 chars
+
   jenkins_infra_ips = {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   }
