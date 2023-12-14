@@ -47,6 +47,7 @@ module "ci_jenkins_io" {
   agent_ip_prefixes = concat(
     [local.external_services["s390x.${data.azurerm_dns_zone.jenkinsio.name}"]],
     data.azurerm_subnet.ci_jenkins_io_ephemeral_agents.address_prefixes,
+    data.azurerm_subnet.ci_jenkins_io_ephemeral_agents_jenkins_sponsorship.address_prefixes,
   )
 }
 

@@ -82,6 +82,7 @@ module "trusted_ci_jenkins_io" {
 
   agent_ip_prefixes = concat(
     data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes,
+    data.azurerm_subnet.trusted_ci_jenkins_io_sponsorship_ephemeral_agents.address_prefixes,
     [azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address],
   )
 }
