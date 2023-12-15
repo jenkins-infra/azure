@@ -64,7 +64,10 @@ module "cert_ci_jenkins_io" {
     azurerm_resource_group.packer_images["prod"].id
   ]
 
-  agent_ip_prefixes = data.azurerm_subnet.cert_ci_jenkins_io_ephemeral_agents.address_prefixes
+  agent_ip_prefixes = concat(
+    data.azurerm_subnet.cert_ci_jenkins_io_ephemeral_agents.address_prefixes,
+    data.azurerm_subnet.cert_ci_jenkins_io_sponsorship_ephemeral_agents.address_prefixes,
+  )
 }
 
 module "cert_ci_jenkins_io_azurevm_agents" {
