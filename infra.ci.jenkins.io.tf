@@ -67,3 +67,69 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_subnet_privat
   role_definition_id = azurerm_role_definition.private_vnet_reader.role_definition_resource_id
   principal_id       = azuread_service_principal.infra_ci_jenkins_io.id
 }
+
+locals {
+  infra_ci_jenkins_io_fqdn                        = "infra.ci.jenkins.io"
+  infra_ci_jenkins_io_service_short_name          = trimprefix(trimprefix(local.infra_ci_jenkins_io_fqdn, "jenkins.io"), ".")
+  infra_ci_jenkins_io_service_short_stripped_name = replace(local.infra_ci_jenkins_io_service_short_name, ".", "-")
+}
+
+## Sponsorship subscription specific resources for controller
+data "azurerm_resource_group" "infra_ci_jenkins_io_sponsorship" {
+  provider = azurerm.jenkins-sponsorship
+  name     = "infra-ci-jenkins-io-sponsorship"
+}
+data "azurerm_virtual_network" "infra_ci_jenkins_io_sponsorship" {
+  provider            = azurerm.jenkins-sponsorship
+  name                = "${data.azurerm_resource_group.infra_ci_jenkins_io_sponsorship.name}-vnet"
+  resource_group_name = data.azurerm_resource_group.infra_ci_jenkins_io_sponsorship.name
+}
+data "azurerm_subnet" "infra_ci_jenkins_io_sponsorship_ephemeral_agents" {
+  provider             = azurerm.jenkins-sponsorship
+  name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name}-ephemeral-agents"
+  virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name
+  resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.resource_group_name
+}
+resource "azurerm_resource_group" "infra_ci_jenkins_io_controller_jenkins_sponsorship" {
+  provider = azurerm.jenkins-sponsorship
+  name     = "infra-ci-jenkins-io-controller" # Custom name on the secondary subscription (it is AKS managed on the primary)
+  location = var.location
+  tags     = local.default_tags
+}
+# Required to allow controller to check for subnets inside the sponsorship network
+resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_vnet_sponsorship_reader" {
+  provider = azurerm.jenkins-sponsorship
+  name     = "Read-infra-ci-jenkins-io-sponsorship-VNET"
+  scope    = data.azurerm_virtual_network.private.id
+
+  permissions {
+    actions = ["Microsoft.Network/virtualNetworks/read"]
+  }
+}
+resource "azurerm_role_assignment" "infra_controller_vnet_reader" {
+  provider           = azurerm.jenkins-sponsorship
+  scope              = data.azurerm_virtual_network.private.id
+  role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_vnet_sponsorship_reader.role_definition_resource_id
+  principal_id       = azuread_application.infra_ci_jenkins_io.id
+}
+module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
+  providers = {
+    azurerm = azurerm.jenkins-sponsorship
+  }
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-azurevm-agents"
+
+  service_fqdn                     = local.infra_ci_jenkins_io_fqdn
+  service_short_stripped_name      = local.infra_ci_jenkins_io_service_short_stripped_name
+  ephemeral_agents_network_rg_name = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.resource_group_name
+  ephemeral_agents_network_name    = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.virtual_network_name
+  ephemeral_agents_subnet_name     = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.name
+  controller_rg_name               = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
+  controller_ips                   = data.azurerm_subnet.privatek8s_tier.address_prefixes # Pod IPs: controlelr IP may change in the pods IP subnet
+  controller_service_principal_id  = azuread_application.infra_ci_jenkins_io.id
+  default_tags                     = local.default_tags
+  storage_account_name             = "infraciagentssub" # Max 24 chars
+
+  jenkins_infra_ips = {
+    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
+  }
+}
