@@ -100,7 +100,7 @@ resource "azurerm_resource_group" "infra_ci_jenkins_io_controller_jenkins_sponso
 resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_vnet_sponsorship_reader" {
   provider = azurerm.jenkins-sponsorship
   name     = "Read-infra-ci-jenkins-io-sponsorship-VNET"
-  scope    = data.azurerm_virtual_network.private.id
+  scope    = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.id
 
   permissions {
     actions = ["Microsoft.Network/virtualNetworks/read"]
@@ -108,9 +108,9 @@ resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_vnet_sponsors
 }
 resource "azurerm_role_assignment" "infra_controller_vnet_reader" {
   provider           = azurerm.jenkins-sponsorship
-  scope              = data.azurerm_virtual_network.private.id
+  scope              = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.id
   role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_vnet_sponsorship_reader.role_definition_resource_id
-  principal_id       = azuread_application.infra_ci_jenkins_io.id
+  principal_id       = azuread_service_principal.infra_ci_jenkins_io.id
 }
 module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
   providers = {
@@ -124,8 +124,8 @@ module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
   ephemeral_agents_network_name    = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.virtual_network_name
   ephemeral_agents_subnet_name     = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.name
   controller_rg_name               = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
-  controller_ips                   = data.azurerm_subnet.privatek8s_tier.address_prefixes # Pod IPs: controlelr IP may change in the pods IP subnet
-  controller_service_principal_id  = azuread_application.infra_ci_jenkins_io.id
+  controller_ips                   = data.azurerm_subnet.privatek8s_tier.address_prefixes # Pod IPs: controller IP may change in the pods IP subnet
+  controller_service_principal_id  = azuread_service_principal.infra_ci_jenkins_io.id
   default_tags                     = local.default_tags
   storage_account_name             = "infraciagentssub" # Max 24 chars
 
