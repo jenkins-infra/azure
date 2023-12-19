@@ -46,6 +46,7 @@ resource "azurerm_resource_group" "packer_images" {
 }
 
 resource "azurerm_resource_group" "packer_builds" {
+  provider = azurerm.jenkins-sponsorship
   for_each = local.shared_galleries
 
   name     = "${each.key}-packer-builds"
@@ -117,6 +118,7 @@ resource "azurerm_role_assignment" "packer_role_images_assignement" {
 }
 # Allow packer Service Principal to manage AzureRM resources inside the packer resource groups
 resource "azurerm_role_assignment" "packer_role_builds_assignement" {
+  provider = azurerm.jenkins-sponsorship
   for_each = azurerm_resource_group.packer_builds
 
   scope                = each.value.id
