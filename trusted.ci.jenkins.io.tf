@@ -105,6 +105,17 @@ module "trusted_ci_jenkins_io_azurevm_agents" {
   }
 }
 
+# Required to allow azcopy sync of updates.jenkins.io File Share with the permanent agent
+module "trusted_ci_jenkins_io_storage" {
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-storage"
+
+  service_fqdn                  = module.trusted_ci_jenkins_io.service_fqdn
+  storage_service_principal_id  = module.trusted_ci_jenkins_io.controler_service_principal_id
+  storage_active_directory_url  = "https://github.com/jenkins-infra/azure"
+  storage_file_share_ids        = [azurerm_storage_share.updates_jenkins_io.id]
+  default_tags                  = local.default_tags
+}
+
 ## Sponsorship subscription specific resources for controller
 resource "azurerm_resource_group" "trusted_ci_jenkins_io_controller_jenkins_sponsorship" {
   provider = azurerm.jenkins-sponsorship
