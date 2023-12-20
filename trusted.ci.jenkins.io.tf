@@ -107,7 +107,7 @@ module "trusted_ci_jenkins_io_azurevm_agents" {
 
 # Required to allow azcopy sync of updates.jenkins.io File Share with the permanent agent
 module "trusted_ci_jenkins_io_storage" {
-  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-storage"
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-filshare-serviceprincipal-writer"
 
   service_fqdn            = module.trusted_ci_jenkins_io.service_fqdn
   active_directory_owners = module.trusted_ci_jenkins_io.controler_service_principal_id
