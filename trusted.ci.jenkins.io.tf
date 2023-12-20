@@ -109,11 +109,12 @@ module "trusted_ci_jenkins_io_azurevm_agents" {
 module "trusted_ci_jenkins_io_storage" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-filshare-serviceprincipal-writer"
 
-  service_fqdn            = module.trusted_ci_jenkins_io.service_fqdn
-  active_directory_owners = [data.azuread_service_principal.terraform_production.id]
-  active_directory_url    = "https://github.com/jenkins-infra/azure"
-  file_share_id           = azurerm_storage_share.updates_jenkins_io.id
-  default_tags            = local.default_tags
+  service_fqdn               = module.trusted_ci_jenkins_io.service_fqdn
+  active_directory_owners    = [data.azuread_service_principal.terraform_production.id]
+  active_directory_url       = "https://github.com/jenkins-infra/azure"
+  service_principal_end_date = "2024-06-20T19:00:00Z"
+  file_share_id              = azurerm_storage_share.updates_jenkins_io.id
+  default_tags               = local.default_tags
 }
 
 ## Sponsorship subscription specific resources for controller
