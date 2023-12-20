@@ -110,7 +110,7 @@ module "trusted_ci_jenkins_io_storage" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-filshare-serviceprincipal-writer"
 
   service_fqdn            = module.trusted_ci_jenkins_io.service_fqdn
-  active_directory_owners = module.trusted_ci_jenkins_io.controler_service_principal_id
+  active_directory_owners = [data.azuread_service_principal.terraform_production.id]
   active_directory_url    = "https://github.com/jenkins-infra/azure"
   file_share_id           = azurerm_storage_share.updates_jenkins_io.id
   default_tags            = local.default_tags
