@@ -121,7 +121,7 @@ output "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer_id" {
 }
 output "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer_password" {
   sensitive = true
-  value     = module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_id
+  value     = module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
 }
 
 ## Sponsorship subscription specific resources for controller
