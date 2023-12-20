@@ -116,6 +116,13 @@ module "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer" {
   file_share_id              = azurerm_storage_share.updates_jenkins_io.resource_manager_id
   default_tags               = local.default_tags
 }
+output "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer_id" {
+  value = module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_id
+}
+output "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer_password" {
+  sensitive = true
+  value     = module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_id
+}
 
 ## Sponsorship subscription specific resources for controller
 resource "azurerm_resource_group" "trusted_ci_jenkins_io_controller_jenkins_sponsorship" {
