@@ -113,7 +113,7 @@ module "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer" {
   active_directory_owners    = [data.azuread_service_principal.terraform_production.id]
   active_directory_url       = "https://github.com/jenkins-infra/azure"
   service_principal_end_date = "2024-06-20T19:00:00Z"
-  file_share_id              = azurerm_storage_share.updates_jenkins_io.id
+  file_share_id              = azurerm_storage_share.updates_jenkins_io.resource_manager_id
   default_tags               = local.default_tags
 }
 
