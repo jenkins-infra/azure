@@ -125,3 +125,17 @@ resource "azurerm_role_assignment" "packer_role_builds_assignement" {
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.packer.id
 }
+
+data "azurerm_subnet" "infra_ci_jenkins_io_sponsorship_packer_builds" {
+  provider             = azurerm.jenkins-sponsorship
+  name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name}-packer-builds"
+  virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name
+  resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.resource_group_name
+}
+
+resource "azurerm_role_assignment" "packer_role_manage_subnet" {
+  provider             = azurerm.jenkins-sponsorship
+  scope                = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_packer_builds.id
+  role_definition_name = "Network Contributor"
+  principal_id         = azuread_service_principal.packer.id
+}
