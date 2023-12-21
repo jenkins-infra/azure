@@ -15,3 +15,4 @@ resource "azurerm_role_definition" "public_vnet_reader" {
     actions = ["Microsoft.Network/virtualNetworks/read"]
   }
 }
+
