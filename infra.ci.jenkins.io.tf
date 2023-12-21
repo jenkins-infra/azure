@@ -75,21 +75,6 @@ locals {
 }
 
 ## Sponsorship subscription specific resources for controller
-data "azurerm_resource_group" "infra_ci_jenkins_io_sponsorship" {
-  provider = azurerm.jenkins-sponsorship
-  name     = "infra-ci-jenkins-io-sponsorship"
-}
-data "azurerm_virtual_network" "infra_ci_jenkins_io_sponsorship" {
-  provider            = azurerm.jenkins-sponsorship
-  name                = "${data.azurerm_resource_group.infra_ci_jenkins_io_sponsorship.name}-vnet"
-  resource_group_name = data.azurerm_resource_group.infra_ci_jenkins_io_sponsorship.name
-}
-data "azurerm_subnet" "infra_ci_jenkins_io_sponsorship_ephemeral_agents" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name}-ephemeral-agents"
-  virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name
-  resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.resource_group_name
-}
 resource "azurerm_resource_group" "infra_ci_jenkins_io_controller_jenkins_sponsorship" {
   provider = azurerm.jenkins-sponsorship
   name     = "infra-ci-jenkins-io-controller" # Custom name on the secondary subscription (it is AKS managed on the primary)

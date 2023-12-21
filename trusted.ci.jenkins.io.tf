@@ -1,41 +1,3 @@
-# Data of resources defined in https://github.com/jenkins-infra/azure-net
-data "azurerm_resource_group" "trusted_ci_jenkins_io" {
-  name = "trusted-ci-jenkins-io"
-}
-data "azurerm_resource_group" "trusted_ci_jenkins_io_sponsorship" {
-  provider = azurerm.jenkins-sponsorship
-  name     = "trusted-ci-jenkins-io-sponsorship"
-}
-data "azurerm_virtual_network" "trusted_ci_jenkins_io" {
-  name                = "trusted-ci-jenkins-io-vnet"
-  resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
-}
-data "azurerm_virtual_network" "trusted_ci_jenkins_io_sponsorship" {
-  provider            = azurerm.jenkins-sponsorship
-  name                = "${data.azurerm_resource_group.trusted_ci_jenkins_io_sponsorship.name}-vnet"
-  resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io_sponsorship.name
-}
-data "azurerm_subnet" "trusted_ci_jenkins_io_controller" {
-  name                 = "${data.azurerm_virtual_network.trusted_ci_jenkins_io.name}-controller"
-  virtual_network_name = data.azurerm_virtual_network.trusted_ci_jenkins_io.name
-  resource_group_name  = data.azurerm_resource_group.trusted_ci_jenkins_io.name
-}
-data "azurerm_subnet" "trusted_ci_jenkins_io_permanent_agents" {
-  name                 = "${data.azurerm_virtual_network.trusted_ci_jenkins_io.name}-permanent-agents"
-  virtual_network_name = data.azurerm_virtual_network.trusted_ci_jenkins_io.name
-  resource_group_name  = data.azurerm_resource_group.trusted_ci_jenkins_io.name
-}
-data "azurerm_subnet" "trusted_ci_jenkins_io_ephemeral_agents" {
-  name                 = "${data.azurerm_virtual_network.trusted_ci_jenkins_io.name}-ephemeral-agents"
-  resource_group_name  = data.azurerm_resource_group.trusted_ci_jenkins_io.name
-  virtual_network_name = data.azurerm_virtual_network.trusted_ci_jenkins_io.name
-}
-data "azurerm_subnet" "trusted_ci_jenkins_io_sponsorship_ephemeral_agents" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "${data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsorship.name}-ephemeral-agents"
-  virtual_network_name = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsorship.name
-  resource_group_name  = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsorship.resource_group_name
-}
 resource "azurerm_private_dns_zone" "trusted" {
   name                = "trusted.ci.jenkins.io"
   resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
@@ -476,11 +438,6 @@ resource "azurerm_subnet_nat_gateway_association" "trusted_outbound_ephemeral_ag
 ####################################################################################
 ## Public DNS records
 ####################################################################################
-# Managed in jenkins-infra/azure-net for the letsencrypt IDP
-data "azurerm_dns_zone" "trusted_ci_jenkins_io" {
-  name                = azurerm_private_dns_zone.trusted.name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-}
 resource "azurerm_dns_a_record" "trusted_bounce" {
   name                = "bounce"
   zone_name           = data.azurerm_dns_zone.trusted_ci_jenkins_io.name

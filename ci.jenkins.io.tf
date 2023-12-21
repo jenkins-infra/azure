@@ -1,19 +1,6 @@
 ####################################################################################
 ## Resources for the Controller VM
 ####################################################################################
-data "azurerm_subnet" "ci_jenkins_io_ephemeral_agents" {
-  name                 = "${data.azurerm_virtual_network.public.name}-ci_jenkins_io_agents"
-  virtual_network_name = data.azurerm_virtual_network.public.name
-  resource_group_name  = data.azurerm_virtual_network.public.resource_group_name
-}
-
-data "azurerm_subnet" "ci_jenkins_io_ephemeral_agents_jenkins_sponsorship" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "${data.azurerm_virtual_network.public_jenkins_sponsorship.name}-ci_jenkins_io_agents"
-  virtual_network_name = data.azurerm_virtual_network.public_jenkins_sponsorship.name
-  resource_group_name  = data.azurerm_virtual_network.public_jenkins_sponsorship.resource_group_name
-}
-
 module "ci_jenkins_io" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-controller"
 
