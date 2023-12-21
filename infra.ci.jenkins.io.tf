@@ -122,6 +122,7 @@ module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
 
 # Allow infra.ci VM agents to reach packer VMs with SSH
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_to_packer_vms" {
+  provider                    = azurerm.jenkins-sponsorship
   name                        = "allow-outbound-ssh-from-infraci-agents-to-packer-vms"
   priority                    = 4080
   direction                   = "Outbound"
@@ -136,6 +137,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents
 }
 # Allow infra.ci VM agents to reach packer VMs with WinRM (HTTP without TLS)
 resource "azurerm_network_security_rule" "allow_outbound_winrm_http_from_infraci_agents_to_packer_vms" {
+  provider                    = azurerm.jenkins-sponsorship
   name                        = "allow-outbound-winrm-http-from-infraci-agents-to-packer-vms"
   priority                    = 4081
   direction                   = "Outbound"
@@ -150,6 +152,7 @@ resource "azurerm_network_security_rule" "allow_outbound_winrm_http_from_infraci
 }
 # Allow infra.ci VM agents to reach packer VMs with WinRM (HTTPS)
 resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infraci_agents_to_packer_vms" {
+  provider                    = azurerm.jenkins-sponsorship
   name                        = "allow-outbound-winrm-https-from-infraci-agents-to-packer-vms"
   priority                    = 4082
   direction                   = "Outbound"
