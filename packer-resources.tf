@@ -34,11 +34,11 @@ resource "azuread_application_password" "packer" {
   end_date       = "2024-03-09T11:00:00Z"
 }
 
-
 ## Dev Resources are used by the pull requests in jenkins-infra/packer-images
 ## Staging Resources are used by the "main" branch builds
 ## Prod Resources are used for final Packer artifacts
 resource "azurerm_resource_group" "packer_images" {
+  provider = azurerm.jenkins-sponsorship
   for_each = local.shared_galleries
 
   name     = "${each.key}-packer-images"
@@ -54,6 +54,8 @@ resource "azurerm_resource_group" "packer_builds" {
 }
 
 resource "azurerm_shared_image_gallery" "packer_images" {
+  provider = azurerm.jenkins-sponsorship
+
   for_each = local.shared_galleries
 
   name                = "${each.key}_packer_images"
@@ -68,12 +70,14 @@ resource "azurerm_shared_image_gallery" "packer_images" {
 
 # Note that Terraform does NOT manage image versions (it's packer-based).
 resource "azurerm_shared_image" "jenkins_agent_images" {
+  provider = azurerm.jenkins-sponsorship
+
   # Generate a list of images in the form "<gallery name>_<image_name>"
   for_each = toset(
     distinct(
       flatten([
         for gallery_key, gallery_value in local.shared_galleries : [
-          for image_key, image_value in gallery_value.images_location : "${gallery_key}_${image_key}"
+          for image_key in gallery_value.images : "${gallery_key}_${image_key}"
         ]
       ])
     )
@@ -82,7 +86,7 @@ resource "azurerm_shared_image" "jenkins_agent_images" {
   name                = format("jenkins-agent-%s", split("_", each.value)[1])
   gallery_name        = azurerm_shared_image_gallery.packer_images[split("_", each.value)[0]].name
   resource_group_name = azurerm_resource_group.packer_images[split("_", each.value)[0]].name
-  location            = local.shared_galleries[split("_", each.value)[0]].images_location[split("_", each.value)[1]]
+  location            = "eastus" # local.shared_galleries[split("_", each.value)[0]].images_location[split("_", each.value)[1]]
 
   architecture = length(regexall(".+arm64", split("_", each.value)[1])) > 0 ? "Arm64" : "x64"
 
@@ -110,6 +114,7 @@ resource "azurerm_shared_image" "jenkins_agent_images" {
 
 # Allow packer Service Principal to manage AzureRM resources inside the packer resource groups
 resource "azurerm_role_assignment" "packer_role_images_assignement" {
+  provider = azurerm.jenkins-sponsorship
   for_each = azurerm_resource_group.packer_images
 
   scope                = each.value.id
