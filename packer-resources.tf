@@ -42,7 +42,7 @@ resource "azurerm_resource_group" "packer_images" {
   for_each = local.shared_galleries
 
   name     = "${each.key}-packer-images"
-  location = each.value.rg_location
+  location = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.location # Location of the packer subnet in infra.ci
 }
 
 resource "azurerm_resource_group" "packer_builds" {
@@ -50,7 +50,7 @@ resource "azurerm_resource_group" "packer_builds" {
   for_each = local.shared_galleries
 
   name     = "${each.key}-packer-builds"
-  location = each.value.rg_location
+  location = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.location # Location of the packer subnet in infra.ci
 }
 
 resource "azurerm_shared_image_gallery" "packer_images" {
@@ -60,7 +60,7 @@ resource "azurerm_shared_image_gallery" "packer_images" {
 
   name                = "${each.key}_packer_images"
   resource_group_name = azurerm_resource_group.packer_images[each.key].name
-  location            = "eastus" #azurerm_resource_group.packer_images[each.key].location
+  location            = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.location # Location of the packer subnet in infra.ci
   description         = each.value.description
 
   tags = {
@@ -86,7 +86,7 @@ resource "azurerm_shared_image" "jenkins_agent_images" {
   name                = format("jenkins-agent-%s", split("_", each.value)[1])
   gallery_name        = azurerm_shared_image_gallery.packer_images[split("_", each.value)[0]].name
   resource_group_name = azurerm_resource_group.packer_images[split("_", each.value)[0]].name
-  location            = "eastus" # local.shared_galleries[split("_", each.value)[0]].images_location[split("_", each.value)[1]]
+  location            = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.location # Location of the packer subnet in infra.ci
 
   architecture = length(regexall(".+arm64", split("_", each.value)[1])) > 0 ? "Arm64" : "x64"
 
