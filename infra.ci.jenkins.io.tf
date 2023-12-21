@@ -73,8 +73,9 @@ locals {
   infra_ci_jenkins_io_service_short_name          = trimprefix(trimprefix(local.infra_ci_jenkins_io_fqdn, "jenkins.io"), ".")
   infra_ci_jenkins_io_service_short_stripped_name = replace(local.infra_ci_jenkins_io_service_short_name, ".", "-")
 }
-
+####################################################################################
 ## Sponsorship subscription specific resources for controller
+####################################################################################
 resource "azurerm_resource_group" "infra_ci_jenkins_io_controller_jenkins_sponsorship" {
   provider = azurerm.jenkins-sponsorship
   name     = "infra-ci-jenkins-io-controller" # Custom name on the secondary subscription (it is AKS managed on the primary)
@@ -117,4 +118,47 @@ module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
   jenkins_infra_ips = {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   }
+}
+
+# Allow infra.ci VM agents to reach packer VMs with SSH
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_to_packer_vms" {
+  name                        = "allow-outbound-ssh-from-infraci-agents-to-packer-vms"
+  priority                    = 4080
+  direction                   = "Outbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefix       = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.address_prefix
+  destination_address_prefix  = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_packer_builds.address_prefix
+  resource_group_name         = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
+  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
+}
+# Allow infra.ci VM agents to reach packer VMs with WinRM (HTTP without TLS)
+resource "azurerm_network_security_rule" "allow_outbound_winrm_http_from_infraci_agents_to_packer_vms" {
+  name                        = "allow-outbound-winrm-http-from-infraci-agents-to-packer-vms"
+  priority                    = 4081
+  direction                   = "Outbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "5985"
+  source_address_prefix       = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.address_prefix
+  destination_address_prefix  = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_packer_builds.address_prefix
+  resource_group_name         = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
+  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
+}
+# Allow infra.ci VM agents to reach packer VMs with WinRM (HTTPS)
+resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infraci_agents_to_packer_vms" {
+  name                        = "allow-outbound-winrm-https-from-infraci-agents-to-packer-vms"
+  priority                    = 4082
+  direction                   = "Outbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "5986"
+  source_address_prefix       = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.address_prefix
+  destination_address_prefix  = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_packer_builds.address_prefix
+  resource_group_name         = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
+  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
 }
