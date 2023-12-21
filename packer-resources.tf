@@ -134,7 +134,7 @@ data "azurerm_subnet" "infra_ci_jenkins_io_sponsorship_packer_builds" {
 }
 
 resource "azurerm_role_assignment" "packer_role_manage_subnet" {
-  provider = azurerm.jenkins-sponsorship
+  provider             = azurerm.jenkins-sponsorship
   scope                = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_packer_builds.id
   role_definition_name = "Network Contributor"
   principal_id         = azuread_service_principal.packer.id
