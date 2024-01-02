@@ -40,8 +40,8 @@ data "azurerm_storage_account_sas" "updates_jenkins_io" {
     file  = true
   }
 
-  start  = "2023-10-06T00:00:00Z"
-  expiry = "2023-12-22T00:00:00Z"
+  start  = "2024-01-01T00:00:00Z"
+  expiry = "2023-03-01T00:00:00Z"
 
   # https://learn.microsoft.com/en-us/rest/api/storageservices/create-account-sas#file-service
   permissions {
