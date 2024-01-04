@@ -24,11 +24,15 @@ sources:
     kind: shell
     spec:
       command: bash ./updatecli/scripts/date_next_expiry.sh
+      environments:
+        - name: PATH
   nextStartDate:
     name: Prepare next azurerm_storage_account_sas `start` date
     kind: shell
     spec:
       command: bash ./updatecli/scripts/date_next_startdate.sh
+      environments:
+        - name: PATH
 
 conditions:
   checkIfExpirySoonExpired:
@@ -36,6 +40,8 @@ conditions:
     sourceid: currentExpiry
     spec:
       command: bash ./updatecli/scripts/datediff_expiry.sh # current expiry date value passed as argument
+      environments:
+        - name: PATH
 
 targets:
   updateNextExpiry:
