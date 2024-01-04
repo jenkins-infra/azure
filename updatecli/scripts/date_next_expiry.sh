@@ -5,7 +5,7 @@ set -eux -o pipefail
 DATE_BIN='date'
 
 ## non GNU operating system
-if command -v gdate  >/dev/null 2>&1
+if command -v gdate >/dev/null 2>&1
 then
     DATE_BIN='gdate'
 fi
