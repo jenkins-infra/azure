@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # This script calculate diff between dates for expiry azurerm_storage_account_sas
 ##
 set -eux -o pipefail
@@ -14,7 +14,7 @@ fi
 command -v "${DATE_BIN}" >/dev/null 2>&1 || { echo "ERROR: ${DATE_BIN} command not found. Exiting."; exit 1; }
 
 currentdateepoch=$("${DATE_BIN}" --utc "+%s" 2>/dev/null)
-expirydateepoch=$("${DATE_BIN}" "+%s" -d "$currentexpirydate")
+expirydateepoch=$("${DATE_BIN}" "+%s" -d "$currentexpirydate" -D"%Y-%m-%dT00:00:00Z")
 datediff=$(((expirydateepoch-currentdateepoch)/86400))
 
 if [ "$datediff" -lt 10 ]

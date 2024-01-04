@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # This script calculate next start date as of today for expiry azurerm_storage_account_sas
 ##
 set -eux -o pipefail
