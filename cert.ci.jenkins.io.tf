@@ -111,32 +111,3 @@ resource "azurerm_dns_a_record" "cert_ci_jenkins_io" {
   ttl                 = 60
   records             = [module.cert_ci_jenkins_io.controller_private_ipv4]
 }
-
-####################################################################################
-## NAT gateway to allow outbound connection on a centralized and scalable appliance
-####################################################################################
-resource "azurerm_public_ip" "cert_ci_jenkins_io_outbound" {
-  name                = "cert-ci-jenkins-io-outbound"
-  location            = data.azurerm_resource_group.cert_ci_jenkins_io.location
-  resource_group_name = module.cert_ci_jenkins_io.controller_resourcegroup_name
-  allocation_method   = "Static"
-  sku                 = "Standard"
-}
-resource "azurerm_nat_gateway" "cert_ci_jenkins_io_outbound" {
-  name                = "cert-ci-jenkins-io-outbound"
-  location            = data.azurerm_resource_group.cert_ci_jenkins_io.location
-  resource_group_name = module.cert_ci_jenkins_io.controller_resourcegroup_name
-  sku_name            = "Standard"
-}
-resource "azurerm_nat_gateway_public_ip_association" "cert_ci_jenkins_io_outbound" {
-  nat_gateway_id       = azurerm_nat_gateway.cert_ci_jenkins_io_outbound.id
-  public_ip_address_id = azurerm_public_ip.cert_ci_jenkins_io_outbound.id
-}
-resource "azurerm_subnet_nat_gateway_association" "cert_ci_jenkins_io_outbound_controller" {
-  subnet_id      = data.azurerm_subnet.cert_ci_jenkins_io_controller.id
-  nat_gateway_id = azurerm_nat_gateway.cert_ci_jenkins_io_outbound.id
-}
-resource "azurerm_subnet_nat_gateway_association" "cert_ci_jenkins_io_outbound_ephemeral_agents" {
-  subnet_id      = data.azurerm_subnet.cert_ci_jenkins_io_ephemeral_agents.id
-  nat_gateway_id = azurerm_nat_gateway.cert_ci_jenkins_io_outbound.id
-}
