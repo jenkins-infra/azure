@@ -403,39 +403,6 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_internet_to_bou
 }
 
 ####################################################################################
-## NAT gateway to allow outbound connection on a centralized and scalable appliance
-####################################################################################
-resource "azurerm_public_ip" "trusted_outbound" {
-  name                = "trusted-outbound"
-  location            = data.azurerm_virtual_network.trusted_ci_jenkins_io.location
-  resource_group_name = module.trusted_ci_jenkins_io.controller_resourcegroup_name
-  allocation_method   = "Static"
-  sku                 = "Standard"
-}
-resource "azurerm_nat_gateway" "trusted_outbound" {
-  name                = "trusted-outbound"
-  location            = data.azurerm_virtual_network.trusted_ci_jenkins_io.location
-  resource_group_name = module.trusted_ci_jenkins_io.controller_resourcegroup_name
-  sku_name            = "Standard"
-}
-resource "azurerm_nat_gateway_public_ip_association" "trusted_outbound" {
-  nat_gateway_id       = azurerm_nat_gateway.trusted_outbound.id
-  public_ip_address_id = azurerm_public_ip.trusted_outbound.id
-}
-resource "azurerm_subnet_nat_gateway_association" "trusted_outbound_controller" {
-  subnet_id      = data.azurerm_subnet.trusted_ci_jenkins_io_controller.id
-  nat_gateway_id = azurerm_nat_gateway.trusted_outbound.id
-}
-resource "azurerm_subnet_nat_gateway_association" "trusted_outbound_permanent_agents" {
-  subnet_id      = data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.id
-  nat_gateway_id = azurerm_nat_gateway.trusted_outbound.id
-}
-resource "azurerm_subnet_nat_gateway_association" "trusted_outbound_ephemeral_agents" {
-  subnet_id      = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.id
-  nat_gateway_id = azurerm_nat_gateway.trusted_outbound.id
-}
-
-####################################################################################
 ## Public DNS records
 ####################################################################################
 resource "azurerm_dns_a_record" "trusted_bounce" {
