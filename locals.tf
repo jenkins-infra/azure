@@ -31,8 +31,6 @@ locals {
     "keyserver.ubuntu.com" = ["162.213.33.8", "162.213.33.9"]
   }
 
-  privatek8s_outbound_ip_cidr = "20.22.6.81/32"
-
   default_tags = {
     scope      = "terraform-managed"
     repository = "jenkins-infra/azure"
