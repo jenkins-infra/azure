@@ -35,6 +35,7 @@ resource "azurerm_storage_account" "updates_jenkins_io" {
         )
       ),
     )
+    bypass = ["Metrics", "Logging", "AzureServices"]
   }
 }
 
