@@ -1,0 +1,71 @@
+name: "Bump contributors.jenkins.io azurerm_storage_account_sas `expiry` date"
+
+scms:
+  default:
+    kind: github
+    spec:
+      user: "{{ .github.user }}"
+      email: "{{ .github.email }}"
+      owner: "{{ .github.owner }}"
+      repository: "{{ .github.repository }}"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ .github.username }}"
+      branch: "{{ .github.branch }}"
+
+sources:
+  currentExpiry:
+    name: Get current azurerm_storage_account_sas `expiry` date
+    kind: terraform/file
+    spec:
+      file: contributors.jenkins.io.tf
+      path: data.azurerm_storage_account_sas.contributors_jenkins_io.expiry
+  nextExpiry:
+    name: Prepare next azurerm_storage_account_sas `expiry` date
+    kind: shell
+    spec:
+      command: bash ./updatecli/scripts/date_next_expiry.sh
+      environments:
+        - name: PATH
+  nextStartDate:
+    name: Prepare next azurerm_storage_account_sas `start` date
+    kind: shell
+    spec:
+      command: bash ./updatecli/scripts/date_next_startdate.sh
+      environments:
+        - name: PATH
+
+conditions:
+  checkIfExpirySoonExpired:
+    kind: shell
+    sourceid: currentExpiry
+    spec:
+      command: bash ./updatecli/scripts/datediff_expiry.sh # current expiry date value passed as argument
+      environments:
+        - name: PATH
+
+targets:
+  updateNextExpiry:
+    name: Update Terraform file `contributors.jenkins.io.tf`
+    kind: terraform/file
+    sourceid: nextExpiry
+    spec:
+      file: contributors.jenkins.io.tf
+      path: data.azurerm_storage_account_sas.contributors_jenkins_io.expiry
+    scmid: default
+  updateStartDate:
+    name: Update Terraform file `contributors.jenkins.io.tf`
+    kind: terraform/file
+    sourceid: nextStartDate
+    spec:
+      file: contributors.jenkins.io.tf
+      path: data.azurerm_storage_account_sas.contributors_jenkins_io.start
+    scmid: default
+
+actions:
+  default:
+    kind: github/pullrequest
+    scmid: default
+    spec:
+      title: Bump contributors.jenkins.io azurerm_storage_account_sas `expiry` date {{ source "nextExpiry" }}
+      labels:
+        - terraform
