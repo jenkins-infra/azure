@@ -13,27 +13,18 @@ resource "azurerm_storage_account" "updates_jenkins_io" {
   account_replication_type = "LRS"
   min_tls_version          = "TLS1_2" # default value, needed for tfsec
 
-  # No public access as the storage is only access through middlewares (mirrorbits) or Azure API (azcopy)
-  allow_nested_items_to_be_public = false
-  public_network_access_enabled   = false
-
   tags = local.default_tags
 
+  # Adding a network rule with `public_network_access_enabled` set to `true` (default) selects the option "Enabled from selected virtual networks and IP addresses"
   network_rules {
     default_action = "Deny"
-    ip_rules = setunion(
-      # admins
-      formatlist(
-        "%s/30",
-        flatten(
-          concat(
-            [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value],
-            module.jenkins_infra_shared_data.outbound_ips["trusted.ci.jenkins.io"],
-            module.jenkins_infra_shared_data.outbound_ips["trusted.sponsorship.ci.jenkins.io"],
-            module.jenkins_infra_shared_data.outbound_ips["privatek8s.jenkins.io"]
-          )
-        )
-      ),
+    ip_rules = flatten(
+      concat(
+        [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value],
+        module.jenkins_infra_shared_data.outbound_ips["trusted.ci.jenkins.io"],
+        module.jenkins_infra_shared_data.outbound_ips["trusted.sponsorship.ci.jenkins.io"],
+        module.jenkins_infra_shared_data.outbound_ips["privatek8s.jenkins.io"]
+      )
     )
     bypass = ["Metrics", "Logging", "AzureServices"]
   }
