@@ -6,15 +6,36 @@ resource "azurerm_resource_group" "updates_jenkins_io" {
 }
 
 resource "azurerm_storage_account" "updates_jenkins_io" {
-  name                          = "updatesjenkinsio"
-  resource_group_name           = azurerm_resource_group.updates_jenkins_io.name
-  location                      = azurerm_resource_group.updates_jenkins_io.location
-  account_tier                  = "Standard"
-  account_replication_type      = "LRS"
-  min_tls_version               = "TLS1_2" # default value, needed for tfsec
-  public_network_access_enabled = "true"   # Explicit default value, we want this storage account to be readable from anywhere
+  name                     = "updatesjenkinsio"
+  resource_group_name      = azurerm_resource_group.updates_jenkins_io.name
+  location                 = azurerm_resource_group.updates_jenkins_io.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+  min_tls_version          = "TLS1_2" # default value, needed for tfsec
+
+  # No public access as the storage is only access through middlewares (mirrorbits) or Azure API (azcopy)
+  allow_nested_items_to_be_public = false
+  public_network_access_enabled   = false
 
   tags = local.default_tags
+
+  network_rules {
+    default_action = "Deny"
+    ip_rules = setunion(
+      # admins
+      formatlist(
+        "%s/30",
+        flatten(
+          concat(
+            [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value],
+            module.jenkins_infra_shared_data.outbound_ips["trusted.ci.jenkins.io"],
+            module.jenkins_infra_shared_data.outbound_ips["trusted.sponsorship.ci.jenkins.io"],
+            module.jenkins_infra_shared_data.outbound_ips["privatek8s.jenkins.io"]
+          )
+        )
+      ),
+    )
+  }
 }
 
 resource "azurerm_storage_share" "updates_jenkins_io" {
