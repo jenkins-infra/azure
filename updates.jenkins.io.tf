@@ -21,11 +21,15 @@ resource "azurerm_storage_account" "updates_jenkins_io" {
     ip_rules = flatten(
       concat(
         [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value],
-        module.jenkins_infra_shared_data.outbound_ips["trusted.ci.jenkins.io"],
-        module.jenkins_infra_shared_data.outbound_ips["trusted.sponsorship.ci.jenkins.io"],
-        module.jenkins_infra_shared_data.outbound_ips["privatek8s.jenkins.io"]
       )
     )
+    virtual_network_subnet_ids = [
+      data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.id,
+      data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.id,
+      data.azurerm_subnet.trusted_ci_jenkins_io_sponsorship_ephemeral_agents.id,
+      data.azurerm_subnet.privatek8s_tier.id,
+      data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.id,
+    ]
     bypass = ["Metrics", "Logging", "AzureServices"]
   }
 }
