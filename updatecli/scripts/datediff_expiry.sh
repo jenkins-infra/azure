@@ -15,7 +15,7 @@ command -v "${DATE_BIN}" >/dev/null 2>&1 || { echo "ERROR: ${DATE_BIN} command n
 
 currentdateepoch=$("${DATE_BIN}" --utc "+%s" 2>/dev/null)
 expirydateepoch=$("${DATE_BIN}" "+%s" -d "$currentexpirydate" -D"%Y-%m-%dT00:00:00Z")
-datediff=$(((expirydateepoch-currentdateepoch)/86400))
+datediff=$(((expirydateepoch-currentdateepoch)/60*60*24*10)) # launch renew 10 days before expiration
 
 if [ "$datediff" -lt 10 ]
 then
