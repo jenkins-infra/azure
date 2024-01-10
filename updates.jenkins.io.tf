@@ -27,6 +27,7 @@ resource "azurerm_storage_account" "updates_jenkins_io" {
       data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.id,
       data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.id,
       data.azurerm_subnet.trusted_ci_jenkins_io_sponsorship_ephemeral_agents.id,
+      data.azurerm_subnet.publick8s_tier.id,
       data.azurerm_subnet.privatek8s_tier.id,
       data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.id,
     ]
