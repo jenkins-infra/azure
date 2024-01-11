@@ -1,3 +1,5 @@
+@Library('pipeline-library@pull/826/head') _
+
 parallel(
   failFast: false,
   'terraform': {
