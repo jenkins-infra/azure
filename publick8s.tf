@@ -67,7 +67,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     outbound_type     = "loadBalancer"
     load_balancer_sku = "standard"
     load_balancer_profile {
-      outbound_ports_allocated  = "2900"
+      outbound_ports_allocated  = "2560" # Max 25 Nodes, 64000 ports total
       idle_timeout_in_minutes   = "4"
       managed_outbound_ip_count = "1"
     }
