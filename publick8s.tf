@@ -62,8 +62,15 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   network_profile {
     network_plugin = "kubenet"
     # These ranges must NOT overlap with any of the subnets
-    pod_cidrs   = ["10.100.0.0/16", "fd12:3456:789a::/64"]
-    ip_versions = ["IPv4", "IPv6"]
+    pod_cidrs         = ["10.100.0.0/16", "fd12:3456:789a::/64"]
+    ip_versions       = ["IPv4", "IPv6"]
+    outbound_type     = "loadBalancer"
+    load_balancer_sku = "standard"
+    load_balancer_profile {
+      outbound_ports_allocated  = "3200"
+      idle_timeout_in_minutes   = "4"
+      managed_outbound_ip_count = "1"
+    }
   }
 
   default_node_pool {
