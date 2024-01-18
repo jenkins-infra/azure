@@ -43,6 +43,45 @@ module "ci_jenkins_io" {
   )
 }
 
+module "ci_jenkins_io_sponsorship" {
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-controller"
+  providers = {
+    azurerm     = azurerm.jenkins-sponsorship
+    azurerm.dns = azurerm
+    azuread     = azuread
+  }
+
+  service_fqdn                 = "ci.jenkins.io"
+  location                     = data.azurerm_virtual_network.public_jenkins_sponsorship.location
+  admin_username               = local.admin_username
+  admin_ssh_publickey          = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDKvZ23dkvhjSU0Gxl5+mKcBOwmR7gqJDYeA1/Xzl3otV4CtC5te5Vx7YnNEFDXD6BsNkFaliXa34yE37WMdWl+exIURBMhBLmOPxEP/cWA5ZbXP//78ejZsxawBpBJy27uQhdcR0zVoMJc8Q9ShYl5YT/Tq1UcPq2wTNFvnrBJL1FrpGT+6l46BTHI+Wpso8BK64LsfX3hKnJEGuHSM0GAcYQSpXAeGS9zObKyZpk3of/Qw/2sVilIOAgNODbwqyWgEBTjMUln71Mjlt1hsEkv3K/VdvpFNF8VNq5k94VX6Rvg5FQBRL5IrlkuNwGWcBbl8Ydqk4wrD3b/PrtuLBEUsqbNhLnlEvFcjak+u2kzCov73csN/oylR0Tkr2y9x2HfZgDJVtvKjkkc4QERo7AqlTuy1whGfDYsioeabVLjZ9ahPjakv9qwcBrEEF+pAya7Q3AgNFVSdPgLDEwEO8GUHaxAjtyXXv9+yPdoDGmG3Pfn3KqM6UZjHCxne3Dr5ZE="
+  controller_network_name      = data.azurerm_subnet.ci_jenkins_io_controller_sponsorship.virtual_network_name
+  controller_network_rg_name   = data.azurerm_subnet.ci_jenkins_io_controller_sponsorship.resource_group_name
+  controller_subnet_name       = data.azurerm_subnet.ci_jenkins_io_controller_sponsorship.name
+  controller_os_disk_size_gb   = 64
+  controller_data_disk_size_gb = 512
+  controller_vm_size           = "Standard_D8as_v5"
+  is_public                    = true
+  default_tags                 = local.default_tags
+  jenkins_infra_ips = {
+    ldap_ipv4         = azurerm_public_ip.ldap_jenkins_io_ipv4.ip_address
+    puppet_ipv4       = azurerm_public_ip.puppet_jenkins_io.ip_address
+    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
+  }
+  controller_service_principal_ids = [
+    data.azuread_service_principal.terraform_production.id,
+  ]
+  controller_service_principal_end_date = "2024-04-30T00:00:00Z"
+  controller_packer_rg_ids = [
+    azurerm_resource_group.packer_images["prod"].id
+  ]
+
+  agent_ip_prefixes = concat(
+    [local.external_services["s390x.${data.azurerm_dns_zone.jenkinsio.name}"]],
+    data.azurerm_subnet.ci_jenkins_io_ephemeral_agents_jenkins_sponsorship.address_prefixes,
+  )
+}
+
 module "ci_jenkins_io_azurevm_agents" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-azurevm-agents"
 
@@ -68,6 +107,7 @@ resource "azurerm_resource_group" "controller_jenkins_sponsorship" {
   location = var.location
   tags     = local.default_tags
 }
+
 # Required to allow controller to check for subnets inside the sponsorship network
 resource "azurerm_role_definition" "controller_vnet_sponsorship_reader" {
   provider = azurerm.jenkins-sponsorship
