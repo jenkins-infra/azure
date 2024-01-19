@@ -1,6 +1,12 @@
 module "cert_ci_jenkins_io" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-controller"
 
+  providers = {
+    azurerm     = azurerm
+    azurerm.dns = azurerm
+    azuread     = azuread
+  }
+
   service_fqdn                 = data.azurerm_dns_zone.cert_ci_jenkins_io.name
   location                     = data.azurerm_resource_group.cert_ci_jenkins_io.location
   admin_username               = local.admin_username

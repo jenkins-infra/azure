@@ -4,6 +4,11 @@
 module "ci_jenkins_io" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-controller"
 
+  providers = {
+    azurerm     = azurerm
+    azurerm.dns = azurerm
+    azuread     = azuread
+  }
   service_fqdn                 = "ci.jenkins.io"
   location                     = data.azurerm_virtual_network.public.location
   admin_username               = local.admin_username

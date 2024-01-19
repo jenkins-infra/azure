@@ -14,6 +14,12 @@ resource "azurerm_private_dns_zone_virtual_network_link" "trusted" {
 module "trusted_ci_jenkins_io" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-controller"
 
+  providers = {
+    azurerm     = azurerm
+    azurerm.dns = azurerm
+    azuread     = azuread
+  }
+
   service_fqdn                 = azurerm_private_dns_zone.trusted.name
   location                     = data.azurerm_virtual_network.trusted_ci_jenkins_io.location
   admin_username               = local.admin_username
