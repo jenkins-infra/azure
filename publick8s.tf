@@ -70,6 +70,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
       outbound_ports_allocated  = "2560" # Max 25 Nodes, 64000 ports total per public IP
       idle_timeout_in_minutes   = "4"
       managed_outbound_ip_count = "3"
+      managed_outbound_ipv6_count = "2"
     }
   }
 
