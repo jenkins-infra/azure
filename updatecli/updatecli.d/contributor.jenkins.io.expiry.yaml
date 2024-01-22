@@ -67,5 +67,6 @@ actions:
     scmid: default
     spec:
       title: Bump contributors.jenkins.io azurerm_storage_account_sas `expiry` date {{ source "nextExpiry" }}
+      description: paste this certicate output here (private repo) https://github.com/jenkins-infra/charts-secrets/blob/main/config/contributors.jenkins.io/secrets.yaml
       labels:
         - terraform
