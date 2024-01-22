@@ -92,7 +92,7 @@ module "ci_jenkins_io_azurevm_agents" {
   ephemeral_agents_subnet_name     = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents.name
   controller_rg_name               = module.ci_jenkins_io.controller_resourcegroup_name
   controller_ips                   = compact([module.ci_jenkins_io.controller_private_ipv4, module.ci_jenkins_io.controller_public_ipv4])
-  controller_service_principal_id  = module.ci_jenkins_io.controler_service_principal_id
+  controller_service_principal_id  = module.ci_jenkins_io.controller_service_principal_id
   default_tags                     = local.default_tags
 
   jenkins_infra_ips = {
@@ -101,14 +101,12 @@ module "ci_jenkins_io_azurevm_agents" {
 }
 
 ## Sponsorship subscription specific resources for controller
-resource "azurerm_resource_group" "controller_jenkins_sponsorship" {
-  provider = azurerm.jenkins-sponsorship
-  name     = module.ci_jenkins_io.controller_resourcegroup_name # Same name on both subscriptions
-  location = var.location
-  tags     = local.default_tags
+moved {
+  from = azurerm_resource_group.controller_jenkins_sponsorship
+  to   = module.ci_jenkins_io_sponsorship.azurerm_resource_group.controller
 }
 
-# Required to allow controller to check for subnets inside the sponsorship network
+# Required to allow (non sponsorship) controller to check for subnets inside the sponsorship network
 resource "azurerm_role_definition" "controller_vnet_sponsorship_reader" {
   provider = azurerm.jenkins-sponsorship
   name     = "Read-ci-jenkins-io-sponsorship-VNET"
@@ -136,9 +134,9 @@ module "ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
   ephemeral_agents_network_rg_name = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents_jenkins_sponsorship.resource_group_name
   ephemeral_agents_network_name    = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents_jenkins_sponsorship.virtual_network_name
   ephemeral_agents_subnet_name     = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents_jenkins_sponsorship.name
-  controller_rg_name               = azurerm_resource_group.controller_jenkins_sponsorship.name
+  controller_rg_name               = module.ci_jenkins_io_sponsorship.controller_resourcegroup_name
   controller_ips                   = compact([module.ci_jenkins_io.controller_private_ipv4, module.ci_jenkins_io.controller_public_ipv4])
-  controller_service_principal_id  = module.ci_jenkins_io.controler_service_principal_id
+  controller_service_principal_id  = module.ci_jenkins_io.controller_service_principal_id
   default_tags                     = local.default_tags
   storage_account_name             = "cijenkinsioagentssub" # Max 24 chars
 
@@ -152,7 +150,7 @@ module "ci_jenkins_io_aci_agents" {
 
   role_name                       = "${module.ci_jenkins_io.service_short_stripped_name}-ACI-Contributor"
   aci_agents_resource_group_name  = module.ci_jenkins_io_azurevm_agents.ephemeral_agents_resource_group_name
-  controller_service_principal_id = module.ci_jenkins_io.controler_service_principal_id
+  controller_service_principal_id = module.ci_jenkins_io.controller_service_principal_id
 }
 
 module "ci_jenkins_io_aci_agents_sponsorship" {
@@ -163,7 +161,7 @@ module "ci_jenkins_io_aci_agents_sponsorship" {
 
   role_name                       = "${module.ci_jenkins_io.service_short_stripped_name}-ACI-Contributor-sponsorship"
   aci_agents_resource_group_name  = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_resource_group_name
-  controller_service_principal_id = module.ci_jenkins_io.controler_service_principal_id
+  controller_service_principal_id = module.ci_jenkins_io.controller_service_principal_id
 }
 
 ## Service DNS records

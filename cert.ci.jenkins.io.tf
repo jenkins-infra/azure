@@ -50,7 +50,7 @@ module "cert_ci_jenkins_io_azurevm_agents" {
   ephemeral_agents_subnet_name     = data.azurerm_subnet.cert_ci_jenkins_io_ephemeral_agents.name
   controller_rg_name               = module.cert_ci_jenkins_io.controller_resourcegroup_name
   controller_ips                   = compact([module.cert_ci_jenkins_io.controller_public_ipv4])
-  controller_service_principal_id  = module.cert_ci_jenkins_io.controler_service_principal_id
+  controller_service_principal_id  = module.cert_ci_jenkins_io.controller_service_principal_id
   default_tags                     = local.default_tags
   jenkins_infra_ips = {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
@@ -78,7 +78,7 @@ resource "azurerm_role_assignment" "cert_controller_vnet_reader" {
   provider           = azurerm.jenkins-sponsorship
   scope              = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsorship.id
   role_definition_id = azurerm_role_definition.cert_ci_jenkins_io_controller_vnet_sponsorship_reader.role_definition_resource_id
-  principal_id       = module.cert_ci_jenkins_io.controler_service_principal_id
+  principal_id       = module.cert_ci_jenkins_io.controller_service_principal_id
 }
 module "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
   providers = {
@@ -93,7 +93,7 @@ module "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
   ephemeral_agents_subnet_name     = data.azurerm_subnet.cert_ci_jenkins_io_sponsorship_ephemeral_agents.name
   controller_rg_name               = azurerm_resource_group.cert_ci_jenkins_io_controller_jenkins_sponsorship.name
   controller_ips                   = compact([module.cert_ci_jenkins_io.controller_public_ipv4])
-  controller_service_principal_id  = module.cert_ci_jenkins_io.controler_service_principal_id
+  controller_service_principal_id  = module.cert_ci_jenkins_io.controller_service_principal_id
   default_tags                     = local.default_tags
   storage_account_name             = "certciagentssub" # Max 24 chars
 
