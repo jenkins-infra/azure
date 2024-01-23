@@ -39,6 +39,13 @@ resource "azurerm_storage_share" "contributors_jenkins_io" {
       expiry      = "2024-04-23T00:00:00Z"
     }
   }
+
+  lifecycle {
+    ignore_changes = [
+      # Ignore changes for acl as it's recreated identically everytime
+      acl
+    ]
+  }
 }
 
 data "azurerm_storage_account_sas" "contributors_jenkins_io" {
