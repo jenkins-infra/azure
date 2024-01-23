@@ -60,6 +60,22 @@ targets:
       file: contributors.jenkins.io.tf
       path: data.azurerm_storage_account_sas.contributors_jenkins_io.start
     scmid: default
+  updateStoredPolicyNextExpiry:
+    name: Update Terraform file `contributors.jenkins.io.tf`
+    kind: terraform/file
+    sourceid: nextExpiry
+    spec:
+      file: contributors.jenkins.io.tf
+      path: azurerm_storage_account.contributors_jenkins_io.acl.access_policy.expiry
+    scmid: default
+  updateStoredPolicyStartDate:
+    name: Update Terraform file `contributors.jenkins.io.tf`
+    kind: terraform/file
+    sourceid: nextStartDate
+    spec:
+      file: contributors.jenkins.io.tf
+      path: azurerm_storage_account.contributors_jenkins_io.acl.access_policy.start
+    scmid: default
 
 actions:
   default:

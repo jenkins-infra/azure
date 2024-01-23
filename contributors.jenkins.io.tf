@@ -35,8 +35,8 @@ resource "azurerm_storage_share" "contributors_jenkins_io" {
     id = "contributorsjenkinsio-stored-access-policy"
     access_policy {
       permissions = "rwdl"
-      start  = "2024-01-22T00:00:00Z"
-      expiry = "2024-04-21T00:00:00Z"
+      start  = "2024-01-23T00:00:00Z"
+      expiry = "2024-04-23T00:00:00Z"
     }
   }
 }
