@@ -9,6 +9,7 @@ module "ci_jenkins_io" {
     azurerm.dns = azurerm
     azuread     = azuread
   }
+
   service_fqdn                 = "ci.jenkins.io"
   location                     = data.azurerm_virtual_network.public.location
   admin_username               = local.admin_username
@@ -51,6 +52,7 @@ module "ci_jenkins_io_sponsorship" {
     azuread     = azuread
   }
 
+  service_custom_name          = "ci.jenkins.io-sponsorship"
   service_fqdn                 = "ci.jenkins.io"
   location                     = data.azurerm_virtual_network.public_jenkins_sponsorship.location
   admin_username               = local.admin_username
@@ -120,7 +122,7 @@ resource "azurerm_role_assignment" "controller_vnet_reader" {
   provider           = azurerm.jenkins-sponsorship
   scope              = data.azurerm_virtual_network.public_jenkins_sponsorship.id
   role_definition_id = azurerm_role_definition.controller_vnet_sponsorship_reader.role_definition_resource_id
-  principal_id       = module.ci_jenkins_io.controler_service_principal_id
+  principal_id       = module.ci_jenkins_io.controller_service_principal_id
 }
 
 module "ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
