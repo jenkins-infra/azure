@@ -23,6 +23,14 @@ resource "azurerm_storage_account" "contributors_jenkins_io" {
     bypass                     = ["AzureServices"]
   }
 
+  tags = local.default_tags
+}
+
+resource "azurerm_storage_share" "contributors_jenkins_io" {
+  name                 = "contributors-jenkins-io"
+  storage_account_name = azurerm_storage_account.contributors_jenkins_io.name
+  quota                = 5
+
   acl {
     id = "contributorsjenkinsio-stored-access-policy"
     access_policy {
@@ -31,14 +39,6 @@ resource "azurerm_storage_account" "contributors_jenkins_io" {
       expiry = "2024-04-21T00:00:00Z"
     }
   }
-
-  tags = local.default_tags
-}
-
-resource "azurerm_storage_share" "contributors_jenkins_io" {
-  name                 = "contributors-jenkins-io"
-  storage_account_name = azurerm_storage_account.contributors_jenkins_io.name
-  quota                = 5
 }
 
 data "azurerm_storage_account_sas" "contributors_jenkins_io" {
