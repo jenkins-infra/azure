@@ -68,6 +68,25 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_subnet_privat
   principal_id       = azuread_service_principal.infra_ci_jenkins_io.id
 }
 
+# Required to allow azcopy sync of contributors.jenkins.io File Share
+module "infra_ci_jenkins_io_fileshare_serviceprincipal_writer" {
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+
+  service_fqdn               = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
+  active_directory_owners    = [data.azuread_service_principal.terraform_production.id]
+  active_directory_url       = "https://github.com/jenkins-infra/azure"
+  service_principal_end_date = "2024-06-20T23:00:00Z"
+  file_share_id              = azurerm_storage_share.contributors_jenkins_io.resource_manager_id
+  default_tags               = local.default_tags
+}
+output "infra_ci_jenkins_io_fileshare_serviceprincipal_writer_id" {
+  value = module.infra_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_id
+}
+output "infra_ci_jenkins_io_fileshare_serviceprincipal_writer_password" {
+  sensitive = true
+  value     = module.infra_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
+}
+
 locals {
   infra_ci_jenkins_io_fqdn                        = "infra.ci.jenkins.io"
   infra_ci_jenkins_io_service_short_name          = trimprefix(trimprefix(local.infra_ci_jenkins_io_fqdn, "jenkins.io"), ".")
