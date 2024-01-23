@@ -30,6 +30,15 @@ resource "azurerm_storage_share" "contributors_jenkins_io" {
   name                 = "contributors-jenkins-io"
   storage_account_name = azurerm_storage_account.contributors_jenkins_io.name
   quota                = 5
+
+  acl {
+    id = "contributorsjenkinsio-stored-access-policy"
+    access_policy {
+      permissions = "rwdl"
+      start  = "2024-01-23T00:00:00Z"
+      expiry = "2024-04-23T00:00:00Z"
+    }
+  }
 }
 
 data "azurerm_storage_account_sas" "contributors_jenkins_io" {
