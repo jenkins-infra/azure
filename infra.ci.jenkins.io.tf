@@ -76,7 +76,7 @@ module "infra_ci_jenkins_io_fileshare_serviceprincipal_writer" {
   active_directory_owners    = [data.azuread_service_principal.terraform_production.id]
   active_directory_url       = "https://github.com/jenkins-infra/azure"
   service_principal_end_date = "2024-06-20T23:00:00Z"
-  file_share_id              = azurerm_resource_group.contributors_jenkins_io.io
+  file_share_id              = azurerm_resource_group.contributors_jenkins_io.id
   default_tags               = local.default_tags
 }
 output "infra_ci_jenkins_io_fileshare_serviceprincipal_writer_id" {
