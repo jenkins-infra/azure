@@ -34,3 +34,11 @@ resource "azurerm_storage_account" "get_jenkins_io" {
     bypass = ["Metrics", "Logging", "AzureServices"]
   }
 }
+
+
+resource "azurerm_storage_share" "get_jenkins_io" {
+  name                 = "mirrorbits"
+  storage_account_name = azurerm_storage_account.get_jenkins_io.name
+  quota                = 1024 # 512.14GiB (Begining 2024)
+}
+
