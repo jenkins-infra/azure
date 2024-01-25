@@ -41,3 +41,46 @@ resource "azurerm_storage_share" "get_jenkins_io" {
   storage_account_name = azurerm_storage_account.get_jenkins_io.name
   quota                = 700 # 512.14GiB used (Begining 2024)
 }
+
+data "azurerm_storage_account_sas" "get_jenkins_io" {
+  connection_string = azurerm_storage_account.get_jenkins_io.primary_connection_string
+  signed_version    = "2022-11-02"
+
+  resource_types {
+    service   = true # Ex: list Share
+    container = true # Ex: list Files and Directories
+    object    = true # Ex: create File
+  }
+
+  services {
+    blob  = false
+    queue = false
+    table = false
+    file  = true
+  }
+
+  start  = "2024-25-01T00:00:00Z"
+  expiry = "2024-25-04T00:00:00Z"
+
+  # https://learn.microsoft.com/en-us/rest/api/storageservices/create-account-sas#file-service
+  permissions {
+    read    = true
+    write   = true
+    delete  = true
+    list    = true
+    add     = false
+    create  = true
+    update  = false
+    process = false
+    tag     = false
+    filter  = false
+  }
+
+output "get_jenkins_io_share_url" {
+  value = azurerm_storage_share.get_jenkins_io.url
+}
+
+output "get_jenkins_io_sas_query_string" {
+  sensitive = true
+  value     = data.azurerm_storage_account_sas.get_jenkins_io.sas
+}
