@@ -86,6 +86,16 @@ output "infra_ci_jenkins_io_fileshare_serviceprincipal_writer_password" {
   sensitive = true
   value     = module.infra_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
 }
+output "infra_ci_jenkins_io_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.infra_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
+}
+output "infra_ci_jenkins_io_fileshare_serviceprincipal_writer_sp_id" {
+  value = module.infra_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_sp_id
+}
+output "infra_ci_jenkins_io_fileshare_serviceprincipal_writer_sp_password" {
+  sensitive = true
+  value     = module.infra_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_sp_password
+}
 
 locals {
   infra_ci_jenkins_io_fqdn                        = "infra.ci.jenkins.io"

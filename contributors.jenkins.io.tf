@@ -35,9 +35,16 @@ resource "azurerm_storage_share" "contributors_jenkins_io" {
     id = "contributorsjenkinsio-stored-access-policy"
     access_policy {
       permissions = "rwdl"
-      start       = "2024-01-23T00:00:00Z"
-      expiry      = "2024-04-23T00:00:00Z"
+      start       = "2024-01-23T00:00:00.0000000Z"
+      expiry      = "2024-04-23T00:00:00.0000000Z"
     }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      # Ignore changes for acl as it's recreated identically everytime
+      acl
+    ]
   }
 }
 
