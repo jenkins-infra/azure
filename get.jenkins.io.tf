@@ -75,6 +75,7 @@ data "azurerm_storage_account_sas" "get_jenkins_io" {
     tag     = false
     filter  = false
   }
+}
 
 output "get_jenkins_io_share_url" {
   value = azurerm_storage_share.get_jenkins_io.url
