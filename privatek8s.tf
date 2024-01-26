@@ -112,7 +112,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   orchestrator_version  = local.kubernetes_versions["privatek8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
-  min_count             = 1
+  min_count             = 0
   max_count             = 20
   zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
