@@ -43,6 +43,12 @@ resource "azurerm_storage_share" "get_jenkins_io" {
   quota                = 700 # 512.14GiB used (Begining 2024)
 }
 
+resource "azurerm_storage_share" "get_jenkins_io_website" {
+  name                 = "website"
+  storage_account_name = azurerm_storage_account.get_jenkins_io.name
+  quota                = 50 # 1.6GiB used in 2020
+}
+
 data "azurerm_storage_account_sas" "get_jenkins_io" {
   connection_string = azurerm_storage_account.get_jenkins_io.primary_connection_string
   signed_version    = "2022-11-02"
