@@ -46,7 +46,7 @@ resource "azurerm_storage_share" "get_jenkins_io" {
 resource "azurerm_storage_share" "get_jenkins_io_website" {
   name                 = "website"
   storage_account_name = azurerm_storage_account.get_jenkins_io.name
-  quota                = 50 # 1.6GiB used in 2020
+  quota                = 100 # Minimal size, 1.6GiB used in 2020
 }
 
 data "azurerm_storage_account_sas" "get_jenkins_io" {
