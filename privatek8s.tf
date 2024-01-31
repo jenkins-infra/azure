@@ -244,7 +244,7 @@ resource "azurerm_role_assignment" "publicip_networkcontributor" {
 
 # Allow cluster to manage get.jenkins.io storage account
 resource "azurerm_role_assignment" "getjenkinsio_storage_account_contributor" {
-  scope                            = azurerm_public_ip.public_privatek8s.id
+  scope                            = azurerm_storage_account.get_jenkins_io.id
   role_definition_name             = "Storage Account Contributor"
   principal_id                     = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
   skip_service_principal_aad_check = true
