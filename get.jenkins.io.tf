@@ -31,6 +31,7 @@ resource "azurerm_storage_account" "get_jenkins_io" {
     virtual_network_subnet_ids = [
       data.azurerm_subnet.publick8s_tier.id,
       data.azurerm_subnet.privatek8s_tier.id,
+      data.azurerm_subnet.privatek8s_release_tier.id,
     ]
     bypass = ["Metrics", "Logging", "AzureServices"]
   }
