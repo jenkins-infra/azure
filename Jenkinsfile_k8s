@@ -1,39 +1,28 @@
-parallel(
-  failFast: false,
-  'terraform': {
-    terraform(
-      stagingCredentials: [
-        azureServicePrincipal(
-          credentialsId: 'staging-terraform-azure-serviceprincipal',
-          subscriptionIdVariable: 'ARM_SUBSCRIPTION_ID',
-          clientIdVariable: 'ARM_CLIENT_ID',
-          clientSecretVariable: 'ARM_CLIENT_SECRET',
-          tenantIdVariable: 'ARM_TENANT_ID',
-        ),
-        file(
-          credentialsId: 'staging-terraform-azure-backend-config',
-          variable: 'BACKEND_CONFIG_FILE',
-        ),
-      ],
-      productionCredentials: [
-        azureServicePrincipal(
-          credentialsId: 'production-terraform-azure-serviceprincipal',
-          subscriptionIdVariable: 'ARM_SUBSCRIPTION_ID',
-          clientIdVariable: 'ARM_CLIENT_ID',
-          clientSecretVariable: 'ARM_CLIENT_SECRET',
-          tenantIdVariable: 'ARM_TENANT_ID',
-        ),
-        file(
-          credentialsId: 'production-terraform-azure-backend-config',
-          variable: 'BACKEND_CONFIG_FILE',
-        ),
-      ],
-    )
-  },
-  'updatecli': {
-    updatecli(action: 'diff')
-    if (env.BRANCH_IS_PRIMARY) {
-      updatecli(action: 'apply', cronTriggerExpression: '@daily')
-    }
-  },
+terraform(
+  stagingCredentials: [
+    azureServicePrincipal(
+      credentialsId: 'staging-terraform-azure-serviceprincipal',
+      subscriptionIdVariable: 'ARM_SUBSCRIPTION_ID',
+      clientIdVariable: 'ARM_CLIENT_ID',
+      clientSecretVariable: 'ARM_CLIENT_SECRET',
+      tenantIdVariable: 'ARM_TENANT_ID',
+    ),
+    file(
+      credentialsId: 'staging-terraform-azure-backend-config',
+      variable: 'BACKEND_CONFIG_FILE',
+    ),
+  ],
+  productionCredentials: [
+    azureServicePrincipal(
+      credentialsId: 'production-terraform-azure-serviceprincipal',
+      subscriptionIdVariable: 'ARM_SUBSCRIPTION_ID',
+      clientIdVariable: 'ARM_CLIENT_ID',
+      clientSecretVariable: 'ARM_CLIENT_SECRET',
+      tenantIdVariable: 'ARM_TENANT_ID',
+    ),
+    file(
+      credentialsId: 'production-terraform-azure-backend-config',
+      variable: 'BACKEND_CONFIG_FILE',
+    ),
+  ],
 )
