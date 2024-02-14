@@ -77,7 +77,7 @@ module "infra_ci_jenkins_io_fileshare_serviceprincipal_writer" {
   active_directory_url           = "https://github.com/jenkins-infra/azure"
   service_principal_end_date     = "2024-06-20T23:00:00Z"
   file_share_resource_manager_id = azurerm_storage_share.contributors_jenkins_io.resource_manager_id
-  storage_account_scope          = azurerm_storage_account.contributors_jenkins_io.id
+  storage_account_id             = azurerm_storage_account.contributors_jenkins_io.id
   default_tags                   = local.default_tags
 }
 output "infra_ci_jenkins_io_fileshare_serviceprincipal_writer_id" {
