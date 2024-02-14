@@ -72,12 +72,13 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_subnet_privat
 module "infra_ci_jenkins_io_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
-  service_fqdn               = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
-  active_directory_owners    = [data.azuread_service_principal.terraform_production.id]
-  active_directory_url       = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date = "2024-06-20T23:00:00Z"
-  file_share_id              = azurerm_storage_share.contributors_jenkins_io.resource_manager_id
-  default_tags               = local.default_tags
+  service_fqdn                   = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
+  active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
+  active_directory_url           = "https://github.com/jenkins-infra/azure"
+  service_principal_end_date     = "2024-06-20T23:00:00Z"
+  file_share_resource_manager_id = azurerm_storage_share.contributors_jenkins_io.resource_manager_id
+  storage_account_scope          = azurerm_storage_account.contributors_jenkins_io.id
+  default_tags                   = local.default_tags
 }
 output "infra_ci_jenkins_io_fileshare_serviceprincipal_writer_id" {
   value = module.infra_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_id
