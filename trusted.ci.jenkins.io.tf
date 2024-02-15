@@ -77,12 +77,13 @@ module "trusted_ci_jenkins_io_azurevm_agents" {
 module "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
-  service_fqdn               = "${module.trusted_ci_jenkins_io.service_fqdn}-fileshare_serviceprincipal_writer"
-  active_directory_owners    = [data.azuread_service_principal.terraform_production.id]
-  active_directory_url       = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date = "2024-06-20T19:00:00Z"
-  file_share_id              = azurerm_storage_share.updates_jenkins_io.resource_manager_id
-  default_tags               = local.default_tags
+  service_fqdn                   = "${module.trusted_ci_jenkins_io.service_fqdn}-fileshare_serviceprincipal_writer"
+  active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
+  active_directory_url           = "https://github.com/jenkins-infra/azure"
+  service_principal_end_date     = "2024-06-20T19:00:00Z"
+  file_share_resource_manager_id = azurerm_storage_share.updates_jenkins_io.resource_manager_id
+  storage_account_id             = azurerm_storage_account.updates_jenkins_io.id
+  default_tags                   = local.default_tags
 }
 output "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer_id" {
   value = module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_id
