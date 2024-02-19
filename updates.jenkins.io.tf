@@ -41,50 +41,6 @@ resource "azurerm_storage_share" "updates_jenkins_io" {
   quota                = 2 # updates.jenkins.io total size in /www/updates.jenkins.io: 400Mo (Mid 2023)
 }
 
-data "azurerm_storage_account_sas" "updates_jenkins_io" {
-  connection_string = azurerm_storage_account.updates_jenkins_io.primary_connection_string
-  signed_version    = "2022-11-02"
-
-  resource_types {
-    service   = true # Ex: list Share
-    container = true # Ex: list Files and Directories
-    object    = true # Ex: create File
-  }
-
-  services {
-    blob  = false
-    queue = false
-    table = false
-    file  = true
-  }
-
-  start  = "2024-01-01T00:00:00Z"
-  expiry = "2024-03-01T00:00:00Z"
-
-  # https://learn.microsoft.com/en-us/rest/api/storageservices/create-account-sas#file-service
-  permissions {
-    read    = true
-    write   = true
-    delete  = true
-    list    = true
-    add     = false
-    create  = true
-    update  = false
-    process = false
-    tag     = false
-    filter  = false
-  }
-}
-
-output "updates_jenkins_io_share_url" {
-  value = azurerm_storage_share.updates_jenkins_io.url
-}
-
-output "updates_jenkins_io_sas_query_string" {
-  sensitive = true
-  value     = data.azurerm_storage_account_sas.updates_jenkins_io.sas
-}
-
 # Redis database
 resource "azurerm_redis_cache" "updates_jenkins_io" {
   name                = "updates-jenkins-io"
