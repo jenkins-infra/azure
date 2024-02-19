@@ -18,3 +18,11 @@ resource "azurerm_resource_group" "prod_public_ips" {
   location = var.location
   tags     = local.default_tags
 }
+
+output "jenkins_tenant_id" {
+  value = azurerm_subscription.jenkins.tenant_id
+}
+
+output "jenkins_subscription_id" {
+  value = azurerm_subscription.jenkins.subscription_id
+}
