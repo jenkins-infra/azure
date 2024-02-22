@@ -93,6 +93,26 @@ output "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer_password" {
   value     = module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
 }
 
+# Required to allow azcopy sync of jenkins.io File Share
+module "trustedci_jenkinsio_fileshare_serviceprincipal_writer" {
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+
+  service_fqdn                   = "trustedci-jenkinsio-fileshare_serviceprincipal_writer"
+  active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
+  active_directory_url           = "https://github.com/jenkins-infra/azure"
+  service_principal_end_date     = "2024-07-23T00:00:00Z"
+  file_share_resource_manager_id = azurerm_storage_share.jenkins_io.resource_manager_id
+  storage_account_id             = azurerm_storage_account.jenkins_io.id
+  default_tags                   = local.default_tags
+}
+output "trustedci_jenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.trustedci_jenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
+}
+output "trustedci_jenkinsio_fileshare_serviceprincipal_writer_password" {
+  sensitive = true
+  value     = module.trustedci_jenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
+}
+
 ## Sponsorship subscription specific resources for controller
 resource "azurerm_resource_group" "trusted_ci_jenkins_io_controller_jenkins_sponsorship" {
   provider = azurerm.jenkins-sponsorship

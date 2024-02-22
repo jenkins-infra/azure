@@ -98,26 +98,6 @@ output "infra_ci_jenkins_io_fileshare_serviceprincipal_writer_sp_password" {
   value     = module.infra_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_sp_password
 }
 
-# Required to allow azcopy sync of jenkins.io File Share
-module "infraci_jenkinsio_fileshare_serviceprincipal_writer" {
-  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
-
-  service_fqdn                   = "infraci-jenkinsio-fileshare_serviceprincipal_writer"
-  active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
-  active_directory_url           = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date     = "2024-07-23T00:00:00Z"
-  file_share_resource_manager_id = azurerm_storage_share.jenkins_io.resource_manager_id
-  storage_account_id             = azurerm_storage_account.jenkins_io.id
-  default_tags                   = local.default_tags
-}
-output "infraci_jenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
-  value = module.infraci_jenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
-}
-output "infraci_jenkinsio_fileshare_serviceprincipal_writer_password" {
-  sensitive = true
-  value     = module.infraci_jenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
-}
-
 locals {
   infra_ci_jenkins_io_fqdn                        = "infra.ci.jenkins.io"
   infra_ci_jenkins_io_service_short_name          = trimprefix(trimprefix(local.infra_ci_jenkins_io_fqdn, "jenkins.io"), ".")
