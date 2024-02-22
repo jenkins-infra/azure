@@ -30,64 +30,8 @@ resource "azurerm_storage_share" "contributors_jenkins_io" {
   name                 = "contributors-jenkins-io"
   storage_account_name = azurerm_storage_account.contributors_jenkins_io.name
   quota                = 5
-
-  acl {
-    id = "contributorsjenkinsio-stored-access-policy"
-    access_policy {
-      permissions = "rwdl"
-      start       = "2024-01-23T00:00:00.0000000Z"
-      expiry      = "2024-04-23T00:00:00.0000000Z"
-    }
-  }
-
-  lifecycle {
-    ignore_changes = [
-      # Ignore changes for acl as it's recreated identically everytime
-      acl
-    ]
-  }
-}
-
-data "azurerm_storage_account_sas" "contributors_jenkins_io" {
-  connection_string = azurerm_storage_account.contributors_jenkins_io.primary_connection_string
-  signed_version    = "2022-11-02"
-
-  resource_types {
-    service   = true # Ex: list Share
-    container = true # Ex: list Files and Directories
-    object    = true # Ex: create File
-  }
-
-  services {
-    blob  = false
-    queue = false
-    table = false
-    file  = true
-  }
-
-  start  = "2024-01-22T00:00:00Z"
-  expiry = "2024-04-21T00:00:00Z"
-
-  # https://learn.microsoft.com/en-us/rest/api/storageservices/create-account-sas#file-service
-  permissions {
-    read    = true
-    write   = true
-    delete  = true
-    list    = true
-    add     = false
-    create  = true
-    update  = false
-    process = false
-    tag     = false
-    filter  = false
-  }
 }
 
 output "contributors_jenkins_io_share_url" {
   value = azurerm_storage_share.contributors_jenkins_io.url
-}
-
-output "contributors_jenkins_io_sas_query_string" {
-  sensitive = true
-  value     = data.azurerm_storage_account_sas.contributors_jenkins_io.sas
 }
