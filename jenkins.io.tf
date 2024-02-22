@@ -8,7 +8,7 @@ resource "azurerm_storage_account" "jenkins_io" {
   resource_group_name      = azurerm_resource_group.jenkins_io.name
   location                 = azurerm_resource_group.jenkins_io.location
   account_tier             = "Premium"
-  account_replication_type = "LRS"
+  account_replication_type = "ZRS"
 
   tags = local.default_tags
 }
