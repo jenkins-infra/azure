@@ -35,6 +35,6 @@ resource "azurerm_storage_account" "jenkins_io" {
 
 resource "azurerm_storage_share" "jenkins_io" {
   name                 = "jenkins-io"
-  storage_account_name = azurerm_storage_account.contributors_jenkins_io.name
+  storage_account_name = azurerm_storage_account.jenkins_io.name
   quota                = 5 # Used capacity end of February 2024: 380Mio
 }
