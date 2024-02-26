@@ -195,3 +195,23 @@ resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infrac
   resource_group_name         = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
 }
+
+# Required to allow azcopy sync of plugins.jenkins.io File Share
+module "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer" {
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+
+  service_fqdn                   = "infraci-pluginsjenkinsio-fileshare_serviceprincipal_writer"
+  active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
+  active_directory_url           = "https://github.com/jenkins-infra/azure"
+  service_principal_end_date     = "2024-07-27T00:00:00Z"
+  file_share_resource_manager_id = azurerm_storage_share.plugins_jenkins_io.resource_manager_id
+  storage_account_id             = azurerm_storage_account.plugins_jenkins_io.id
+  default_tags                   = local.default_tags
+}
+output "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
+}
+output "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer_password" {
+  sensitive = true
+  value     = module.infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
+}
