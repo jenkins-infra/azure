@@ -201,7 +201,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracilargearm64" {
   tags = local.default_tags
 }
 
-
 resource "azurerm_kubernetes_cluster_node_pool" "releasepool" {
   name                  = "releasepool"
   vm_size               = "Standard_D8s_v3" # 8 vCPU 32 GiB RAM
