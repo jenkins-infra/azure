@@ -169,7 +169,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infraciarm64" {
   tags = local.default_tags
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "infracilgarm64" {
+resource "azurerm_kubernetes_cluster_node_pool" "infracilargearm64" {
   name                  = "arm64large"
   vm_size               = "Standard_D8pds_v5" # 8 vCPU, 32 GB RAM, local disk: 300 GB and 38000 IOPS
   os_disk_type          = "Ephemeral"
@@ -177,7 +177,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracilgarm64" {
   orchestrator_version  = local.kubernetes_versions["privatek8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
-  min_count             = 1
+  min_count             = 0 # warning this can lead to error with spot instances, we acknowledge the risk of a 0 node nodepool occurance.
   max_count             = 10
   zones                 = [1]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
