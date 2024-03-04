@@ -39,7 +39,7 @@ locals {
   admin_username = "jenkins-infra-team"
 
   kubernetes_versions = {
-    "privatek8s" = "1.26.6"
+    "privatek8s" = "1.26.12"
     "publick8s"  = "1.26.6"
   }
 }
