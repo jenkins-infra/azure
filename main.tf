@@ -6,6 +6,7 @@ data "azuread_service_principal" "terraform_production" {
 
 # Data source used to retrieve the subscription id
 data "azurerm_subscription" "jenkins" {
+  subscription_id = local.subscription_main
 }
 
 module "jenkins_infra_shared_data" {
