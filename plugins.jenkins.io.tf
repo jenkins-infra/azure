@@ -24,7 +24,7 @@ resource "azurerm_storage_account" "plugins_jenkins_io" {
     )
     virtual_network_subnet_ids = [
       data.azurerm_subnet.publick8s_tier.id,
-      data.azurerm_subnet.privatek8s_tier.id, # required for management from infra.ci (terraform)
+      data.azurerm_subnet.privatek8s_tier.id,                                  # required for management from infra.ci (terraform)
       data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.id, # infra.ci Azure VM agents
     ]
     bypass = ["Metrics", "Logging", "AzureServices"]
