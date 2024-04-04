@@ -275,7 +275,7 @@ resource "kubernetes_storage_class" "azurefile_csi_premium_retain" {
   provider      = kubernetes.privatek8s
 }
 
-resource "kubernetes_storage_class" "managed_csi_premium_ZRS_retain_public" {
+resource "kubernetes_storage_class" "managed_csi_premium_ZRS_retain_public_private" {
   metadata {
     name = "managed-csi-premium-zrs-retain"
   }
