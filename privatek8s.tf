@@ -275,7 +275,7 @@ resource "kubernetes_storage_class" "azurefile_csi_premium_retain" {
   provider      = kubernetes.privatek8s
 }
 
-resource "kubernetes_storage_class" "managed_csi_premium_ZRS_retain_public_private" {
+resource "kubernetes_storage_class" "managed_csi_premium_ZRS_retain_public" {
   metadata {
     name = "managed-csi-premium-zrs-retain"
   }
@@ -284,7 +284,7 @@ resource "kubernetes_storage_class" "managed_csi_premium_ZRS_retain_public_priva
   parameters = {
     skuname = "Premium_ZRS"
   }
-  provider               = kubernetes.publick8s
+  provider               = kubernetes.privatek8s
   allow_volume_expansion = true
 }
 
