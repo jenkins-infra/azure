@@ -35,7 +35,3 @@ resource "azurerm_storage_share" "contributors_jenkins_io" {
   storage_account_name = azurerm_storage_account.contributors_jenkins_io.name
   quota                = 5
 }
-
-output "contributors_jenkins_io_share_url" {
-  value = azurerm_storage_share.contributors_jenkins_io.url
-}
