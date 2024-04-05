@@ -275,6 +275,19 @@ resource "kubernetes_storage_class" "azurefile_csi_premium_retain" {
   provider      = kubernetes.privatek8s
 }
 
+resource "kubernetes_storage_class" "managed_csi_premium_ZRS_retain_public_private" {
+  metadata {
+    name = "managed-csi-premium-zrs-retain"
+  }
+  storage_provisioner = "disk.csi.azure.com"
+  reclaim_policy      = "Retain"
+  parameters = {
+    skuname = "Premium_ZRS"
+  }
+  provider               = kubernetes.privatek8s
+  allow_volume_expansion = true
+}
+
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/privatek8s.yaml
 resource "azurerm_public_ip" "public_privatek8s" {
   name                = "public-privatek8s"
