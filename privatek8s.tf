@@ -147,7 +147,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infraciarm64" {
   enable_auto_scaling   = true
   min_count             = 1
   max_count             = 10
-  zones                 = [1]
+  zones                 = [1] # zone 1 is dedicated to ARM64 by azure
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
 
   # Spot instances
@@ -180,7 +180,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracictrlarm64" {
   enable_auto_scaling   = true
   min_count             = 1
   max_count             = 3
-  zones                 = [1]
+  zones                 = [1] # zone 1 is dedicated to ARM64 by azure
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
 
   node_taints = [
