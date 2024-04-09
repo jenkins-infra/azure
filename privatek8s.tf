@@ -147,7 +147,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infraciarm64" {
   enable_auto_scaling   = true
   min_count             = 1
   max_count             = 10
-  zones                 = [1] # zone 1 is dedicated to ARM64 by azure
+  zones                 = [1] # Linux arm64 VMs are only available in the Zone 1 in this region (undocumented by Azure)
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
 
   # Spot instances
@@ -185,7 +185,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracictrlarm64" {
 
   node_taints = [
     "jenkins=infra.ci.jenkins.io:NoSchedule",
-    "kubernetes.azure.com/scalesetpriority=spot:NoSchedule",
     "kind=controller"
   ]
   lifecycle {
