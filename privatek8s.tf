@@ -20,6 +20,19 @@ data "azurerm_subnet" "privatek8s_release_tier" {
   virtual_network_name = data.azurerm_virtual_network.private.name
 }
 
+data "azurerm_subnet" "privatek8s_infra_ci_controller_tier" {
+  name                 = "privatek8s-infraci-ctrl-tier"
+  resource_group_name  = data.azurerm_resource_group.private.name
+  virtual_network_name = data.azurerm_virtual_network.private.name
+}
+
+data "azurerm_subnet" "privatek8s_release_ci_controller_tier" {
+  name                 = "privatek8s-releaseci-ctrl-tier"
+  resource_group_name  = data.azurerm_resource_group.private.name
+  virtual_network_name = data.azurerm_virtual_network.private.name
+}
+
+
 #trivy:ignore:azure-container-logging #trivy:ignore:azure-container-limit-authorized-ips
 resource "azurerm_kubernetes_cluster" "privatek8s" {
   name                              = "privatek8s-${random_pet.suffix_privatek8s.id}"
@@ -147,7 +160,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infraciarm64" {
   enable_auto_scaling   = true
   min_count             = 1
   max_count             = 10
-  zones                 = [1]
+  zones                 = [1] # Linux arm64 VMs are only available in the Zone 1 in this region (undocumented by Azure)
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_tier.id
 
   # Spot instances
@@ -169,6 +182,55 @@ resource "azurerm_kubernetes_cluster_node_pool" "infraciarm64" {
   tags = local.default_tags
 }
 
+# nodepool dedicated for the infra.ci.jenkins.io controller
+resource "azurerm_kubernetes_cluster_node_pool" "infraci_controller" {
+  name                  = "infracictrl"
+  vm_size               = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
+  os_disk_type          = "Ephemeral"
+  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
+  orchestrator_version  = local.kubernetes_versions["privatek8s"]
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
+  enable_auto_scaling   = true
+  min_count             = 1
+  max_count             = 2
+  zones                 = [1] # Linux arm64 VMs are only available in the Zone 1 in this region (undocumented by Azure)
+  vnet_subnet_id        = data.azurerm_subnet.privatek8s_infra_ci_controller_tier.id
+
+  node_taints = [
+    "jenkins=infra.ci.jenkins.io:NoSchedule",
+    "jenkins-component=controller:NoSchedule"
+  ]
+  lifecycle {
+    ignore_changes = [node_count]
+  }
+
+  tags = local.default_tags
+}
+
+# nodepool dedicated for the release.ci.jenkins.io controller
+resource "azurerm_kubernetes_cluster_node_pool" "releaseci_controller" {
+  name                  = "releacictrl"
+  vm_size               = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
+  os_disk_type          = "Ephemeral"
+  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
+  orchestrator_version  = local.kubernetes_versions["privatek8s"]
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
+  enable_auto_scaling   = true
+  min_count             = 1
+  max_count             = 2
+  zones                 = [1] # Linux arm64 VMs are only available in the Zone 1 in this region (undocumented by Azure)
+  vnet_subnet_id        = data.azurerm_subnet.privatek8s_release_ci_controller_tier.id
+
+  node_taints = [
+    "jenkins=release.ci.jenkins.io:NoSchedule",
+    "jenkins-component=controller:NoSchedule"
+  ]
+  lifecycle {
+    ignore_changes = [node_count]
+  }
+
+  tags = local.default_tags
+}
 resource "azurerm_kubernetes_cluster_node_pool" "releasepool" {
   name                  = "releasepool"
   vm_size               = "Standard_D8s_v3" # 8 vCPU 32 GiB RAM
