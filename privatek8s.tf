@@ -183,8 +183,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "infraciarm64" {
 }
 
 # nodepool dedicated for the infra.ci.jenkins.io controller
-resource "azurerm_kubernetes_cluster_node_pool" "infracictrlarm64" {
-  name                  = "arm64infracictrl"
+resource "azurerm_kubernetes_cluster_node_pool" "infraci_controller" {
+  name                  = "infracictrl"
   vm_size               = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
@@ -192,13 +192,13 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracictrlarm64" {
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
   min_count             = 1
-  max_count             = 3
-  zones                 = [1] # zone 1 is dedicated to ARM64 by azure
+  max_count             = 2
+  zones                 = [1] # Linux arm64 VMs are only available in the Zone 1 in this region (undocumented by Azure)
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_infra_ci_controller_tier.id
 
   node_taints = [
     "jenkins=infra.ci.jenkins.io:NoSchedule",
-    "kind=infra.ci.jenkins.io"
+    "jenkins-component=controller:NoSchedule"
   ]
   lifecycle {
     ignore_changes = [node_count]
@@ -208,8 +208,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracictrlarm64" {
 }
 
 # nodepool dedicated for the release.ci.jenkins.io controller
-resource "azurerm_kubernetes_cluster_node_pool" "releasecictrlarm64" {
-  name                  = "arm64releasecictrl"
+resource "azurerm_kubernetes_cluster_node_pool" "releaseci_controller" {
+  name                  = "releacictrl"
   vm_size               = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
@@ -217,13 +217,13 @@ resource "azurerm_kubernetes_cluster_node_pool" "releasecictrlarm64" {
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   enable_auto_scaling   = true
   min_count             = 1
-  max_count             = 3
-  zones                 = [1] # zone 1 is dedicated to ARM64 by azure
+  max_count             = 2
+  zones                 = [1] # Linux arm64 VMs are only available in the Zone 1 in this region (undocumented by Azure)
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_release_ci_controller_tier.id
 
   node_taints = [
     "jenkins=release.ci.jenkins.io:NoSchedule",
-    "kind=release.ci.jenkins.io"
+    "jenkins-component=controller:NoSchedule"
   ]
   lifecycle {
     ignore_changes = [node_count]
