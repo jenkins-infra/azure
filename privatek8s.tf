@@ -186,6 +186,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infraciarm64" {
 resource "azurerm_kubernetes_cluster_node_pool" "infraci_controller" {
   name                  = "infracictrl"
   vm_size               = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
+  os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["privatek8s"]
@@ -211,6 +212,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infraci_controller" {
 resource "azurerm_kubernetes_cluster_node_pool" "releaseci_controller" {
   name                  = "releacictrl"
   vm_size               = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
+  os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["privatek8s"]
