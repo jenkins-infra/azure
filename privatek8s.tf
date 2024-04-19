@@ -64,7 +64,7 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
     outbound_type     = "loadBalancer"
     load_balancer_sku = "standard"
     load_balancer_profile {
-      outbound_ports_allocated  = "1280" # Max 50 Nodes, 64000 total
+      outbound_ports_allocated  = "1088" # Max 58 Nodes, <64000 total
       idle_timeout_in_minutes   = "4"
       managed_outbound_ip_count = "1"
     }
