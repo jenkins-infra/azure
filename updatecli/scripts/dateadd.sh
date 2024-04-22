@@ -1,5 +1,5 @@
 #!/bin/bash
-# This script calculate next date for certificates
+# This script calculates next date for certificates
 ##
 set -eux -o pipefail
 DATE_BIN='date'
