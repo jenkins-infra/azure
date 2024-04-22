@@ -339,7 +339,7 @@ resource "kubernetes_storage_class" "azurefile_csi_premium_retain" {
   provider      = kubernetes.privatek8s
 }
 
-resource "kubernetes_storage_class" "managed_csi_premium_ZRS_retain_public_private" {
+resource "kubernetes_storage_class" "managed_csi_premium_ZRS_retain_private" {
   metadata {
     name = "managed-csi-premium-zrs-retain"
   }
@@ -347,6 +347,20 @@ resource "kubernetes_storage_class" "managed_csi_premium_ZRS_retain_public_priva
   reclaim_policy      = "Retain"
   parameters = {
     skuname = "Premium_ZRS"
+  }
+  provider               = kubernetes.privatek8s
+  allow_volume_expansion = true
+}
+
+# https://learn.microsoft.com/en-us/java/api/com.microsoft.azure.management.storage.skuname?view=azure-java-legacy#field-summary
+resource "kubernetes_storage_class" "managed_csi_standard_ZRS_retain_private" {
+  metadata {
+    name = "managed-csi-standard-zrs-retain"
+  }
+  storage_provisioner = "disk.csi.azure.com"
+  reclaim_policy      = "Retain"
+  parameters = {
+    skuname = " Standard_ZRS"
   }
   provider               = kubernetes.privatek8s
   allow_volume_expansion = true
