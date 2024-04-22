@@ -74,8 +74,8 @@ resource "azurerm_dns_cname_record" "azure_updates_jenkins_io" {
   tags                = local.default_tags
 }
 
-resource "azurerm_dns_cname_record" "mirrors_updates_jenkins_io" {
-  name                = "mirrors.updates"
+resource "azurerm_dns_cname_record" "redirect_updates_jenkins_io" {
+  name                = "redirect.updates"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
