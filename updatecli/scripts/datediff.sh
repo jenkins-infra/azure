@@ -1,6 +1,5 @@
-#!/bin/sh
-# This script calculate diff between dates for expiry azurerm_storage_account_sas
-##
+#!/bin/bash
+# This script calculate diff between dates for letsencrypt expiration
 set -eux -o pipefail
 
 currentexpirydate="${1}"
@@ -15,9 +14,10 @@ command -v "${DATE_BIN}" >/dev/null 2>&1 || { echo "ERROR: ${DATE_BIN} command n
 
 currentdateepoch=$("${DATE_BIN}" --utc "+%s" 2>/dev/null)
 expirydateepoch=$("${DATE_BIN}" "+%s" -d "$currentexpirydate")
+
 datediff=$(((expirydateepoch-currentdateepoch)/(60*60*24))) # diff per days
 
-if [ "$datediff" -lt 10 ] # launch renew 10 days before expiration
+if [ "$datediff" -lt 21 ] # launch renew 21 days before expiration
 then
     echo "time for update"
     exit 0
