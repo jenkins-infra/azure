@@ -64,9 +64,18 @@ output "updates_jenkins_io_redis_primary_access_key" {
   value     = azurerm_redis_cache.updates_jenkins_io.primary_access_key
 }
 
-# Azure service CNAME record
+# Azure service CNAME records
 resource "azurerm_dns_cname_record" "azure_updates_jenkins_io" {
   name                = "azure.updates"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  record              = azurerm_dns_a_record.public_publick8s.fqdn
+  tags                = local.default_tags
+}
+
+resource "azurerm_dns_cname_record" "mirrors_updates_jenkins_io" {
+  name                = "mirrors.updates"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
