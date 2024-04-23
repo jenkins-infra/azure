@@ -1,0 +1,58 @@
+name: "Generate new end date for ci.jenkins.io controller service principal"
+
+scms:
+  default:
+    kind: github
+    spec:
+      user: "{{ .github.user }}"
+      email: "{{ .github.email }}"
+      owner: "{{ .github.owner }}"
+      repository: "{{ .github.repository }}"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ .github.username }}"
+      branch: "{{ .github.branch }}"
+
+sources:
+  currentExpiry:
+    name: Get current `expiry` date
+    kind: terraform/file #  as per updatecli/updatecli#1859 need to use terraform/file findsubmatch for now
+    spec:
+      file: ci.jenkins.io.tf
+      path: 'module.controller_service_principal_end_date'
+  nextExpiry:
+    name: Prepare next `expiry` date within 3 months
+    kind: shell
+    spec:
+      command: bash ./updatecli/scripts/dateadd.sh
+      environments:
+        - name: PATH
+
+conditions:
+  checkIfExpirySoonExpired:
+    kind: shell
+    sourceid: currentExpiry
+    spec:
+      command: bash ./updatecli/scripts/datediff.sh # current expiry date value passed as argument
+      environments:
+        - name: PATH
+
+targets:
+  updateNextExpiry:
+    name: Update Terraform file `ci.jenkins.io.tf` with new expiration date for controller_service_principal_end_date
+    kind: file
+    sourceid: nextExpiry
+    spec:
+      file: ci.jenkins.io.tf
+      matchpattern: (controller_service_principal_end_date.*=.*\")(.*)(\".*)
+      replacepattern: ${1}{{ source "nextExpiry" }}"
+    scmid: default
+
+actions:
+  default:
+    kind: github/pullrequest
+    scmid: default
+    spec:
+      title: Generate a new Azure Service Principal password with expiration date {{ source "nextExpiry" }} on `ci.jenkins.io`
+      description: "Generate a new password for the Azure Service Principal `ci.jenkins.io`."
+      labels:
+        - terraform
