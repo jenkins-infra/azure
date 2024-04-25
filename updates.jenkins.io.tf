@@ -41,6 +41,12 @@ resource "azurerm_storage_share" "updates_jenkins_io" {
   quota                = 2 # updates.jenkins.io total size in /www/updates.jenkins.io: 400Mo (Mid 2023)
 }
 
+resource "azurerm_storage_share" "updates_jenkins_io_httpd" {
+  name                 = "updates-jenkins-io-httpd"
+  storage_account_name = azurerm_storage_account.updates_jenkins_io.name
+  quota                = 1
+}
+
 # Redis database
 resource "azurerm_redis_cache" "updates_jenkins_io" {
   name                = "updates-jenkins-io"
