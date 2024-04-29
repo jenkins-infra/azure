@@ -53,6 +53,6 @@ actions:
     scmid: default
     spec:
       title: Generate a new Azure Service Principal password with expiration date {{ source "nextExpiry" }} on `ci.jenkins.io`
-      description: "Generate a new password for the Azure Service Principal `ci.jenkins.io`."
+      description: "Generate a new password for the Azure Service Principal `ci.jenkins.io`. See https://github.com/jenkins-infra/helpdesk/issues/4052#issuecomment-2072867491 for details"
       labels:
         - terraform
