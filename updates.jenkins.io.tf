@@ -6,12 +6,16 @@ resource "azurerm_resource_group" "updates_jenkins_io" {
 }
 
 resource "azurerm_storage_account" "updates_jenkins_io" {
-  name                     = "updatesjenkinsio"
-  resource_group_name      = azurerm_resource_group.updates_jenkins_io.name
-  location                 = azurerm_resource_group.updates_jenkins_io.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  min_tls_version          = "TLS1_2" # default value, needed for tfsec
+  name                = "updatesjenkinsio"
+  resource_group_name = azurerm_resource_group.updates_jenkins_io.name
+  location            = azurerm_resource_group.updates_jenkins_io.location
+
+  account_tier                      = "Premium"
+  account_kind                      = "FileStorage"
+  access_tier                       = "Hot"
+  account_replication_type          = "ZRS"
+  min_tls_version                   = "TLS1_2" # default value, needed for tfsec
+  infrastructure_encryption_enabled = true
 
   tags = local.default_tags
 
