@@ -40,7 +40,7 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   resource_group_name               = azurerm_resource_group.privatek8s.name
   kubernetes_version                = local.kubernetes_versions["privatek8s"]
   dns_prefix                        = "privatek8s-${random_pet.suffix_privatek8s.id}"
-  role_based_access_control_enabled = true # default value but made explicit to please trivy
+  role_based_access_control_enabled = true # default value, added to please tfsec
 
   api_server_access_profile {
     authorized_ip_ranges = setunion(
