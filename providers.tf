@@ -27,6 +27,14 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(data.azurerm_kubernetes_cluster.publick8s.kube_config.0.cluster_ca_certificate)
 }
 
+provider "kubernetes" {
+  alias                  = "cijenkinsio_agents_1"
+  host                   = azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.host
+  client_certificate     = base64decode(azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.client_certificate)
+  client_key             = base64decode(azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.client_key)
+  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.cluster_ca_certificate)
+}
+
 provider "postgresql" {
   /**
   Important: terraform must be allowed to reach this instance through the network. Check the followings:
