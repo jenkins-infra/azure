@@ -87,7 +87,7 @@ module "ci_jenkins_io_kubernetes_agents_jenkins_sponsorship_1" {
   providers = {
     azurerm = azurerm.jenkins-sponsorship
   }
-  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-kubernetes-agents"
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-inbound-agents"
 
   service_fqdn                      = local.ci_jenkins_io_fqdn
   kubernetes_agents_network_rg_name = data.azurerm_resource_group.public_jenkins_sponsorship.name
