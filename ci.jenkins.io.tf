@@ -83,6 +83,57 @@ module "ci_jenkins_io_aci_agents_sponsorship" {
   controller_service_principal_id = module.ci_jenkins_io_sponsorship.controller_service_principal_id
 }
 
+module "ci_jenkins_io_kubernetes_agents_jenkins_sponsorship_1" {
+  providers = {
+    azurerm = azurerm.jenkins-sponsorship
+  }
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-inbound-agents"
+
+  service_fqdn                      = local.ci_jenkins_io_fqdn
+  kubernetes_agents_network_rg_name = data.azurerm_resource_group.public_jenkins_sponsorship.name
+  kubernetes_agents_network_name    = data.azurerm_virtual_network.public_jenkins_sponsorship.name
+  kubernetes_agents_subnet_name     = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.name
+
+  controller_rg_name = module.ci_jenkins_io_sponsorship.controller_resourcegroup_name
+  controller_ips = compact([
+    module.ci_jenkins_io_sponsorship.controller_private_ipv4,
+    module.ci_jenkins_io_sponsorship.controller_public_ipv4
+  ])
+  default_tags = local.default_tags
+}
+
+## Allow ci.jenkins.io to reach the private AKS cluster API (outbound in controller NSG and inbound in cluster subnet)
+resource "azurerm_network_security_rule" "allow_outbound_https_from_cijio_to_cijenkinsio_agents_1_api" {
+  provider               = azurerm.jenkins-sponsorship
+  name                   = "allow-out-https-from-cijio-to-cijenkinsio_agents-1-api"
+  priority               = 4000
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "443"
+  source_address_prefix  = module.ci_jenkins_io_sponsorship.controller_private_ipv4 # Only private IPv4
+  # All IPs has the endpoint NIC may change inside this subnet
+  destination_address_prefixes = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.address_prefixes
+  resource_group_name          = module.ci_jenkins_io_sponsorship.controller_resourcegroup_name
+  network_security_group_name  = module.ci_jenkins_io_sponsorship.controller_nsg_name
+}
+resource "azurerm_network_security_rule" "allow_inbound_https_from_cijio_to_cijenkinsio_agents_1_api" {
+  provider               = azurerm.jenkins-sponsorship
+  name                   = "allow-in-https-from-cijio-to-cijenkinsio_agents-1-api"
+  priority               = 4000
+  direction              = "Inbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "443"
+  source_address_prefix  = module.ci_jenkins_io_sponsorship.controller_private_ipv4 # Only private IPv4
+  # All IPs has the endpoint NIC may change inside this subnet
+  destination_address_prefixes = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.address_prefixes
+  resource_group_name          = data.azurerm_resource_group.public_jenkins_sponsorship.name # Passed to module.ci_jenkins_io_kubernetes_agents_jenkins_sponsorship_1
+  network_security_group_name  = module.ci_jenkins_io_kubernetes_agents_jenkins_sponsorship_1.kubernetes_agents_nsg_name
+}
+
 ## Service DNS records
 resource "azurerm_dns_cname_record" "ci_jenkins_io" {
   name                = trimsuffix(trimsuffix(local.ci_jenkins_io_fqdn, data.azurerm_dns_zone.jenkinsio.name), ".")
