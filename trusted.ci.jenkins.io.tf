@@ -111,6 +111,35 @@ output "trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer_pas
   value     = module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
 }
 
+# Output a command to locally generate a zip containing two env files:
+# .env-content for updates-jenkins-io File Share
+# .env-redirections for updates-jenkins-io-httpd File Share
+# This zip file has to be uploaded as zip credentials on trusted.ci.jenkins.io
+# for the update-center2/site/publish.sh script to work.
+output "update_center_fileshares_env_zip_credentials" {
+  sensitive = true
+  value     = <<ZIPCOMMAND
+  # Copy/paste the following command to generate the Azure File Shares env zip credentials for update-center2/site/publish.sh
+  {
+    echo "STORAGE_NAME=updatesjenkinsio"
+    echo "STORAGE_FILESHARE=updates-jenkins-io"
+    echo "FILESHARE_SYNC_SOURCE=./www-content/"
+    echo "JENKINS_INFRA_FILESHARE_CLIENT_ID=${module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_id}"
+    echo "JENKINS_INFRA_FILESHARE_CLIENT_SECRET=${module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password}"
+    echo "STORAGE_DURATION_IN_MINUTE=5"
+    echo "STORAGE_PERMISSIONS=dlrw"
+  } > .env-content && {
+    echo "STORAGE_NAME=updatesjenkinsio"
+    echo "STORAGE_FILESHARE=updates-jenkins-io-httpd"
+    echo "FILESHARE_SYNC_SOURCE=./www-redirections/"
+    echo "JENKINS_INFRA_FILESHARE_CLIENT_ID=${module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_id}"
+    echo "JENKINS_INFRA_FILESHARE_CLIENT_SECRET=${module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password}"
+    echo "STORAGE_DURATION_IN_MINUTE=5"
+    echo "STORAGE_PERMISSIONS=dlrw"
+  } > .env-redirections && zip update-center-fileshares-env-zip-credentials.zip .env-content .env-redirections && rm .env-content .env-redirections
+    ZIPCOMMAND
+}
+
 # Required to allow azcopy sync of jenkins.io File Share
 module "trustedci_jenkinsio_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
