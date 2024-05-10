@@ -88,7 +88,7 @@ module "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer" {
 module "trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
-  service_fqdn                   = "${module.trusted_ci_jenkins_io.service_fqdn}-fileshare_serviceprincipal_writer"
+  service_fqdn                   = "${module.trusted_ci_jenkins_io.service_fqdn}-fileshare_serviceprincipal_writer-httpd"
   active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
   service_principal_end_date     = "2024-06-20T19:00:00Z"
@@ -96,15 +96,15 @@ module "trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer" {
   storage_account_id             = azurerm_storage_account.updates_jenkins_io.id
   default_tags                   = local.default_tags
 }
-output "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer_id" {
-  value = module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_id
+output "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
 output "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer_password" {
   sensitive = true
   value     = module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
 }
-output "trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer_id" {
-  value = module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_id
+output "trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
 output "trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer_password" {
   sensitive = true
@@ -124,7 +124,7 @@ output "update_center_fileshares_env_zip_credentials" {
     echo "STORAGE_NAME=updatesjenkinsio"
     echo "STORAGE_FILESHARE=updates-jenkins-io"
     echo "FILESHARE_SYNC_SOURCE=./www-content/"
-    echo "JENKINS_INFRA_FILESHARE_CLIENT_ID=${module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_id}"
+    echo "JENKINS_INFRA_FILESHARE_CLIENT_ID=${module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id}"
     echo "JENKINS_INFRA_FILESHARE_CLIENT_SECRET=${module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password}"
     echo "STORAGE_DURATION_IN_MINUTE=5"
     echo "STORAGE_PERMISSIONS=dlrw"
@@ -132,7 +132,7 @@ output "update_center_fileshares_env_zip_credentials" {
     echo "STORAGE_NAME=updatesjenkinsio"
     echo "STORAGE_FILESHARE=updates-jenkins-io-httpd"
     echo "FILESHARE_SYNC_SOURCE=./www-redirections/"
-    echo "JENKINS_INFRA_FILESHARE_CLIENT_ID=${module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_id}"
+    echo "JENKINS_INFRA_FILESHARE_CLIENT_ID=${module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id}"
     echo "JENKINS_INFRA_FILESHARE_CLIENT_SECRET=${module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password}"
     echo "STORAGE_DURATION_IN_MINUTE=5"
     echo "STORAGE_PERMISSIONS=dlrw"
