@@ -24,7 +24,8 @@ data "azurerm_subnet" "public_vnet_data_tier" {
 }
 
 locals {
-  publick8s_compute_zones = [3]
+  publick8s_compute_zones            = [3]
+  cijenkinsio_agents_1_compute_zones = [1]
 }
 
 #trivy:ignore:azure-container-logging #trivy:ignore:azure-container-limit-authorized-ips
@@ -34,7 +35,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   resource_group_name               = azurerm_resource_group.publick8s.name
   kubernetes_version                = local.kubernetes_versions["publick8s"]
   dns_prefix                        = "publick8s-${random_pet.suffix_publick8s.id}"
-  role_based_access_control_enabled = true # default value, added to please tfsec
+  role_based_access_control_enabled = true # default value but made explicit to please trivy
   api_server_access_profile {
     authorized_ip_ranges = setunion(
       # admins
