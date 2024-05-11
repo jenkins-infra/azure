@@ -1,6 +1,6 @@
 resource "azurerm_resource_group" "cijenkinsio_kubernetes_agents" {
   provider = azurerm.jenkins-sponsorship
-  name     = "cijenkinsio-kubernetes-agents"
+  name     = "ci-jenkins-io-kubernetes-agents"
   location = var.location
   tags     = local.default_tags
 
@@ -60,96 +60,96 @@ resource "azurerm_kubernetes_cluster" "cijenkinsio_agents_1" {
   tags = local.default_tags
 }
 
-# Node pool to host "jenkins-infra" applications required on this cluster such as ACP or datadog's cluster-agent, e.g. "Not agent, neither AKS System tools"
-resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_n2_applications" {
-  provider              = azurerm.jenkins-sponsorship
-  name                  = "la64n2app"
-  vm_size               = "Standard_D4pds_v5"
-  os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
-  orchestrator_version  = local.kubernetes_versions["cijenkinsio_agents_1"]
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.cijenkinsio_agents_1.id
-  enable_auto_scaling   = true
-  min_count             = 1
-  max_count             = 3 # 2 nodes always up for HA, a 3rd one is allowed for surge upgrades
-  zones                 = local.cijenkinsio_agents_1_compute_zones
-  vnet_subnet_id        = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id
+# # Node pool to host "jenkins-infra" applications required on this cluster such as ACP or datadog's cluster-agent, e.g. "Not agent, neither AKS System tools"
+# resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_n2_applications" {
+#   provider              = azurerm.jenkins-sponsorship
+#   name                  = "la64n2app"
+#   vm_size               = "Standard_D4pds_v5"
+#   os_disk_type          = "Ephemeral"
+#   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
+#   orchestrator_version  = local.kubernetes_versions["cijenkinsio_agents_1"]
+#   kubernetes_cluster_id = azurerm_kubernetes_cluster.cijenkinsio_agents_1.id
+#   enable_auto_scaling   = true
+#   min_count             = 1
+#   max_count             = 3 # 2 nodes always up for HA, a 3rd one is allowed for surge upgrades
+#   zones                 = local.cijenkinsio_agents_1_compute_zones
+#   vnet_subnet_id        = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id
 
-  node_labels = {
-    "jenkins" = "ci.jenkins.io"
-    "role"    = "applications"
-  }
-  node_taints = [
-    "ci.jenkins.io/applications=true:NoSchedule",
-  ]
+#   node_labels = {
+#     "jenkins" = "ci.jenkins.io"
+#     "role"    = "applications"
+#   }
+#   node_taints = [
+#     "ci.jenkins.io/applications=true:NoSchedule",
+#   ]
 
-  lifecycle {
-    ignore_changes = [node_count]
-  }
+#   lifecycle {
+#     ignore_changes = [node_count]
+#   }
 
-  tags = local.default_tags
-}
+#   tags = local.default_tags
+# }
 
-# Node pool to host ci.jenkins.io agents for usual builds
-resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_agents_1" {
-  provider              = azurerm.jenkins-sponsorship
-  name                  = "lx86n3agt1"
-  vm_size               = "Standard_D16ads_v5"
-  os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
-  orchestrator_version  = local.kubernetes_versions["cijenkinsio_agents_1"]
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.cijenkinsio_agents_1.id
-  enable_auto_scaling   = true
-  min_count             = 0
-  max_count             = 50 # 4 pods per nodes, max 200 nodes
-  zones                 = local.cijenkinsio_agents_1_compute_zones
-  vnet_subnet_id        = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id
+# # Node pool to host ci.jenkins.io agents for usual builds
+# resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_agents_1" {
+#   provider              = azurerm.jenkins-sponsorship
+#   name                  = "lx86n3agt1"
+#   vm_size               = "Standard_D16ads_v5"
+#   os_disk_type          = "Ephemeral"
+#   os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
+#   orchestrator_version  = local.kubernetes_versions["cijenkinsio_agents_1"]
+#   kubernetes_cluster_id = azurerm_kubernetes_cluster.cijenkinsio_agents_1.id
+#   enable_auto_scaling   = true
+#   min_count             = 0
+#   max_count             = 50 # 4 pods per nodes, max 200 nodes
+#   zones                 = local.cijenkinsio_agents_1_compute_zones
+#   vnet_subnet_id        = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id
 
-  node_labels = {
-    "jenkins" = "ci.jenkins.io"
-    "role"    = "jenkins-agents"
-  }
-  node_taints = [
-    "ci.jenkins.io/agents=true:NoSchedule",
-  ]
+#   node_labels = {
+#     "jenkins" = "ci.jenkins.io"
+#     "role"    = "jenkins-agents"
+#   }
+#   node_taints = [
+#     "ci.jenkins.io/agents=true:NoSchedule",
+#   ]
 
-  lifecycle {
-    ignore_changes = [node_count]
-  }
+#   lifecycle {
+#     ignore_changes = [node_count]
+#   }
 
-  tags = local.default_tags
-}
+#   tags = local.default_tags
+# }
 
-# Node pool to host ci.jenkins.io agents for BOM builds
-resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_bom_1" {
-  provider              = azurerm.jenkins-sponsorship
-  name                  = "lx86n3bom1"
-  vm_size               = "Standard_D16ads_v5"
-  os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
-  orchestrator_version  = local.kubernetes_versions["cijenkinsio_agents_1"]
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.cijenkinsio_agents_1.id
-  enable_auto_scaling   = true
-  min_count             = 0
-  max_count             = 50
-  zones                 = local.cijenkinsio_agents_1_compute_zones
-  vnet_subnet_id        = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id
+# # Node pool to host ci.jenkins.io agents for BOM builds
+# resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_bom_1" {
+#   provider              = azurerm.jenkins-sponsorship
+#   name                  = "lx86n3bom1"
+#   vm_size               = "Standard_D16ads_v5"
+#   os_disk_type          = "Ephemeral"
+#   os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
+#   orchestrator_version  = local.kubernetes_versions["cijenkinsio_agents_1"]
+#   kubernetes_cluster_id = azurerm_kubernetes_cluster.cijenkinsio_agents_1.id
+#   enable_auto_scaling   = true
+#   min_count             = 0
+#   max_count             = 50
+#   zones                 = local.cijenkinsio_agents_1_compute_zones
+#   vnet_subnet_id        = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id
 
-  node_labels = {
-    "jenkins" = "ci.jenkins.io"
-    "role"    = "jenkins-agents"
-  }
-  node_taints = [
-    "ci.jenkins.io/agents=true:NoSchedule",
-    "ci.jenkins.io/bom=true:NoSchedule",
-  ]
+#   node_labels = {
+#     "jenkins" = "ci.jenkins.io"
+#     "role"    = "jenkins-agents"
+#   }
+#   node_taints = [
+#     "ci.jenkins.io/agents=true:NoSchedule",
+#     "ci.jenkins.io/bom=true:NoSchedule",
+#   ]
 
-  lifecycle {
-    ignore_changes = [node_count]
-  }
+#   lifecycle {
+#     ignore_changes = [node_count]
+#   }
 
-  tags = local.default_tags
-}
+#   tags = local.default_tags
+# }
 
 ## TODO: uncomment once infra.ci routing is enabled
 # # Configure the jenkins-infra/kubernetes-management admin service account
