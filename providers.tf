@@ -29,7 +29,7 @@ provider "kubernetes" {
 
 provider "kubernetes" {
   alias                  = "cijenkinsio_agents_1"
-  host                   = azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.host
+  host                   = azurerm_kubernetes_cluster.cijenkinsio_agents_1.fqdn
   client_certificate     = base64decode(azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.client_certificate)
   client_key             = base64decode(azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.client_key)
   cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.cluster_ca_certificate)
