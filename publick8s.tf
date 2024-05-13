@@ -23,11 +23,6 @@ data "azurerm_subnet" "public_vnet_data_tier" {
   virtual_network_name = data.azurerm_virtual_network.public.name
 }
 
-locals {
-  publick8s_compute_zones            = [3]
-  cijenkinsio_agents_1_compute_zones = [1]
-}
-
 #trivy:ignore:azure-container-logging #trivy:ignore:azure-container-limit-authorized-ips
 resource "azurerm_kubernetes_cluster" "publick8s" {
   name                              = "publick8s-${random_pet.suffix_publick8s.id}"

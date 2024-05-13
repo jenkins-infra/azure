@@ -48,4 +48,7 @@ locals {
   }
   ci_jenkins_io_fqdn              = "ci.jenkins.io"
   ci_jenkins_io_agents_1_pod_cidr = "10.100.0.0/14"
+
+  publick8s_compute_zones            = [3]
+  cijenkinsio_agents_1_compute_zones = [1]
 }
