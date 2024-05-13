@@ -46,4 +46,6 @@ locals {
     "publick8s"            = "1.27.9"
     "cijenkinsio_agents_1" = "1.27.9"
   }
+  ci_jenkins_io_fqdn              = "ci.jenkins.io"
+  ci_jenkins_io_agents_1_pod_cidr = "10.100.0.0/14"
 }

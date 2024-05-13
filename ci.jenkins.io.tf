@@ -1,11 +1,6 @@
 ####################################################################################
 ## Resources for the Controller VM
 ####################################################################################
-locals {
-  ci_jenkins_io_fqdn = "ci.jenkins.io"
-  short_name         = "ci"
-}
-
 module "ci_jenkins_io_sponsorship" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-controller"
   providers = {
@@ -78,7 +73,7 @@ module "ci_jenkins_io_aci_agents_sponsorship" {
   }
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-aci-agents"
 
-  role_name                       = "${local.short_name}-ACI-Contributor-sponsorship"
+  role_name                       = "ci-ACI-Contributor-sponsorship"
   aci_agents_resource_group_name  = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_resource_group_name
   controller_service_principal_id = module.ci_jenkins_io_sponsorship.controller_service_principal_id
 }
@@ -90,6 +85,7 @@ module "ci_jenkins_io_kubernetes_agents_jenkins_sponsorship_1" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-inbound-agents"
 
   service_fqdn                   = local.ci_jenkins_io_fqdn
+  inbound_agents_cidrs           = [local.ci_jenkins_io_agents_1_pod_cidr]
   inbound_agents_network_rg_name = data.azurerm_resource_group.public_jenkins_sponsorship.name
   inbound_agents_network_name    = data.azurerm_virtual_network.public_jenkins_sponsorship.name
   inbound_agents_subnet_name     = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.name
@@ -130,7 +126,7 @@ resource "azurerm_network_security_rule" "allow_inbound_https_from_cijio_to_cije
   source_address_prefix  = module.ci_jenkins_io_sponsorship.controller_private_ipv4 # Only private IPv4
   # All IPs has the endpoint NIC may change inside this subnet
   destination_address_prefixes = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.address_prefixes
-  resource_group_name          = data.azurerm_resource_group.public_jenkins_sponsorship.name # Passed to module.ci_jenkins_io_kubernetes_agents_jenkins_sponsorship_1
+  resource_group_name          = module.ci_jenkins_io_kubernetes_agents_jenkins_sponsorship_1.inbound_agents_nsg_rg_name
   network_security_group_name  = module.ci_jenkins_io_kubernetes_agents_jenkins_sponsorship_1.inbound_agents_nsg_name
 }
 
