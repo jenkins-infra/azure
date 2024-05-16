@@ -101,7 +101,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_agents_1" {
   kubernetes_cluster_id = azurerm_kubernetes_cluster.cijenkinsio_agents_1.id
   enable_auto_scaling   = true
   min_count             = 0
-  max_count             = 50 # 4 pods per nodes, max 200 nodes
+  max_count             = 40 # 3 pods per nodes, max 120 pods - due to quotas
   zones                 = local.cijenkinsio_agents_1_compute_zones
   vnet_subnet_id        = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id
 
