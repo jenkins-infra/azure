@@ -1,6 +1,6 @@
-resource "kubernetes_persistent_volume_claim" "jenkins_weekly_PVC" {
+resource "kubernetes_persistent_volume_claim" "jenkins_weekly_data" {
   metadata {
-    name = "jenkins-weekly-pvc"
+    name = "jenkins-weekly-data"
   }
   spec {
     access_modes       = ["ReadWriteOnce"]
