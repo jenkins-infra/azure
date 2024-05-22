@@ -93,21 +93,6 @@ resource "azurerm_dns_cname_record" "mirrors_updates_jenkins_io" {
   tags                = local.default_tags
 }
 
-# DigitalOcean service CNAME record pointing to the doks-public A record defined in https://github.com/jenkins-infra/azure-net/blob/main/dns-records.tf
-data "azurerm_dns_a_record" "doks_public_public_ipv4_address" {
-  name                = "doks-public-public-ipv4-address"
-  zone_name           = data.azurerm_dns_zone.jenkinsio.name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-}
-resource "azurerm_dns_cname_record" "digitalocean_updates_jenkins_io" {
-  name                = "digitalocean.updates"
-  zone_name           = data.azurerm_dns_zone.jenkinsio.name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 60
-  record              = data.azurerm_dns_a_record.doks_public_public_ipv4_address.fqdn
-  tags                = local.default_tags
-}
-
 ## NS records for each CloudFlare zone defined in https://github.com/jenkins-infra/cloudflare/blob/main/updates.jenkins.io.tf
 # West Europe
 resource "azurerm_dns_ns_record" "updates_jenkins_io_cloudflare_zone_westeurope" {
