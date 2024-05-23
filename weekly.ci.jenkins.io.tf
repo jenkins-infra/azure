@@ -24,7 +24,7 @@ resource "kubernetes_persistent_volume" "jenkins_weekly_data" {
     capacity = {
       storage = local.weekly_ci_disk_size
     }
-    access_modes                     = [local.weekly_ci_access_modes]
+    access_modes                     = local.weekly_ci_access_modes
     persistent_volume_reclaim_policy = "Retain"
     persistent_volume_source {
       azure_disk {
@@ -43,7 +43,7 @@ resource "kubernetes_persistent_volume_claim" "jenkins_weekly_data" {
     name = "jenkins-weekly-data"
   }
   spec {
-    access_modes = [local.weekly_ci_access_modes]
+    access_modes = local.weekly_ci_access_modes
     volume_name  = kubernetes_persistent_volume.jenkins_weekly_data.metadata.0.name
     resources {
       requests = {
