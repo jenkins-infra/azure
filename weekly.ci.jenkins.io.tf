@@ -16,7 +16,7 @@ resource "azurerm_managed_disk" "jenkins_weekly_data" {
 }
 
 resource "kubernetes_persistent_volume" "jenkins_weekly_data" {
-  provider               = kubernetes.publick8s
+  provider = kubernetes.publick8s
   metadata {
     name = "jenkins-weekly-pv"
   }
@@ -24,7 +24,7 @@ resource "kubernetes_persistent_volume" "jenkins_weekly_data" {
     capacity = {
       storage = local.weekly_ci_disk_size
     }
-    access_modes                     = ["ReadWriteOnce"]
+    access_modes                     = [local.weekly_ci_access_modes]
     persistent_volume_reclaim_policy = "Retain"
     persistent_volume_source {
       azure_disk {
@@ -38,13 +38,13 @@ resource "kubernetes_persistent_volume" "jenkins_weekly_data" {
 }
 
 resource "kubernetes_persistent_volume_claim" "jenkins_weekly_data" {
-  provider               = kubernetes.publick8s
+  provider = kubernetes.publick8s
   metadata {
     name = "jenkins-weekly-data"
   }
   spec {
-    access_modes       = ["ReadWriteOnce"]
-    volume_name        = kubernetes_persistent_volume.jenkins_weekly_data.metadata.0.name
+    access_modes = [local.weekly_ci_access_modes]
+    volume_name  = kubernetes_persistent_volume.jenkins_weekly_data.metadata.0.name
     resources {
       requests = {
         storage = local.weekly_ci_disk_size
