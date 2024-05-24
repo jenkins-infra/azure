@@ -125,7 +125,8 @@ output "update_center_fileshares_env_zip_credentials" {
     echo "STORAGE_FILESHARE=updates-jenkins-io"
     echo "FILESHARE_SYNC_SOURCE=./www-content/"
     echo "JENKINS_INFRA_FILESHARE_CLIENT_ID=${module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id}"
-    echo "JENKINS_INFRA_FILESHARE_CLIENT_SECRET=${module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password}"
+    echo "JENKINS_INFRA_FILESHARE_CLIENT_SECRET='${module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password}'"
+    echo "JENKINS_INFRA_FILESHARE_TENANT_ID=${data.azurerm_subscription.jenkins.tenant_id}"
     echo "STORAGE_DURATION_IN_MINUTE=5"
     echo "STORAGE_PERMISSIONS=dlrw"
   } > .env-content && {
@@ -133,7 +134,8 @@ output "update_center_fileshares_env_zip_credentials" {
     echo "STORAGE_FILESHARE=updates-jenkins-io-httpd"
     echo "FILESHARE_SYNC_SOURCE=./www-redirections/"
     echo "JENKINS_INFRA_FILESHARE_CLIENT_ID=${module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id}"
-    echo "JENKINS_INFRA_FILESHARE_CLIENT_SECRET=${module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password}"
+    echo "JENKINS_INFRA_FILESHARE_CLIENT_SECRET='${module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password}'"
+    echo "JENKINS_INFRA_FILESHARE_TENANT_ID=${data.azurerm_subscription.jenkins.tenant_id}"
     echo "STORAGE_DURATION_IN_MINUTE=5"
     echo "STORAGE_PERMISSIONS=dlrw"
   } > .env-redirections && zip update-center-fileshares-env-zip-credentials.zip .env-content .env-redirections && rm .env-content .env-redirections
