@@ -111,35 +111,33 @@ output "trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer_pas
   value     = module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
 }
 
-# Output a command to locally generate a zip containing two env files:
-# .env-content for updates-jenkins-io File Share
-# .env-redirections for updates-jenkins-io-httpd File Share
-# This zip file has to be uploaded as zip credentials on trusted.ci.jenkins.io
-# for the update-center2/site/publish.sh script to work.
-output "update_center_fileshares_env_zip_credentials" {
+# Used by scripts/get-updates.jenkins.io-trustedci-credentials.sh
+output "update_center_fileshare_env-content" {
   sensitive = true
-  value     = <<ZIPCOMMAND
-  # Copy/paste the following command to generate the Azure File Shares env zip credentials for update-center2/site/publish.sh
-  {
-    echo "STORAGE_NAME=updatesjenkinsio"
-    echo "STORAGE_FILESHARE=updates-jenkins-io"
-    echo "FILESHARE_SYNC_SOURCE=./www-content/"
-    echo "JENKINS_INFRA_FILESHARE_CLIENT_ID=${module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id}"
-    echo "JENKINS_INFRA_FILESHARE_CLIENT_SECRET='${module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password}'"
-    echo "JENKINS_INFRA_FILESHARE_TENANT_ID=${data.azurerm_subscription.jenkins.tenant_id}"
-    echo "STORAGE_DURATION_IN_MINUTE=5"
-    echo "STORAGE_PERMISSIONS=dlrw"
-  } > .env-content && {
-    echo "STORAGE_NAME=updatesjenkinsio"
-    echo "STORAGE_FILESHARE=updates-jenkins-io-httpd"
-    echo "FILESHARE_SYNC_SOURCE=./www-redirections/"
-    echo "JENKINS_INFRA_FILESHARE_CLIENT_ID=${module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id}"
-    echo "JENKINS_INFRA_FILESHARE_CLIENT_SECRET='${module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password}'"
-    echo "JENKINS_INFRA_FILESHARE_TENANT_ID=${data.azurerm_subscription.jenkins.tenant_id}"
-    echo "STORAGE_DURATION_IN_MINUTE=5"
-    echo "STORAGE_PERMISSIONS=dlrw"
-  } > .env-redirections && zip update-center-fileshares-env-zip-credentials.zip .env-content .env-redirections && rm .env-content .env-redirections
-    ZIPCOMMAND
+  value     = <<-EOF
+    STORAGE_NAME=updatesjenkinsio
+    STORAGE_FILESHARE=updates-jenkins-io
+    FILESHARE_SYNC_SOURCE=./www-content/
+    JENKINS_INFRA_FILESHARE_CLIENT_ID='${module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id}'
+    JENKINS_INFRA_FILESHARE_CLIENT_SECRET='${module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password}'
+    JENKINS_INFRA_FILESHARE_TENANT_ID='${data.azurerm_subscription.jenkins.tenant_id}'
+    STORAGE_DURATION_IN_MINUTE=5
+    STORAGE_PERMISSIONS=dlrw
+  EOF
+}
+# Used by scripts/get-updates.jenkins.io-trustedci-credentials.sh
+output "update_center_fileshare_env-redirections" {
+  sensitive = true
+  value     = <<-EOF
+    STORAGE_NAME=updatesjenkinsio
+    STORAGE_FILESHARE=updates-jenkins-io-httpd
+    FILESHARE_SYNC_SOURCE=./www-redirections/
+    JENKINS_INFRA_FILESHARE_CLIENT_ID='${module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id}'
+    JENKINS_INFRA_FILESHARE_CLIENT_SECRET='${module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password}'
+    JENKINS_INFRA_FILESHARE_TENANT_ID='${data.azurerm_subscription.jenkins.tenant_id}'
+    STORAGE_DURATION_IN_MINUTE=5
+    STORAGE_PERMISSIONS=dlrw
+  EOF
 }
 
 # Required to allow azcopy sync of jenkins.io File Share
