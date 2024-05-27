@@ -26,12 +26,11 @@ resource "kubernetes_persistent_volume" "jenkins_weekly_data" {
     }
     access_modes                     = local.weekly_ci_access_modes
     persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.statically_provisionned.id
     persistent_volume_source {
-      azure_disk {
-        caching_mode  = "ReadWrite"
-        data_disk_uri = azurerm_managed_disk.jenkins_weekly_data.id
-        disk_name     = azurerm_managed_disk.jenkins_weekly_data.name
-        kind          = "Managed"
+      csi {
+        driver        = "disk.csi.azure.com"
+        volume_handle = azurerm_managed_disk.jenkins_weekly_data.id
       }
     }
   }
@@ -40,12 +39,13 @@ resource "kubernetes_persistent_volume" "jenkins_weekly_data" {
 resource "kubernetes_persistent_volume_claim" "jenkins_weekly_data" {
   provider = kubernetes.publick8s
   metadata {
-    name = "jenkins-weekly-data"
+    name      = "jenkins-weekly-data"
     namespace = "jenkins-weekly"
   }
   spec {
-    access_modes = local.weekly_ci_access_modes
-    volume_name  =  "${kubernetes_persistent_volume.jenkins_weekly_data.metadata.0.name}"
+    access_modes       = local.weekly_ci_access_modes
+    volume_name        = kubernetes_persistent_volume.jenkins_weekly_data.metadata.0.name
+    storage_class_name = kubernetes_storage_class.statically_provisionned.id
     resources {
       requests = {
         storage = local.weekly_ci_disk_size

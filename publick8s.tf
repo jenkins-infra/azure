@@ -225,6 +225,16 @@ resource "kubernetes_storage_class" "managed_csi_standard_ZRS_retain_public" {
   allow_volume_expansion = true
 }
 
+resource "kubernetes_storage_class" "statically_provisionned" {
+  metadata {
+    name = "statically-provisionned"
+  }
+  storage_provisioner    = "disk.csi.azure.com"
+  reclaim_policy         = "Retain"
+  provider               = kubernetes.publick8s
+  allow_volume_expansion = true
+}
+
 resource "kubernetes_storage_class" "azurefile_csi_premium_retain_public" {
   metadata {
     name = "azurefile-csi-premium-retain"
