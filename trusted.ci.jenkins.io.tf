@@ -111,35 +111,6 @@ output "trusted_ci_jenkins_io_uc_redirections_fileshare_client_secret" {
   value     = module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
 }
 
-# Used by scripts/get-updates.jenkins.io-trustedci-credentials.sh
-output "update_center_fileshare_env-content" {
-  sensitive = true
-  value     = <<-EOF
-    STORAGE_NAME=updatesjenkinsio
-    STORAGE_FILESHARE=updates-jenkins-io
-    FILESHARE_SYNC_SOURCE=./www-content/
-    JENKINS_INFRA_FILESHARE_CLIENT_ID='${module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id}'
-    JENKINS_INFRA_FILESHARE_CLIENT_SECRET='${module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password}'
-    JENKINS_INFRA_FILESHARE_TENANT_ID='${data.azurerm_subscription.jenkins.tenant_id}'
-    STORAGE_DURATION_IN_MINUTE=5
-    STORAGE_PERMISSIONS=dlrw
-  EOF
-}
-# Used by scripts/get-updates.jenkins.io-trustedci-credentials.sh
-output "update_center_fileshare_env-redirections" {
-  sensitive = true
-  value     = <<-EOF
-    STORAGE_NAME=updatesjenkinsio
-    STORAGE_FILESHARE=updates-jenkins-io-httpd
-    FILESHARE_SYNC_SOURCE=./www-redirections/
-    JENKINS_INFRA_FILESHARE_CLIENT_ID='${module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id}'
-    JENKINS_INFRA_FILESHARE_CLIENT_SECRET='${module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password}'
-    JENKINS_INFRA_FILESHARE_TENANT_ID='${data.azurerm_subscription.jenkins.tenant_id}'
-    STORAGE_DURATION_IN_MINUTE=5
-    STORAGE_PERMISSIONS=dlrw
-  EOF
-}
-
 # Required to allow azcopy sync of jenkins.io File Share
 module "trustedci_jenkinsio_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
