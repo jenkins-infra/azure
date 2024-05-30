@@ -96,17 +96,17 @@ module "trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer" {
   storage_account_id             = azurerm_storage_account.updates_jenkins_io.id
   default_tags                   = local.default_tags
 }
-output "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer_application_client_id" {
+output "trusted_ci_jenkins_io_uc_content_fileshare_client_id" {
   value = module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
-output "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer_password" {
+output "trusted_ci_jenkins_io_uc_content_fileshare_client_secret" {
   sensitive = true
   value     = module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
 }
-output "trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer_application_client_id" {
+output "trusted_ci_jenkins_io_uc_redirections_fileshare_client_id" {
   value = module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
-output "trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer_password" {
+output "trusted_ci_jenkins_io_uc_redirections_fileshare_client_secret" {
   sensitive = true
   value     = module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
 }
