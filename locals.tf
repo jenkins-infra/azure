@@ -51,4 +51,7 @@ locals {
 
   publick8s_compute_zones            = [3]
   cijenkinsio_agents_1_compute_zones = [1]
+
+  weekly_ci_disk_size    = 8
+  weekly_ci_access_modes = ["ReadWriteOnce"]
 }
