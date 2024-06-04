@@ -43,15 +43,18 @@ locals {
 
   kubernetes_versions = {
     "privatek8s"              = "1.27.9"
-    "privatek8s-sponsorship"  = "1.27.9"
+    "infracijenkinsio_agents_1"  = "1.27.9"
     "publick8s"               = "1.27.9"
     "cijenkinsio_agents_1"    = "1.27.9"
   }
   ci_jenkins_io_fqdn              = "ci.jenkins.io"
-  ci_jenkins_io_agents_1_pod_cidr = "10.100.0.0/14"
+  ci_jenkins_io_agents_1_pod_cidr = "10.100.0.0/14" # 10.100.0.1 - 10.103.255.255
 
   publick8s_compute_zones            = [3]
   cijenkinsio_agents_1_compute_zones = [1]
+  infracijenkinsio_agents_1_compute_zones = [1]
+
+  infraci_jenkins_io_agents_1_pod_cidr = "10.110.0.0/14" # 10.110.0.1 - 10.113.0.255 or 10.108.0.1 - 10.111.255.255
 
   weekly_ci_disk_size    = 8
   weekly_ci_access_modes = ["ReadWriteOnce"]
