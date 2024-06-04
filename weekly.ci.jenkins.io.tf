@@ -65,6 +65,6 @@ resource "azurerm_role_definition" "weekly_ci_jenkins_io_controller_disk_reader"
 }
 resource "azurerm_role_assignment" "weekly_ci_jenkins_io_allow_azurerm" {
   scope              = azurerm_resource_group.weekly_ci_controller.id
-  role_definition_id = azurerm_role_definition.weekly_ci_jenkins_io_controller_disk_reader.role_definition_id
+  role_definition_id = azurerm_role_definition.weekly_ci_jenkins_io_controller_disk_reader.role_definition_resource_id
   principal_id       = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
 }
