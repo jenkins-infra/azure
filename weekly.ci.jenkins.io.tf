@@ -53,3 +53,18 @@ resource "kubernetes_persistent_volume_claim" "jenkins_weekly_data" {
     }
   }
 }
+
+# Required to allow the weekly controller to read the disk
+resource "azurerm_role_definition" "weekly_ci_jenkins_io_controller_disk_reader" {
+  name  = "ReadWeeklyCIDisk"
+  scope = azurerm_resource_group.weekly_ci_controller.id
+
+  permissions {
+    actions = ["Microsoft.Compute/disks/read"]
+  }
+}
+resource "azurerm_role_assignment" "weekly_ci_jenkins_io_allow_azurerm" {
+  scope              = azurerm_resource_group.weekly_ci_controller.id
+  role_definition_id = azurerm_role_definition.weekly_ci_jenkins_io_controller_disk_reader.role_definition_id
+  principal_id       = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
+}
