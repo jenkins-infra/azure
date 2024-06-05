@@ -55,7 +55,7 @@ actions:
       title: Generate a new Azure AD Application password with expiration date {{ source "nextExpiry" }} on `trusted.ci.jenkins.io`
       description: |
         This PR generates a new Azure AD application password with a new end date for the `trusted.ci.jenkins.io` controller (to allow spawning Azure VM agents).
-        Once this PR is merged and deployed with success by Terraform (on infra.ci.jenkins.io), you can retrieve the new password's value in Terraform state [terraform show -json / module.trusted_ci_jenkins_io.azuread_application_password.controller:values.value] (do NOT save it anywhere!) and update (manually) the trusted.ci.jenkins.io credential named `azure-jenkins-sponsorship-credentials` through the Jenkins UI.
+        Once this PR is merged and deployed with success by Terraform (on infra.ci.jenkins.io), you can retrieve the new password value from the Terraform state with `terraform show -json / module.trusted_ci_jenkins_io.azuread_application_password.controller:values.value` (do NOT save it anywhere!) and (manually) update the trusted.ci.jenkins.io credential named `azure-jenkins-sponsorship-credentials` through the Jenkins UI.
         Finally, verify both the Azure Credential and Azure VM clouds by clicking on the "Verify <...>" buttons with success.
       labels:
         - terraform
