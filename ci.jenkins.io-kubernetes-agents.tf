@@ -16,6 +16,7 @@ data "azurerm_subnet" "ci_jenkins_io_kubernetes_sponsorship" {
 resource "azurerm_kubernetes_cluster" "cijenkinsio_agents_1" {
   provider = azurerm.jenkins-sponsorship
   name     = "cijenkinsio-agents-1"
+  sku_tier = "Standard"
   ## Private cluster requires network setup to allow API access from:
   # - infra.ci.jenkins.io agents (for both terraform job agents and kubernetes-management agents)
   # - ci.jenkins.io controller to allow spawning agents (nominal usage)
