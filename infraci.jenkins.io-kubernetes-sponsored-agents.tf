@@ -7,8 +7,8 @@ resource "azurerm_resource_group" "infracijio_kubernetes_agents_sponsorship" {
 
 data "azurerm_subnet" "infraci_jenkins_io_kubernetes_agent_sponsorship" {
   provider             = azurerm.jenkins-sponsorship
-  name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name}-infraci_jenkins_io_kubernetes-agent-sponsorship"
-  resource_group_name  = data.azurerm_resource_group.public_jenkins_sponsorship.name
+  name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name}-infraci_jenkins_io_kubernetes-agent"
+  resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name
 }
 
@@ -16,7 +16,7 @@ data "azurerm_subnet" "infraci_jenkins_io_kubernetes_agent_sponsorship" {
 resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
   provider = azurerm.jenkins-sponsorship
   name     = "infracijenkinsio-agents-1"
-  sku_tier = "standard"
+  sku_tier = "Standard"
   ## Private cluster requires network setup to allow API access from:
   # - infra.ci.jenkins.io agents (for both terraform job agents and kubernetes-management agents)
   # - private.vpn.jenkins.io to allow admin management (either Azure UI or kube tools from admin machines)
@@ -61,7 +61,7 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
 }
 
 # Node pool to host "jenkins-infra" applications required on this cluster such as ACP or datadog's cluster-agent, e.g. "Not agent, neither AKS System tools"
-resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_n2_applications" {
+resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_n2_applications_sponsorship" {
   provider              = azurerm.jenkins-sponsorship
   name                  = "la64n2app"
   vm_size               = "Standard_D4pds_v5"
@@ -91,7 +91,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_n2_applications" {
 }
 
 # Node pool to host ci.jenkins.io agents for usual builds
-resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_agents_1" {
+resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_agents_1_sponsorship" {
   provider              = azurerm.jenkins-sponsorship
   name                  = "lx86n3agt1"
   vm_size               = "Standard_D16ads_v5"
@@ -121,7 +121,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_agents_1" {
 }
 
 # Node pool to host ci.jenkins.io agents for BOM builds
-resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_bom_1" {
+resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_bom_1_sponsorship" {
   provider              = azurerm.jenkins-sponsorship
   name                  = "lx86n3bom1"
   vm_size               = "Standard_D16ads_v5"
@@ -155,7 +155,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_bom_1" {
 
 
 # Configure the jenkins-infra/kubernetes-management admin service account
-module "cijenkinsio_agents_1_admin_sa" {
+module "infracijenkinsio_agents_1_admin_sa_sponsorship" {
   providers = {
     kubernetes = kubernetes.cijenkinsio_agents_1
   }
@@ -164,10 +164,10 @@ module "cijenkinsio_agents_1_admin_sa" {
   cluster_hostname           = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.fqdn
   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.kube_config.0.cluster_ca_certificate
 }
-output "kubeconfig_cijenkinsio_agents_1" {
+output "kubeconfig_infracijenkinsio_agents_1" {
   sensitive = true
-  value     = module.cijenkinsio_agents_1_admin_sa.kubeconfig
+  value     = module.infracijenkinsio_agents_1_admin_sa_sponsorship.kubeconfig
 }
-output "cijenkinsio_agents_1_kube_config_command" {
+output "infracijenkinsio_agents_1_kube_config_command" {
   value = "az aks get-credentials --name ${azurerm_kubernetes_cluster.infracijenkinsio_agents_1.name} --resource-group ${azurerm_kubernetes_cluster.infracijenkinsio_agents_1.resource_group_name}"
 }
