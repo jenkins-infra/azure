@@ -7,7 +7,7 @@ resource "azurerm_resource_group" "infracijio_kubernetes_agents_sponsorship" {
 
 data "azurerm_subnet" "infraci_jenkins_io_kubernetes_agent_sponsorship" {
   provider             = azurerm.jenkins-sponsorship
-  name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name}-infraci_jenkins_io_kubernetes-agent"
+  name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name}-kubernetes-agents"
   resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name
 }
