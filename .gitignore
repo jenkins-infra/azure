@@ -11,8 +11,6 @@
 backend-config
 terraform-plan-output.txt
 tfplan
-# temporary and local test
-.tmp/
 # sensitive files from terraform outputs
 .env*
 *.zip
