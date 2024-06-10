@@ -54,7 +54,7 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
     node_count                   = 3 # 3 nodes for HA as per AKS best practises
     vnet_subnet_id               = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
     tags                         = local.default_tags
-    zones                        = local.cijenkinsio_agents_1_compute_zones
+    zones                        = local.infracijenkinsio_agents_1_compute_zones
   }
 
   tags = local.default_tags
