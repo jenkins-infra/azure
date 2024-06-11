@@ -35,6 +35,14 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.cluster_ca_certificate)
 }
 
+provider "kubernetes" {
+  alias                  = "infracijenkinsio_agents_1"
+  host                   = "https://${azurerm_kubernetes_cluster.infracijenkinsio_agents_1.fqdn}:443" # Cannot use the kubeconfig host as it provides a private DNS name
+  client_certificate     = base64decode(azurerm_kubernetes_cluster.infracijenkinsio_agents_1.kube_config.0.client_certificate)
+  client_key             = base64decode(azurerm_kubernetes_cluster.infracijenkinsio_agents_1.kube_config.0.client_key)
+  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.infracijenkinsio_agents_1.kube_config.0.cluster_ca_certificate)
+}
+
 provider "postgresql" {
   /**
   Important: terraform must be allowed to reach this instance through the network. Check the followings:
