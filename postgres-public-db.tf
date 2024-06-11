@@ -25,17 +25,18 @@ resource "random_password" "public_db_pgsql_admin_password" {
   length = 24
 }
 resource "azurerm_postgresql_flexible_server" "public_db" {
-  name                   = "public-db"
-  resource_group_name    = data.azurerm_resource_group.public.name
-  location               = var.location
-  administrator_login    = local.public_db_pgsql_admin_login
-  administrator_password = random_password.public_db_pgsql_admin_password.result
-  sku_name               = "B_Standard_B1ms" # 1vCore / 2 Gb - https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-b-series-burstable
-  storage_mb             = "131072"
-  version                = "13"
-  zone                   = "1"
-  private_dns_zone_id    = azurerm_private_dns_zone.public_db_pgsql.id
-  delegated_subnet_id    = data.azurerm_subnet.public_db_vnet_postgres_tier.id
+  name                          = "public-db"
+  resource_group_name           = data.azurerm_resource_group.public.name
+  location                      = var.location
+  public_network_access_enabled = false
+  administrator_login           = local.public_db_pgsql_admin_login
+  administrator_password        = random_password.public_db_pgsql_admin_password.result
+  sku_name                      = "B_Standard_B1ms" # 1vCore / 2 Gb - https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-b-series-burstable
+  storage_mb                    = "131072"
+  version                       = "13"
+  zone                          = "1"
+  private_dns_zone_id           = azurerm_private_dns_zone.public_db_pgsql.id
+  delegated_subnet_id           = data.azurerm_subnet.public_db_vnet_postgres_tier.id
 
   depends_on = [
     /**
