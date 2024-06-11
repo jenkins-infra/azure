@@ -101,7 +101,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_agents_1_sponso
   orchestrator_version  = local.kubernetes_versions["infracijenkinsio_agents_1"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.id
   enable_auto_scaling   = true
-  min_count             = 1
+  min_count             = 0
   max_count             = 20
   zones                 = local.infracijenkinsio_agents_1_compute_zones
   vnet_subnet_id        = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
@@ -131,7 +131,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_n4_1_sponsorship" {
   orchestrator_version  = local.kubernetes_versions["infracijenkinsio_agents_1"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.id
   enable_auto_scaling   = true
-  min_count             = 1
+  min_count             = 0
   max_count             = 20
   zones                 = local.infracijenkinsio_agents_1_compute_zones # need to be on zone 1 for arm availability
   vnet_subnet_id        = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
