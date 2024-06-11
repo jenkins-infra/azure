@@ -59,3 +59,94 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
 
   tags = local.default_tags
 }
+
+
+# Node pool to host "jenkins-infra" applications required on this cluster such as datadog's cluster-agent, e.g. "Not agent, neither AKS System tools"
+resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_n2_applications_sponsorship" {
+  provider              = azurerm.jenkins-sponsorship
+  name                  = "la64n2app"
+  vm_size               = "Standard_D4pds_v5"
+  os_disk_type          = "Ephemeral"
+  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
+  orchestrator_version  = local.kubernetes_versions["infracijenkinsio_agents_1"]
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.id
+  enable_auto_scaling   = true
+  min_count             = 1
+  max_count             = 3 # 2 nodes always up for HA, a 3rd one is allowed for surge upgrades
+  zones                 = local.infracijenkinsio_agents_1_compute_zones
+  vnet_subnet_id        = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
+
+  node_labels = {
+    "jenkins" = "infra.ci.jenkins.io"
+    "role"    = "applications"
+  }
+  node_taints = [
+    "infra.ci.jenkins.io/applications=true:NoSchedule",
+  ]
+
+  lifecycle {
+    ignore_changes = [node_count]
+  }
+
+  tags = local.default_tags
+}
+
+# Node pool to host infra.ci.jenkins.io agents for usual builds
+resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_agents_1_sponsorship" {
+  provider              = azurerm.jenkins-sponsorship
+  name                  = "lx86n3agt1"
+  vm_size               = "Standard_D8ads_v5" # Standard_D8ads_v5 	8 	32 	300 	16 	38000 / 500 	12800/200 	20000/600 	4 	12500
+  os_disk_type          = "Ephemeral"
+  os_disk_size_gb       = 300 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dasv5-dadsv5-series (depends on the instance size)
+  orchestrator_version  = local.kubernetes_versions["infracijenkinsio_agents_1"]
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.id
+  enable_auto_scaling   = true
+  min_count             = 1
+  max_count             = 20
+  zones                 = local.infracijenkinsio_agents_1_compute_zones
+  vnet_subnet_id        = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
+
+  node_labels = {
+    "jenkins" = "infra.ci.jenkins.io"
+    "role"    = "jenkins-agents-x86-64"
+  }
+  node_taints = [
+    "infra.ci.jenkins.io/agents=true:NoSchedule",
+  ]
+
+  lifecycle {
+    ignore_changes = [node_count]
+  }
+
+  tags = local.default_tags
+}
+
+# Node pool to host infra.ci.jenkins.io agents for BOM builds
+resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_n4_1_sponsorship" {
+  provider              = azurerm.jenkins-sponsorship
+  name                  = "la64n41"
+  vm_size               = "Standard_D8pds_v5" # Standard_D8pds_v5 	8 	32 	300 	16 	38000/500 	12800/290 	20000/1200 	4 	12500
+  os_disk_type          = "Ephemeral"
+  os_disk_size_gb       = 300 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
+  orchestrator_version  = local.kubernetes_versions["infracijenkinsio_agents_1"]
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.id
+  enable_auto_scaling   = true
+  min_count             = 1
+  max_count             = 20
+  zones                 = local.infracijenkinsio_agents_1_compute_zones # need to be on zone 1 for arm availability
+  vnet_subnet_id        = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
+
+  node_labels = {
+    "jenkins" = "infra.ci.jenkins.io"
+    "role"    = "jenkins-agents-arm64"
+  }
+  node_taints = [
+    "infra.ci.jenkins.io/agents=true:NoSchedule",
+  ]
+
+  lifecycle {
+    ignore_changes = [node_count]
+  }
+
+  tags = local.default_tags
+}
