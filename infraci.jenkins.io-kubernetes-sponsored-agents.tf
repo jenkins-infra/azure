@@ -108,7 +108,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_agents_1_sponso
 
   node_labels = {
     "jenkins" = "infra.ci.jenkins.io"
-    "role"    = "jenkins-agents-x86-64"
+    "role"    = "jenkins-agents"
   }
   node_taints = [
     "infra.ci.jenkins.io/agents=true:NoSchedule",
@@ -138,7 +138,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_n4_1_sponsorship" {
 
   node_labels = {
     "jenkins" = "infra.ci.jenkins.io"
-    "role"    = "jenkins-agents-arm64"
+    "role"    = "jenkins-agents"
   }
   node_taints = [
     "infra.ci.jenkins.io/agents=true:NoSchedule",
