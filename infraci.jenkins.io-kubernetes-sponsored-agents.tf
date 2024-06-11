@@ -121,3 +121,21 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_agents_1_sponsorshi
 
   tags = local.default_tags
 }
+
+# Configure the jenkins-infra/kubernetes-management admin service account
+module "infracijenkinsio_agents_1_admin_sa_sponsorship" {
+  providers = {
+    kubernetes = kubernetes.infracijenkinsio_agents_1
+  }
+  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
+  cluster_name               = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.name
+  cluster_hostname           = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.fqdn
+  cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.kube_config.0.cluster_ca_certificate
+}
+output "kubeconfig_infracijenkinsio_agents_1" {
+  sensitive = true
+  value     = module.infracijenkinsio_agents_1_admin_sa_sponsorship.kubeconfig
+}
+output "infracijenkinsio_agents_1_kube_config_command" {
+  value = "az aks get-credentials --name ${azurerm_kubernetes_cluster.infracijenkinsio_agents_1.name} --resource-group ${azurerm_kubernetes_cluster.infracijenkinsio_agents_1.resource_group_name}"
+}
