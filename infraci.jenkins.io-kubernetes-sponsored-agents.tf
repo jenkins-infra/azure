@@ -59,3 +59,65 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
 
   tags = local.default_tags
 }
+
+# Node pool to host infra.ci.jenkins.io x86_64 agents
+# number of pods per node calculated with https://github.com/jenkins-infra/kubernetes-management/blob/9c14f72867170e9755f3434fb6f6dd3a8606686a/config/jenkins_infra.ci.jenkins.io.yaml#L137-L208
+resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_agents_1_sponsorship" {
+  provider              = azurerm.jenkins-sponsorship
+  name                  = "lx86n14agt1"
+  vm_size               = "Standard_D8ads_v5" # https://learn.microsoft.com/en-us/azure/virtual-machines/dasv5-dadsv5-series Standard_D8ads_v5 	8vcpu 	32Go 	300ssd
+  os_disk_type          = "Ephemeral"
+  os_disk_size_gb       = 300 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dasv5-dadsv5-series (depends on the instance size)
+  orchestrator_version  = local.kubernetes_versions["infracijenkinsio_agents_1"]
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.id
+  enable_auto_scaling   = true
+  min_count             = 0
+  max_count             = 20
+  zones                 = local.infracijenkinsio_agents_1_compute_zones
+  vnet_subnet_id        = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
+
+  node_labels = {
+    "jenkins" = "infra.ci.jenkins.io"
+    "role"    = "jenkins-agents"
+  }
+  node_taints = [
+    "infra.ci.jenkins.io/agents=true:NoSchedule",
+  ]
+
+  lifecycle {
+    ignore_changes = [node_count]
+  }
+
+  tags = local.default_tags
+}
+
+# # Node pool to host infra.ci.jenkins.io
+# number of pods per node calculated with https://github.com/jenkins-infra/kubernetes-management/blob/9c14f72867170e9755f3434fb6f6dd3a8606686a/config/jenkins_infra.ci.jenkins.io.yaml#L137-L208
+resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_agents_1_sponsorship" {
+  provider              = azurerm.jenkins-sponsorship
+  name                  = "la64n14agt1"
+  vm_size               = "Standard_D8pds_v5" # https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series 	8vcpu 	32Go 	300ssd
+  os_disk_type          = "Ephemeral"
+  os_disk_size_gb       = 300 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
+  orchestrator_version  = local.kubernetes_versions["infracijenkinsio_agents_1"]
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.id
+  enable_auto_scaling   = true
+  min_count             = 0
+  max_count             = 20
+  zones                 = local.infracijenkinsio_agents_1_compute_zones # need to be on zone 1 for arm availability
+  vnet_subnet_id        = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
+
+  node_labels = {
+    "jenkins" = "infra.ci.jenkins.io"
+    "role"    = "jenkins-agents"
+  }
+  node_taints = [
+    "infra.ci.jenkins.io/agents=true:NoSchedule",
+  ]
+
+  lifecycle {
+    ignore_changes = [node_count]
+  }
+
+  tags = local.default_tags
+}
