@@ -66,6 +66,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_agents_1_sponsorsh
   provider              = azurerm.jenkins-sponsorship
   name                  = "lx86n14agt1"
   vm_size               = "Standard_D8ads_v5" # https://learn.microsoft.com/en-us/azure/virtual-machines/dasv5-dadsv5-series Standard_D8ads_v5 	8vcpu 	32Go 	300ssd
+  os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 300 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dasv5-dadsv5-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["infracijenkinsio_agents_1"]
@@ -97,6 +98,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_agents_1_sponsorshi
   provider              = azurerm.jenkins-sponsorship
   name                  = "la64n14agt1"
   vm_size               = "Standard_D8pds_v5" # https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series 	8vcpu 	32Go 	300ssd
+  os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 300 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["infracijenkinsio_agents_1"]
