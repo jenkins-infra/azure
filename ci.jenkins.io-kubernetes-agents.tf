@@ -67,6 +67,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_n2_applications" {
   name                  = "la64n2app"
   vm_size               = "Standard_D4pds_v5"
   os_disk_type          = "Ephemeral"
+  os_sku                = "AzureLinux"
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["cijenkinsio_agents_1"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.cijenkinsio_agents_1.id
@@ -96,6 +97,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_agents_1" {
   provider              = azurerm.jenkins-sponsorship
   name                  = "lx86n3agt1"
   vm_size               = "Standard_D16ads_v5"
+  os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["cijenkinsio_agents_1"]
@@ -126,6 +128,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_bom_1" {
   provider              = azurerm.jenkins-sponsorship
   name                  = "lx86n3bom1"
   vm_size               = "Standard_D16ads_v5"
+  os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["cijenkinsio_agents_1"]
