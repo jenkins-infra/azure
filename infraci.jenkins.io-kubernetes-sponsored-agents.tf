@@ -45,16 +45,19 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
     name                         = "systempool1"
     only_critical_addons_enabled = true                # This property is the only valid way to add the "CriticalAddonsOnly=true:NoSchedule" taint to the default node pool
     vm_size                      = "Standard_D4pds_v5" # At least 4 vCPUS/4 Gb as per AKS best practises
-    os_sku                       = "AzureLinux"
-    os_disk_type                 = "Ephemeral"
-    os_disk_size_gb              = 150 # Ref. Cache storage size athttps://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
-    orchestrator_version         = local.kubernetes_versions["infracijenkinsio_agents_1"]
-    kubelet_disk_type            = "OS"
-    enable_auto_scaling          = false
-    node_count                   = 3 # 3 nodes for HA as per AKS best practises
-    vnet_subnet_id               = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
-    tags                         = local.default_tags
-    zones                        = local.infracijenkinsio_agents_1_compute_zones
+    upgrade_settings = {
+      max_surge = "10%"
+    }
+    os_sku               = "AzureLinux"
+    os_disk_type         = "Ephemeral"
+    os_disk_size_gb      = 150 # Ref. Cache storage size athttps://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
+    orchestrator_version = local.kubernetes_versions["infracijenkinsio_agents_1"]
+    kubelet_disk_type    = "OS"
+    enable_auto_scaling  = false
+    node_count           = 3 # 3 nodes for HA as per AKS best practises
+    vnet_subnet_id       = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
+    tags                 = local.default_tags
+    zones                = local.infracijenkinsio_agents_1_compute_zones
   }
 
   tags = local.default_tags
@@ -63,9 +66,12 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
 # Node pool to host infra.ci.jenkins.io x86_64 agents
 # number of pods per node calculated with https://github.com/jenkins-infra/kubernetes-management/blob/9c14f72867170e9755f3434fb6f6dd3a8606686a/config/jenkins_infra.ci.jenkins.io.yaml#L137-L208
 resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_agents_1_sponsorship" {
-  provider              = azurerm.jenkins-sponsorship
-  name                  = "lx86n14agt1"
-  vm_size               = "Standard_D8ads_v5" # https://learn.microsoft.com/en-us/azure/virtual-machines/dasv5-dadsv5-series Standard_D8ads_v5 	8vcpu 	32Go 	300ssd
+  provider = azurerm.jenkins-sponsorship
+  name     = "lx86n14agt1"
+  vm_size  = "Standard_D8ads_v5" # https://learn.microsoft.com/en-us/azure/virtual-machines/dasv5-dadsv5-series Standard_D8ads_v5 	8vcpu 	32Go 	300ssd
+  upgrade_settings = {
+    max_surge = "10%"
+  }
   os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 300 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dasv5-dadsv5-series (depends on the instance size)
@@ -95,9 +101,12 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_agents_1_sponsorsh
 # # Node pool to host infra.ci.jenkins.io
 # number of pods per node calculated with https://github.com/jenkins-infra/kubernetes-management/blob/9c14f72867170e9755f3434fb6f6dd3a8606686a/config/jenkins_infra.ci.jenkins.io.yaml#L137-L208
 resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_agents_1_sponsorship" {
-  provider              = azurerm.jenkins-sponsorship
-  name                  = "la64n14agt1"
-  vm_size               = "Standard_D8pds_v5" # https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series 	8vcpu 	32Go 	300ssd
+  provider = azurerm.jenkins-sponsorship
+  name     = "la64n14agt1"
+  vm_size  = "Standard_D8pds_v5" # https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series 	8vcpu 	32Go 	300ssd
+  upgrade_settings = {
+    max_surge = "10%"
+  }
   os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 300 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
