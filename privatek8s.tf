@@ -126,9 +126,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
 resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   name    = "infracipool"
   vm_size = "Standard_D8s_v3"
-  upgrade_settings {
-    max_surge = "10%"
-  }
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 200 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["privatek8s"]
@@ -162,9 +159,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
 resource "azurerm_kubernetes_cluster_node_pool" "infraciarm64" {
   name    = "arm64small"
   vm_size = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
-  upgrade_settings {
-    max_surge = "10%"
-  }
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["privatek8s"]
