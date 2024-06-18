@@ -150,7 +150,10 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   ]
 
   lifecycle {
-    ignore_changes = [node_count]
+    ignore_changes = [
+      node_count,       # Due to autoscaling
+      upgrade_settings, # https://github.com/hashicorp/terraform-provider-azurerm/issues/24020#issuecomment-2158404079
+    ]
   }
 
   tags = local.default_tags
@@ -182,7 +185,10 @@ resource "azurerm_kubernetes_cluster_node_pool" "infraciarm64" {
     "kubernetes.azure.com/scalesetpriority=spot:NoSchedule",
   ]
   lifecycle {
-    ignore_changes = [node_count]
+    ignore_changes = [
+      node_count,       # Due to autoscaling
+      upgrade_settings, # https://github.com/hashicorp/terraform-provider-azurerm/issues/24020#issuecomment-2158404079
+    ]
   }
 
   tags = local.default_tags
