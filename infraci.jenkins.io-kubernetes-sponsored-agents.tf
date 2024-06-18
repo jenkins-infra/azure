@@ -45,7 +45,7 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
     name                         = "systempool1"
     only_critical_addons_enabled = true                # This property is the only valid way to add the "CriticalAddonsOnly=true:NoSchedule" taint to the default node pool
     vm_size                      = "Standard_D4pds_v5" # At least 4 vCPUS/4 Gb as per AKS best practises
-    upgrade_settings = {
+    upgrade_settings {
       max_surge = "10%"
     }
     os_sku               = "AzureLinux"
@@ -69,7 +69,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_agents_1_sponsorsh
   provider = azurerm.jenkins-sponsorship
   name     = "lx86n14agt1"
   vm_size  = "Standard_D8ads_v5" # https://learn.microsoft.com/en-us/azure/virtual-machines/dasv5-dadsv5-series Standard_D8ads_v5 	8vcpu 	32Go 	300ssd
-  upgrade_settings = {
+  upgrade_settings {
     max_surge = "10%"
   }
   os_sku                = "AzureLinux"
@@ -104,7 +104,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_agents_1_sponsorshi
   provider = azurerm.jenkins-sponsorship
   name     = "la64n14agt1"
   vm_size  = "Standard_D8pds_v5" # https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series 	8vcpu 	32Go 	300ssd
-  upgrade_settings = {
+  upgrade_settings {
     max_surge = "10%"
   }
   os_sku                = "AzureLinux"
