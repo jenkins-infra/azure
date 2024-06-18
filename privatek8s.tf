@@ -71,8 +71,11 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   }
 
   default_node_pool {
-    name                 = "syspool"
-    vm_size              = "Standard_D2as_v4"
+    name    = "syspool"
+    vm_size = "Standard_D2as_v4"
+    upgrade_settings {
+      max_surge = "10%"
+    }
     os_sku               = "Ubuntu"
     os_disk_type         = "Ephemeral"
     os_disk_size_gb      = 50 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dav4-dasv4-series#dasv4-series (depends on the instance size)
@@ -98,8 +101,11 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
-  name                  = "linuxpool"
-  vm_size               = "Standard_D4s_v3"
+  name    = "linuxpool"
+  vm_size = "Standard_D4s_v3"
+  upgrade_settings {
+    max_surge = "10%"
+  }
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 100 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["privatek8s"]
@@ -144,7 +150,10 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracipool" {
   ]
 
   lifecycle {
-    ignore_changes = [node_count]
+    ignore_changes = [
+      node_count,       # Due to autoscaling
+      upgrade_settings, # https://github.com/hashicorp/terraform-provider-azurerm/issues/24020#issuecomment-2158404079
+    ]
   }
 
   tags = local.default_tags
@@ -176,7 +185,10 @@ resource "azurerm_kubernetes_cluster_node_pool" "infraciarm64" {
     "kubernetes.azure.com/scalesetpriority=spot:NoSchedule",
   ]
   lifecycle {
-    ignore_changes = [node_count]
+    ignore_changes = [
+      node_count,       # Due to autoscaling
+      upgrade_settings, # https://github.com/hashicorp/terraform-provider-azurerm/issues/24020#issuecomment-2158404079
+    ]
   }
 
   tags = local.default_tags
@@ -184,8 +196,11 @@ resource "azurerm_kubernetes_cluster_node_pool" "infraciarm64" {
 
 # nodepool dedicated for the infra.ci.jenkins.io controller
 resource "azurerm_kubernetes_cluster_node_pool" "infraci_controller" {
-  name                  = "infracictrl"
-  vm_size               = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
+  name    = "infracictrl"
+  vm_size = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
+  upgrade_settings {
+    max_surge = "10%"
+  }
   os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
@@ -210,8 +225,11 @@ resource "azurerm_kubernetes_cluster_node_pool" "infraci_controller" {
 
 # nodepool dedicated for the release.ci.jenkins.io controller
 resource "azurerm_kubernetes_cluster_node_pool" "releaseci_controller" {
-  name                  = "releacictrl"
-  vm_size               = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
+  name    = "releacictrl"
+  vm_size = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
+  upgrade_settings {
+    max_surge = "10%"
+  }
   os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
@@ -234,8 +252,11 @@ resource "azurerm_kubernetes_cluster_node_pool" "releaseci_controller" {
   tags = local.default_tags
 }
 resource "azurerm_kubernetes_cluster_node_pool" "releasepool" {
-  name                  = "releasepool"
-  vm_size               = "Standard_D8s_v3" # 8 vCPU 32 GiB RAM
+  name    = "releasepool"
+  vm_size = "Standard_D8s_v3" # 8 vCPU 32 GiB RAM
+  upgrade_settings {
+    max_surge = "10%"
+  }
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 200 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["privatek8s"]
@@ -257,8 +278,11 @@ resource "azurerm_kubernetes_cluster_node_pool" "releasepool" {
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "windows2019pool" {
-  name                  = "w2019"
-  vm_size               = "Standard_D4s_v3" # 4 vCPU 16 GiB RAM
+  name    = "w2019"
+  vm_size = "Standard_D4s_v3" # 4 vCPU 16 GiB RAM
+  upgrade_settings {
+    max_surge = "10%"
+  }
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 100 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["privatek8s"]
