@@ -1,0 +1,63 @@
+name: "Generate new end date for stats.jenkins.io File Share service principal writer"
+
+scms:
+  default:
+    kind: github
+    spec:
+      user: "{{ .github.user }}"
+      email: "{{ .github.email }}"
+      owner: "{{ .github.owner }}"
+      repository: "{{ .github.repository }}"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ .github.username }}"
+      branch: "{{ .github.branch }}"
+
+sources:
+  currentExpiry:
+    name: Get current `end_date` date
+    kind: yaml
+    spec:
+      file: locals.yaml
+      key: $.end_dates.infraci_stats_jenkins_io_fileshare_serviceprincipal_writer
+  nextExpiry:
+    name: Prepare next `end_date` date within 3 months
+    kind: shell
+    spec:
+      command: bash ./updatecli/scripts/dateadd.sh
+      environments:
+        - name: PATH
+
+conditions:
+  checkIfExpirySoonExpired:
+    kind: shell
+    sourceid: currentExpiry
+    spec:
+      command: bash ./updatecli/scripts/datediff.sh # current end_date date value passed as argument
+      environments:
+        - name: PATH
+
+targets:
+  updateNextExpiry:
+    name: generate new end date {{ source "nextExpiry" }} for stats.jenkins.io File Share service principal writer on infra.ci.jenkins.io
+    kind: yaml
+    sourceid: nextExpiry
+    spec:
+      file: locals.yaml
+      key: $.end_dates.infraci_stats_jenkins_io_fileshare_serviceprincipal_writer
+    scmid: default
+
+actions:
+  default:
+    kind: github/pullrequest
+    scmid: default
+    spec:
+      title: Generate new end date {{ source "nextExpiry" }} for stats.jenkins.io File Share service principal writer on infra.ci.jenkins.io
+      description: |
+        Generate a new password for stats.jenkins.io File Share service principal on infra.ci.jenkins.io.
+        
+        Ref:
+        - https://github.com/jenkins-infra/helpdesk/issues/4132#issuecomment-2167717401
+      labels:
+        - terraform
+        - stats.jenkins.io
+        - end-dates
