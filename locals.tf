@@ -1,3 +1,7 @@
+data "local_file" "locals_yaml" {
+  filename = "locals.yaml"
+}
+
 locals {
   subscription_main      = "dff2ec18-6a8e-405c-8e45-b7df7465acf0"
   subscription_sponsored = "1311c09f-aee0-4d6c-99a4-392c2b543204"
@@ -60,11 +64,5 @@ locals {
   weekly_ci_disk_size    = 8
   weekly_ci_access_modes = ["ReadWriteOnce"]
 
-  # End dates regrouped here, easier to track with updatecli
-  end_dates = {
-    "infra_ci_jenkins_io_fileshare_serviceprincipal_writer"      = "2024-06-20T23:00:00Z"
-    "infraci_docs_jenkins_io_fileshare_serviceprincipal_writer"  = "2024-08-07T23:00:00Z"
-    "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer" = "2024-07-27T00:00:00Z"
-    "infraci_stats_jenkins_io_fileshare_serviceprincipal_writer" = "2024-09-19T23:00:00Z"
-  }
+  end_dates = yamldecode(data.local_file.locals_yaml.content).end_dates
 }
