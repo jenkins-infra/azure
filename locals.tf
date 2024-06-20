@@ -59,4 +59,12 @@ locals {
 
   weekly_ci_disk_size    = 8
   weekly_ci_access_modes = ["ReadWriteOnce"]
+
+  # End dates regrouped here, easier to track with updatecli
+  end_dates = {
+    "infra_ci_jenkins_io_fileshare_serviceprincipal_writer"      = "2024-06-20T23:00:00Z"
+    "infraci_docs_jenkins_io_fileshare_serviceprincipal_writer"  = "2024-08-07T23:00:00Z"
+    "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer" = "2024-07-27T00:00:00Z"
+    "infraci_stats_jenkins_io_fileshare_serviceprincipal_writer" = "2024-09-19T23:00:00Z"
+  }
 }
