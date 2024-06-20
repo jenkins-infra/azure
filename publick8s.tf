@@ -46,6 +46,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
             # trusted.ci subnet (UC agents need to execute mirrorbits scans)
             module.jenkins_infra_shared_data.outbound_ips["trusted.ci.jenkins.io"],
             module.jenkins_infra_shared_data.outbound_ips["trusted.sponsorship.ci.jenkins.io"],
+            module.jenkins_infra_shared_data.outbound_ips["infracijenkinsioagents1.jenkins.io"],
           )
         )
       ),
