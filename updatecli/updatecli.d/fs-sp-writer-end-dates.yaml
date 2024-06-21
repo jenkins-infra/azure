@@ -66,7 +66,7 @@ actions:
       description: |
         This PR updates the end date of {{ $val.service }} File Share service principal writer on infra.ci.jenkins.io.
 
-        The current end date is set to {{ source "currentEndDate" }}.
+        The current end date is set to {{ $val.end_date }}.
 
         After merging this PR, a new password will be generated.
         
