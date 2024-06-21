@@ -5,11 +5,10 @@ github:
   branch: "main"
   owner: "jenkins-infra"
   repository: "azure"
-
 # Also used by terraform in locals.tf
 end_dates:
   infra_ci_jenkins_io_fileshare_serviceprincipal_writer:
-    end_date: "2024-06-20T23:00:00Z"
+    end_date: 2024-09-19T00:00:00Z
     service: "contributors.jenkins.io"
     secret: "CONTRIBUTORS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
   infraci_docs_jenkins_io_fileshare_serviceprincipal_writer:
