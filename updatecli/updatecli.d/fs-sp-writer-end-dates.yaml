@@ -29,6 +29,13 @@ sources:
       command: bash ./updatecli/scripts/dateadd.sh
       environments:
         - name: PATH
+  nextEndDateShort:
+    name: Short next `end_date` date within 3 months
+    kind: shell
+    spec:
+      command: bash ./updatecli/scripts/dateadd.sh | cut -c -10
+      environments:
+        - name: PATH
 
 conditions:
   checkIfEndDateSoonExpired:
@@ -42,7 +49,7 @@ conditions:
 
 targets:
   updateNextEndDate:
-    name: generate new end date {{ source "nextEndDate" }} for {{ $val.concern }} File Share service principal writer on infra.ci.jenkins.io
+    name: generate new end date {{ source "nextEndDateShort" }} for {{ $val.concern }} File Share service principal writer on infra.ci.jenkins.io
     kind: yaml
     sourceid: nextEndDate
     spec:
@@ -55,7 +62,7 @@ actions:
     kind: github/pullrequest
     scmid: default
     spec:
-      title: Generate new end date {{ source "nextEndDate" }} for {{ $val.concern }} File Share service principal writer on infra.ci.jenkins.io
+      title: Generate new end date {{ source "nextEndDateShort" }} for {{ $val.concern }} File Share service principal writer on infra.ci.jenkins.io
       description: |
         This PR updates the end date of {{ $val.concern }} File Share service principal writer on infra.ci.jenkins.io.
 
