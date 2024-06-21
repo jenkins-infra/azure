@@ -53,10 +53,15 @@ actions:
     spec:
       title: Generate new end date {{ source "nextExpiry" }} for stats.jenkins.io File Share service principal writer on infra.ci.jenkins.io
       description: |
-        Generate a new password for stats.jenkins.io File Share service principal on infra.ci.jenkins.io.
+        This PR updates the end date of stats.jenkins.io File Share service principal writer on infra.ci.jenkins.io.
+
+        After merging this PR, a new password will be generated.
         
-        Ref:
-        - https://github.com/jenkins-infra/helpdesk/issues/4132#issuecomment-2167717401
+        > [!IMPORTANT]  
+        > You'll have to ensure that `STATS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET` is updated with this new password
+        > in https://github.com/jenkins-infra/charts-secrets/blob/main/config/infra.ci.jenkins.io/jenkins-secrets.yaml.
+        
+        If you don't, the build of stats.jenkins.io on infra.ci.jenkins.io won't be able to update the website content anymore.
       labels:
         - terraform
         - stats.jenkins.io
