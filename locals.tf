@@ -1,5 +1,6 @@
+# Retrieving end dates from updatecli values, easier location to track and update them
 data "local_file" "locals_yaml" {
-  filename = "locals.yaml"
+  filename = "updatecli/values.yaml"
 }
 
 locals {
