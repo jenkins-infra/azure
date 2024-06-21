@@ -75,7 +75,7 @@ module "infra_ci_jenkins_io_fileshare_serviceprincipal_writer" {
   service_fqdn                   = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
   active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date     = local.end_dates.infra_ci_jenkins_io_fileshare_serviceprincipal_writer
+  service_principal_end_date     = local.end_dates.infra_ci_jenkins_io_fileshare_serviceprincipal_writer.end_date
   file_share_resource_manager_id = azurerm_storage_share.contributors_jenkins_io.resource_manager_id
   storage_account_id             = azurerm_storage_account.contributors_jenkins_io.id
   default_tags                   = local.default_tags
@@ -105,7 +105,7 @@ module "infraci_docs_jenkins_io_fileshare_serviceprincipal_writer" {
   service_fqdn                   = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
   active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date     = local.end_dates.infraci_docs_jenkins_io_fileshare_serviceprincipal_writer
+  service_principal_end_date     = local.end_dates.infraci_docs_jenkins_io_fileshare_serviceprincipal_writer.end_date
   file_share_resource_manager_id = azurerm_storage_share.docs_jenkins_io.resource_manager_id
   storage_account_id             = azurerm_storage_account.docs_jenkins_io.id
   default_tags                   = local.default_tags
@@ -135,7 +135,7 @@ module "infraci_stats_jenkins_io_fileshare_serviceprincipal_writer" {
   service_fqdn                   = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
   active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date     = local.end_dates.infraci_stats_jenkins_io_fileshare_serviceprincipal_writer
+  service_principal_end_date     = local.end_dates.infraci_stats_jenkins_io_fileshare_serviceprincipal_writer.end_date
   file_share_resource_manager_id = azurerm_storage_share.stats_jenkins_io.resource_manager_id
   storage_account_id             = azurerm_storage_account.stats_jenkins_io.id
   default_tags                   = local.default_tags
@@ -263,7 +263,7 @@ module "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer" {
   service_fqdn                   = "infraci-pluginsjenkinsio-fileshare_serviceprincipal_writer"
   active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date     = local.end_dates.infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer
+  service_principal_end_date     = local.end_dates.infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer.end_date
   file_share_resource_manager_id = azurerm_storage_share.plugins_jenkins_io.resource_manager_id
   storage_account_id             = azurerm_storage_account.plugins_jenkins_io.id
   default_tags                   = local.default_tags

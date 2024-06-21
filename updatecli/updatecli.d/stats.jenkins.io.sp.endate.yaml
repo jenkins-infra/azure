@@ -17,7 +17,7 @@ sources:
     name: Get current `end_date` date
     kind: yaml
     spec:
-      file: locals.yaml
+      file: updatecli/values.yaml
       key: $.end_dates.infraci_stats_jenkins_io_fileshare_serviceprincipal_writer
   nextExpiry:
     name: Prepare next `end_date` date within 3 months
@@ -42,7 +42,7 @@ targets:
     kind: yaml
     sourceid: nextExpiry
     spec:
-      file: locals.yaml
+      file: updatecli/values.yaml
       key: $.end_dates.infraci_stats_jenkins_io_fileshare_serviceprincipal_writer
     scmid: default
 
