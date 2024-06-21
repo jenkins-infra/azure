@@ -1,7 +1,15 @@
 ---
 # End dates regrouped here, easier to track with updatecli
 end_dates:
-  infra_ci_jenkins_io_fileshare_serviceprincipal_writer: "2024-06-20T23:00:00Z"
-  infraci_docs_jenkins_io_fileshare_serviceprincipal_writer: "2024-08-07T23:00:00Z"
-  infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer: "2024-07-27T00:00:00Z"
-  infraci_stats_jenkins_io_fileshare_serviceprincipal_writer: "2024-09-19T23:00:00Z"
+  infra_ci_jenkins_io_fileshare_serviceprincipal_writer:
+    end_date: "2024-06-20T23:00:00Z"
+    concern: "contributors.jenkins.io"
+  infraci_docs_jenkins_io_fileshare_serviceprincipal_writer:
+    end_date: "2024-08-07T23:00:00Z"
+    concern: "docs.jenkins.io"
+  infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer:
+    end_date: "2024-07-27T00:00:00Z"
+    concern: "plugins.jenkins.io"
+  infraci_stats_jenkins_io_fileshare_serviceprincipal_writer:
+    end_date: "2023-09-19T23:00:00Z"
+    concern: "stats.jenkins.io"
