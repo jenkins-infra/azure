@@ -1,7 +1,7 @@
 {{ $github := .github }}
 {{ range $key, $val := .end_dates }}
 ---
-name: "Generate new end date for {{ $val.concern }} File Share service principal writer"
+name: "Generate new end date for {{ $val.service }} File Share service principal writer"
 
 scms:
   default:
@@ -42,7 +42,7 @@ conditions:
 
 targets:
   updateNextEndDate:
-    name: generate new end date {{ source "nextEndDate" }} for {{ $val.concern }} File Share service principal writer on infra.ci.jenkins.io
+    name: generate new end date {{ source "nextEndDate" }} for {{ $val.service }} File Share service principal writer on infra.ci.jenkins.io
     kind: yaml
     sourceid: nextEndDate
     spec:
@@ -55,9 +55,9 @@ actions:
     kind: github/pullrequest
     scmid: default
     spec:
-      title: Generate new end date {{ source "nextEndDate" }} for {{ $val.concern }} File Share service principal writer on infra.ci.jenkins.io
+      title: Generate new end date {{ source "nextEndDate" }} for {{ $val.service }} File Share service principal writer on infra.ci.jenkins.io
       description: |
-        This PR updates the end date of {{ $val.concern }} File Share service principal writer on infra.ci.jenkins.io.
+        This PR updates the end date of {{ $val.service }} File Share service principal writer on infra.ci.jenkins.io.
 
         After merging this PR, a new password will be generated.
         
@@ -65,9 +65,9 @@ actions:
         > You'll have to ensure that `STATS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET` is updated with this new password
         > in https://github.com/jenkins-infra/charts-secrets/blob/main/config/infra.ci.jenkins.io/jenkins-secrets.yaml.
         
-        If you don't, the build of {{ $val.concern }} on infra.ci.jenkins.io won't be able to update the website content anymore.
+        If you don't, the build of {{ $val.service }} on infra.ci.jenkins.io won't be able to update the website content anymore.
       labels:
         - terraform
-        - {{ $val.concern }}
+        - {{ $val.service }}
         - end-dates
 {{ end }}
