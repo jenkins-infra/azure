@@ -1,0 +1,68 @@
+name: "Generate new end date for stats.jenkins.io File Share service principal writer"
+
+scms:
+  default:
+    kind: github
+    spec:
+      user: "{{ .github.user }}"
+      email: "{{ .github.email }}"
+      owner: "{{ .github.owner }}"
+      repository: "{{ .github.repository }}"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ .github.username }}"
+      branch: "{{ .github.branch }}"
+
+sources:
+  currentExpiry:
+    name: Get current `end_date` date
+    kind: yaml
+    spec:
+      file: locals.yaml
+      key: $.end_dates.infraci_stats_jenkins_io_fileshare_serviceprincipal_writer
+  nextExpiry:
+    name: Prepare next `end_date` date within 3 months
+    kind: shell
+    spec:
+      command: bash ./updatecli/scripts/dateadd.sh
+      environments:
+        - name: PATH
+
+conditions:
+  checkIfExpirySoonExpired:
+    kind: shell
+    sourceid: currentExpiry
+    spec:
+      command: bash ./updatecli/scripts/datediff.sh # current end_date date value passed as argument
+      environments:
+        - name: PATH
+
+targets:
+  updateNextExpiry:
+    name: generate new end date {{ source "nextExpiry" }} for stats.jenkins.io File Share service principal writer on infra.ci.jenkins.io
+    kind: yaml
+    sourceid: nextExpiry
+    spec:
+      file: locals.yaml
+      key: $.end_dates.infraci_stats_jenkins_io_fileshare_serviceprincipal_writer
+    scmid: default
+
+actions:
+  default:
+    kind: github/pullrequest
+    scmid: default
+    spec:
+      title: Generate new end date {{ source "nextExpiry" }} for stats.jenkins.io File Share service principal writer on infra.ci.jenkins.io
+      description: |
+        This PR updates the end date of stats.jenkins.io File Share service principal writer on infra.ci.jenkins.io.
+
+        After merging this PR, a new password will be generated.
+        
+        > [!IMPORTANT]  
+        > You'll have to ensure that `STATS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET` is updated with this new password
+        > in https://github.com/jenkins-infra/charts-secrets/blob/main/config/infra.ci.jenkins.io/jenkins-secrets.yaml.
+        
+        If you don't, the build of stats.jenkins.io on infra.ci.jenkins.io won't be able to update the website content anymore.
+      labels:
+        - terraform
+        - stats.jenkins.io
+        - end-dates
