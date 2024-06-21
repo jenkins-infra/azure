@@ -10,13 +10,17 @@ github:
 end_dates:
   infra_ci_jenkins_io_fileshare_serviceprincipal_writer:
     end_date: "2024-06-20T23:00:00Z"
-    concern: "contributors.jenkins.io"
+    service: "contributors.jenkins.io"
+    secret: "CONTRIBUTORS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
   infraci_docs_jenkins_io_fileshare_serviceprincipal_writer:
     end_date: "2024-08-07T23:00:00Z"
-    concern: "docs.jenkins.io"
+    service: "docs.jenkins.io"
+    secret: "DOCS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
   infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer:
     end_date: "2024-07-27T00:00:00Z"
-    concern: "plugins.jenkins.io"
+    service: "plugins.jenkins.io"
+    secret: "INFRACI_PLUGINSJENKINSIO_FILESHARE_SERVICE_PRINCIPAL_WRITER_PASSWORD"
   infraci_stats_jenkins_io_fileshare_serviceprincipal_writer:
     end_date: "2024-09-19T23:00:00Z"
-    concern: "stats.jenkins.io"
+    service: "stats.jenkins.io"
+    secret: "STATS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
