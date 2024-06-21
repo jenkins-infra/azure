@@ -62,7 +62,7 @@ actions:
         After merging this PR, a new password will be generated.
         
         > [!IMPORTANT]  
-        > You'll have to ensure that `STATS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET` is updated with this new password
+        > You'll have to ensure that `{{ $val.secret }}` is updated with this new password
         > in https://github.com/jenkins-infra/charts-secrets/blob/main/config/infra.ci.jenkins.io/jenkins-secrets.yaml.
         
         If you don't, the build of {{ $val.concern }} on infra.ci.jenkins.io won't be able to update the website content anymore.
