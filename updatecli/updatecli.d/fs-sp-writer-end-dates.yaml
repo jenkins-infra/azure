@@ -29,6 +29,13 @@ sources:
       command: bash ./updatecli/scripts/dateadd.sh
       environments:
         - name: PATH
+  shortNextEndDate:
+    name: Short next `end_date` date within 3 months
+    kind: shell
+    spec:
+      command: bash ./updatecli/scripts/dateadd.sh | cut -c -10
+      environments:
+        - name: PATH
 
 conditions:
   checkIfEndDateSoonExpired:
@@ -42,7 +49,7 @@ conditions:
 
 targets:
   updateNextEndDate:
-    name: generate new end date {{ source "nextEndDate" }} for {{ $val.service }} File Share service principal writer on infra.ci.jenkins.io
+    name: generate new end date {{ source "shortNextEndDate" }} for {{ $val.service }} File Share service principal writer on infra.ci.jenkins.io
     kind: yaml
     sourceid: nextEndDate
     spec:
@@ -55,14 +62,16 @@ actions:
     kind: github/pullrequest
     scmid: default
     spec:
-      title: Generate new end date {{ source "nextEndDate" }} for {{ $val.service }} File Share service principal writer on infra.ci.jenkins.io
+      title: Generate new end date {{ source "shortNextEndDate" }} for {{ $val.service }} File Share service principal writer on infra.ci.jenkins.io
       description: |
         This PR updates the end date of {{ $val.service }} File Share service principal writer on infra.ci.jenkins.io.
+
+        The current end date is set to {{ $val.end_date }}.
 
         After merging this PR, a new password will be generated.
         
         > [!IMPORTANT]  
-        > You'll have to ensure that `STATS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET` is updated with this new password
+        > You'll have to ensure that `{{ $val.secret }}` is updated with this new password
         > in https://github.com/jenkins-infra/charts-secrets/blob/main/config/infra.ci.jenkins.io/jenkins-secrets.yaml.
         
         If you don't, the build of {{ $val.service }} on infra.ci.jenkins.io won't be able to update the website content anymore.
