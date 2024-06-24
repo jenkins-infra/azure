@@ -69,15 +69,11 @@ actions:
         The current end date is set to `{{ $val.end_date }}`.
 
         After merging this PR, a new password will be generated.
-        
+
         > [!IMPORTANT]
-        > You'll have to ensure that `{{ $val.secret }}` is updated with this new password!
-        
+        > You'll have to ensure that the trusted.ci.jenkins.io top-level credential `{{ $val.secret }}` is updated with this new password!
+
         If you don't, {{ $val.service }} File Share won't be updated by trusted.ci.jenkins.io jobs anymore.
-        
-        > [!NOTE]
-        > This message is a work in progress that needs to be improved
-        > Check https://github.com/jenkins-infra/helpdesk/issues/4148 for the next steps.
       labels:
         - terraform
         - {{ $val.service }}
