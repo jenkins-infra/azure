@@ -80,7 +80,7 @@ module "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer" {
   service_fqdn                   = "${module.trusted_ci_jenkins_io.service_fqdn}-fileshare_serviceprincipal_writer"
   active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date     = "2024-06-20T19:00:00Z"
+  service_principal_end_date     = local.end_dates.trusted_ci_jenkins_io.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.end_date
   file_share_resource_manager_id = azurerm_storage_share.updates_jenkins_io.resource_manager_id
   storage_account_id             = azurerm_storage_account.updates_jenkins_io.id
   default_tags                   = local.default_tags
@@ -91,7 +91,7 @@ module "trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer" {
   service_fqdn                   = "${module.trusted_ci_jenkins_io.service_fqdn}-fileshare_serviceprincipal_writer-httpd"
   active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date     = "2024-06-20T19:00:00Z"
+  service_principal_end_date     = local.end_dates.trusted_ci_jenkins_io.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.end_date
   file_share_resource_manager_id = azurerm_storage_share.updates_jenkins_io_httpd.resource_manager_id
   storage_account_id             = azurerm_storage_account.updates_jenkins_io.id
   default_tags                   = local.default_tags
@@ -118,7 +118,7 @@ module "trustedci_jenkinsio_fileshare_serviceprincipal_writer" {
   service_fqdn                   = "trustedci-jenkinsio-fileshare_serviceprincipal_writer"
   active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date     = "2024-07-23T00:00:00Z"
+  service_principal_end_date     = local.end_dates.trusted_ci_jenkins_io.trustedci_jenkinsio_fileshare_serviceprincipal_writer.end_date
   file_share_resource_manager_id = azurerm_storage_share.jenkins_io.resource_manager_id
   storage_account_id             = azurerm_storage_account.jenkins_io.id
   default_tags                   = local.default_tags
