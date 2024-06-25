@@ -47,7 +47,7 @@ locals {
   admin_username = "jenkins-infra-team"
 
   kubernetes_versions = {
-    "cijenkinsio_agents_1"      = "1.27.9"
+    "cijenkinsio_agents_1"      = "1.28.9"
     "infracijenkinsio_agents_1" = "1.28.9"
     "privatek8s"                = "1.27.9"
     "publick8s"                 = "1.27.9"
