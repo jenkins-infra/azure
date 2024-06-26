@@ -74,10 +74,6 @@ module "trusted_ci_jenkins_io_azurevm_agents" {
 }
 
 # Required to allow azcopy sync of updates.jenkins.io File Share (content) with the permanent agent
-moved {
-  from = module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer
-  to   = module.trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer
-}
 module "trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
@@ -89,18 +85,14 @@ module "trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer" {
   storage_account_id             = azurerm_storage_account.updates_jenkins_io.id
   default_tags                   = local.default_tags
 }
-output "trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer_client_id" {
+output "trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer_application_client_id" {
   value = module.trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
-output "trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer_client_secret" {
+output "trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer_application_client_secret" {
   sensitive = true
-  value     = module.trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
+  value     = module.trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
 # Required to allow azcopy sync of updates.jenkins.io File Share (redirections) with the permanent agent
-moved {
-  from = module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer
-  to   = module.trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer
-}
 module "trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
@@ -112,12 +104,12 @@ module "trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_write
   storage_account_id             = azurerm_storage_account.updates_jenkins_io.id
   default_tags                   = local.default_tags
 }
-output "trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer_client_id" {
+output "trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer_application_client_id" {
   value = module.trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
-output "trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer_client_secret" {
+output "trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer_application_client_secret" {
   sensitive = true
-  value     = module.trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
+  value     = module.trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
 
 # Required to allow azcopy sync of jenkins.io File Share
@@ -135,9 +127,9 @@ module "trustedci_jenkinsio_fileshare_serviceprincipal_writer" {
 output "trustedci_jenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
   value = module.trustedci_jenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
-output "trustedci_jenkinsio_fileshare_serviceprincipal_writer_password" {
+output "trustedci_jenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
   sensitive = true
-  value     = module.trustedci_jenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
+  value     = module.trustedci_jenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
 
 # Required to allow azcopy sync of javadoc.jenkins.io File Share
@@ -155,9 +147,9 @@ module "trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer" {
 output "trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
   value = module.trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
-output "trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer_password" {
+output "trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
   sensitive = true
-  value     = module.trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
+  value     = module.trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
 
 ## Sponsorship subscription specific resources for controller
