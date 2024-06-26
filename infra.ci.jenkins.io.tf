@@ -69,93 +69,63 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_subnet_privat
 }
 
 # Required to allow azcopy sync of contributors.jenkins.io File Share
-module "infra_ci_jenkins_io_fileshare_serviceprincipal_writer" {
+module "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
   service_fqdn                   = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
   active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date     = local.end_dates.infra_ci_jenkins_io.infra_ci_jenkins_io_fileshare_serviceprincipal_writer.end_date
+  service_principal_end_date     = local.end_dates.infra_ci_jenkins_io.infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer.end_date
   file_share_resource_manager_id = azurerm_storage_share.contributors_jenkins_io.resource_manager_id
   storage_account_id             = azurerm_storage_account.contributors_jenkins_io.id
   default_tags                   = local.default_tags
 }
-output "infra_ci_jenkins_io_fileshare_serviceprincipal_writer_id" {
-  value = module.infra_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_id
+output "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
-output "infra_ci_jenkins_io_fileshare_serviceprincipal_writer_password" {
+output "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
   sensitive = true
-  value     = module.infra_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
-}
-output "infra_ci_jenkins_io_fileshare_serviceprincipal_writer_application_client_id" {
-  value = module.infra_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
-}
-output "infra_ci_jenkins_io_fileshare_serviceprincipal_writer_sp_id" {
-  value = module.infra_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_sp_id
-}
-output "infra_ci_jenkins_io_fileshare_serviceprincipal_writer_sp_password" {
-  sensitive = true
-  value     = module.infra_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_sp_password
+  value     = module.infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
 
 # Required to allow azcopy sync of docs.jenkins.io File Share
-module "infraci_docs_jenkins_io_fileshare_serviceprincipal_writer" {
+module "infraci_docsjenkinsio_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
   service_fqdn                   = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
   active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date     = local.end_dates.infra_ci_jenkins_io.infraci_docs_jenkins_io_fileshare_serviceprincipal_writer.end_date
+  service_principal_end_date     = local.end_dates.infra_ci_jenkins_io.infraci_docsjenkinsio_fileshare_serviceprincipal_writer.end_date
   file_share_resource_manager_id = azurerm_storage_share.docs_jenkins_io.resource_manager_id
   storage_account_id             = azurerm_storage_account.docs_jenkins_io.id
   default_tags                   = local.default_tags
 }
-output "infraci_docs_jenkins_io_fileshare_serviceprincipal_writer_id" {
-  value = module.infraci_docs_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_id
+output "infraci_docsjenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.infraci_docsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
-output "infraci_docs_jenkins_io_fileshare_serviceprincipal_writer_password" {
+output "infraci_docsjenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
   sensitive = true
-  value     = module.infraci_docs_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
-}
-output "infraci_docs_jenkins_io_fileshare_serviceprincipal_writer_application_client_id" {
-  value = module.infraci_docs_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
-}
-output "infraci_docs_jenkins_io_fileshare_serviceprincipal_writer_sp_id" {
-  value = module.infraci_docs_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_sp_id
-}
-output "infraci_docs_jenkins_io_fileshare_serviceprincipal_writer_sp_password" {
-  sensitive = true
-  value     = module.infraci_docs_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_sp_password
+  value     = module.infraci_docsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
 
 # Required to allow azcopy sync of stats.jenkins.io File Share
-module "infraci_stats_jenkins_io_fileshare_serviceprincipal_writer" {
+module "infraci_statsjenkinsio_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
   service_fqdn                   = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
   active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date     = local.end_dates.infra_ci_jenkins_io.infraci_stats_jenkins_io_fileshare_serviceprincipal_writer.end_date
+  service_principal_end_date     = local.end_dates.infra_ci_jenkins_io.infraci_statsjenkinsio_fileshare_serviceprincipal_writer.end_date
   file_share_resource_manager_id = azurerm_storage_share.stats_jenkins_io.resource_manager_id
   storage_account_id             = azurerm_storage_account.stats_jenkins_io.id
   default_tags                   = local.default_tags
 }
-output "infraci_stats_jenkins_io_fileshare_serviceprincipal_writer_id" {
-  value = module.infraci_stats_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_id
+output "infraci_statsjenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.infraci_statsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
-output "infraci_stats_jenkins_io_fileshare_serviceprincipal_writer_password" {
+output "infraci_statsjenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
   sensitive = true
-  value     = module.infraci_stats_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
-}
-output "infraci_stats_jenkins_io_fileshare_serviceprincipal_writer_application_client_id" {
-  value = module.infraci_stats_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
-}
-output "infraci_stats_jenkins_io_fileshare_serviceprincipal_writer_sp_id" {
-  value = module.infraci_stats_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_sp_id
-}
-output "infraci_stats_jenkins_io_fileshare_serviceprincipal_writer_sp_password" {
-  sensitive = true
-  value     = module.infraci_stats_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_sp_password
+  value     = module.infraci_statsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
 
 locals {
@@ -271,7 +241,7 @@ module "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer" {
 output "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
   value = module.infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
-output "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer_password" {
+output "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
   sensitive = true
-  value     = module.infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
+  value     = module.infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
