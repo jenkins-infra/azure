@@ -80,22 +80,12 @@ module "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer" {
   storage_account_id             = azurerm_storage_account.contributors_jenkins_io.id
   default_tags                   = local.default_tags
 }
-output "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer_id" {
-  value = module.infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_id
-}
-output "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer_password" {
-  sensitive = true
-  value     = module.infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
-}
 output "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
   value = module.infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
-output "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer_sp_id" {
-  value = module.infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_sp_id
-}
-output "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer_sp_password" {
+output "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
   sensitive = true
-  value     = module.infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_sp_password
+  value     = module.infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
 
 # Required to allow azcopy sync of docs.jenkins.io File Share
@@ -110,22 +100,12 @@ module "infraci_docsjenkinsio_fileshare_serviceprincipal_writer" {
   storage_account_id             = azurerm_storage_account.docs_jenkins_io.id
   default_tags                   = local.default_tags
 }
-output "infraci_docsjenkinsio_fileshare_serviceprincipal_writer_id" {
-  value = module.infraci_docsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_id
-}
-output "infraci_docsjenkinsio_fileshare_serviceprincipal_writer_password" {
-  sensitive = true
-  value     = module.infraci_docsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
-}
 output "infraci_docsjenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
   value = module.infraci_docsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
-output "infraci_docsjenkinsio_fileshare_serviceprincipal_writer_sp_id" {
-  value = module.infraci_docsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_sp_id
-}
-output "infraci_docsjenkinsio_fileshare_serviceprincipal_writer_sp_password" {
+output "infraci_docsjenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
   sensitive = true
-  value     = module.infraci_docsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_sp_password
+  value     = module.infraci_docsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
 
 # Required to allow azcopy sync of stats.jenkins.io File Share
@@ -140,22 +120,12 @@ module "infraci_statsjenkinsio_fileshare_serviceprincipal_writer" {
   storage_account_id             = azurerm_storage_account.stats_jenkins_io.id
   default_tags                   = local.default_tags
 }
-output "infraci_statsjenkinsio_fileshare_serviceprincipal_writer_id" {
-  value = module.infraci_statsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_id
-}
-output "infraci_statsjenkinsio_fileshare_serviceprincipal_writer_password" {
-  sensitive = true
-  value     = module.infraci_statsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
-}
 output "infraci_statsjenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
   value = module.infraci_statsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
-output "infraci_statsjenkinsio_fileshare_serviceprincipal_writer_sp_id" {
-  value = module.infraci_statsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_sp_id
-}
-output "infraci_statsjenkinsio_fileshare_serviceprincipal_writer_sp_password" {
+output "infraci_statsjenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
   sensitive = true
-  value     = module.infraci_statsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_sp_password
+  value     = module.infraci_statsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
 
 locals {
@@ -271,7 +241,7 @@ module "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer" {
 output "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
   value = module.infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
-output "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer_password" {
+output "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
   sensitive = true
-  value     = module.infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
+  value     = module.infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
