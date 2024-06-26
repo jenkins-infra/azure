@@ -69,10 +69,6 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_subnet_privat
 }
 
 # Required to allow azcopy sync of contributors.jenkins.io File Share
-moved {
-  from = module.infra_ci_jenkins_io_fileshare_serviceprincipal_writer
-  to   = module.infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer
-}
 module "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
@@ -103,10 +99,6 @@ output "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer_sp_passw
 }
 
 # Required to allow azcopy sync of docs.jenkins.io File Share
-moved {
-  from = module.infraci_docs_jenkins_io_fileshare_serviceprincipal_writer
-  to   = module.infraci_docsjenkinsio_fileshare_serviceprincipal_writer
-}
 module "infraci_docsjenkinsio_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
@@ -137,10 +129,6 @@ output "infraci_docsjenkinsio_fileshare_serviceprincipal_writer_sp_password" {
 }
 
 # Required to allow azcopy sync of stats.jenkins.io File Share
-moved {
-  from = module.infraci_stats_jenkins_io_fileshare_serviceprincipal_writer
-  to   = module.infraci_statsjenkinsio_fileshare_serviceprincipal_writer
-}
 module "infraci_statsjenkinsio_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 

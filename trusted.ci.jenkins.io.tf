@@ -74,10 +74,6 @@ module "trusted_ci_jenkins_io_azurevm_agents" {
 }
 
 # Required to allow azcopy sync of updates.jenkins.io File Share (content) with the permanent agent
-moved {
-  from = module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer
-  to   = module.trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer
-}
 module "trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
@@ -97,10 +93,6 @@ output "trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer_cli
   value     = module.trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
 }
 # Required to allow azcopy sync of updates.jenkins.io File Share (redirections) with the permanent agent
-moved {
-  from = module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer
-  to   = module.trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer
-}
 module "trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
