@@ -27,17 +27,17 @@ end_dates:
   trusted_ci_jenkins_io:
     trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer:
       end_date: 2024-09-22T00:00:00Z
-      service: "updates.jenkins.io"
-      secret: "TODO: to be identified, related to updates.jenkins.io"
+      service: "updates.jenkins.io (content)"
+      secret: "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer"
     trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer:
       end_date: 2024-09-22T00:00:00Z
-      service: "updates.jenkins.io (httpd)"
-      secret: "TODO: to be identified, related to updates.jenkins.io (httpd)"
+      service: "updates.jenkins.io (redirections)"
+      secret: "TODO: to be identified, related to updates.jenkins.io (redirections)"
     trustedci_jenkinsio_fileshare_serviceprincipal_writer:
       end_date: "2024-07-23T00:00:00Z"
       service: "jenkins.io"
-      secret: "TODO: to be identified, related to jenkins.io"
+      secret: "trustedci_jenkinsio_fileshare_serviceprincipal_writer"
     trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer:
       end_date: "2024-07-28T00:00:00Z"
       service: "javadoc.jenkins.io"
-      secret: "TODO: to be identified, related to javadoc.jenkins.io"
+      secret: "trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer"
