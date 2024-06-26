@@ -8,11 +8,11 @@ github:
 # Also used by terraform in locals.tf
 end_dates:
   infra_ci_jenkins_io:
-    infra_ci_jenkins_io_fileshare_serviceprincipal_writer:
+    infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer:
       end_date: 2024-09-22T00:00:00Z
       service: "contributors.jenkins.io"
       secret: "CONTRIBUTORS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
-    infraci_docs_jenkins_io_fileshare_serviceprincipal_writer:
+    infraci_docsjenkinsio_fileshare_serviceprincipal_writer:
       end_date: "2024-08-07T23:00:00Z"
       service: "docs.jenkins.io"
       secret: "DOCS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
@@ -20,16 +20,16 @@ end_dates:
       end_date: "2024-07-27T00:00:00Z"
       service: "plugins.jenkins.io"
       secret: "INFRACI_PLUGINSJENKINSIO_FILESHARE_SERVICE_PRINCIPAL_WRITER_PASSWORD"
-    infraci_stats_jenkins_io_fileshare_serviceprincipal_writer:
+    infraci_statsjenkinsio_fileshare_serviceprincipal_writer:
       end_date: "2024-09-19T23:00:00Z"
       service: "stats.jenkins.io"
       secret: "STATS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
   trusted_ci_jenkins_io:
-    trusted_ci_jenkins_io_fileshare_serviceprincipal_writer:
+    trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer:
       end_date: 2024-09-22T00:00:00Z
       service: "updates.jenkins.io"
       secret: "TODO: to be identified, related to updates.jenkins.io"
-    trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer:
+    trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer:
       end_date: 2024-09-22T00:00:00Z
       service: "updates.jenkins.io (httpd)"
       secret: "TODO: to be identified, related to updates.jenkins.io (httpd)"

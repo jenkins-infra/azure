@@ -73,42 +73,51 @@ module "trusted_ci_jenkins_io_azurevm_agents" {
   }
 }
 
-# Required to allow azcopy sync of updates.jenkins.io File Share with the permanent agent
-module "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer" {
+# Required to allow azcopy sync of updates.jenkins.io File Share (content) with the permanent agent
+moved {
+  from = module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer
+  to   = module.trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer
+}
+module "trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
   service_fqdn                   = "${module.trusted_ci_jenkins_io.service_fqdn}-fileshare_serviceprincipal_writer"
   active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date     = local.end_dates.trusted_ci_jenkins_io.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.end_date
+  service_principal_end_date     = local.end_dates.trusted_ci_jenkins_io.trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer.end_date
   file_share_resource_manager_id = azurerm_storage_share.updates_jenkins_io.resource_manager_id
   storage_account_id             = azurerm_storage_account.updates_jenkins_io.id
   default_tags                   = local.default_tags
 }
-module "trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer" {
+output "trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer_client_id" {
+  value = module.trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
+}
+output "trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer_client_secret" {
+  sensitive = true
+  value     = module.trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
+}
+# Required to allow azcopy sync of updates.jenkins.io File Share (redirections) with the permanent agent
+moved {
+  from = module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer
+  to   = module.trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer
+}
+module "trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
   service_fqdn                   = "${module.trusted_ci_jenkins_io.service_fqdn}-fileshare_serviceprincipal_writer-httpd"
   active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date     = local.end_dates.trusted_ci_jenkins_io.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.end_date
+  service_principal_end_date     = local.end_dates.trusted_ci_jenkins_io.trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer.end_date
   file_share_resource_manager_id = azurerm_storage_share.updates_jenkins_io_httpd.resource_manager_id
   storage_account_id             = azurerm_storage_account.updates_jenkins_io.id
   default_tags                   = local.default_tags
 }
-output "trusted_ci_jenkins_io_uc_content_fileshare_client_id" {
-  value = module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
+output "trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer_client_id" {
+  value = module.trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
-output "trusted_ci_jenkins_io_uc_content_fileshare_client_secret" {
+output "trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer_client_secret" {
   sensitive = true
-  value     = module.trusted_ci_jenkins_io_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
-}
-output "trusted_ci_jenkins_io_uc_redirections_fileshare_client_id" {
-  value = module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
-}
-output "trusted_ci_jenkins_io_uc_redirections_fileshare_client_secret" {
-  sensitive = true
-  value     = module.trustedci_updates_jenkins_io_httpd_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
+  value     = module.trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_password
 }
 
 # Required to allow azcopy sync of jenkins.io File Share
@@ -138,7 +147,7 @@ module "trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer" {
   service_fqdn                   = "trustedci-javadocjenkinsio-fileshare_serviceprincipal_writer"
   active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date     = "2024-07-28T00:00:00Z"
+  service_principal_end_date     = local.end_dates.trusted_ci_jenkins_io.trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer.end_date
   file_share_resource_manager_id = azurerm_storage_share.javadoc_jenkins_io.resource_manager_id
   storage_account_id             = azurerm_storage_account.javadoc_jenkins_io.id
   default_tags                   = local.default_tags
