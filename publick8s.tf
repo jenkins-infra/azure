@@ -84,8 +84,9 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     os_disk_type         = "Ephemeral"
     os_disk_size_gb      = 50
     orchestrator_version = local.kubernetes_versions["publick8s"]
-    enable_auto_scaling  = false
-    node_count           = 2
+    enable_auto_scaling  = true
+    min_count            = 2
+    max_count            = 4
     vnet_subnet_id       = data.azurerm_subnet.publick8s_tier.id
     tags                 = local.default_tags
     zones                = local.publick8s_compute_zones
