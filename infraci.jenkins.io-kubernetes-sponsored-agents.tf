@@ -53,8 +53,9 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
     os_disk_size_gb      = 150 # Ref. Cache storage size athttps://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
     orchestrator_version = local.kubernetes_versions["infracijenkinsio_agents_1"]
     kubelet_disk_type    = "OS"
-    enable_auto_scaling  = false
-    node_count           = 3 # 3 nodes for HA as per AKS best practises
+    enable_auto_scaling  = true
+    min_count            = 2 # for best practises
+    max_count            = 3 # for upgrade
     vnet_subnet_id       = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
     tags                 = local.default_tags
     zones                = local.infracijenkinsio_agents_1_compute_zones
