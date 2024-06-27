@@ -1,0 +1,60 @@
+name: "Generate new end date for the infra.ci.jenkins.io controller Azure AD Application password"
+
+scms:
+  default:
+    kind: github
+    spec:
+      user: "{{ .github.user }}"
+      email: "{{ .github.email }}"
+      owner: "{{ .github.owner }}"
+      repository: "{{ .github.repository }}"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ .github.username }}"
+      branch: "{{ .github.branch }}"
+
+sources:
+  currentExpiry:
+    name: Get current `expiry` date
+    kind: hcl
+    spec:
+      file: infra.ci.jenkins.io.tf
+      path: resource.azuread_application_password.infra_ci_jenkins_io.end_date
+  nextExpiry:
+    name: Prepare next `expiry` date within 3 months
+    kind: shell
+    spec:
+      command: bash ./updatecli/scripts/dateadd.sh
+      environments:
+        - name: PATH
+
+conditions:
+  checkIfExpirySoonExpired:
+    kind: shell
+    sourceid: currentExpiry
+    spec:
+      command: bash ./updatecli/scripts/datediff.sh # current expiry date value passed as argument
+      environments:
+        - name: PATH
+
+targets:
+  updateNextExpiry:
+    name: Update Terraform file `infra.ci.jenkins.io.tf` with new expiration date for controller_service_principal_end_date
+    kind: hcl
+    sourceid: nextExpiry
+    spec:
+      file: infra.ci.jenkins.io.tf
+      path: resource.azuread_application_password.infra_ci_jenkins_io.end_date
+    scmid: default
+
+actions:
+  default:
+    kind: github/pullrequest
+    scmid: default
+    spec:
+      title: Generate a new Azure AD Application password with expiration date {{ source "nextExpiry" }} on `infra.ci.jenkins.io`
+      description: |
+        This PR generates a new Azure AD application password with a new end date for the `infra.ci.jenkins.io` controller (to allow spawning Azure VM agents).
+        Once this PR is merged and deployed with success by Terraform (on infra.ci.jenkins.io), you can retrieve the new password value from the Terraform state with `terraform show -json` then searching for the new password in `values.value` of the `resource.azuread_application_password.infra_ci_jenkins_io` section (do NOT save it anywhere!) and (manually) update the infra.ci.jenkins.io credential named `azure-jenkins-sponsorship-credentials` through the Jenkins UI.
+        Finally, verify both Azure Credential and Azure VM clouds by checking that a click on the "Verify <...>" buttons returns a success, then restart the controller to ensure that the old credential is not kept in cache.
+      labels:
+        - terraform
