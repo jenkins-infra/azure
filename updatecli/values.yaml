@@ -24,6 +24,10 @@ end_dates:
       end_date: "2024-09-19T23:00:00Z"
       service: "stats.jenkins.io"
       secret: "STATS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
+    azurevms_agents_client_secret:
+      end_date: "2024-06-30T00:00:00Z"
+      service: "infra.ci.jenkins.io Azure VM agents"
+      secret: "JENKINSINFRA_AZURE_CLIENT_SECRET_VALUE"
   trusted_ci_jenkins_io:
     trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer:
       end_date: 2024-09-22T00:00:00Z
