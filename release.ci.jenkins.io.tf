@@ -1,6 +1,6 @@
 resource "azurerm_resource_group" "release_ci_controller" {
   name     = "release-ci"
-  location = "East US 2"
+  location = var.location
 }
 
 resource "azurerm_managed_disk" "jenkins_release_data" {
@@ -16,7 +16,7 @@ resource "azurerm_managed_disk" "jenkins_release_data" {
 }
 
 resource "kubernetes_persistent_volume" "jenkins_release_data" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.privatek8s
   metadata {
     name = "jenkins-release-pv"
   }
@@ -37,7 +37,7 @@ resource "kubernetes_persistent_volume" "jenkins_release_data" {
 }
 
 resource "kubernetes_persistent_volume_claim" "jenkins_release_data" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.privatek8s
   metadata {
     name      = "jenkins-release-data"
     namespace = "jenkins-release"
@@ -66,5 +66,5 @@ resource "azurerm_role_definition" "release_ci_jenkins_io_controller_disk_reader
 resource "azurerm_role_assignment" "release_ci_jenkins_io_allow_azurerm" {
   scope              = azurerm_resource_group.release_ci_controller.id
   role_definition_id = azurerm_role_definition.release_ci_jenkins_io_controller_disk_reader.role_definition_resource_id
-  principal_id       = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
+  principal_id       = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
 }

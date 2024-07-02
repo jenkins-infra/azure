@@ -326,7 +326,7 @@ resource "kubernetes_storage_class" "statically_provisionned_privatek8s" {
   }
   storage_provisioner    = "disk.csi.azure.com"
   reclaim_policy         = "Retain"
-  provider               = kubernetes.publick8s
+  provider               = kubernetes.privatek8s
   allow_volume_expansion = true
 }
 
