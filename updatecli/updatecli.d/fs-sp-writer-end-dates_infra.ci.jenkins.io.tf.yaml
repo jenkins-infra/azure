@@ -1,4 +1,3 @@
-{{ $github := .github }}
 {{ range $key, $val := .end_dates.infra_ci_jenkins_io }}
 ---
 name: "Generate new end date for {{ $val.service }} File Share service principal writer on infra.ci.jenkins.io"
@@ -7,13 +6,13 @@ scms:
   default:
     kind: github
     spec:
-      user: "{{ $github.user }}"
-      email: "{{ $github.email }}"
-      owner: "{{ $github.owner }}"
-      repository: "{{ $github.repository }}"
-      token: "{{ requiredEnv $github.token }}"
-      username: "{{ $github.username }}"
-      branch: "{{ $github.branch }}"
+      user: "{{ $.github.user }}"
+      email: "{{ $.github.email }}"
+      owner: "{{ $.github.owner }}"
+      repository: "{{ $.github.repository }}"
+      token: "{{ requiredEnv $.github.token }}"
+      username: "{{ $.github.username }}"
+      branch: "{{ $.github.branch }}"
 
 sources:
   currentEndDate:
@@ -69,11 +68,11 @@ actions:
         The current end date is set to `{{ $val.end_date }}`.
 
         After merging this PR, a new password will be generated.
-        
+
         > [!IMPORTANT]
         > You'll have to ensure that `{{ $val.secret }}` is updated with this new password
         > in https://github.com/jenkins-infra/charts-secrets/blob/main/config/infra.ci.jenkins.io/jenkins-secrets.yaml.
-        
+
         If you don't, the build of {{ $val.service }} on infra.ci.jenkins.io won't be able to update the website content anymore.
       labels:
         - terraform
