@@ -9,7 +9,7 @@ resource "azurerm_managed_disk" "jenkins_release_data" {
   resource_group_name  = azurerm_resource_group.release_ci_controller.name
   storage_account_type = "StandardSSD_ZRS"
   create_option        = "Empty"
-  disk_size_gb         = local.release_ci_disk_size
+  disk_size_gb         = 64
   tags = {
     environment = azurerm_resource_group.release_ci_controller.name
   }
@@ -22,9 +22,9 @@ resource "kubernetes_persistent_volume" "jenkins_release_data" {
   }
   spec {
     capacity = {
-      storage = local.release_ci_disk_size
+      storage = azurerm_managed_disk.jenkins_release_data.disk_size_gb
     }
-    access_modes                     = local.release_ci_access_modes
+    access_modes                     = ["ReadWriteOnce"]
     persistent_volume_reclaim_policy = "Retain"
     storage_class_name               = kubernetes_storage_class.statically_provisionned_privatek8s.id
     persistent_volume_source {
@@ -43,12 +43,12 @@ resource "kubernetes_persistent_volume_claim" "jenkins_release_data" {
     namespace = "jenkins-release"
   }
   spec {
-    access_modes       = local.release_ci_access_modes
+    access_modes       = kubernetes_persistent_volume.jenkins_release_data.spec[0].access_modes
     volume_name        = kubernetes_persistent_volume.jenkins_release_data.metadata.0.name
     storage_class_name = kubernetes_storage_class.statically_provisionned_privatek8s.id
     resources {
       requests = {
-        storage = local.release_ci_disk_size
+        storage = azurerm_managed_disk.jenkins_release_data.disk_size_gb
       }
     }
   }
