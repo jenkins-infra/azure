@@ -26,7 +26,7 @@ resource "kubernetes_persistent_volume" "jenkins_release_data" {
     }
     access_modes                     = local.release_ci_access_modes
     persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = kubernetes_storage_class.statically_provisionned.id
+    storage_class_name               = kubernetes_storage_class.statically_provisionned_privatek8s.id
     persistent_volume_source {
       csi {
         driver        = "disk.csi.azure.com"
@@ -45,7 +45,7 @@ resource "kubernetes_persistent_volume_claim" "jenkins_release_data" {
   spec {
     access_modes       = local.release_ci_access_modes
     volume_name        = kubernetes_persistent_volume.jenkins_release_data.metadata.0.name
-    storage_class_name = kubernetes_storage_class.statically_provisionned.id
+    storage_class_name = kubernetes_storage_class.statically_provisionned_privatek8s.id
     resources {
       requests = {
         storage = local.release_ci_disk_size
