@@ -245,3 +245,69 @@ output "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer_application_c
   sensitive = true
   value     = module.infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
+
+resource "azurerm_managed_disk" "jenkins_infra_data" {
+  name                 = "jenkins-infra-data"
+  location             = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.location
+  resource_group_name  = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
+  storage_account_type = "StandardSSD_ZRS"
+  create_option        = "Empty"
+  disk_size_gb         = 64
+  tags = {
+    environment = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
+  }
+}
+
+resource "kubernetes_persistent_volume" "jenkins_infra_data" {
+  provider = kubernetes.privatek8s
+  metadata {
+    name = "jenkins-infra-pv"
+  }
+  spec {
+    capacity = {
+      storage = azurerm_managed_disk.jenkins_infra_data.disk_size_gb
+    }
+    access_modes                     = ["ReadWriteOnce"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.statically_provisionned_privatek8s.id
+    persistent_volume_source {
+      csi {
+        driver        = "disk.csi.azure.com"
+        volume_handle = azurerm_managed_disk.jenkins_infra_data.id
+      }
+    }
+  }
+}
+
+resource "kubernetes_persistent_volume_claim" "jenkins_infra_data" {
+  provider = kubernetes.privatek8s
+  metadata {
+    name      = "jenkins-infra-data"
+    namespace = "jenkins-infra"
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.jenkins_infra_data.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.jenkins_infra_data.metadata.0.name
+    storage_class_name = kubernetes_storage_class.statically_provisionned_privatek8s.id
+    resources {
+      requests = {
+        storage = azurerm_managed_disk.jenkins_infra_data.disk_size_gb
+      }
+    }
+  }
+}
+
+# Required to allow the release controller to read the disk
+resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_disk_reader" {
+  name  = "ReadinfraCIDisk"
+  scope = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.id
+
+  permissions {
+    actions = ["Microsoft.Compute/disks/read"]
+  }
+}
+resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_azurerm_privatek8s" {
+  scope              = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.id
+  role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_disk_reader.role_definition_resource_id
+  principal_id       = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
+}
