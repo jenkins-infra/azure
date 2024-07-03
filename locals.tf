@@ -62,8 +62,5 @@ locals {
 
   publick8s_compute_zones = [3]
 
-  weekly_ci_disk_size    = 8
-  weekly_ci_access_modes = ["ReadWriteOnce"]
-
   end_dates = yamldecode(data.local_file.locals_yaml.content).end_dates
 }
