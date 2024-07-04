@@ -136,9 +136,11 @@ locals {
 ####################################################################################
 ## Sponsorship subscription specific resources for controller
 ####################################################################################
+# This resource group hosts resources used for agents only managed by terraform or administrators
+# such as NSG for agents subnet (we don't want azure-vm-agents jenkins plugin to access this RG)
 resource "azurerm_resource_group" "infra_ci_jenkins_io_controller_jenkins_sponsorship" {
   provider = azurerm.jenkins-sponsorship
-  name     = "infra-ci-jenkins-io-controller" # Custom name on the secondary subscription (it is AKS managed on the primary)
+  name     = "infra-ci-jenkins-io-controller"
   location = var.location
   tags     = local.default_tags
 }
@@ -246,15 +248,22 @@ output "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer_application_c
   value     = module.infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
 
+# This resource group hosts resources used by the controller on the main subscription
+resource "azurerm_resource_group" "infra_ci_jenkins_io_controller_jenkins" {
+  name     = "infra-ci-jenkins-io-controller"
+  location = var.location
+  tags     = local.default_tags
+}
+
 resource "azurerm_managed_disk" "jenkins_infra_data" {
   name                 = "jenkins-infra-data"
-  location             = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.location
-  resource_group_name  = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
+  location             = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins.location
+  resource_group_name  = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins.name
   storage_account_type = "StandardSSD_ZRS"
   create_option        = "Empty"
   disk_size_gb         = 64
   tags = {
-    environment = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
+    environment = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins.name
   }
 }
 
@@ -300,14 +309,14 @@ resource "kubernetes_persistent_volume_claim" "jenkins_infra_data" {
 # Required to allow the release controller to read the disk
 resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_disk_reader" {
   name  = "ReadinfraCIDisk"
-  scope = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.id
+  scope = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins.id
 
   permissions {
     actions = ["Microsoft.Compute/disks/read"]
   }
 }
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_azurerm_privatek8s" {
-  scope              = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.id
+  scope              = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins.id
   role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_disk_reader.role_definition_resource_id
   principal_id       = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
 }
