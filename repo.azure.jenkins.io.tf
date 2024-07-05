@@ -29,7 +29,7 @@ resource "kubernetes_persistent_volume" "repo_azure_jenkins_io_data" {
   }
   spec {
     capacity = {
-      storage = azurerm_managed_disk.repo_azure_jenkins_io_data[count.index].disk_size_gb
+      storage = "${azurerm_managed_disk.repo_azure_jenkins_io_data[count.index].disk_size_gb}Gi"
     }
     access_modes                     = ["ReadWriteOnce"]
     persistent_volume_reclaim_policy = "Retain"
