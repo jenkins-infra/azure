@@ -236,10 +236,6 @@ resource "kubernetes_storage_class" "managed_csi_standard_ZRS_retain_public" {
   allow_volume_expansion = true
 }
 
-moved {
-  from = kubernetes_storage_class.statically_provisionned
-  to   = kubernetes_storage_class.statically_provisionned_publick8s
-}
 resource "kubernetes_storage_class" "statically_provisionned_publick8s" {
   metadata {
     name = "statically-provisionned"
