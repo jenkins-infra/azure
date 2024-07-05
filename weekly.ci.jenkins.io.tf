@@ -1,6 +1,6 @@
 resource "azurerm_resource_group" "weekly_ci_controller" {
   name     = "weekly-ci"
-  location = "East US 2"
+  location = var.location
 }
 
 resource "azurerm_managed_disk" "jenkins_weekly_data" {
@@ -10,9 +10,7 @@ resource "azurerm_managed_disk" "jenkins_weekly_data" {
   storage_account_type = "StandardSSD_ZRS"
   create_option        = "Empty"
   disk_size_gb         = 8
-  tags = {
-    environment = azurerm_resource_group.weekly_ci_controller.name
-  }
+  tags                 = local.default_tags
 }
 
 resource "kubernetes_persistent_volume" "jenkins_weekly_data" {
@@ -26,7 +24,7 @@ resource "kubernetes_persistent_volume" "jenkins_weekly_data" {
     }
     access_modes                     = ["ReadWriteOnce"]
     persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = kubernetes_storage_class.statically_provisionned.id
+    storage_class_name               = kubernetes_storage_class.statically_provisionned_publick8s.id
     persistent_volume_source {
       csi {
         driver        = "disk.csi.azure.com"
@@ -45,7 +43,7 @@ resource "kubernetes_persistent_volume_claim" "jenkins_weekly_data" {
   spec {
     access_modes       = kubernetes_persistent_volume.jenkins_weekly_data.spec[0].access_modes
     volume_name        = kubernetes_persistent_volume.jenkins_weekly_data.metadata.0.name
-    storage_class_name = kubernetes_storage_class.statically_provisionned.id
+    storage_class_name = kubernetes_storage_class.statically_provisionned_publick8s.id
     resources {
       requests = {
         storage = azurerm_managed_disk.jenkins_weekly_data.disk_size_gb
@@ -54,7 +52,7 @@ resource "kubernetes_persistent_volume_claim" "jenkins_weekly_data" {
   }
 }
 
-# Required to allow the weekly controller to read the disk
+# Required to allow AKS CSI driver to access the Azure disk
 resource "azurerm_role_definition" "weekly_ci_jenkins_io_controller_disk_reader" {
   name  = "ReadWeeklyCIDisk"
   scope = azurerm_resource_group.weekly_ci_controller.id

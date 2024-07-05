@@ -10,9 +10,7 @@ resource "azurerm_managed_disk" "jenkins_release_data" {
   storage_account_type = "StandardSSD_ZRS"
   create_option        = "Empty"
   disk_size_gb         = 64
-  tags = {
-    environment = azurerm_resource_group.release_ci_controller.name
-  }
+  tags                 = local.default_tags
 }
 
 resource "kubernetes_persistent_volume" "jenkins_release_data" {
@@ -54,7 +52,7 @@ resource "kubernetes_persistent_volume_claim" "jenkins_release_data" {
   }
 }
 
-# Required to allow the release controller to read the disk
+# Required to allow AKS CSI driver to access the Azure disk
 resource "azurerm_role_definition" "release_ci_jenkins_io_controller_disk_reader" {
   name  = "ReadreleaseCIDisk"
   scope = azurerm_resource_group.release_ci_controller.id
