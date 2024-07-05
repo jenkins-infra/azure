@@ -20,7 +20,7 @@ resource "kubernetes_persistent_volume" "jenkins_weekly_data" {
   }
   spec {
     capacity = {
-      storage = azurerm_managed_disk.jenkins_weekly_data.disk_size_gb
+      storage = "${azurerm_managed_disk.jenkins_weekly_data.disk_size_gb}Gi"
     }
     access_modes                     = ["ReadWriteOnce"]
     persistent_volume_reclaim_policy = "Retain"
@@ -46,7 +46,7 @@ resource "kubernetes_persistent_volume_claim" "jenkins_weekly_data" {
     storage_class_name = kubernetes_storage_class.statically_provisionned_publick8s.id
     resources {
       requests = {
-        storage = azurerm_managed_disk.jenkins_weekly_data.disk_size_gb
+        storage = "${azurerm_managed_disk.jenkins_weekly_data.disk_size_gb}Gi"
       }
     }
   }
