@@ -55,7 +55,7 @@ actions:
     kind: github/pullrequest
     scmid: default
     spec:
-      title: "Extend Azure Service Principal password on `ci.jenkins.io` (current end date: {{ source \"currentEndDate\" }})"
+      title: 'Extend Azure Service Principal password on `ci.jenkins.io` (current end date: {{ source "currentEndDate" }})'
       description: |
         Generate a new password for the Azure Service Principal `ci.jenkins.io`.
 
