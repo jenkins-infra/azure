@@ -54,7 +54,7 @@ actions:
     kind: github/pullrequest
     scmid: default
     spec:
-      title: "Extend Azure AD Application password on `infra.ci.jenkins.io` (current end date: {{ source \"currentEndDate\" }})"
+      title: 'Extend Azure AD Application password on `infra.ci.jenkins.io` (current end date: {{ source "currentEndDate" }})'
       description: |
         This PR generates a new Azure AD application password with a new end date for the `infra.ci.jenkins.io` controller (to allow spawning Azure VM agents).
         Once this PR is merged and deployed with success by Terraform (on infra.ci.jenkins.io), you can retrieve the new password value from the Terraform state with `terraform show -json` then searching for the new password in `values.value` of the `resource.azuread_application_password.infra_ci_jenkins_io` section (do NOT save it anywhere!) and (manually) update the infra.ci.jenkins.io credential named `azure-jenkins-sponsorship-credentials` through the Jenkins UI.
