@@ -62,7 +62,7 @@ actions:
     kind: github/pullrequest
     scmid: default
     spec:
-      title: "New end date for `{{ $val.service }}` File Share service principal writer on `infra.ci.jenkins.io` (current: {{ source \"currentEndDate\" }})"
+      title: 'New end date for `{{ $val.service }}` File Share service principal writer on `infra.ci.jenkins.io` (current: {{ source "currentEndDate" }})'
       description: |
         This PR updates the end date of {{ $val.service }} File Share service principal writer on infra.ci.jenkins.io.
 

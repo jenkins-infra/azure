@@ -49,7 +49,7 @@ conditions:
 
 targets:
   updateNextEndDate:
-    name: "New end date for `{{ $val.service }}` File Share service principal writer on `trusted.ci.jenkins.io` (current: {{ source \"currentEndDate\" }})"
+    name: 'New end date for `{{ $val.service }}` File Share service principal writer on `trusted.ci.jenkins.io` (current: {{ source "currentEndDate" }})'
     kind: yaml
     sourceid: nextEndDate
     spec:
