@@ -1,6 +1,7 @@
-{{ range $key, $val := .end_dates.infra_ci_jenkins_io }}
+{{ range $key, $val := .end_dates.trusted_ci_jenkins_io }}
 ---
-name: "Generate new end date for {{ $val.service }} File Share service principal writer on infra.ci.jenkins.io"
+# yamllint disable rule:line-length
+name: "Generate new end date for {{ $val.service }} File Share service principal writer on trusted.ci.jenkins.io"
 
 scms:
   default:
@@ -20,7 +21,7 @@ sources:
     kind: yaml
     spec:
       file: updatecli/values.yaml
-      key: $.end_dates.infra_ci_jenkins_io.{{ $key }}.end_date
+      key: $.end_dates.trusted_ci_jenkins_io.{{ $key }}.end_date
   nextEndDate:
     name: Prepare next `end_date` date within 3 months
     kind: shell
@@ -48,12 +49,12 @@ conditions:
 
 targets:
   updateNextEndDate:
-    name: new end date `{{ source "shortNextEndDate" }}` for `{{ $val.service }}` File Share service principal writer on `infra.ci.jenkins.io`
+    name: 'New end date for `{{ $val.service }}` File Share service principal writer on `trusted.ci.jenkins.io` (current: {{ source "currentEndDate" }})'
     kind: yaml
     sourceid: nextEndDate
     spec:
       file: updatecli/values.yaml
-      key: $.end_dates.infra_ci_jenkins_io.{{ $key }}.end_date
+      key: $.end_dates.trusted_ci_jenkins_io.{{ $key }}.end_date
     scmid: default
 
 actions:
@@ -61,22 +62,21 @@ actions:
     kind: github/pullrequest
     scmid: default
     spec:
-      title: New end date `{{ source "shortNextEndDate" }}` for `{{ $val.service }}` File Share service principal writer on `infra.ci.jenkins.io`
+      title: 'New end date for `{{ $val.service }}` File Share service principal writer on `trusted.ci.jenkins.io` (current: {{ source "currentEndDate" }})'
       description: |
-        This PR updates the end date of {{ $val.service }} File Share service principal writer on infra.ci.jenkins.io.
+        This PR updates the end date of {{ $val.service }} File Share service principal writer used in trusted.ci.jenkins.io.
 
         The current end date is set to `{{ $val.end_date }}`.
 
         After merging this PR, a new password will be generated.
 
         > [!IMPORTANT]
-        > You'll have to ensure that `{{ $val.secret }}` is updated with this new password
-        > in https://github.com/jenkins-infra/charts-secrets/blob/main/config/infra.ci.jenkins.io/jenkins-secrets.yaml.
+        > You'll have to ensure that the trusted.ci.jenkins.io top-level credential `{{ $val.secret }}` is updated with this new password!
 
-        If you don't, the build of {{ $val.service }} on infra.ci.jenkins.io won't be able to update the website content anymore.
+        If you don't, {{ $val.service }} File Share won't be updated by trusted.ci.jenkins.io jobs anymore.
       labels:
         - terraform
-        - {{ $val.service }}
+        - "{{ $val.service }}"
         - end-dates
-        - infra.ci.jenkins.io
+        - trusted.ci.jenkins.io
 {{ end }}

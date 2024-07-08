@@ -1,3 +1,5 @@
+---
+# yamllint disable rule:line-length
 name: "Generate new end date for the trusted.ci.jenkins.io controller Azure AD Application password"
 
 scms:
@@ -13,14 +15,14 @@ scms:
       branch: "{{ .github.branch }}"
 
 sources:
-  currentExpiry:
-    name: Get current `expiry` date
-    kind: terraform/file #  as per updatecli/updatecli#1859 need to use terraform/file findsubmatch for now
+  currentEndDate:
+    name: Get current `end_date` date
+    kind: terraform/file  # As per updatecli/updatecli#1859 need to use terraform/file findsubmatch for now
     spec:
       file: trusted.ci.jenkins.io.tf
       path: 'module.controller_service_principal_end_date'
-  nextExpiry:
-    name: Prepare next `expiry` date within 3 months
+  nextEndDate:
+    name: Prepare next `end_date` date within 3 months
     kind: shell
     spec:
       command: bash ./updatecli/scripts/dateadd.sh
@@ -28,23 +30,24 @@ sources:
         - name: PATH
 
 conditions:
-  checkIfExpirySoonExpired:
+  checkIfEndDateSoonExpired:
     kind: shell
-    sourceid: currentExpiry
+    sourceid: currentEndDate
     spec:
-      command: bash ./updatecli/scripts/datediff.sh # current expiry date value passed as argument
+      # Current end_date date value passed as argument
+      command: bash ./updatecli/scripts/datediff.sh
       environments:
         - name: PATH
 
 targets:
-  updateNextExpiry:
+  updateNextEndDate:
     name: Update Terraform file `trusted.ci.jenkins.io.tf` with new expiration date for controller_service_principal_end_date
     kind: file
-    sourceid: nextExpiry
+    sourceid: nextEndDate
     spec:
       file: trusted.ci.jenkins.io.tf
       matchpattern: (controller_service_principal_end_date.*=.*\")(.*)(\".*)
-      replacepattern: ${1}{{ source "nextExpiry" }}"
+      replacepattern: ${1}{{ source "nextEndDate" }}"
     scmid: default
 
 actions:
@@ -52,10 +55,12 @@ actions:
     kind: github/pullrequest
     scmid: default
     spec:
-      title: Generate a new Azure AD Application password with expiration date {{ source "nextExpiry" }} on `trusted.ci.jenkins.io`
+      title: 'Extend Azure AD Application password on `trusted.ci.jenkins.io` (current end date: {{ source "currentEndDate" }})'
       description: |
         This PR generates a new Azure AD application password with a new end date for the `trusted.ci.jenkins.io` controller (to allow spawning Azure VM agents).
         Once this PR is merged and deployed with success by Terraform (on infra.ci.jenkins.io), you can retrieve the new password value from the Terraform state with `terraform show -json` then searching for the new password in `values.value` of the `module.trusted_ci_jenkins_io.azuread_application_password.controller` section (do NOT save it anywhere!) and (manually) update the trusted.ci.jenkins.io credential named `azure-jenkins-sponsorship-credentials` through the Jenkins UI.
         Finally, verify both Azure Credential and Azure VM clouds by checking that a click on the "Verify <...>" buttons returns a success, then restart the controller to ensure that the old credential is not kept in cache.
       labels:
         - terraform
+        - end-dates
+        - trusted.ci.jenkins.io
