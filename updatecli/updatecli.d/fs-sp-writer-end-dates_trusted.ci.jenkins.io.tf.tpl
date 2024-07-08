@@ -29,13 +29,6 @@ sources:
       command: bash ./updatecli/scripts/dateadd.sh
       environments:
         - name: PATH
-  shortNextEndDate:
-    name: Short next `end_date` date within 3 months
-    kind: shell
-    spec:
-      command: bash ./updatecli/scripts/dateadd.sh | cut -c -10
-      environments:
-        - name: PATH
 
 conditions:
   checkIfEndDateSoonExpired:
