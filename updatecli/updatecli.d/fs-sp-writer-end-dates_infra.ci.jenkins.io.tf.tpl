@@ -29,13 +29,6 @@ sources:
       command: bash ./updatecli/scripts/dateadd.sh
       environments:
         - name: PATH
-  shortNextEndDate:
-    name: Short next `end_date` date within 3 months
-    kind: shell
-    spec:
-      command: bash ./updatecli/scripts/dateadd.sh | cut -c -10
-      environments:
-        - name: PATH
 
 conditions:
   checkIfEndDateSoonExpired:
@@ -49,7 +42,7 @@ conditions:
 
 targets:
   updateNextEndDate:
-    name: New end date `{{ source "shortNextEndDate" }}` for `{{ $val.service }}` File Share service principal writer on `infra.ci.jenkins.io`
+    name: 'New end date for `{{ $val.service }}` File Share service principal writer on `infra.ci.jenkins.io` (current: {{ source "currentEndDate" }})'
     kind: yaml
     sourceid: nextEndDate
     spec:
