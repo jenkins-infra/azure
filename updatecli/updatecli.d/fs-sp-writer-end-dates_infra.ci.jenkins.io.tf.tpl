@@ -1,5 +1,6 @@
 {{ range $key, $val := .end_dates.infra_ci_jenkins_io }}
 ---
+# yamllint disable rule:line-length
 name: "Generate new end date for {{ $val.service }} File Share service principal writer on infra.ci.jenkins.io"
 
 scms:
@@ -48,7 +49,7 @@ conditions:
 
 targets:
   updateNextEndDate:
-    name: new end date `{{ source "shortNextEndDate" }}` for `{{ $val.service }}` File Share service principal writer on `infra.ci.jenkins.io`
+    name: New end date `{{ source "shortNextEndDate" }}` for `{{ $val.service }}` File Share service principal writer on `infra.ci.jenkins.io`
     kind: yaml
     sourceid: nextEndDate
     spec:
@@ -61,7 +62,7 @@ actions:
     kind: github/pullrequest
     scmid: default
     spec:
-      title: New end date `{{ source "shortNextEndDate" }}` for `{{ $val.service }}` File Share service principal writer on `infra.ci.jenkins.io`
+      title: "New end date for `{{ $val.service }}` File Share service principal writer on `infra.ci.jenkins.io` (current: {{ source \"currentEndDate\" }})"
       description: |
         This PR updates the end date of {{ $val.service }} File Share service principal writer on infra.ci.jenkins.io.
 
@@ -76,7 +77,7 @@ actions:
         If you don't, the build of {{ $val.service }} on infra.ci.jenkins.io won't be able to update the website content anymore.
       labels:
         - terraform
-        - {{ $val.service }}
+        - "{{ $val.service }}"
         - end-dates
         - infra.ci.jenkins.io
 {{ end }}

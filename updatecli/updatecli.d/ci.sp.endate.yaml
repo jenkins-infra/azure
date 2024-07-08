@@ -1,3 +1,5 @@
+---
+# yamllint disable rule:line-length
 name: "Generate new end date for ci.jenkins.io controller service principal"
 
 scms:
@@ -13,14 +15,14 @@ scms:
       branch: "{{ .github.branch }}"
 
 sources:
-  currentExpiry:
-    name: Get current `expiry` date
+  currentEndDate:
+    name: Get current `end_date` date
     kind: terraform/file #  as per updatecli/updatecli#1859 need to use terraform/file findsubmatch for now
     spec:
       file: ci.jenkins.io.tf
       path: 'module.controller_service_principal_end_date'
-  nextExpiry:
-    name: Prepare next `expiry` date within 3 months
+  nextEndDate:
+    name: Prepare next `end_date` date within 3 months
     kind: shell
     spec:
       command: bash ./updatecli/scripts/dateadd.sh
@@ -28,23 +30,24 @@ sources:
         - name: PATH
 
 conditions:
-  checkIfExpirySoonExpired:
+  checkIfEndDateSoonExpired:
     kind: shell
-    sourceid: currentExpiry
+    sourceid: currentEndDate
     spec:
-      command: bash ./updatecli/scripts/datediff.sh # current expiry date value passed as argument
+      # Current end_date date value passed as argument
+      command: bash ./updatecli/scripts/datediff.sh
       environments:
         - name: PATH
 
 targets:
-  updateNextExpiry:
+  updateNextEndDate:
     name: Update Terraform file `ci.jenkins.io.tf` with new expiration date for controller_service_principal_end_date
     kind: file
-    sourceid: nextExpiry
+    sourceid: nextEndDate
     spec:
       file: ci.jenkins.io.tf
       matchpattern: (controller_service_principal_end_date.*=.*\")(.*)(\".*)
-      replacepattern: ${1}{{ source "nextExpiry" }}"
+      replacepattern: ${1}{{ source "nextEndDate" }}"
     scmid: default
 
 actions:
@@ -52,7 +55,12 @@ actions:
     kind: github/pullrequest
     scmid: default
     spec:
-      title: Generate a new Azure Service Principal password with expiration date {{ source "nextExpiry" }} on `ci.jenkins.io`
-      description: "Generate a new password for the Azure Service Principal `ci.jenkins.io`. See https://github.com/jenkins-infra/helpdesk/issues/4052#issuecomment-2072867491 for details"
+      title: "Extend Azure Service Principal password on `ci.jenkins.io` (current end date: {{ source \"currentEndDate\" }})"
+      description: |
+        Generate a new password for the Azure Service Principal `ci.jenkins.io`.
+
+        See https://github.com/jenkins-infra/helpdesk/issues/4052#issuecomment-2072867491 for details.
       labels:
         - terraform
+        - end-dates
+        - ci.jenkins.io

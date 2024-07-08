@@ -1,5 +1,6 @@
 {{ range $key, $val := .end_dates.trusted_ci_jenkins_io }}
 ---
+# yamllint disable rule:line-length
 name: "Generate new end date for {{ $val.service }} File Share service principal writer on trusted.ci.jenkins.io"
 
 scms:
@@ -48,7 +49,7 @@ conditions:
 
 targets:
   updateNextEndDate:
-    name: new end date `{{ source "shortNextEndDate" }}` for `{{ $val.service }}` File Share service principal writer on `trusted.ci.jenkins.io`
+    name: "New end date for `{{ $val.service }}` File Share service principal writer on `trusted.ci.jenkins.io` (current: {{ source \"currentEndDate\" }})"
     kind: yaml
     sourceid: nextEndDate
     spec:
@@ -61,7 +62,7 @@ actions:
     kind: github/pullrequest
     scmid: default
     spec:
-      title: New end date `{{ source "shortNextEndDate" }}` for `{{ $val.service }}` File Share service principal writer on `trusted.ci.jenkins.io`
+      title: "New end date for `{{ $val.service }}` File Share service principal writer on `trusted.ci.jenkins.io` (current: {{ source \"currentEndDate\" }})"
       description: |
         This PR updates the end date of {{ $val.service }} File Share service principal writer used in trusted.ci.jenkins.io.
 
@@ -75,7 +76,7 @@ actions:
         If you don't, {{ $val.service }} File Share won't be updated by trusted.ci.jenkins.io jobs anymore.
       labels:
         - terraform
-        - {{ $val.service }}
+        - "{{ $val.service }}"
         - end-dates
         - trusted.ci.jenkins.io
 {{ end }}
