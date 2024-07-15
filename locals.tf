@@ -4,9 +4,6 @@ data "local_file" "locals_yaml" {
 }
 
 locals {
-  subscription_main      = "dff2ec18-6a8e-405c-8e45-b7df7465acf0"
-  subscription_sponsored = "1311c09f-aee0-4d6c-99a4-392c2b543204"
-
   public_db_pgsql_admin_login = "psqladmin${random_password.public_db_pgsql_admin_login.result}"
   public_db_mysql_admin_login = "mysqladmin${random_password.public_db_mysql_admin_login.result}"
 
