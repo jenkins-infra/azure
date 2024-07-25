@@ -53,7 +53,7 @@ resource "azuread_service_principal" "test_azurevm_agents_sponsorship" {
 resource "azuread_application_password" "test_azurevm_agents_sponsorship" {
   application_id = azuread_application.test_azurevm_agents_sponsorship.id
   display_name   = "test.jay.onboarding-tf-managed"
-  end_date       = "2024-07-31T00:00:00Z"
+  end_date       = "2024-08-31T00:00:00Z"
 }
 resource "azurerm_role_assignment" "controller_read_packer_prod_images" {
   scope                = azurerm_resource_group.packer_images["prod"].id
