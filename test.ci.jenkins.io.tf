@@ -60,17 +60,17 @@ resource "azurerm_role_assignment" "controller_read_packer_prod_images" {
   role_definition_name = "Reader"
   principal_id         = azuread_service_principal.test_azurevm_agents_sponsorship.id
 }
-resource "azurerm_role_definition" "jayonboarding_vnet_reader" {
-  name  = "Read-test.jay.onboarding-VNET"
+resource "azurerm_role_definition" "jayonboarding_vnet_writer" {
+  name  = "write-test.jay.onboarding-VNET"
   scope = data.azurerm_virtual_network.test_azurevm_agents_sponsorship.id
 
   permissions {
-    actions = ["Microsoft.Network/virtualNetworks/read"]
+    actions = ["Microsoft.Network/virtualNetworks/read", "Microsoft.Network/virtualNetworks/write"]
   }
 }
-resource "azurerm_role_assignment" "jayonboarding_vnet_reader" {
+resource "azurerm_role_assignment" "jayonboarding_vnet_writer" {
   scope              = data.azurerm_virtual_network.test_azurevm_agents_sponsorship.id
-  role_definition_id = azurerm_role_definition.jayonboarding_vnet_reader.role_definition_resource_id
+  role_definition_id = azurerm_role_definition.jayonboarding_vnet_writer.role_definition_resource_id
   principal_id       = azuread_service_principal.test_azurevm_agents_sponsorship.id
 }
 
