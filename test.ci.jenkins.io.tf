@@ -62,10 +62,14 @@ resource "azurerm_role_assignment" "controller_read_packer_prod_images" {
 }
 resource "azurerm_role_definition" "jayonboarding_vnet_writer" {
   name  = "write-test.jay.onboarding-VNET"
-  scope = data.azurerm_virtual_network.test_azurevm_agents_sponsorship.id
+  scope = data.azurerm_resource_group.test_azurevm_agents_sponsorship.id
 
   permissions {
-    actions = ["Microsoft.Network/virtualNetworks/read", "Microsoft.Network/virtualNetworks/write"]
+    actions = [
+      "Microsoft.Network/virtualNetworks/read", 
+      "Microsoft.Network/virtualNetworks/write", 
+      "Microsoft.Network/publicIPAddresses/write",
+    ]
   }
 }
 resource "azurerm_role_assignment" "jayonboarding_vnet_writer" {
