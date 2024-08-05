@@ -117,3 +117,41 @@ resource "azurerm_dns_a_record" "cert_ci_jenkins_io" {
   ttl                 = 60
   records             = [module.cert_ci_jenkins_io.controller_private_ipv4]
 }
+
+## Allow access to/from ACR endpoint
+resource "azurerm_network_security_rule" "allow_out_https_from_cert_ephemeral_agents_to_acr" {
+  provider                = azurerm.jenkins-sponsorship
+  name                    = "allow-out-https-from-ephemeral-agents-to-acr"
+  priority                = 4050
+  direction               = "Outbound"
+  access                  = "Allow"
+  protocol                = "Tcp"
+  source_port_range       = "*"
+  destination_port_range  = "443"
+  source_address_prefixes = data.azurerm_subnet.cert_ci_jenkins_io_sponsorship_ephemeral_agents.address_prefixes
+  destination_address_prefixes = distinct(
+    flatten(
+      [for rs in azurerm_private_endpoint.dockerhub_mirror["certcijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
+    )
+  )
+  resource_group_name         = azurerm_resource_group.cert_ci_jenkins_io_controller_jenkins_sponsorship.name
+  network_security_group_name = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
+}
+resource "azurerm_network_security_rule" "allow_in_https_from_cert_ephemeral_agents_to_acr" {
+  provider                = azurerm.jenkins-sponsorship
+  name                    = "allow-in-https-from-ephemeral-agents-to-acr"
+  priority                = 4050
+  direction               = "Inbound"
+  access                  = "Allow"
+  protocol                = "Tcp"
+  source_port_range       = "*"
+  destination_port_range  = "443"
+  source_address_prefixes = data.azurerm_subnet.cert_ci_jenkins_io_sponsorship_ephemeral_agents.address_prefixes
+  destination_address_prefixes = distinct(
+    flatten(
+      [for rs in azurerm_private_endpoint.dockerhub_mirror["certcijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
+    )
+  )
+  resource_group_name         = azurerm_resource_group.cert_ci_jenkins_io_controller_jenkins_sponsorship.name
+  network_security_group_name = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
+}
