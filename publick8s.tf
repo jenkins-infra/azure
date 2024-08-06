@@ -196,6 +196,13 @@ resource "azurerm_role_assignment" "publick8s_ipv6_networkcontributor" {
   skip_service_principal_aad_check = true
 }
 
+resource "azurerm_role_assignment" "public_ips_networkcontributor" {
+  scope                            = azurerm_resource_group.prod_public_ips.id
+  role_definition_name             = "Network Contributor"
+  principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
+  skip_service_principal_aad_check = true
+}
+
 resource "kubernetes_storage_class" "managed_csi_premium_retain_public" {
   metadata {
     name = "managed-csi-premium-retain"
