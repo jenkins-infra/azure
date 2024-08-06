@@ -318,3 +318,41 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_azurerm_privatek8s
   role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_disk_reader.role_definition_resource_id
   principal_id       = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
 }
+
+## Allow access to/from ACR endpoint
+resource "azurerm_network_security_rule" "allow_out_https_from_infra_ephemeral_agents_to_acr" {
+  provider                = azurerm.jenkins-sponsorship
+  name                    = "allow-out-https-from-ephemeral-agents-to-acr"
+  priority                = 4050
+  direction               = "Outbound"
+  access                  = "Allow"
+  protocol                = "Tcp"
+  source_port_range       = "*"
+  destination_port_range  = "443"
+  source_address_prefixes = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.address_prefixes
+  destination_address_prefixes = distinct(
+    flatten(
+      [for rs in azurerm_private_endpoint.dockerhub_mirror["infracijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
+    )
+  )
+  resource_group_name         = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
+  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
+}
+resource "azurerm_network_security_rule" "allow_in_https_from_infra_ephemeral_agents_to_acr" {
+  provider                = azurerm.jenkins-sponsorship
+  name                    = "allow-in-https-from-ephemeral-agents-to-acr"
+  priority                = 4050
+  direction               = "Inbound"
+  access                  = "Allow"
+  protocol                = "Tcp"
+  source_port_range       = "*"
+  destination_port_range  = "443"
+  source_address_prefixes = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.address_prefixes
+  destination_address_prefixes = distinct(
+    flatten(
+      [for rs in azurerm_private_endpoint.dockerhub_mirror["infracijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
+    )
+  )
+  resource_group_name         = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
+  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
+}

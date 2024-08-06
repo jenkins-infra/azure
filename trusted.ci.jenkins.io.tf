@@ -345,6 +345,24 @@ resource "azurerm_subnet_network_security_group_association" "trusted_ci_permane
 }
 
 ## Outbound Rules (different set of priorities than Inbound rules) ##
+resource "azurerm_network_security_rule" "allow_out_https_from_trusted_ephemeral_agents_to_acr" {
+  provider                = azurerm.jenkins-sponsorship
+  name                    = "allow-out-https-from-ephemeral-agents-to-acr"
+  priority                = 4050
+  direction               = "Outbound"
+  access                  = "Allow"
+  protocol                = "Tcp"
+  source_port_range       = "*"
+  destination_port_range  = "443"
+  source_address_prefixes = data.azurerm_subnet.trusted_ci_jenkins_io_sponsorship_ephemeral_agents.address_prefixes
+  destination_address_prefixes = distinct(
+    flatten(
+      [for rs in azurerm_private_endpoint.dockerhub_mirror["trustedcijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
+    )
+  )
+  resource_group_name         = azurerm_resource_group.trusted_ci_jenkins_io_controller_jenkins_sponsorship.name
+  network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
+}
 # Ignore the rule as it does not detect the IP restriction to only update.jenkins.io"s host
 #trivy:ignore:azure-network-no-public-egress
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_permanent_agent_to_updatecenter" {
@@ -452,6 +470,24 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_ephem
   destination_address_prefix  = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefix
   resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
+}
+resource "azurerm_network_security_rule" "allow_in_https_from_trusted_ephemeral_agents_to_acr" {
+  provider                = azurerm.jenkins-sponsorship
+  name                    = "allow-in-https-from-ephemeral-agents-to-acr"
+  priority                = 4050
+  direction               = "Inbound"
+  access                  = "Allow"
+  protocol                = "Tcp"
+  source_port_range       = "*"
+  destination_port_range  = "443"
+  source_address_prefixes = data.azurerm_subnet.trusted_ci_jenkins_io_sponsorship_ephemeral_agents.address_prefixes
+  destination_address_prefixes = distinct(
+    flatten(
+      [for rs in azurerm_private_endpoint.dockerhub_mirror["trustedcijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
+    )
+  )
+  resource_group_name         = azurerm_resource_group.trusted_ci_jenkins_io_controller_jenkins_sponsorship.name
+  network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
 }
 #trivy:ignore:azure-network-no-public-ingress
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_internet_to_bounce" {
