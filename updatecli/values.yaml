@@ -5,6 +5,13 @@ github:
   branch: "main"
   owner: "jenkins-infra"
   repository: "azure"
+controllers_azurevm_client_end_dates:
+  ci.jenkins.io:
+  trusted.ci.jenkins.io:
+  cert.ci.jenkins.io:
+  infra.ci.jenkins.io:
+    custom_hcl_key: resource.azuread_application_password.infra_ci_jenkins_io.end_date
+
 # Also used by terraform in locals.tf
 end_dates:
   infra_ci_jenkins_io:
