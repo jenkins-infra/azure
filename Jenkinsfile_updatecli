@@ -1,4 +1,7 @@
 updatecli(action: 'diff')
+
 if (env.BRANCH_IS_PRIMARY) {
-    updatecli(action: 'apply', cronTriggerExpression: '@daily')
+    // Only trigger a daily check on the principal branch
+    properties([pipelineTriggers([cron('@daily')])])
+    updatecli(action: 'apply')
 }

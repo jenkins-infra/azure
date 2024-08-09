@@ -1,3 +1,8 @@
+if (env.BRANCH_IS_PRIMARY) {
+    // Only trigger a daily check on the principal branch
+    properties([pipelineTriggers([cron('@daily')])])
+}
+
 terraform(
   stagingCredentials: [
     azureServicePrincipal(
@@ -25,5 +30,5 @@ terraform(
       variable: 'BACKEND_CONFIG_FILE',
     ),
   ],
-  publishReports: ['jenkins-infra-data-reports/azure-net.json'],
+  publishReports: ['jenkins-infra-data-reports/azure.json'],
 )

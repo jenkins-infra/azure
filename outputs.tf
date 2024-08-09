@@ -4,5 +4,5 @@ resource "local_file" "jenkins_infra_data_report" {
       "service_ip" = azurerm_private_dns_a_record.artifact_caching_proxy,
     },
   })
-  filename = "${path.module}/jenkins-infra-data-reports/azure-net.json"
+  filename = "${path.module}/jenkins-infra-data-reports/azure.json"
 }
