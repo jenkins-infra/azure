@@ -25,4 +25,5 @@ terraform(
       variable: 'BACKEND_CONFIG_FILE',
     ),
   ],
+  publishReports: ['jenkins-infra-data-reports/azure-net.json'],
 )
