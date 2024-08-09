@@ -78,6 +78,38 @@ module "ci_jenkins_io_aci_agents_sponsorship" {
   controller_service_principal_id = module.ci_jenkins_io_sponsorship.controller_service_principal_id
 }
 
+## Service DNS records
+resource "azurerm_dns_cname_record" "ci_jenkins_io" {
+  name                = trimsuffix(trimsuffix(local.ci_jenkins_io_fqdn, data.azurerm_dns_zone.jenkinsio.name), ".")
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  record              = module.ci_jenkins_io_sponsorship.controller_public_fqdn
+  tags                = local.default_tags
+}
+resource "azurerm_dns_cname_record" "assets_ci_jenkins_io" {
+  name                = "assets.${azurerm_dns_cname_record.ci_jenkins_io.name}"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  record              = module.ci_jenkins_io_sponsorship.controller_public_fqdn
+  tags                = local.default_tags
+}
+resource "azurerm_private_dns_a_record" "artifact_caching_proxy" {
+  provider            = azurerm.jenkins-sponsorship
+  name                = "artifact-caching-proxy"
+  zone_name           = azurerm_private_dns_zone.dockerhub_mirror["cijenkinsio"].name
+  resource_group_name = azurerm_private_dns_zone.dockerhub_mirror["cijenkinsio"].resource_group_name
+  ttl                 = 60
+  records = [
+    # Let's specify an IP at the end of the range to have low probability of being used
+    cidrhost(
+      data.azurerm_subnet.ci_jenkins_io_ephemeral_agents_jenkins_sponsorship.address_prefixes[0],
+      -2,
+    )
+  ]
+}
+
 ## Allow ci.jenkins.io to reach the private AKS cluster API
 resource "azurerm_network_security_rule" "allow_outbound_https_from_cijio_to_cijenkinsio_agents_1_api" {
   provider               = azurerm.jenkins-sponsorship
@@ -115,20 +147,32 @@ resource "azurerm_network_security_rule" "allow_out_https_from_cijio_agents_to_a
   network_security_group_name = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
 }
 
-## Service DNS records
-resource "azurerm_dns_cname_record" "ci_jenkins_io" {
-  name                = trimsuffix(trimsuffix(local.ci_jenkins_io_fqdn, data.azurerm_dns_zone.jenkinsio.name), ".")
-  zone_name           = data.azurerm_dns_zone.jenkinsio.name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 60
-  record              = module.ci_jenkins_io_sponsorship.controller_public_fqdn
-  tags                = local.default_tags
+## Allow access to/from Artifact Caching Proxy (internal LB)
+resource "azurerm_network_security_rule" "allow_out_http_from_cijio_agents_to_acp" {
+  provider                     = azurerm.jenkins-sponsorship
+  name                         = "allow-out-http-from-cijio-agents-to-acp"
+  priority                     = 4049
+  direction                    = "Outbound"
+  access                       = "Allow"
+  protocol                     = "Tcp"
+  source_port_range            = "*"
+  destination_port_range       = "8080"
+  source_address_prefixes      = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents_jenkins_sponsorship.address_prefixes
+  destination_address_prefixes = azurerm_private_dns_a_record.artifact_caching_proxy.records
+  resource_group_name          = module.ci_jenkins_io_sponsorship.controller_resourcegroup_name
+  network_security_group_name  = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
 }
-resource "azurerm_dns_cname_record" "assets_ci_jenkins_io" {
-  name                = "assets.${azurerm_dns_cname_record.ci_jenkins_io.name}"
-  zone_name           = data.azurerm_dns_zone.jenkinsio.name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 60
-  record              = module.ci_jenkins_io_sponsorship.controller_public_fqdn
-  tags                = local.default_tags
+resource "azurerm_network_security_rule" "allow_in_http_from_cijio_agents_to_acp" {
+  provider                     = azurerm.jenkins-sponsorship
+  name                         = "allow-in-http-from-cijio-agents-to-acp"
+  priority                     = 4049
+  direction                    = "Inbound"
+  access                       = "Allow"
+  protocol                     = "Tcp"
+  source_port_range            = "*"
+  destination_port_range       = "8080"
+  source_address_prefixes      = data.azurerm_subnet.ci_jenkins_io_ephemeral_agents_jenkins_sponsorship.address_prefixes
+  destination_address_prefixes = azurerm_private_dns_a_record.artifact_caching_proxy.records
+  resource_group_name          = module.ci_jenkins_io_sponsorship.controller_resourcegroup_name
+  network_security_group_name  = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
 }

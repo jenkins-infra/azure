@@ -16,3 +16,4 @@ tfplan
 # sensitive files from terraform outputs
 .env*
 *.zip
+jenkins-infra-data-reports
