@@ -168,6 +168,15 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_bom_1" {
   tags = local.default_tags
 }
 
+# Allow AKS to manipulate LBs, PLS and join subnets - https://learn.microsoft.com/en-us/azure/aks/internal-lb?tabs=set-service-annotations#use-private-networks (see Note)
+resource "azurerm_role_assignment" "cijio_agents_networkcontributor_vnet" {
+  provider                         = azurerm.jenkins-sponsorship
+  scope                            = data.azurerm_virtual_network.public_jenkins_sponsorship.id
+  role_definition_name             = "Network Contributor"
+  principal_id                     = azurerm_kubernetes_cluster.cijenkinsio_agents_1.identity[0].principal_id
+  skip_service_principal_aad_check = true
+}
+
 # Configure the jenkins-infra/kubernetes-management admin service account
 module "cijenkinsio_agents_1_admin_sa" {
   providers = {
