@@ -64,7 +64,15 @@ module "ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
 
   jenkins_infra_ips = {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
+    # acp_service_ips = azurerm_private_dns_a_record.artifact_caching_proxy.records
   }
+}
+
+data "azurerm_subnet" "ci_jenkins_io_aci_agents_jenkins_sponsorship" {
+  provider             = azurerm.jenkins-sponsorship
+  name                 = "${data.azurerm_virtual_network.public_jenkins_sponsorship.name}-ci_jenkins_io_aci"
+  virtual_network_name = data.azurerm_virtual_network.public_jenkins_sponsorship.name
+  resource_group_name  = data.azurerm_virtual_network.public_jenkins_sponsorship.resource_group_name
 }
 
 module "ci_jenkins_io_aci_agents_sponsorship" {
@@ -73,9 +81,27 @@ module "ci_jenkins_io_aci_agents_sponsorship" {
   }
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-aci-agents"
 
-  role_name                       = "ci-ACI-Contributor-sponsorship"
-  aci_agents_resource_group_name  = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_resource_group_name
+  controller_ips = compact([
+    module.ci_jenkins_io_sponsorship.controller_private_ipv4,
+    module.ci_jenkins_io_sponsorship.controller_public_ipv4
+  ])
+
+  jenkins_infra_ips = {
+    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
+    acp_service_ips   = azurerm_private_dns_a_record.artifact_caching_proxy.records
+  }
+
+  service_fqdn                = local.ci_jenkins_io_fqdn
+  service_short_stripped_name = "ci-jenkins-io"
+
+  aci_agents_resource_group_name = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_resource_group_name
+
   controller_service_principal_id = module.ci_jenkins_io_sponsorship.controller_service_principal_id
+
+  aci_agents_network_rg_name = data.azurerm_subnet.ci_jenkins_io_aci_agents_jenkins_sponsorship.resource_group_name
+  aci_agents_network_name    = data.azurerm_subnet.ci_jenkins_io_aci_agents_jenkins_sponsorship.virtual_network_name
+  aci_agents_subnet_name     = data.azurerm_subnet.ci_jenkins_io_aci_agents_jenkins_sponsorship.name
+  controller_rg_name         = module.ci_jenkins_io_sponsorship.controller_resourcegroup_name
 }
 
 ## Service DNS records
