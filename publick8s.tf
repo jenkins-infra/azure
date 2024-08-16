@@ -266,6 +266,115 @@ resource "kubernetes_storage_class" "azurefile_csi_premium_retain_public" {
   provider      = kubernetes.publick8s
 }
 
+# Cluster persistent data volumes
+resource "azurerm_storage_account" "publick8s" {
+  name                = "publick8spvdata"
+  resource_group_name = azurerm_resource_group.publick8s.name
+  location            = azurerm_resource_group.publick8s.location
+
+  account_tier                      = "Standard"
+  account_kind                      = "StorageV2"
+  access_tier                       = "Hot"
+  account_replication_type          = "ZRS"
+  min_tls_version                   = "TLS1_2" # default value, needed for tfsec
+  infrastructure_encryption_enabled = true
+  enable_https_traffic_only         = true
+
+  tags = local.default_tags
+
+  # Adding a network rule with `public_network_access_enabled` set to `true` (default) selects the option "Enabled from selected virtual networks and IP addresses"
+  network_rules {
+    default_action = "Deny"
+    ip_rules = flatten(
+      concat(
+        [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value],
+      )
+    )
+    virtual_network_subnet_ids = [
+      data.azurerm_subnet.publick8s_tier.id,
+      data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.id, # infra.ci (Terraform management) Azure VM agents
+      data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id,  # infra.ci (Terraform management) container agents
+    ]
+    bypass = ["Metrics", "Logging", "AzureServices"]
+  }
+}
+
+# GeoIP data persist
+resource "azurerm_storage_share" "geoip_data" {
+  name                 = "geoip-data"
+  storage_account_name = azurerm_storage_account.publick8s.name
+  quota                = 1 # GeoIP databses weight around 80Mb
+}
+resource "kubernetes_namespace" "geoip_data" {
+  provider = kubernetes.publick8s
+
+  metadata {
+    name = azurerm_storage_share.geoip_data.name
+  }
+}
+resource "kubernetes_secret" "geoip_data" {
+  provider = kubernetes.publick8s
+
+  metadata {
+    name      = "geoip-data"
+    namespace = azurerm_storage_share.geoip_data.name
+  }
+
+  data = {
+    azurestorageaccountname = azurerm_storage_account.publick8s.name
+    azurestorageaccountkey  = azurerm_storage_account.publick8s.primary_access_key
+  }
+
+  type = "Opaque"
+}
+resource "kubernetes_persistent_volume" "geoip_data" {
+  provider = kubernetes.publick8s
+  metadata {
+    name = "geoip-data"
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_storage_share.geoip_data.quota}Gi"
+    }
+    access_modes                     = ["ReadWriteMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.statically_provisionned_publick8s.id
+    persistent_volume_source {
+      csi {
+        driver  = "file.csi.azure.com"
+        fs_type = "ext4"
+        # make sure this volumeid handle is unique for every identical share in the cluster
+        volume_handle = azurerm_storage_share.geoip_data.id
+        volume_attributes = {
+          resourceGroup = azurerm_resource_group.publick8s.name
+          shareName     = azurerm_storage_share.geoip_data.name
+        }
+        node_stage_secret_ref {
+          name      = kubernetes_secret.geoip_data.metadata[0].name
+          namespace = azurerm_storage_share.geoip_data.name
+        }
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "geoip_data" {
+  provider = kubernetes.publick8s
+  metadata {
+    name      = "geoip-data"
+    namespace = azurerm_storage_share.geoip_data.name
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.geoip_data.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.geoip_data.metadata.0.name
+    storage_class_name = kubernetes_storage_class.statically_provisionned_publick8s.id
+    resources {
+      requests = {
+        storage = lookup(kubernetes_persistent_volume.geoip_data.spec[0].capacity, "storage")
+      }
+    }
+  }
+}
+
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/publick8s.yaml
 resource "azurerm_public_ip" "publick8s_ipv4" {
   name                = "public-publick8s-ipv4"
