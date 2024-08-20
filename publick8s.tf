@@ -164,9 +164,17 @@ resource "azurerm_role_assignment" "publick8s_networkcontributor" {
   skip_service_principal_aad_check = true
 }
 
+## TODO: remove once private ingress moved to private vnet
 # Allow cluster to manage LBs in the public-vnet-data-tier subnet (internal LBs)
 resource "azurerm_role_assignment" "public_vnet_data_tier_networkcontributor" {
   scope                            = data.azurerm_subnet.public_vnet_data_tier.id
+  role_definition_name             = "Network Contributor"
+  principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
+  skip_service_principal_aad_check = true
+}
+# Allow cluster to manage LBs in the private-vnet-data-tier subnet (internal LBs)
+resource "azurerm_role_assignment" "private_vnet_data_tier_networkcontributor" {
+  scope                            = data.azurerm_subnet.private_vnet_data_tier.id
   role_definition_name             = "Network Contributor"
   principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
   skip_service_principal_aad_check = true
