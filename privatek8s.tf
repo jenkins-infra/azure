@@ -252,7 +252,7 @@ resource "azurerm_role_assignment" "datatier_networkcontributor" {
   skip_service_principal_aad_check = true
 }
 
-# Allow cluster to manage LBs in the data-tier subnet (internal LBs)
+# Allow cluster to manage private IP
 resource "azurerm_role_assignment" "publicip_networkcontributor" {
   scope                            = azurerm_public_ip.public_privatek8s.id
   role_definition_name             = "Network Contributor"
