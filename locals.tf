@@ -45,7 +45,7 @@ locals {
 
   kubernetes_versions = {
     "cijenkinsio_agents_1"      = "1.28.9"
-    "infracijenkinsio_agents_1" = "1.29.8"
+    "infracijenkinsio_agents_1" = "1.29.7"
     "privatek8s"                = "1.28.9"
     "publick8s"                 = "1.28.9"
   }
