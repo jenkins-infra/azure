@@ -43,7 +43,7 @@ module "trusted_ci_jenkins_io" {
   controller_service_principal_ids = [
     data.azuread_service_principal.terraform_production.id,
   ]
-  controller_service_principal_end_date = "2024-09-02T00:00:00Z"
+  controller_service_principal_end_date = "2024-11-20T00:00:00Z"
   controller_packer_rg_ids = [
     azurerm_resource_group.packer_images["prod"].id
   ]
