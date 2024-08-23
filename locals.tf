@@ -47,7 +47,7 @@ locals {
     "cijenkinsio_agents_1"      = "1.29.7"
     "infracijenkinsio_agents_1" = "1.29.7"
     "privatek8s"                = "1.29.7"
-    "publick8s"                 = "1.28.9"
+    "publick8s"                 = "1.29.7"
   }
 
   ci_jenkins_io_fqdn                 = "ci.jenkins.io"
