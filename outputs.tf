@@ -5,7 +5,7 @@ resource "local_file" "jenkins_infra_data_report" {
     },
     "public_redis" = {
       "service_hostname" = azurerm_redis_cache.public_redis.hostname,
-      "service_port" = azurerm_redis_cache.public_redis.port,
+      "service_port"     = azurerm_redis_cache.public_redis.port,
     },
   })
   filename = "${path.module}/jenkins-infra-data-reports/azure.json"

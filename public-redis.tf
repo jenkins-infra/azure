@@ -25,7 +25,7 @@ resource "azurerm_redis_cache" "public_redis" {
 resource "azurerm_private_dns_zone" "public_redis" {
   # Conventional and static name required by Azure (otherwise automatic record creation does not work)
   # https://learn.microsoft.com/en-us/azure/private-link/private-endpoint-dns
-  name     = "privatelink.redis.cache.windows.net"
+  name = "privatelink.redis.cache.windows.net"
 
   # Private DNS zone name is static: we can only have one per RG
   resource_group_name = data.azurerm_subnet.publick8s_tier.resource_group_name
