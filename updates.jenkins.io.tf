@@ -64,29 +64,6 @@ output "updates_jenkins_io_redirections_fileshare_name" {
   value = azurerm_storage_share.updates_jenkins_io_httpd.name
 }
 
-# Redis database
-resource "azurerm_redis_cache" "updates_jenkins_io" {
-  name                = "updates-jenkins-io"
-  location            = azurerm_resource_group.updates_jenkins_io.location
-  resource_group_name = azurerm_resource_group.updates_jenkins_io.name
-  capacity            = 1
-  family              = "C"        # Basic/Standard SKU family
-  sku_name            = "Standard" # A replicated cache in a two node Primary/Secondary configuration managed by Microsoft, with a high availability SLA.
-  enable_non_ssl_port = true
-  minimum_tls_version = "1.2"
-
-  tags = local.default_tags
-}
-
-output "updates_jenkins_io_redis_hostname" {
-  value = azurerm_redis_cache.updates_jenkins_io.hostname
-}
-
-output "updates_jenkins_io_redis_primary_access_key" {
-  sensitive = true
-  value     = azurerm_redis_cache.updates_jenkins_io.primary_access_key
-}
-
 # Azure service CNAME records
 resource "azurerm_dns_cname_record" "azure_updates_jenkins_io" {
   name                = "azure.updates"
