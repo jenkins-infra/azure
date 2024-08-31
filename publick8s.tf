@@ -307,11 +307,33 @@ resource "azurerm_storage_account" "publick8s" {
   }
 }
 
-# GeoIP data persist
+# GeoIP data shared data (needs a reusable secret to mount the file storage for at least all mirrorbits applications)
 resource "azurerm_storage_share" "geoip_data" {
   name                 = "geoip-data"
   storage_account_name = azurerm_storage_account.publick8s.name
   quota                = 1 # GeoIP databses weight around 80Mb
+}
+resource "kubernetes_namespace" "geoip_data" {
+  provider = kubernetes.publick8s
+
+  metadata {
+    name = azurerm_storage_share.geoip_data.name
+  }
+}
+resource "kubernetes_secret" "geoip_data" {
+  provider = kubernetes.publick8s
+
+  metadata {
+    name      = azurerm_storage_share.geoip_data.name
+    namespace = azurerm_storage_share.geoip_data.name
+  }
+
+  data = {
+    azurestorageaccountname = azurerm_storage_account.publick8s.name
+    azurestorageaccountkey  = azurerm_storage_account.publick8s.primary_access_key
+  }
+
+  type = "Opaque"
 }
 
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/publick8s.yaml
