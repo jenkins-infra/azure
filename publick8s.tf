@@ -157,28 +157,33 @@ resource "azurerm_kubernetes_cluster_node_pool" "arm64small2" {
 }
 
 # Allow cluster to manage LBs in the publick8s-tier subnet (Public LB)
-resource "azurerm_role_assignment" "publick8s_networkcontributor" {
-  scope                            = data.azurerm_subnet.publick8s_tier.id
+resource "azurerm_role_assignment" "publick8s_public_vnet_networkcontributor" {
+  scope                            = data.azurerm_virtual_network.public.id
   role_definition_name             = "Network Contributor"
   principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
   skip_service_principal_aad_check = true
 }
 
-## TODO: remove once private ingress moved to private vnet
-# Allow cluster to manage LBs in the public-vnet-data-tier subnet (internal LBs)
-resource "azurerm_role_assignment" "public_vnet_data_tier_networkcontributor" {
-  scope                            = data.azurerm_subnet.public_vnet_data_tier.id
-  role_definition_name             = "Network Contributor"
+# Allow cluster to manage Azure PLS if it's in the same subnet as the the cluster itself
+data "azurerm_nat_gateway" "publick8s_outbound" {
+  resource_group_name = data.azurerm_virtual_network.public.resource_group_name
+  name                = "publick8s-outbound"
+}
+resource "azurerm_role_definition" "publick8s_outbound_gateway" {
+  name  = "publick8s_outbount_gateway"
+  scope = data.azurerm_nat_gateway.publick8s_outbound.id
+
+  permissions {
+    actions = ["Microsoft.Network/natGateways/join/action"]
+  }
+}
+resource "azurerm_role_assignment" "publick8s_nat_gateway" {
+  scope                            = data.azurerm_nat_gateway.publick8s_outbound.id
+  role_definition_id               = azurerm_role_definition.publick8s_outbound_gateway.role_definition_resource_id
   principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
   skip_service_principal_aad_check = true
 }
-# Allow cluster to manage LBs in the private-vnet-data-tier subnet (internal LBs)
-resource "azurerm_role_assignment" "private_vnet_data_tier_networkcontributor" {
-  scope                            = data.azurerm_subnet.private_vnet_data_tier.id
-  role_definition_name             = "Network Contributor"
-  principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
-  skip_service_principal_aad_check = true
-}
+
 
 # Allow cluster to manage publick8s_ipv4
 resource "azurerm_role_assignment" "publick8s_ipv4_networkcontributor" {
