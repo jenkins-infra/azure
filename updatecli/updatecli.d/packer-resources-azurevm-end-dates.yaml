@@ -1,0 +1,66 @@
+---
+name: "Generate new end date for the packer Azure AD Application password"
+
+scms:
+  default:
+    kind: github
+    spec:
+      user: "{{ .github.user }}"
+      email: "{{ .github.email }}"
+      owner: "{{ .github.owner }}"
+      repository: "{{ .github.repository }}"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ .github.username }}"
+      branch: "{{ .github.branch }}"
+
+sources:
+  currentEndDate:
+    name: Get current `end_date` date
+    kind: hcl
+    spec:
+      file: packer-resources.tf
+      path: resource.azuread_application_password.packer.end_date
+  nextEndDate:
+    name: Prepare next `end_date` date within 3 months
+    kind: shell
+    spec:
+      command: bash ./updatecli/scripts/dateadd.sh
+      environments:
+        - name: PATH
+
+conditions:
+  checkIfEndDateSoonExpired:
+    kind: shell
+    sourceid: currentEndDate
+    spec:
+      command: bash ./updatecli/scripts/datediff.sh
+      environments:
+        - name: PATH
+
+targets:
+  updateNextEndDate:
+    name: Update Terraform file `packer-resources.tf` with new expiration date
+    kind: hcl
+    sourceid: nextEndDate
+    spec:
+      file: packer-resources.tf
+      path: resource.azuread_application_password.packer.end_date
+    scmid: default
+
+actions:
+  default:
+    kind: github/pullrequest
+    scmid: default
+    spec:
+      title: 'Extend Azure AD Application password validity for packer-resources (current end date: {{ source "currentEndDate" }})'
+      description: |
+        This PR generates a new Azure AD application password with a new end date for the packer-resources application (to allow building VM images).
+        Once this PR is merged and deployed with success by Terraform (on infra.ci.jenkins.io),
+        you can retrieve the new password value from the Terraform state with `terraform show -json`
+        then searching for the new password in `values.value` of the `resource.azuread_application_password.packer` section (do NOT save it anywhere!)
+        and (manually) update the packer credential as needed.
+        Finally, verify that the new credential works by running a test Packer build.
+      labels:
+        - azure-ad-application
+        - end-dates
+        - packer-resources
