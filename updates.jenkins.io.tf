@@ -54,14 +54,92 @@ output "updates_jenkins_io_content_fileshare_name" {
   value = azurerm_storage_share.updates_jenkins_io.name
 }
 
+# TODO: remove once migration to 'updates_jenkins_io_redirect' is complete
 resource "azurerm_storage_share" "updates_jenkins_io_httpd" {
   name                 = "updates-jenkins-io-httpd"
   storage_account_name = azurerm_storage_account.updates_jenkins_io.name
   quota                = 100 # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
 }
+resource "azurerm_storage_share" "updates_jenkins_io_redirects" {
+  name                 = "updates-jenkins-io-redirects"
+  storage_account_name = azurerm_storage_account.updates_jenkins_io.name
+  quota                = 100 # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
+}
 
 output "updates_jenkins_io_redirections_fileshare_name" {
-  value = azurerm_storage_share.updates_jenkins_io_httpd.name
+  value = azurerm_storage_share.updates_jenkins_io_redirects.name
+}
+
+## Kubernetes Resources (statci provision of persistent volumes)
+resource "kubernetes_namespace" "updates_jenkins_io" {
+  provider = kubernetes.publick8s
+
+  metadata {
+    name = "updates-jenkins-io"
+  }
+}
+resource "kubernetes_secret" "updates_jenkins_io_storage" {
+  provider = kubernetes.publick8s
+
+  metadata {
+    name      = "updates-jenkins-io-storage"
+    namespace = kubernetes_namespace.updates_jenkins_io.metadata[0].name
+  }
+
+  data = {
+    azurestorageaccountname = azurerm_storage_account.updates_jenkins_io.name
+    azurestorageaccountkey  = azurerm_storage_account.updates_jenkins_io.primary_access_key
+  }
+
+  type = "Opaque"
+}
+resource "kubernetes_persistent_volume" "updates_jenkins_io_redirects" {
+  provider = kubernetes.publick8s
+  metadata {
+    name = azurerm_storage_share.updates_jenkins_io_redirects.name
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_storage_share.updates_jenkins_io_redirects.quota}Gi"
+    }
+    access_modes                     = ["ReadOnlyMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.statically_provisioned_publick8s.id
+    persistent_volume_source {
+      csi {
+        driver  = "file.csi.azure.com"
+        fs_type = "ext4"
+        # `volumeHandle` must be unique on the cluster for this volume
+        volume_handle = azurerm_storage_share.updates_jenkins_io_redirects.name
+        read_only     = true
+        volume_attributes = {
+          resourceGroup = azurerm_resource_group.updates_jenkins_io.name
+          shareName     = azurerm_storage_share.updates_jenkins_io_redirects.name
+        }
+        node_stage_secret_ref {
+          name      = kubernetes_secret.updates_jenkins_io_storage.metadata[0].name
+          namespace = kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace
+        }
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "updates_jenkins_io_redirects" {
+  provider = kubernetes.publick8s
+  metadata {
+    name      = azurerm_storage_share.updates_jenkins_io_redirects.name
+    namespace = kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.updates_jenkins_io_redirects.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.updates_jenkins_io_redirects.metadata[0].name
+    storage_class_name = kubernetes_persistent_volume.updates_jenkins_io_redirects.spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = "${azurerm_storage_share.updates_jenkins_io_redirects.quota}Gi"
+      }
+    }
+  }
 }
 
 ## NS records for each CloudFlare zone defined in https://github.com/jenkins-infra/cloudflare/blob/main/updates.jenkins.io.tf
