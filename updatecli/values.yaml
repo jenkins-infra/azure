@@ -36,7 +36,7 @@ end_dates:
       service: "updates.jenkins.io (content)"
       secret: "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer"
     trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer:
-      end_date: 2024-09-22T00:00:00Z
+      end_date: 2024-12-18T00:00:00Z
       service: "updates.jenkins.io (redirections)"
       secret: "TODO: to be identified, related to updates.jenkins.io (redirections)"
     trustedci_jenkinsio_fileshare_serviceprincipal_writer:
