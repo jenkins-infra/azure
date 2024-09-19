@@ -6,12 +6,11 @@ github:
   owner: "jenkins-infra"
   repository: "azure"
 controllers_azurevm_client_end_dates:
-  ci.jenkins.io:
-  trusted.ci.jenkins.io:
-  cert.ci.jenkins.io:
+  ci.jenkins.io: null
+  trusted.ci.jenkins.io: null
+  cert.ci.jenkins.io: null
   infra.ci.jenkins.io:
     custom_hcl_key: resource.azuread_application_password.infra_ci_jenkins_io.end_date
-
 # Also used by terraform in locals.tf
 end_dates:
   infra_ci_jenkins_io:
@@ -28,7 +27,7 @@ end_dates:
       service: "plugins.jenkins.io"
       secret: "INFRACI_PLUGINSJENKINSIO_FILESHARE_SERVICE_PRINCIPAL_WRITER_PASSWORD"
     infraci_statsjenkinsio_fileshare_serviceprincipal_writer:
-      end_date: "2024-09-19T23:00:00Z"
+      end_date: 2024-12-18T00:00:00Z
       service: "stats.jenkins.io"
       secret: "STATS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
   trusted_ci_jenkins_io:
