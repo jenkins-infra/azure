@@ -71,6 +71,10 @@ output "updates_jenkins_io_redirections_fileshare_name" {
 }
 
 ## Kubernetes Resources (statci provision of persistent volumes)
+import {
+  to = kubernetes_namespace.updates_jenkins_io
+  id = "updates-jenkins-io"
+}
 resource "kubernetes_namespace" "updates_jenkins_io" {
   provider = kubernetes.publick8s
 
