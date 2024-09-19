@@ -90,6 +90,8 @@ resource "azurerm_network_security_rule" "allow_inbound_puppet_from_vms" {
   network_security_group_name = data.azurerm_network_security_group.private_dmz.name
 }
 ## Outbound Rules (different set of priorities than Inbound rules) ##
+## Do not tag internet egress as a security issue (we want puppet master to access to internet)
+#trivy:ignore:avd-azu-0051
 resource "azurerm_network_security_rule" "allow_outbound_http_from_puppet_to_internet" {
   name                        = "allow-outbound-http-from-puppet-to-internet"
   priority                    = 4002
