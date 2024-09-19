@@ -6,11 +6,60 @@ github:
   owner: "jenkins-infra"
   repository: "azure"
 controllers_azurevm_client_end_dates:
-  ci.jenkins.io: null
-  trusted.ci.jenkins.io: null
-  cert.ci.jenkins.io: null
+  ci.jenkins.io:
+    doc_how_to_get_credential: |
+      > [!IMPORTANT]
+      >
+      > ⚠️ Merging this PR will prevent starting new Azure VM agents until the credential is updated on the controller.
+
+      You'll have to update **manually** the top-level credential `azure-jenkins-sponsorship-credentials` on the Jenkins UI.
+
+      The new password value, once the PR is merged and deployed, can be retrieved from the Terraform state,
+      by searching for `module.ci_jenkins_io_sponsorship.azuread_application_password.controller.value`.
+
+      Finally, verify both Azure Credential and Azure VM clouds by checking that a click on the "Verify <...>" buttons returns a success,
+      then restart the controller to ensure that the old credential is not kept in cache.
+  trusted.ci.jenkins.io:
+    doc_how_to_get_credential: |
+      > [!IMPORTANT]
+      >
+      > ⚠️ Merging this PR will prevent starting new Azure VM agents until the credential is updated on the controller.
+
+      You'll have to update **manually** the top-level credential `azure-jenkins-sponsorship-credentials` on the Jenkins UI.
+
+      The new password value, once the PR is merged and deployed, can be retrieved from the Terraform state,
+      by searching for `module.trusted_ci_jenkins_io.azuread_application_password.controller`.
+
+      Finally, verify both Azure Credential and Azure VM clouds by checking that a click on the "Verify <...>" buttons returns a success,
+      then restart the controller to ensure that the old credential is not kept in cache.
+  cert.ci.jenkins.io:
+    doc_how_to_get_credential: |
+      > [!IMPORTANT]
+      >
+      > ⚠️ Merging this PR will prevent starting new Azure VM agents until the credential is updated on the controller.
+
+      You'll have to update **manually** the top-level credential `azure-jenkins-sponsorship-credentials` on the Jenkins UI.
+
+      The new password value, once the PR is merged and deployed, can be retrieved from the Terraform state,
+      by searching for `module.cert_ci_jenkins_io.azuread_application_password.controller.value`.
+
+      Finally, verify both Azure Credential and Azure VM clouds by checking that a click on the "Verify <...>" buttons returns a success,
+      then restart the controller to ensure that the old credential is not kept in cache.
   infra.ci.jenkins.io:
     custom_hcl_key: resource.azuread_application_password.infra_ci_jenkins_io.end_date
+    doc_how_to_get_credential: |
+      > [!IMPORTANT]
+      >
+      > ⚠️ Merging this PR will prevent starting new Azure VM agents until the credential is updated on the controller.
+
+      You'll have to update the credential on infra.ci.jenkins.io's encrypted secrets:
+
+      - Update the secret value in jenkins-infra/chart-secrets (or kubernetes-management/secrets), add, commit and push the change
+      - Trigger a build of the `kubernetes-management` job on infra.ci.jenkins.io to ensure secret value is updated in Kubernetes secrets
+      - Finally, trigger a controller restart (pod delete, or rollout) to make sure secrets are used to update the Jenkins credential.
+
+      The new password value, once the PR is merged and deployed, can be retrieved from the Terraform state,
+      by searching for `azuread_application_password.infra_ci_jenkins_io.value`.
 # Also used by terraform in locals.tf
 end_dates:
   infra_ci_jenkins_io:

@@ -56,6 +56,7 @@ actions:
     scmid: default
     spec:
       title: 'New end date for `{{ $val.service }}` File Share service principal writer on `infra.ci.jenkins.io` (current: {{ source "currentEndDate" }})'
+      title: 'Azure File Share Principal `{{ $val.service }}` on `trusted.ci.jenkins.io` expires on `{{ source "currentEndDate" }}`'
       description: |
         This PR updates the end date of {{ $val.service }} File Share service principal writer on infra.ci.jenkins.io.
 
