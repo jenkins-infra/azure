@@ -119,7 +119,7 @@ module "trustedci_jenkinsio_fileshare_serviceprincipal_writer" {
   service_fqdn                   = "trustedci-jenkinsio-fileshare_serviceprincipal_writer"
   active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date     = local.end_dates.trusted_ci_jenkins_io.trustedci_jenkinsio_fileshare_serviceprincipal_writer.end_date
+  service_principal_end_date     = "2024-12-18T00:00:00Z"
   file_share_resource_manager_id = azurerm_storage_share.jenkins_io.resource_manager_id
   storage_account_id             = azurerm_storage_account.jenkins_io.id
   default_tags                   = local.default_tags
