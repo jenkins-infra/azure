@@ -64,17 +64,14 @@ actions:
     kind: github/pullrequest
     scmid: default
     spec:
-      title: 'Extend Azure AD Application password validity on `{{ $key }}` (current end date: {{ source "currentEndDate" }})'
+      title: 'Azure AD Application password for Azure VM agents in `{{ $key }}` expires on `{{ source "currentEndDate" }}`'
       description: |
-        This PR generates a new Azure AD application password with a new end date for the `{{ $key }}` controller (to allow spawning Azure VM agents).
+        This PR updates the Azure AD application password used in `{{ $key }}` controller to spawn Azure VM agents.
 
-        Once this PR is merged and deployed with success by Terraform (on infra.ci.jenkins.io),
-        you can retrieve the new password value from the Terraform state with `terraform show -json`
-        then searching for the new password in `values.value` of the `{{ $hclKey }}` section (do NOT save it anywhere!)
-        and (manually) update the {{ $key }} credential named `{{ $controlerCredentialId }}` through the Jenkins UI.
+        The current end date is set to `{{ source "currentEndDate" }}`.
 
-        Finally, verify both Azure Credential and Azure VM clouds by checking that a click on the "Verify <...>" buttons returns a success,
-        then restart the controller to ensure that the old credential is not kept in cache.
+{{ $val.doc_how_to_get_credential | indent 8 }}
+
       labels:
         - azure-ad-application
         - end-dates
