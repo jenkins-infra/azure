@@ -320,6 +320,7 @@ resource "kubernetes_storage_class" "managed_csi_standard_ZRS_retain_private" {
   allow_volume_expansion = true
 }
 
+# TODO: remove this class once all PV/PVCs have been patched
 resource "kubernetes_storage_class" "statically_provisionned_privatek8s" {
   metadata {
     name = "statically-provisionned"
@@ -330,6 +331,15 @@ resource "kubernetes_storage_class" "statically_provisionned_privatek8s" {
   allow_volume_expansion = true
 }
 
+resource "kubernetes_storage_class" "statically_provisioned_privatek8s" {
+  metadata {
+    name = "statically-provisioned"
+  }
+  storage_provisioner    = "disk.csi.azure.com"
+  reclaim_policy         = "Retain"
+  provider               = kubernetes.privatek8s
+  allow_volume_expansion = true
+}
 
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/privatek8s.yaml
 resource "azurerm_public_ip" "public_privatek8s" {
