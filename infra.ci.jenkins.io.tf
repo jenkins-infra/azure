@@ -44,7 +44,7 @@ resource "azuread_service_principal" "infra_ci_jenkins_io" {
 resource "azuread_application_password" "infra_ci_jenkins_io" {
   application_id = azuread_application.infra_ci_jenkins_io.id
   display_name   = "infra.ci.jenkins.io-tf-managed"
-  end_date       = "2024-09-26T00:00:00Z"
+  end_date       = "2024-12-18T00:00:00Z"
 }
 # Allow Service Principal to manage AzureRM resources inside the agents resource groups
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_azurerm" {
