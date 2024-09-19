@@ -63,7 +63,7 @@ end_dates:
         > ⚠️ Merging this PR will prevent the "jenkins.io" deployment job to succeed and update the www.jenkins.io website.
         > You'll have to update the top-level credential `trustedci_jenkinsio_fileshare_serviceprincipal_writer` on trusted.ci.jenkins.io UI.
         >
-        > This credential value can be retrieved in the Terraform state from "module.trustedci_jenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password".
+        > This credential value can be retrieved in the Terraform state from `module.trustedci_jenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password`.
     trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer:
       service: "javadoc.jenkins.io"
       doc_how_to_get_credential: |
@@ -72,4 +72,4 @@ end_dates:
         > ⚠️ Merging this PR will prevent the "jenkins.io" deployment job to succeed and update the www.jenkins.io website.
         > You'll have to update the top-level credential `trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer` on trusted.ci.jenkins.io UI.
         >
-        > This credential value can be retrieved in the Terraform state from "module.trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password".
+        > This credential value can be retrieved in the Terraform state from `module.trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password`.
