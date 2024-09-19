@@ -18,10 +18,10 @@ scms:
 sources:
   currentEndDate:
     name: Get current `end_date` date
-    kind: yaml
+    kind: hcl
     spec:
-      file: updatecli/values.yaml
-      key: $.end_dates.trusted_ci_jenkins_io.{{ $key }}.end_date
+      file: trusted.ci.jenkins.io.tf
+      path: module.{{ $key }}.service_principal_end_date
   nextEndDate:
     name: Prepare next `end_date` date within 3 months
     kind: shell
@@ -43,11 +43,11 @@ conditions:
 targets:
   updateNextEndDate:
     name: 'New end date for `{{ $val.service }}` File Share service principal writer on `trusted.ci.jenkins.io` (current: {{ source "currentEndDate" }})'
-    kind: yaml
+    kind: hcl
     sourceid: nextEndDate
     spec:
-      file: updatecli/values.yaml
-      key: $.end_dates.trusted_ci_jenkins_io.{{ $key }}.end_date
+      file: trusted.ci.jenkins.io.tf
+      path: module.{{ $key }}.service_principal_end_date
     scmid: default
 
 actions:
@@ -55,18 +55,14 @@ actions:
     kind: github/pullrequest
     scmid: default
     spec:
-      title: 'New end date for `{{ $val.service }}` File Share service principal writer on `trusted.ci.jenkins.io` (current: {{ source "currentEndDate" }})'
+      title: 'Azure File Share Principal `{{ $val.service }}` on `trusted.ci.jenkins.io` expires on `{{ source "currentEndDate" }}`'
       description: |
         This PR updates the end date of {{ $val.service }} File Share service principal writer used in trusted.ci.jenkins.io.
 
-        The current end date is set to `{{ $val.end_date }}`.
+        The current end date is set to `{{ source "currentEndDate" }}`.
 
-        After merging this PR, a new password will be generated.
+{{ $val.doc_how_to_get_credential | indent 8 }}
 
-        > [!IMPORTANT]
-        > You'll have to ensure that the trusted.ci.jenkins.io top-level credential `{{ $val.secret }}` is updated with this new password!
-
-        If you don't, {{ $val.service }} File Share won't be updated by trusted.ci.jenkins.io jobs anymore.
       labels:
         - terraform
         - "{{ $val.service }}"
