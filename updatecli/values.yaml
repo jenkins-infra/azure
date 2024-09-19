@@ -32,7 +32,7 @@ end_dates:
       secret: "STATS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
   trusted_ci_jenkins_io:
     trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer:
-      end_date: 2024-09-22T00:00:00Z
+      end_date: 2024-12-18T00:00:00Z
       service: "updates.jenkins.io (content)"
       secret: "trusted_ci_jenkins_io_fileshare_serviceprincipal_writer"
     trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer:
