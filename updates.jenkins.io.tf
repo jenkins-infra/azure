@@ -40,18 +40,10 @@ resource "azurerm_storage_account" "updates_jenkins_io" {
   }
 }
 
-output "updates_jenkins_io_storage_account_name" {
-  value = azurerm_storage_account.updates_jenkins_io.name
-}
-
 resource "azurerm_storage_share" "updates_jenkins_io" {
   name                 = "updates-jenkins-io"
   storage_account_name = azurerm_storage_account.updates_jenkins_io.name
   quota                = 100 # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
-}
-
-output "updates_jenkins_io_content_fileshare_name" {
-  value = azurerm_storage_share.updates_jenkins_io.name
 }
 
 # TODO: remove once migration to 'updates_jenkins_io_redirect' is complete
@@ -64,10 +56,6 @@ resource "azurerm_storage_share" "updates_jenkins_io_redirects" {
   name                 = "updates-jenkins-io-redirects"
   storage_account_name = azurerm_storage_account.updates_jenkins_io.name
   quota                = 100 # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
-}
-
-output "updates_jenkins_io_redirections_fileshare_name" {
-  value = azurerm_storage_share.updates_jenkins_io_redirects.name
 }
 
 ## Kubernetes Resources (static provision of persistent volumes)
