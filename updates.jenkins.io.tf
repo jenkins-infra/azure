@@ -70,11 +70,7 @@ output "updates_jenkins_io_redirections_fileshare_name" {
   value = azurerm_storage_share.updates_jenkins_io_redirects.name
 }
 
-## Kubernetes Resources (statci provision of persistent volumes)
-import {
-  to = kubernetes_namespace.updates_jenkins_io
-  id = "updates-jenkins-io"
-}
+## Kubernetes Resources (static provision of persistent volumes)
 resource "kubernetes_namespace" "updates_jenkins_io" {
   provider = kubernetes.publick8s
 
