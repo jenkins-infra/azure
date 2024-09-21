@@ -85,7 +85,7 @@ module "trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer" {
   storage_account_id             = azurerm_storage_account.updates_jenkins_io.id
   default_tags                   = local.default_tags
 }
-# Required to allow azcopy sync of updates.jenkins.io File Share (redirections) with the permanent agent
+# TODO: remove once migration to 'updates_jenkins_io_redirect' is complete
 module "trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
@@ -94,6 +94,18 @@ module "trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_write
   active_directory_url           = "https://github.com/jenkins-infra/azure"
   service_principal_end_date     = "2024-12-18T00:00:00Z"
   file_share_resource_manager_id = azurerm_storage_share.updates_jenkins_io_httpd.resource_manager_id
+  storage_account_id             = azurerm_storage_account.updates_jenkins_io.id
+  default_tags                   = local.default_tags
+}
+# Required to allow azcopy sync of updates.jenkins.io File Share (redirections) with the permanent agent
+module "trustedci_updatesjenkinsio_redirects_fileshare_serviceprincipal_writer" {
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+
+  service_fqdn                   = "${module.trusted_ci_jenkins_io.service_fqdn}-fileshare_serviceprincipal_writer-redirects"
+  active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
+  active_directory_url           = "https://github.com/jenkins-infra/azure"
+  service_principal_end_date     = "2024-12-18T00:00:00Z"
+  file_share_resource_manager_id = azurerm_storage_share.updates_jenkins_io_redirects.resource_manager_id
   storage_account_id             = azurerm_storage_account.updates_jenkins_io.id
   default_tags                   = local.default_tags
 }
