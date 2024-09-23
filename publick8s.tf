@@ -361,7 +361,7 @@ module "cronjob_geoip_data_fileshare_serviceprincipal_writer" {
   active_directory_url           = "https://github.com/jenkins-infra/azure"
   service_principal_end_date     = "2024-12-23T00:00:00Z"
   file_share_resource_manager_id = azurerm_storage_share.geoip_data.resource_manager_id
-  storage_account_id             = azurerm_storage_account.geoip_data.id
+  storage_account_id             = azurerm_storage_account.publick8s.id
   default_tags                   = local.default_tags
 }
 
