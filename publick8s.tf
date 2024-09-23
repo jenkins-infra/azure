@@ -352,6 +352,19 @@ resource "kubernetes_secret" "geoip_data" {
   type = "Opaque"
 }
 
+# Required to allow azcopy sync of geoip data from cronjob
+module "cronjob_geoip_data_fileshare_serviceprincipal_writer" {
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+
+  service_fqdn                   = "${azurerm_resource_group.publick8s.name}-fileshare_serviceprincipal_writer-redirects"
+  active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
+  active_directory_url           = "https://github.com/jenkins-infra/azure"
+  service_principal_end_date     = "2024-12-23T00:00:00Z"
+  file_share_resource_manager_id = azurerm_storage_share.geoip_data.resource_manager_id
+  storage_account_id             = azurerm_storage_account.publick8s.id
+  default_tags                   = local.default_tags
+}
+
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/publick8s.yaml
 resource "azurerm_public_ip" "publick8s_ipv4" {
   name                = "public-publick8s-ipv4"
