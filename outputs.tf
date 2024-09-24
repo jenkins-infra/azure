@@ -9,22 +9,25 @@ resource "local_file" "jenkins_infra_data_report" {
     },
     "updates.jenkins.io" = {
       "content" = {
-        "share_name" = azurerm_storage_share.updates_jenkins_io.name,
+        "share_name" = azurerm_storage_share.updates_jenkins_io_content.name,
         "share_uri"  = "/",
-      },
-      # TODO: remove once migration to 'updates_jenkins_io_redirect' is complete
-      "redirections" = {
-        "share_name" = azurerm_storage_share.updates_jenkins_io_httpd.name,
-        "share_uri"  = "/",
+        "pvc_name"   = kubernetes_persistent_volume_claim.updates_jenkins_io_content.metadata[0].name,
       },
       "redirections-unsecured" = {
         "share_name" = azurerm_storage_share.updates_jenkins_io_redirects.name
         "share_uri"  = "/unsecured/",
+        "pvc_name"   = kubernetes_persistent_volume_claim.updates_jenkins_io_redirects.metadata[0].name,
       },
       "redirections-secured" = {
         "share_name" = azurerm_storage_share.updates_jenkins_io_redirects.name
         "share_uri"  = "/secured/",
+        "pvc_name"   = kubernetes_persistent_volume_claim.updates_jenkins_io_redirects.metadata[0].name,
       },
+      "geoip_data" = {
+        "share_name" = azurerm_storage_share.geoip_data.name
+        "share_uri"  = "/",
+        "pvc_name"   = kubernetes_persistent_volume_claim.updates_jenkins_io_geoipdata.metadata[0].name,
+      }
     },
   })
   filename = "${path.module}/jenkins-infra-data-reports/azure.json"
