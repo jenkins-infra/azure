@@ -47,11 +47,6 @@ output "trusted_ci_jenkins_io_updatesjenkinsio_credentials" {
       "azure_client_id"       = module.trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id,
       "azure_client_password" = module.trustedci_updatesjenkinsio_content_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password,
     },
-    # TODO: remove once migration to 'updates_jenkins_io_redirect' is complete
-    "redirections" = {
-      "azure_client_id"       = module.trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id,
-      "azure_client_password" = module.trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password,
-    },
     "redirections-unsecured" = {
       "azure_client_id"       = module.trustedci_updatesjenkinsio_redirects_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id,
       "azure_client_password" = module.trustedci_updatesjenkinsio_redirects_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password,
