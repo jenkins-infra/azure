@@ -40,7 +40,11 @@ resource "azurerm_storage_account" "updates_jenkins_io" {
   }
 }
 
-resource "azurerm_storage_share" "updates_jenkins_io" {
+moved {
+  from = azurerm_storage_share.updates_jenkins_io
+  to   = azurerm_storage_share.updates_jenkins_io_content
+}
+resource "azurerm_storage_share" "updates_jenkins_io_content" {
   name                 = "updates-jenkins-io"
   storage_account_name = azurerm_storage_account.updates_jenkins_io.name
   quota                = 100 # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
@@ -81,6 +85,8 @@ resource "kubernetes_secret" "updates_jenkins_io_storage" {
 
   type = "Opaque"
 }
+
+# Persistent Data for the httpd services
 resource "kubernetes_persistent_volume" "updates_jenkins_io_redirects" {
   provider = kubernetes.publick8s
   metadata {
@@ -125,6 +131,106 @@ resource "kubernetes_persistent_volume_claim" "updates_jenkins_io_redirects" {
     resources {
       requests = {
         storage = "${azurerm_storage_share.updates_jenkins_io_redirects.quota}Gi"
+      }
+    }
+  }
+}
+
+# Persistent Data for the mirrorbits services ("repository" in mirrorbits naming)
+resource "kubernetes_persistent_volume" "updates_jenkins_io_content" {
+  provider = kubernetes.publick8s
+  metadata {
+    name = azurerm_storage_share.updates_jenkins_io_content.name
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_storage_share.updates_jenkins_io_content.quota}Gi"
+    }
+    access_modes                     = ["ReadOnlyMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.statically_provisioned_publick8s.id
+    persistent_volume_source {
+      csi {
+        driver  = "file.csi.azure.com"
+        fs_type = "ext4"
+        # `volumeHandle` must be unique on the cluster for this volume
+        volume_handle = azurerm_storage_share.updates_jenkins_io_content.name
+        read_only     = true
+        volume_attributes = {
+          resourceGroup = azurerm_resource_group.updates_jenkins_io.name
+          shareName     = azurerm_storage_share.updates_jenkins_io_content.name
+        }
+        node_stage_secret_ref {
+          name      = kubernetes_secret.updates_jenkins_io_storage.metadata[0].name
+          namespace = kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace
+        }
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "updates_jenkins_io_content" {
+  provider = kubernetes.publick8s
+  metadata {
+    name      = azurerm_storage_share.updates_jenkins_io_content.name
+    namespace = kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.updates_jenkins_io_content.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.updates_jenkins_io_content.metadata[0].name
+    storage_class_name = kubernetes_persistent_volume.updates_jenkins_io_content.spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = "${azurerm_storage_share.updates_jenkins_io_content.quota}Gi"
+      }
+    }
+  }
+}
+
+# Persistent Data for the mirrorbits services ("geoipdata" in mirrorbits naming)
+resource "kubernetes_persistent_volume" "updates_jenkins_io_geoipdata" {
+  provider = kubernetes.publick8s
+  metadata {
+    name = "${kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace}-${azurerm_storage_share.geoip_data.name}"
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_storage_share.geoip_data.quota}Gi"
+    }
+    access_modes                     = ["ReadOnlyMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.statically_provisioned_publick8s.id
+    persistent_volume_source {
+      csi {
+        driver  = "file.csi.azure.com"
+        fs_type = "ext4"
+        # `volumeHandle` must be unique on the cluster for this volume
+        volume_handle = "${kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace}-${azurerm_storage_share.geoip_data.name}"
+        read_only     = true
+        volume_attributes = {
+          resourceGroup = azurerm_resource_group.updates_jenkins_io.name
+          shareName     = azurerm_storage_share.geoip_data.name
+        }
+        node_stage_secret_ref {
+          name      = kubernetes_secret.updates_jenkins_io_storage.metadata[0].name
+          namespace = kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace
+        }
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "updates_jenkins_io_geoipdata" {
+  provider = kubernetes.publick8s
+  metadata {
+    name      = "${kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace}-${azurerm_storage_share.geoip_data.name}"
+    namespace = kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.updates_jenkins_io_geoipdata.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.updates_jenkins_io_geoipdata.metadata[0].name
+    storage_class_name = kubernetes_persistent_volume.updates_jenkins_io_geoipdata.spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = "${azurerm_storage_share.geoip_data.quota}Gi"
       }
     }
   }
