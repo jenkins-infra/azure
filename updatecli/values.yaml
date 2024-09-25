@@ -92,7 +92,7 @@ end_dates:
         https://github.com/jenkins-infra/charts-secrets/blob/main/config/trusted.ci.jenkins.io/get-uc-sync-zip-credential.sh.
         > ⚠️ Make sure you can generate this ZIP file BEFORE merging the pull request here!
         > ⚠️ Check if you don't have other PR to related to the same ZIP credential to only generates the ZIP once.
-    trustedci_updatesjenkinsio_redirections_fileshare_serviceprincipal_writer:
+    trustedci_updatesjenkinsio_redirects_fileshare_serviceprincipal_writer:
       service: "updates.jenkins.io (redirections)"
       doc_how_to_get_credential: |
         > [!IMPORTANT]

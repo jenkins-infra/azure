@@ -39,20 +39,8 @@ resource "azurerm_storage_account" "updates_jenkins_io" {
     bypass = ["Metrics", "Logging", "AzureServices"]
   }
 }
-
-moved {
-  from = azurerm_storage_share.updates_jenkins_io
-  to   = azurerm_storage_share.updates_jenkins_io_content
-}
 resource "azurerm_storage_share" "updates_jenkins_io_content" {
   name                 = "updates-jenkins-io"
-  storage_account_name = azurerm_storage_account.updates_jenkins_io.name
-  quota                = 100 # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
-}
-
-# TODO: remove once migration to 'updates_jenkins_io_redirect' is complete
-resource "azurerm_storage_share" "updates_jenkins_io_httpd" {
-  name                 = "updates-jenkins-io-httpd"
   storage_account_name = azurerm_storage_account.updates_jenkins_io.name
   quota                = 100 # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
 }
