@@ -195,12 +195,12 @@ resource "kubernetes_persistent_volume" "updates_jenkins_io_geoipdata" {
         volume_handle = "${kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace}-${azurerm_storage_share.geoip_data.name}"
         read_only     = true
         volume_attributes = {
-          resourceGroup = azurerm_resource_group.updates_jenkins_io.name
+          resourceGroup = azurerm_resource_group.publick8s.name
           shareName     = azurerm_storage_share.geoip_data.name
         }
         node_stage_secret_ref {
-          name      = kubernetes_secret.updates_jenkins_io_storage.metadata[0].name
-          namespace = kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace
+          name      = kubernetes_secret.geoip_data.metadata[0].name
+          namespace = kubernetes_secret.geoip_data.metadata[0].namespace
         }
       }
     }
