@@ -19,7 +19,7 @@ resource "azurerm_storage_account" "infra_ci_jenkins_io_agents" {
 resource "azuread_application" "infra_ci_jenkins_io" {
   display_name = "infra.ci.jenkins.io"
   owners = [
-    data.azuread_service_principal.terraform_production.id,
+    data.azuread_service_principal.terraform_production.object_id,
   ]
   tags = [for key, value in local.default_tags : "${key}:${value}"]
   required_resource_access {
@@ -38,7 +38,7 @@ resource "azuread_service_principal" "infra_ci_jenkins_io" {
   client_id                    = azuread_application.infra_ci_jenkins_io.client_id
   app_role_assignment_required = false
   owners = [
-    data.azuread_service_principal.terraform_production.id,
+    data.azuread_service_principal.terraform_production.object_id,
   ]
 }
 resource "azuread_application_password" "infra_ci_jenkins_io" {
@@ -73,7 +73,7 @@ module "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
   service_fqdn                   = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
-  active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
+  active_directory_owners        = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
   service_principal_end_date     = local.end_dates.infra_ci_jenkins_io.infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer.end_date
   file_share_resource_manager_id = azurerm_storage_share.contributors_jenkins_io.resource_manager_id
@@ -93,7 +93,7 @@ module "infraci_docsjenkinsio_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
   service_fqdn                   = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
-  active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
+  active_directory_owners        = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
   service_principal_end_date     = local.end_dates.infra_ci_jenkins_io.infraci_docsjenkinsio_fileshare_serviceprincipal_writer.end_date
   file_share_resource_manager_id = azurerm_storage_share.docs_jenkins_io.resource_manager_id
@@ -113,7 +113,7 @@ module "infraci_statsjenkinsio_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
   service_fqdn                   = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
-  active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
+  active_directory_owners        = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
   service_principal_end_date     = local.end_dates.infra_ci_jenkins_io.infraci_statsjenkinsio_fileshare_serviceprincipal_writer.end_date
   file_share_resource_manager_id = azurerm_storage_share.stats_jenkins_io.resource_manager_id
@@ -233,7 +233,7 @@ module "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
 
   service_fqdn                   = "infraci-pluginsjenkinsio-fileshare_serviceprincipal_writer"
-  active_directory_owners        = [data.azuread_service_principal.terraform_production.id]
+  active_directory_owners        = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url           = "https://github.com/jenkins-infra/azure"
   service_principal_end_date     = local.end_dates.infra_ci_jenkins_io.infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer.end_date
   file_share_resource_manager_id = azurerm_storage_share.plugins_jenkins_io.resource_manager_id
