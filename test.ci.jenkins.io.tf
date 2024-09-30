@@ -31,7 +31,7 @@ data "azurerm_subnet" "test_azurevm_agents_agents_sponsorship" {
 ####################################################################################
 resource "azuread_application" "test_azurevm_agents_sponsorship" {
   display_name = "test.jay.onboarding"
-  owners       = [data.azuread_service_principal.terraform_production.id]
+  owners       = [data.azuread_service_principal.terraform_production.object_id]
   tags         = [for key, value in local.default_tags : "${key}:${value}"]
   required_resource_access {
     resource_app_id = "00000003-0000-0000-c000-000000000000" # Microsoft Graph
@@ -48,7 +48,7 @@ resource "azuread_application" "test_azurevm_agents_sponsorship" {
 resource "azuread_service_principal" "test_azurevm_agents_sponsorship" {
   client_id                    = azuread_application.test_azurevm_agents_sponsorship.client_id
   app_role_assignment_required = false
-  owners                       = [data.azuread_service_principal.terraform_production.id]
+  owners                       = [data.azuread_service_principal.terraform_production.object_id]
 }
 resource "azuread_application_password" "test_azurevm_agents_sponsorship" {
   application_id = azuread_application.test_azurevm_agents_sponsorship.id
