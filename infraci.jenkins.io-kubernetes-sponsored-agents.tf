@@ -104,7 +104,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_agents_1_sponsorsh
 resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_agents_1_sponsorship" {
   provider = azurerm.jenkins-sponsorship
   name     = "la64n14agt1"
-  vm_size  = "Standard_D8pds_v5" # https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series 	8vcpu 	32Go 	300ssd
+  vm_size  = "Standard_D16pds_v5" # temporarily upgrade https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series 	8vcpu 	32Go 	300ssd
   upgrade_settings {
     max_surge = "10%"
   }
