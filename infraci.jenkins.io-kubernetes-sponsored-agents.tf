@@ -104,13 +104,13 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_agents_1_sponsorsh
 resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_agents_1_sponsorship" {
   provider = azurerm.jenkins-sponsorship
   name     = "la64n14agt1"
-  vm_size  = "Standard_D16pds_v5" # temporarily upgrade https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series 	8vcpu 	32Go 	300ssd
+  vm_size  = "Standard_D16pds_v5" # temporarily upgrade https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv5-series?tabs=sizebasic 	16vcpu 	64Go 	600ssd
   upgrade_settings {
     max_surge = "10%"
   }
   os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 300 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
+  os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv5-series?tabs=sizebasic (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["infracijenkinsio_agents_1"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.id
   enable_auto_scaling   = true
