@@ -1,7 +1,7 @@
 /** One resource group for the agents **/
 resource "azurerm_resource_group" "infra_ci_jenkins_io_agents" {
   name     = "infra-agents"
-  location = "East US 2"
+  location = var.location
 }
 
 /** Agent Resources **/
@@ -355,4 +355,56 @@ resource "azurerm_network_security_rule" "allow_in_https_from_infra_ephemeral_ag
   )
   resource_group_name         = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
+}
+
+
+# Azure SP for updatecli with minimum rights
+resource "azurerm_resource_group" "updatecli_infra_ci_jenkins_io" {
+  name     = "updatecli-infra-ci-jenkins-io"
+  location = var.location
+}
+resource "azuread_application" "updatecli_infra_ci_jenkins_io" {
+  display_name = "updatecli_infra.ci.jenkins.io"
+  owners = [
+    data.azuread_service_principal.terraform_production.id,
+  ]
+  tags = [for key, value in local.default_tags : "${key}:${value}"]
+  required_resource_access {
+    resource_app_id = "00000003-0000-0000-c000-000000000000" # Microsoft Graph
+
+    resource_access {
+      id   = "e1fe6dd8-ba31-4d61-89e7-88639da4683d" # User.Read
+      type = "Scope"
+    }
+  }
+  web {
+    homepage_url = "https://infra.ci.jenkins.io/job/updatecli/"
+  }
+}
+resource "azuread_service_principal" "updatecli_infra_ci_jenkins_io" {
+  client_id                    = azuread_application.updatecli_infra_ci_jenkins_io.client_id
+  app_role_assignment_required = false
+  owners = [
+    data.azuread_service_principal.terraform_production.id,
+  ]
+}
+resource "azuread_application_password" "updatecli_infra_ci_jenkins_io" {
+  application_id = azuread_application.updatecli_infra_ci_jenkins_io.id
+  display_name   = "updatecli_infra.ci.jenkins.io-tf-managed"
+  end_date       = "2025-01-18T00:00:00Z"
+}
+
+resource "azurerm_role_definition" "vm_images_reader" {
+  name  = "ReadVMImages"
+  scope = azurerm_resource_group.updatecli_infra_ci_jenkins_io.id
+
+  permissions {
+    actions = ["Microsoft.Compute/images/read"]
+  }
+}
+
+resource "azurerm_role_assignment" "updatecli_infra_ci_jenkins_io_allow_images_list" {
+  scope              = azurerm_resource_group.updatecli_infra_ci_jenkins_io.id
+  role_definition_id = azurerm_role_definition.vm_images_reader.role_definition_resource_id
+  principal_id       = azuread_service_principal.updatecli_infra_ci_jenkins_io.id
 }
