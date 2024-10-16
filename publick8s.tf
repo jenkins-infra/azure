@@ -57,6 +57,8 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     )
   }
 
+  image_cleaner_interval_hours = 48
+
   #trivy:ignore:azure-container-configured-network-policy
   network_profile {
     network_plugin = "kubenet"

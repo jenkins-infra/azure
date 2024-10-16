@@ -28,6 +28,8 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
   kubernetes_version                  = local.kubernetes_versions["infracijenkinsio_agents_1"]
   role_based_access_control_enabled   = true # default value but made explicit to please trivy
 
+  image_cleaner_interval_hours = 48
+
   network_profile {
     network_plugin      = "azure"
     network_plugin_mode = "overlay"

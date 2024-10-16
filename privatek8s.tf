@@ -59,6 +59,8 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
     )
   }
 
+  image_cleaner_interval_hours = 48
+
   network_profile {
     network_plugin    = "azure"
     network_policy    = "azure"
