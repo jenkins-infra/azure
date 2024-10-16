@@ -15,7 +15,7 @@ resource "azurerm_redis_cache" "public_redis" {
   capacity                      = 2
   family                        = "P"       # Basic/Standard SKU family
   sku_name                      = "Premium" # A replicated cache in a two node Primary/Secondary configuration managed by Microsoft, with a high availability SLA.
-  enable_non_ssl_port           = true
+  non_ssl_port_enabled          = true
   minimum_tls_version           = "1.2"
   public_network_access_enabled = false
 

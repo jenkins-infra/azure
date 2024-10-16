@@ -84,7 +84,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     os_disk_type         = "Ephemeral"
     os_disk_size_gb      = 50
     orchestrator_version = local.kubernetes_versions["publick8s"]
-    enable_auto_scaling  = true
+    auto_scaling_enabled = true
     min_count            = 2
     max_count            = 4
     vnet_subnet_id       = data.azurerm_subnet.publick8s_tier.id
@@ -116,7 +116,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "x86small" {
   os_disk_size_gb       = 100 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["publick8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 10
   zones                 = local.publick8s_compute_zones
@@ -139,7 +139,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "arm64small2" {
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["publick8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 10
   zones                 = [1]
@@ -302,7 +302,7 @@ resource "azurerm_storage_account" "publick8s" {
   account_replication_type          = "ZRS"
   min_tls_version                   = "TLS1_2" # default value, needed for tfsec
   infrastructure_encryption_enabled = true
-  enable_https_traffic_only         = true
+  https_traffic_only_enabled        = true
 
   tags = local.default_tags
 

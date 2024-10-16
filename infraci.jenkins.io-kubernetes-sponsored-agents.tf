@@ -53,7 +53,7 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
     os_disk_size_gb      = 150 # Ref. Cache storage size athttps://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
     orchestrator_version = local.kubernetes_versions["infracijenkinsio_agents_1"]
     kubelet_disk_type    = "OS"
-    enable_auto_scaling  = true
+    auto_scaling_enabled = true
     min_count            = 2 # for best practises
     max_count            = 3 # for upgrade
     vnet_subnet_id       = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
@@ -78,7 +78,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_agents_1_sponsorsh
   os_disk_size_gb       = 300 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dasv5-dadsv5-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["infracijenkinsio_agents_1"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.id
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 20
   zones                 = local.infracijenkinsio_agents_1_compute_zones
@@ -113,7 +113,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_agents_1_sponsorshi
   os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv5-series?tabs=sizebasic (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["infracijenkinsio_agents_1"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.id
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   min_count             = 1 # Azure autoscaler with ARM64 is really slow when starting from zero nodes.
   max_count             = 20
   zones                 = local.infracijenkinsio_agents_1_compute_zones # need to be on zone 1 for arm availability
