@@ -119,7 +119,7 @@ resource "azurerm_role_assignment" "packer_role_images_assignement" {
 
   scope                = each.value.id
   role_definition_name = "Contributor"
-  principal_id         = azuread_service_principal.packer.id
+  principal_id         = azuread_service_principal.packer.object_id
 }
 # Allow packer Service Principal to manage AzureRM resources inside the packer resource groups
 resource "azurerm_role_assignment" "packer_role_builds_assignement" {
@@ -128,11 +128,11 @@ resource "azurerm_role_assignment" "packer_role_builds_assignement" {
 
   scope                = each.value.id
   role_definition_name = "Contributor"
-  principal_id         = azuread_service_principal.packer.id
+  principal_id         = azuread_service_principal.packer.object_id
 }
 resource "azurerm_role_assignment" "packer_role_manage_subnet" {
   provider             = azurerm.jenkins-sponsorship
   scope                = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_packer_builds.id
   role_definition_name = "Network Contributor"
-  principal_id         = azuread_service_principal.packer.id
+  principal_id         = azuread_service_principal.packer.object_id
 }
