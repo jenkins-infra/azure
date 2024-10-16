@@ -29,7 +29,7 @@ module "ci_jenkins_io_sponsorship" {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   }
   controller_service_principal_ids = [
-    data.azuread_service_principal.terraform_production.id,
+    data.azuread_service_principal.terraform_production.object_id,
   ]
   controller_service_principal_end_date = "2025-01-13T00:00:00Z"
   controller_packer_rg_ids = [

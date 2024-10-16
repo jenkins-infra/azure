@@ -3,7 +3,7 @@
 resource "azuread_application" "packer" {
   display_name = "packer"
   owners = [
-    data.azuread_service_principal.terraform_production.id, # terraform-production Service Principal, used by the CI system
+    data.azuread_service_principal.terraform_production.object_id, # terraform-production Service Principal, used by the CI system
   ]
   tags = [for key, value in local.default_tags : "${key}:${value}"]
   required_resource_access {
@@ -24,7 +24,7 @@ resource "azuread_service_principal" "packer" {
   client_id                    = azuread_application.packer.client_id
   app_role_assignment_required = false
   owners = [
-    data.azuread_service_principal.terraform_production.id, # terraform-production Service Principal, used by the CI system
+    data.azuread_service_principal.terraform_production.object_id, # terraform-production Service Principal, used by the CI system
   ]
 }
 
@@ -119,7 +119,7 @@ resource "azurerm_role_assignment" "packer_role_images_assignement" {
 
   scope                = each.value.id
   role_definition_name = "Contributor"
-  principal_id         = azuread_service_principal.packer.id
+  principal_id         = azuread_service_principal.packer.object_id
 }
 # Allow packer Service Principal to manage AzureRM resources inside the packer resource groups
 resource "azurerm_role_assignment" "packer_role_builds_assignement" {
@@ -128,11 +128,11 @@ resource "azurerm_role_assignment" "packer_role_builds_assignement" {
 
   scope                = each.value.id
   role_definition_name = "Contributor"
-  principal_id         = azuread_service_principal.packer.id
+  principal_id         = azuread_service_principal.packer.object_id
 }
 resource "azurerm_role_assignment" "packer_role_manage_subnet" {
   provider             = azurerm.jenkins-sponsorship
   scope                = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_packer_builds.id
   role_definition_name = "Network Contributor"
-  principal_id         = azuread_service_principal.packer.id
+  principal_id         = azuread_service_principal.packer.object_id
 }

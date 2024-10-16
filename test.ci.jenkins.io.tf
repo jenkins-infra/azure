@@ -31,7 +31,7 @@ data "azurerm_subnet" "test_azurevm_agents_agents_sponsorship" {
 ####################################################################################
 resource "azuread_application" "test_azurevm_agents_sponsorship" {
   display_name = "test.jay.onboarding"
-  owners       = [data.azuread_service_principal.terraform_production.id]
+  owners       = [data.azuread_service_principal.terraform_production.object_id]
   tags         = [for key, value in local.default_tags : "${key}:${value}"]
   required_resource_access {
     resource_app_id = "00000003-0000-0000-c000-000000000000" # Microsoft Graph
@@ -48,7 +48,7 @@ resource "azuread_application" "test_azurevm_agents_sponsorship" {
 resource "azuread_service_principal" "test_azurevm_agents_sponsorship" {
   client_id                    = azuread_application.test_azurevm_agents_sponsorship.client_id
   app_role_assignment_required = false
-  owners                       = [data.azuread_service_principal.terraform_production.id]
+  owners                       = [data.azuread_service_principal.terraform_production.object_id]
 }
 resource "azuread_application_password" "test_azurevm_agents_sponsorship" {
   application_id = azuread_application.test_azurevm_agents_sponsorship.id
@@ -58,7 +58,7 @@ resource "azuread_application_password" "test_azurevm_agents_sponsorship" {
 resource "azurerm_role_assignment" "controller_read_packer_prod_images" {
   scope                = azurerm_resource_group.packer_images["prod"].id
   role_definition_name = "Reader"
-  principal_id         = azuread_service_principal.test_azurevm_agents_sponsorship.id
+  principal_id         = azuread_service_principal.test_azurevm_agents_sponsorship.object_id
 }
 resource "azurerm_role_definition" "jayonboarding_vnet_writer" {
   name  = "write-test.jay.onboarding-VNET"
@@ -71,7 +71,7 @@ resource "azurerm_role_definition" "jayonboarding_vnet_writer" {
 resource "azurerm_role_assignment" "jayonboarding_vnet_writer" {
   scope              = data.azurerm_virtual_network.test_azurevm_agents_sponsorship.id
   role_definition_id = azurerm_role_definition.jayonboarding_vnet_writer.role_definition_resource_id
-  principal_id       = azuread_service_principal.test_azurevm_agents_sponsorship.id
+  principal_id       = azuread_service_principal.test_azurevm_agents_sponsorship.object_id
 }
 
 module "test_azurevm_agents_sponsorship" {
@@ -90,7 +90,7 @@ module "test_azurevm_agents_sponsorship" {
     "135.237.163.64", # VM (manually managed) public IP
     "10.0.0.4",       # VM (manually managed) private IP
   ])
-  controller_service_principal_id = azuread_service_principal.test_azurevm_agents_sponsorship.id
+  controller_service_principal_id = azuread_service_principal.test_azurevm_agents_sponsorship.object_id
   default_tags                    = local.default_tags
   storage_account_name            = "jayagentssub" # Max 24 chars
 
