@@ -5,14 +5,14 @@ resource "azurerm_resource_group" "stats_jenkins_io" {
 }
 
 resource "azurerm_storage_account" "stats_jenkins_io" {
-  name                      = "statsjenkinsio"
-  resource_group_name       = azurerm_resource_group.stats_jenkins_io.name
-  location                  = azurerm_resource_group.stats_jenkins_io.location
-  account_tier              = "Standard"
-  account_replication_type  = "ZRS"
-  account_kind              = "StorageV2"
-  enable_https_traffic_only = true
-  min_tls_version           = "TLS1_2"
+  name                       = "statsjenkinsio"
+  resource_group_name        = azurerm_resource_group.stats_jenkins_io.name
+  location                   = azurerm_resource_group.stats_jenkins_io.location
+  account_tier               = "Standard"
+  account_replication_type   = "ZRS"
+  account_kind               = "StorageV2"
+  https_traffic_only_enabled = true
+  min_tls_version            = "TLS1_2"
 
   network_rules {
     default_action = "Deny"

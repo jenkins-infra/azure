@@ -29,6 +29,8 @@ resource "azurerm_kubernetes_cluster" "cijenkinsio_agents_1" {
   kubernetes_version                  = local.kubernetes_versions["cijenkinsio_agents_1"]
   role_based_access_control_enabled   = true # default value but made explicit to please trivy
 
+  image_cleaner_interval_hours = 48
+
   network_profile {
     network_plugin      = "azure"
     network_plugin_mode = "overlay"
@@ -54,7 +56,7 @@ resource "azurerm_kubernetes_cluster" "cijenkinsio_agents_1" {
     os_disk_size_gb      = 150 # Ref. Cache storage size athttps://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
     orchestrator_version = local.kubernetes_versions["cijenkinsio_agents_1"]
     kubelet_disk_type    = "OS"
-    enable_auto_scaling  = true
+    auto_scaling_enabled = true
     min_count            = 2 # for best practises
     max_count            = 3 # for upgrade
     vnet_subnet_id       = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id
@@ -78,7 +80,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_n2_applications" {
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["cijenkinsio_agents_1"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.cijenkinsio_agents_1.id
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   min_count             = 1
   max_count             = 3 # 2 nodes always up for HA, a 3rd one is allowed for surge upgrades
   zones                 = local.cijenkinsio_agents_1_compute_zones
@@ -112,7 +114,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_agents_1" {
   os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["cijenkinsio_agents_1"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.cijenkinsio_agents_1.id
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 40 # 3 pods per nodes, max 120 pods - due to quotas
   zones                 = local.cijenkinsio_agents_1_compute_zones
@@ -146,7 +148,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_bom_1" {
   os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["cijenkinsio_agents_1"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.cijenkinsio_agents_1.id
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 50
   zones                 = local.cijenkinsio_agents_1_compute_zones

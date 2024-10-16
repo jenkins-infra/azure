@@ -59,6 +59,8 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
     )
   }
 
+  image_cleaner_interval_hours = 48
+
   network_profile {
     network_plugin    = "azure"
     network_policy    = "azure"
@@ -82,7 +84,7 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
     os_disk_size_gb      = 50 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dav4-dasv4-series#dasv4-series (depends on the instance size)
     orchestrator_version = local.kubernetes_versions["privatek8s"]
     kubelet_disk_type    = "OS"
-    enable_auto_scaling  = true
+    auto_scaling_enabled = true
     min_count            = 1
     max_count            = 3
     vnet_subnet_id       = data.azurerm_subnet.privatek8s_tier.id
@@ -111,7 +113,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
   os_disk_size_gb       = 100 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["privatek8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 5
   zones                 = [3]
@@ -136,7 +138,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infraci_controller" {
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["privatek8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   min_count             = 1
   max_count             = 2
   zones                 = [1] # Linux arm64 VMs are only available in the Zone 1 in this region (undocumented by Azure)
@@ -165,7 +167,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "releaseci_controller" {
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["privatek8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   min_count             = 1
   max_count             = 2
   zones                 = [1] # Linux arm64 VMs are only available in the Zone 1 in this region (undocumented by Azure)
@@ -191,7 +193,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "releasepool" {
   os_disk_size_gb       = 200 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
   orchestrator_version  = local.kubernetes_versions["privatek8s"]
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 3
   zones                 = [3]
@@ -219,7 +221,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "windows2019pool" {
   os_type               = "Windows"
   os_sku                = "Windows2019"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 3
   zones                 = [3]
