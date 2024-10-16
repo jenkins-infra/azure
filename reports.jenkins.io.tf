@@ -18,11 +18,6 @@ resource "azurerm_storage_account" "prodjenkinsreports" {
   https_traffic_only_enabled = true
   min_tls_version            = "TLS1_2"
 
-  custom_domain {
-    name          = "reports.jenkins.io"
-    use_subdomain = false
-  }
-
   tags = {
     scope = "terraform-managed"
   }
