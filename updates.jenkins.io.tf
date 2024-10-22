@@ -87,6 +87,16 @@ resource "kubernetes_persistent_volume" "updates_jenkins_io_redirects" {
     access_modes                     = ["ReadOnlyMany"]
     persistent_volume_reclaim_policy = "Retain"
     storage_class_name               = kubernetes_storage_class.statically_provisioned_publick8s.id
+    mount_options = [
+      "dir_mode=0777",
+      "file_mode=0777",
+      "uid=0",
+      "gid=0",
+      "mfsymlinks",
+      "cache=strict", # Default on usual kernels but worth setting it explicitly
+      "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+      "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+    ]
     persistent_volume_source {
       csi {
         driver  = "file.csi.azure.com"
@@ -137,6 +147,16 @@ resource "kubernetes_persistent_volume" "updates_jenkins_io_content" {
     access_modes                     = ["ReadOnlyMany"]
     persistent_volume_reclaim_policy = "Retain"
     storage_class_name               = kubernetes_storage_class.statically_provisioned_publick8s.id
+    mount_options = [
+      "dir_mode=0777",
+      "file_mode=0777",
+      "uid=0",
+      "gid=0",
+      "mfsymlinks",
+      "cache=strict", # Default on usual kernels but worth setting it explicitly
+      "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+      "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+    ]
     persistent_volume_source {
       csi {
         driver  = "file.csi.azure.com"
@@ -187,6 +207,16 @@ resource "kubernetes_persistent_volume" "updates_jenkins_io_geoipdata" {
     access_modes                     = ["ReadOnlyMany"]
     persistent_volume_reclaim_policy = "Retain"
     storage_class_name               = kubernetes_storage_class.statically_provisioned_publick8s.id
+    mount_options = [
+      "dir_mode=0777",
+      "file_mode=0777",
+      "uid=0",
+      "gid=0",
+      "mfsymlinks",
+      "cache=strict", # Default on usual kernels but worth setting it explicitly
+      "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+      "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+    ]
     persistent_volume_source {
       csi {
         driver  = "file.csi.azure.com"
