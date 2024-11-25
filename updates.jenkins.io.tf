@@ -39,6 +39,12 @@ resource "azurerm_storage_account" "updates_jenkins_io" {
     bypass = ["Metrics", "Logging", "AzureServices"]
   }
 }
+# This storage account is expected to replace both "updates_jenkins_io_content" and "updates_jenkins_io_redirects"
+resource "azurerm_storage_share" "updates_jenkins_io_data" {
+  name                 = "updates-jenkins-io-data"
+  storage_account_name = azurerm_storage_account.updates_jenkins_io.name
+  quota                = 100 # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
+}
 resource "azurerm_storage_share" "updates_jenkins_io_content" {
   name                 = "updates-jenkins-io"
   storage_account_name = azurerm_storage_account.updates_jenkins_io.name
@@ -189,6 +195,66 @@ resource "kubernetes_persistent_volume_claim" "updates_jenkins_io_content" {
     resources {
       requests = {
         storage = "${azurerm_storage_share.updates_jenkins_io_content.quota}Gi"
+      }
+    }
+  }
+}
+
+# Persistent Data available in read and write
+resource "kubernetes_persistent_volume" "updates_jenkins_io_content_data" {
+  provider = kubernetes.publick8s
+  metadata {
+    name = azurerm_storage_share.updates_jenkins_io_data.name
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_storage_share.updates_jenkins_io_data.quota}Gi"
+    }
+    access_modes                     = ["ReadWriteMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.statically_provisioned_publick8s.id
+    mount_options = [
+      "dir_mode=0777",
+      "file_mode=0777",
+      "uid=0",
+      "gid=0",
+      "mfsymlinks",
+      "cache=strict", # Default on usual kernels but worth setting it explicitly
+      "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+      "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+    ]
+    persistent_volume_source {
+      csi {
+        driver  = "file.csi.azure.com"
+        fs_type = "ext4"
+        # `volumeHandle` must be unique on the cluster for this volume
+        volume_handle = azurerm_storage_share.updates_jenkins_io_data.name
+        read_only     = false
+        volume_attributes = {
+          resourceGroup = azurerm_resource_group.updates_jenkins_io.name
+          shareName     = azurerm_storage_share.updates_jenkins_io_data.name
+        }
+        node_stage_secret_ref {
+          name      = kubernetes_secret.updates_jenkins_io_storage.metadata[0].name
+          namespace = kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace
+        }
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "updates_jenkins_io_content_data" {
+  provider = kubernetes.publick8s
+  metadata {
+    name      = azurerm_storage_share.updates_jenkins_io_data.name
+    namespace = kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.updates_jenkins_io_content_data.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.updates_jenkins_io_content_data.metadata[0].name
+    storage_class_name = kubernetes_persistent_volume.updates_jenkins_io_content_data.spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = "${azurerm_storage_share.updates_jenkins_io_data.quota}Gi"
       }
     }
   }
