@@ -505,12 +505,12 @@ resource "azurerm_dns_a_record" "trusted_bounce" {
 ## Private endpoints
 ####################################################################################
 ## updates.jenkins.io's mirrorbits CLI Kubernetes Service (internal LB)
+## TODO: use updates_jenkins_io_data instead
 data "azurerm_private_link_service" "updates_jenkins_io_cli" {
   # https://github.com/jenkins-infra/kubernetes-management/blob/67e5741bf926c72c143604301132cbe6ada0bab8/config/updates.jenkins.io.yaml#L126
   name                = "updates.jenkins.io-cli"
   resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
 }
-
 resource "azurerm_private_endpoint" "updates_jio_mirrorbits_cli_for_trustedci" {
   name = "${data.azurerm_private_link_service.updates_jenkins_io_cli.name}-for-trustedci"
 
@@ -531,11 +531,45 @@ resource "azurerm_private_endpoint" "updates_jio_mirrorbits_cli_for_trustedci" {
   }
   tags = local.default_tags
 }
-
 resource "azurerm_private_dns_a_record" "updates_jio_mirrorbits_cli_for_trustedci" {
   name                = "updates.jio-cli"
   zone_name           = azurerm_private_dns_zone.trusted.name
   resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
   ttl                 = 60
   records             = [azurerm_private_endpoint.updates_jio_mirrorbits_cli_for_trustedci.private_service_connection[0].private_ip_address]
+}
+
+## updates.jenkins.io's internal services (RsyncDs, mirrorbits CLI, etc.)
+data "azurerm_private_link_service" "updates_jenkins_io_data" {
+  # TODO: track with updatecli
+  # https://github.com/jenkins-infra/kubernetes-management/blob/8b026b6e13ab726ce8064e842479839b371daf13/config/updates.jenkins.io-rsyncd-data.yaml#L40-L41
+  name                = "updates.jenkins.io-data"
+  resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
+}
+resource "azurerm_private_endpoint" "updates_jio_mirrorbits_data_for_trustedci" {
+  name = "${data.azurerm_private_link_service.updates_jenkins_io_data.name}-for-trustedci"
+
+  location            = var.location
+  resource_group_name = data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.resource_group_name
+  subnet_id           = data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.id
+
+  custom_network_interface_name = "${data.azurerm_private_link_service.updates_jenkins_io_data.name}-for-trustedci-nic"
+
+  private_service_connection {
+    name                           = "${data.azurerm_private_link_service.updates_jenkins_io_data.name}-for-trustedci"
+    private_connection_resource_id = data.azurerm_private_link_service.updates_jenkins_io_data.id
+    is_manual_connection           = false
+  }
+  private_dns_zone_group {
+    name                 = "trusted.ci.jenkins.io"
+    private_dns_zone_ids = [azurerm_private_dns_zone.trusted.id]
+  }
+  tags = local.default_tags
+}
+resource "azurerm_private_dns_a_record" "updates_jio_mirrorbits_data_for_trustedci" {
+  name                = "updates.jenkins.io-data"
+  zone_name           = azurerm_private_dns_zone.trusted.name
+  resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
+  ttl                 = 60
+  records             = [azurerm_private_endpoint.updates_jio_mirrorbits_data_for_trustedci.private_service_connection[0].private_ip_address]
 }
