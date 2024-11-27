@@ -222,7 +222,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "windows2019pool" {
   os_sku                = "Windows2019"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   auto_scaling_enabled  = true
-  min_count             = 1
+  min_count             = 0
   max_count             = 3
   zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_release_tier.id
