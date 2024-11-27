@@ -566,10 +566,10 @@ resource "azurerm_private_endpoint" "updates_jenkins_io_data_for_trustedci" {
   }
   tags = local.default_tags
 }
-resource "azurerm_private_dns_a_record" "updates_jio_mirrorbits_data_for_trustedci" {
+resource "azurerm_private_dns_a_record" "updates_jenkins_io_data_for_trustedci" {
   name                = "updates.jenkins.io-data"
   zone_name           = azurerm_private_dns_zone.trusted.name
   resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
   ttl                 = 60
-  records             = [azurerm_private_endpoint.updates_jio_mirrorbits_data_for_trustedci.private_service_connection[0].private_ip_address]
+  records             = [azurerm_private_endpoint.updates_jenkins_io_data_for_trustedci.private_service_connection[0].private_ip_address]
 }
