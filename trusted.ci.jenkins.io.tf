@@ -546,7 +546,7 @@ data "azurerm_private_link_service" "updates_jenkins_io_data" {
   name                = "updates.jenkins.io-data"
   resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
 }
-resource "azurerm_private_endpoint" "updates_jio_mirrorbits_data_for_trustedci" {
+resource "azurerm_private_endpoint" "updates_jenkins_io_data_for_trustedci" {
   name = "${data.azurerm_private_link_service.updates_jenkins_io_data.name}-for-trustedci"
 
   location            = var.location
