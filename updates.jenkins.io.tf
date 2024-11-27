@@ -218,7 +218,7 @@ resource "kubernetes_persistent_volume" "updates_jenkins_io_content_data" {
     persistent_volume_reclaim_policy = "Retain"
     storage_class_name               = kubernetes_storage_class.statically_provisioned_publick8s.id
     mount_options = [
-      "nconnect=8", # Ref. https://learn.microsoft.com/en-us/azure/azure-netapp-files/performance-linux-mount-options#nconnect
+      "nconnect=4", # Mandatory value (4) for Premium Azure File Share NFS 4.1. Increasesing require using NetApp NFS instead ($$$)
       "noresvport", # ref. https://linux.die.net/man/5/nfs
       "actimeo=10", # Data is changed quite often
       "cto",        # Ensure data consistency at the cost of slower I/O
