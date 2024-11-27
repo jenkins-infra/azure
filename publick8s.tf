@@ -367,6 +367,48 @@ module "cronjob_geoip_data_fileshare_serviceprincipal_writer" {
   default_tags                   = local.default_tags
 }
 
+
+resource "azurerm_storage_share" "geoip_data_staging" {
+  name                 = "geoip-data-staging"
+  storage_account_id = azurerm_storage_account.publick8s.id
+  quota                = 1 # GeoIP databses weight around 80Mb
+}
+resource "kubernetes_namespace" "geoip_data_staging" {
+  provider = kubernetes.publick8s
+
+  metadata {
+    name = azurerm_storage_share.geoip_data_staging.name
+  }
+}
+resource "kubernetes_secret" "geoip_data_staging" {
+  provider = kubernetes.publick8s
+
+  metadata {
+    name      = azurerm_storage_share.geoip_data_staging.name
+    namespace = azurerm_storage_share.geoip_data_staging.name
+  }
+
+  data = {
+    azurestorageaccountname = azurerm_storage_account.publick8s.name
+    azurestorageaccountkey  = azurerm_storage_account.publick8s.primary_access_key
+  }
+
+  type = "Opaque"
+}
+
+# Required to allow azcopy sync of geoip data from cronjob
+module "cronjob_geoip_data_staging_fileshare_serviceprincipal_writer" {
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+
+  service_fqdn                   = "${azurerm_resource_group.publick8s.name}-fileshare_serviceprincipal_writer-redirects"
+  active_directory_owners        = [data.azuread_service_principal.terraform_production.object_id]
+  active_directory_url           = "https://github.com/jenkins-infra/azure"
+  service_principal_end_date     = "2024-12-23T00:00:00Z"
+  file_share_resource_manager_id = azurerm_storage_share.geoip_data_staging.resource_manager_id
+  storage_account_id             = azurerm_storage_account.publick8s.id
+  default_tags                   = local.default_tags
+}
+
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/publick8s.yaml
 resource "azurerm_public_ip" "publick8s_ipv4" {
   name                = "public-publick8s-ipv4"
