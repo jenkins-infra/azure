@@ -370,7 +370,7 @@ module "cronjob_geoip_data_fileshare_serviceprincipal_writer" {
 
 resource "azurerm_storage_share" "geoip_data_staging" {
   name                 = "geoip-data-staging"
-  storage_account_id = azurerm_storage_account.publick8s.id
+  storage_account_name = azurerm_storage_account.publick8s.name
   quota                = 1 # GeoIP databses weight around 80Mb
 }
 resource "kubernetes_namespace" "geoip_data_staging" {
