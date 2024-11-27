@@ -45,7 +45,7 @@ resource "azurerm_storage_account" "updates_jenkins_io" {
 resource "azurerm_storage_share" "updates_jenkins_io_data" {
   name                 = "updates-jenkins-io-data"
   storage_account_name = azurerm_storage_account.updates_jenkins_io.name
-  quota                = 100 # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
+  quota                = 100   # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
   enabled_protocol     = "NFS" # Require a Premium Storage Account
 }
 
