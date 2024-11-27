@@ -373,28 +373,6 @@ resource "azurerm_storage_share" "geoip_data_staging" {
   storage_account_name = azurerm_storage_account.publick8s.name
   quota                = 1 # GeoIP databses weight around 80Mb
 }
-resource "kubernetes_namespace" "geoip_data_staging" {
-  provider = kubernetes.publick8s
-
-  metadata {
-    name = azurerm_storage_share.geoip_data_staging.name
-  }
-}
-resource "kubernetes_secret" "geoip_data_staging" {
-  provider = kubernetes.publick8s
-
-  metadata {
-    name      = azurerm_storage_share.geoip_data_staging.name
-    namespace = azurerm_storage_share.geoip_data_staging.name
-  }
-
-  data = {
-    azurestorageaccountname = azurerm_storage_account.publick8s.name
-    azurestorageaccountkey  = azurerm_storage_account.publick8s.primary_access_key
-  }
-
-  type = "Opaque"
-}
 
 # Required to allow azcopy sync of geoip data from cronjob
 module "cronjob_geoip_data_staging_fileshare_serviceprincipal_writer" {
