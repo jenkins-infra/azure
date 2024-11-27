@@ -16,6 +16,8 @@ resource "azurerm_storage_account" "updates_jenkins_io" {
   account_replication_type          = "ZRS"
   min_tls_version                   = "TLS1_2" # default value, needed for tfsec
   infrastructure_encryption_enabled = true
+  # Disabled for NFS - https://learn.microsoft.com/en-us/azure/storage/common/storage-require-secure-transfer?toc=%2Fazure%2Fstorage%2Ffiles%2Ftoc.json
+  https_traffic_only_enabled = false
 
   tags = local.default_tags
 
@@ -44,7 +46,9 @@ resource "azurerm_storage_share" "updates_jenkins_io_data" {
   name                 = "updates-jenkins-io-data"
   storage_account_name = azurerm_storage_account.updates_jenkins_io.name
   quota                = 100 # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
+  enabled_protocol     = "NFS"
 }
+
 resource "azurerm_storage_share" "updates_jenkins_io_content" {
   name                 = "updates-jenkins-io"
   storage_account_name = azurerm_storage_account.updates_jenkins_io.name
@@ -214,14 +218,10 @@ resource "kubernetes_persistent_volume" "updates_jenkins_io_content_data" {
     persistent_volume_reclaim_policy = "Retain"
     storage_class_name               = kubernetes_storage_class.statically_provisioned_publick8s.id
     mount_options = [
-      "dir_mode=0777",
-      "file_mode=0777",
-      "uid=0",
-      "gid=0",
-      "mfsymlinks",
-      "cache=strict", # Default on usual kernels but worth setting it explicitly
-      "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
-      "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+      "nconnect=8", # Ref. https://learn.microsoft.com/en-us/azure/azure-netapp-files/performance-linux-mount-options#nconnect
+      "noresvport", # ref. https://linux.die.net/man/5/nfs
+      "actimeo=10", # Data is changed quite often
+      "cto",        # Ensure data consistency at the cost of slower I/O
     ]
     persistent_volume_source {
       csi {
@@ -231,8 +231,10 @@ resource "kubernetes_persistent_volume" "updates_jenkins_io_content_data" {
         volume_handle = azurerm_storage_share.updates_jenkins_io_data.name
         read_only     = false
         volume_attributes = {
-          resourceGroup = azurerm_resource_group.updates_jenkins_io.name
-          shareName     = azurerm_storage_share.updates_jenkins_io_data.name
+          protocol       = "nfs"
+          resourceGroup  = azurerm_resource_group.updates_jenkins_io.name
+          shareName      = azurerm_storage_share.updates_jenkins_io_data.name
+          storageAccount = azurerm_storage_account.updates_jenkins_io.name
         }
         node_stage_secret_ref {
           name      = kubernetes_secret.updates_jenkins_io_storage.metadata[0].name
