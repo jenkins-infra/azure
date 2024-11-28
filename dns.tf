@@ -18,7 +18,7 @@ data "azurerm_dns_zone" "jenkinsciorg" {
 
 # Managed in jenkins-infra/azure-net for the letsencrypt IDP
 data "azurerm_dns_zone" "trusted_ci_jenkins_io" {
-  name                = azurerm_private_dns_zone.trusted.name
+  name                = "trusted.ci.jenkins.io"
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
 }
 # Managed in jenkins-infra/azure-net for the letsencrypt IDP
