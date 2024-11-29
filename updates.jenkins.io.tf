@@ -84,128 +84,12 @@ resource "kubernetes_secret" "updates_jenkins_io_storage" {
   type = "Opaque"
 }
 
-# Persistent Data for the httpd services
-resource "kubernetes_persistent_volume" "updates_jenkins_io_redirects" {
-  provider = kubernetes.publick8s
-  metadata {
-    name = azurerm_storage_share.updates_jenkins_io_redirects.name
-  }
-  spec {
-    capacity = {
-      storage = "${azurerm_storage_share.updates_jenkins_io_redirects.quota}Gi"
-    }
-    access_modes                     = ["ReadOnlyMany"]
-    persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = kubernetes_storage_class.statically_provisioned_publick8s.id
-    mount_options = [
-      "dir_mode=0777",
-      "file_mode=0777",
-      "uid=0",
-      "gid=0",
-      "mfsymlinks",
-      "cache=strict", # Default on usual kernels but worth setting it explicitly
-      "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
-      "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
-    ]
-    persistent_volume_source {
-      csi {
-        driver  = "file.csi.azure.com"
-        fs_type = "ext4"
-        # `volumeHandle` must be unique on the cluster for this volume
-        volume_handle = azurerm_storage_share.updates_jenkins_io_redirects.name
-        read_only     = true
-        volume_attributes = {
-          resourceGroup = azurerm_resource_group.updates_jenkins_io.name
-          shareName     = azurerm_storage_share.updates_jenkins_io_redirects.name
-        }
-        node_stage_secret_ref {
-          name      = kubernetes_secret.updates_jenkins_io_storage.metadata[0].name
-          namespace = kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace
-        }
-      }
-    }
-  }
-}
-resource "kubernetes_persistent_volume_claim" "updates_jenkins_io_redirects" {
-  provider = kubernetes.publick8s
-  metadata {
-    name      = azurerm_storage_share.updates_jenkins_io_redirects.name
-    namespace = kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace
-  }
-  spec {
-    access_modes       = kubernetes_persistent_volume.updates_jenkins_io_redirects.spec[0].access_modes
-    volume_name        = kubernetes_persistent_volume.updates_jenkins_io_redirects.metadata[0].name
-    storage_class_name = kubernetes_persistent_volume.updates_jenkins_io_redirects.spec[0].storage_class_name
-    resources {
-      requests = {
-        storage = "${azurerm_storage_share.updates_jenkins_io_redirects.quota}Gi"
-      }
-    }
-  }
-}
-
-# Persistent Data for the mirrorbits services ("repository" in mirrorbits naming)
-resource "kubernetes_persistent_volume" "updates_jenkins_io_content" {
-  provider = kubernetes.publick8s
-  metadata {
-    name = azurerm_storage_share.updates_jenkins_io_content.name
-  }
-  spec {
-    capacity = {
-      storage = "${azurerm_storage_share.updates_jenkins_io_content.quota}Gi"
-    }
-    access_modes                     = ["ReadOnlyMany"]
-    persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = kubernetes_storage_class.statically_provisioned_publick8s.id
-    mount_options = [
-      "dir_mode=0777",
-      "file_mode=0777",
-      "uid=0",
-      "gid=0",
-      "mfsymlinks",
-      "cache=strict", # Default on usual kernels but worth setting it explicitly
-      "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
-      "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
-    ]
-    persistent_volume_source {
-      csi {
-        driver  = "file.csi.azure.com"
-        fs_type = "ext4"
-        # `volumeHandle` must be unique on the cluster for this volume
-        volume_handle = azurerm_storage_share.updates_jenkins_io_content.name
-        read_only     = true
-        volume_attributes = {
-          resourceGroup = azurerm_resource_group.updates_jenkins_io.name
-          shareName     = azurerm_storage_share.updates_jenkins_io_content.name
-        }
-        node_stage_secret_ref {
-          name      = kubernetes_secret.updates_jenkins_io_storage.metadata[0].name
-          namespace = kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace
-        }
-      }
-    }
-  }
-}
-resource "kubernetes_persistent_volume_claim" "updates_jenkins_io_content" {
-  provider = kubernetes.publick8s
-  metadata {
-    name      = azurerm_storage_share.updates_jenkins_io_content.name
-    namespace = kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace
-  }
-  spec {
-    access_modes       = kubernetes_persistent_volume.updates_jenkins_io_content.spec[0].access_modes
-    volume_name        = kubernetes_persistent_volume.updates_jenkins_io_content.metadata[0].name
-    storage_class_name = kubernetes_persistent_volume.updates_jenkins_io_content.spec[0].storage_class_name
-    resources {
-      requests = {
-        storage = "${azurerm_storage_share.updates_jenkins_io_content.quota}Gi"
-      }
-    }
-  }
-}
-
 # Persistent Data available in read and write
-resource "kubernetes_persistent_volume" "updates_jenkins_io_content_data" {
+moved {
+  from = kubernetes_persistent_volume.updates_jenkins_io_content_data
+  to   = kubernetes_persistent_volume.updates_jenkins_io_data
+}
+resource "kubernetes_persistent_volume" "updates_jenkins_io_data" {
   provider = kubernetes.publick8s
   metadata {
     name = azurerm_storage_share.updates_jenkins_io_data.name
@@ -236,6 +120,7 @@ resource "kubernetes_persistent_volume" "updates_jenkins_io_content_data" {
           shareName      = azurerm_storage_share.updates_jenkins_io_data.name
           storageAccount = azurerm_storage_account.updates_jenkins_io.name
         }
+        # Check if still needed with NFS
         node_stage_secret_ref {
           name      = kubernetes_secret.updates_jenkins_io_storage.metadata[0].name
           namespace = kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace
@@ -244,16 +129,20 @@ resource "kubernetes_persistent_volume" "updates_jenkins_io_content_data" {
     }
   }
 }
-resource "kubernetes_persistent_volume_claim" "updates_jenkins_io_content_data" {
+moved {
+  from = kubernetes_persistent_volume_claim.updates_jenkins_io_content_data
+  to   = kubernetes_persistent_volume_claim.updates_jenkins_io_data
+}
+resource "kubernetes_persistent_volume_claim" "updates_jenkins_io_data" {
   provider = kubernetes.publick8s
   metadata {
     name      = azurerm_storage_share.updates_jenkins_io_data.name
     namespace = kubernetes_secret.updates_jenkins_io_storage.metadata[0].namespace
   }
   spec {
-    access_modes       = kubernetes_persistent_volume.updates_jenkins_io_content_data.spec[0].access_modes
-    volume_name        = kubernetes_persistent_volume.updates_jenkins_io_content_data.metadata[0].name
-    storage_class_name = kubernetes_persistent_volume.updates_jenkins_io_content_data.spec[0].storage_class_name
+    access_modes       = kubernetes_persistent_volume.updates_jenkins_io_data.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.updates_jenkins_io_data.metadata[0].name
+    storage_class_name = kubernetes_persistent_volume.updates_jenkins_io_data.spec[0].storage_class_name
     resources {
       requests = {
         storage = "${azurerm_storage_share.updates_jenkins_io_data.quota}Gi"
