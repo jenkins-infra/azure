@@ -9,19 +9,19 @@ resource "local_file" "jenkins_infra_data_report" {
     },
     "updates.jenkins.io" = {
       "content" = {
-        "share_name" = azurerm_storage_share.updates_jenkins_io_content.name,
-        "share_uri"  = "/",
-        "pvc_name"   = kubernetes_persistent_volume_claim.updates_jenkins_io_content.metadata[0].name,
+        "share_name" = azurerm_storage_share.updates_jenkins_io_data.name,
+        "share_uri"  = "/content/",
+        "pvc_name"   = kubernetes_persistent_volume_claim.updates_jenkins_io_data.metadata[0].name,
       },
       "redirections-unsecured" = {
-        "share_name" = azurerm_storage_share.updates_jenkins_io_redirects.name
-        "share_uri"  = "/unsecured/",
-        "pvc_name"   = kubernetes_persistent_volume_claim.updates_jenkins_io_redirects.metadata[0].name,
+        "share_name" = azurerm_storage_share.updates_jenkins_io_data.name
+        "share_uri"  = "/redirections-unsecured/",
+        "pvc_name"   = kubernetes_persistent_volume_claim.updates_jenkins_io_data.metadata[0].name,
       },
       "redirections-secured" = {
-        "share_name" = azurerm_storage_share.updates_jenkins_io_redirects.name
-        "share_uri"  = "/secured/",
-        "pvc_name"   = kubernetes_persistent_volume_claim.updates_jenkins_io_redirects.metadata[0].name,
+        "share_name" = azurerm_storage_share.updates_jenkins_io_data.name
+        "share_uri"  = "/redirections-secured/",
+        "pvc_name"   = kubernetes_persistent_volume_claim.updates_jenkins_io_data.metadata[0].name,
       },
       "geoip_data" = {
         "share_name" = azurerm_storage_share.geoip_data.name
