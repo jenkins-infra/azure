@@ -24,11 +24,8 @@ resource "azurerm_storage_account" "updates_jenkins_io" {
   # Adding a network rule with `public_network_access_enabled` set to `true` (default) selects the option "Enabled from selected virtual networks and IP addresses"
   network_rules {
     default_action = "Deny"
-    ip_rules = flatten(
-      concat(
-        [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value],
-      )
-    )
+
+    # Only NFS share means only private network access - https://learn.microsoft.com/en-us/azure/storage/files/files-nfs-protocol#security-and-networking
     virtual_network_subnet_ids = [
       data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.id,
       data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.id,
@@ -47,17 +44,6 @@ resource "azurerm_storage_share" "updates_jenkins_io_data" {
   storage_account_name = azurerm_storage_account.updates_jenkins_io.name
   quota                = 100   # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
   enabled_protocol     = "NFS" # Require a Premium Storage Account
-}
-
-resource "azurerm_storage_share" "updates_jenkins_io_content" {
-  name                 = "updates-jenkins-io"
-  storage_account_name = azurerm_storage_account.updates_jenkins_io.name
-  quota                = 100 # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
-}
-resource "azurerm_storage_share" "updates_jenkins_io_redirects" {
-  name                 = "updates-jenkins-io-redirects"
-  storage_account_name = azurerm_storage_account.updates_jenkins_io.name
-  quota                = 100 # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
 }
 
 ## Kubernetes Resources (static provision of persistent volumes)
@@ -85,10 +71,6 @@ resource "kubernetes_secret" "updates_jenkins_io_storage" {
 }
 
 # Persistent Data available in read and write
-moved {
-  from = kubernetes_persistent_volume.updates_jenkins_io_content_data
-  to   = kubernetes_persistent_volume.updates_jenkins_io_data
-}
 resource "kubernetes_persistent_volume" "updates_jenkins_io_data" {
   provider = kubernetes.publick8s
   metadata {
@@ -128,10 +110,6 @@ resource "kubernetes_persistent_volume" "updates_jenkins_io_data" {
       }
     }
   }
-}
-moved {
-  from = kubernetes_persistent_volume_claim.updates_jenkins_io_content_data
-  to   = kubernetes_persistent_volume_claim.updates_jenkins_io_data
 }
 resource "kubernetes_persistent_volume_claim" "updates_jenkins_io_data" {
   provider = kubernetes.publick8s
