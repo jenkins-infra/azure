@@ -333,12 +333,8 @@ resource "azurerm_network_security_rule" "allow_out_many_from_trusted_ephemeral_
     "3390", # mirrorbits CLI (content-secured)
     "3391", # mirrorbits CLI (content-unsecured)
   ]
-  source_address_prefixes = data.azurerm_subnet.trusted_ci_jenkins_io_sponsorship_ephemeral_agents.address_prefixes
-  destination_address_prefixes = distinct(
-    flatten(
-      [for rs in azurerm_private_endpoint.dockerhub_mirror["trustedcijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
-    )
-  )
+  source_address_prefixes     = data.azurerm_subnet.trusted_ci_jenkins_io_sponsorship_ephemeral_agents.address_prefixes
+  destination_address_prefix  = module.trustedci_ephemeral_agents_private_resources.endpoint_ip
   resource_group_name         = azurerm_resource_group.trusted_ci_jenkins_io_controller_jenkins_sponsorship.name
   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
 }
