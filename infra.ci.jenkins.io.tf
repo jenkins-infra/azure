@@ -182,7 +182,7 @@ module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
   }
 }
 
-# Allow infra.ci VM agents to reach packer VMs with SSH
+# Allow infra.ci VM agents to reach packer VMs with SSH on azure
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_to_packer_vms" {
   provider                    = azurerm.jenkins-sponsorship
   name                        = "allow-outbound-ssh-from-infraci-agents-to-packer-vms"
@@ -197,6 +197,23 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents
   resource_group_name         = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
 }
+
+# Allow infra.ci VM agents to reach packer VMs with SSH on aws
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_to_packer_vms_on_aws" {
+  provider                    = azurerm.jenkins-sponsorship
+  name                        = "allow-outbound-ssh-from-infraci-agents-to-packer-vms"
+  priority                    = 4079
+  direction                   = "Outbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "22"
+  source_address_prefix       = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.address_prefix
+  destination_address_prefix  = "*" # Allow all the internet for now need to define a correct target for packer vm in aws
+  resource_group_name         = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
+  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
+}
+
 # Allow infra.ci VM agents to reach packer VMs with WinRM (HTTP without TLS)
 resource "azurerm_network_security_rule" "allow_outbound_winrm_http_from_infraci_agents_to_packer_vms" {
   provider                    = azurerm.jenkins-sponsorship
