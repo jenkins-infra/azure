@@ -199,9 +199,9 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents
 }
 
 # Allow infra.ci VM agents to reach packer VMs with SSH on aws
-resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_to_packer_vms_on_aws" {
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_to_aws_packer" {
   provider                    = azurerm.jenkins-sponsorship
-  name                        = "allow-outbound-ssh-from-infraci-agents-to-packer-vms"
+  name                        = "allow-outbound-ssh-from-infraci-agents-to-aws-packer"
   priority                    = 4079
   direction                   = "Outbound"
   access                      = "Allow"
