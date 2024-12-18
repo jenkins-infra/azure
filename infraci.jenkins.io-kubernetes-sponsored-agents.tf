@@ -45,22 +45,24 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
 
   default_node_pool {
     name                         = "systempool1"
-    only_critical_addons_enabled = true                # This property is the only valid way to add the "CriticalAddonsOnly=true:NoSchedule" taint to the default node pool
-    vm_size                      = "Standard_D4pds_v5" # At least 4 vCPUS/4 Gb as per AKS best practises
+    only_critical_addons_enabled = true # This property is the only valid way to add the "CriticalAddonsOnly=true:NoSchedule" taint to the default node pool
+    vm_size                      = "Standard_D2pds_v5"
+    temporary_name_for_rotation  = "syspooltemp"
     upgrade_settings {
       max_surge = "10%"
     }
     os_sku               = "AzureLinux"
     os_disk_type         = "Ephemeral"
-    os_disk_size_gb      = 150 # Ref. Cache storage size athttps://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
+    os_disk_size_gb      = 75 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
     orchestrator_version = local.kubernetes_versions["infracijenkinsio_agents_1"]
     kubelet_disk_type    = "OS"
     auto_scaling_enabled = true
-    min_count            = 2 # for best practises
+    min_count            = 2 # for best practices
     max_count            = 3 # for upgrade
     vnet_subnet_id       = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
     tags                 = local.default_tags
-    zones                = local.infracijenkinsio_agents_1_compute_zones
+    # Avoid deploying system pool in the same zone as other node pools
+    zones = [for zone in local.infracijenkinsio_agents_1_compute_zones : zone + 1]
   }
 
   tags = local.default_tags
