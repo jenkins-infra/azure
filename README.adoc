@@ -30,6 +30,10 @@ In order to use this repository to provision the Jenkins infrastructure on azure
 git submodule update --init --recursive
 ----
 
+* Routing to database (private endpoints and private DNSes):
+** VPN access is required with routing to the database subnets set up to your user
+** As there are no public DNS, set up your local `/etc/hosts` (check the `providers.tf` for details)
+
 == HowTo
 
 === Provision
