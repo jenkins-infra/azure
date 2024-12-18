@@ -1,3 +1,13 @@
+# NOTE: managing DB resources requires routes to database (private endpoints and private DNSes):
+# * Either:
+# ** VPN access is required with routing to the database subnets set up to your user,
+# ** OR running terraform in a subnet with a private endpoint access/routing to the DB subnet
+# * Also, as there are no public DNS, either:
+# ** Set up your local `/etc/hosts` (check the `providers.tf` for details),
+# ** OR have your subnet set up to use the private DNS records
+######
+# Dedicated subnet is reserved as "delegated" for the mysql server on the public network
+# Defined in https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
 data "azurerm_subnet" "public_db_vnet_mysql_tier" {
   name                 = "${data.azurerm_virtual_network.public_db.name}-mysql-tier"
   virtual_network_name = data.azurerm_virtual_network.public_db.name
