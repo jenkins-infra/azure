@@ -31,7 +31,7 @@ module "ci_jenkins_io_sponsorship" {
   controller_service_principal_ids = [
     data.azuread_service_principal.terraform_production.object_id,
   ]
-  controller_service_principal_end_date = "2025-03-28T00:00:00Z"
+  controller_service_principal_end_date = "2025-03-29T00:00:00Z"
   controller_packer_rg_ids = [
     azurerm_resource_group.packer_images["prod"].id
   ]
