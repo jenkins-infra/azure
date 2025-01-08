@@ -88,7 +88,7 @@ end_dates:
         > ⚠️ Merging this PR will prevent the "jenkins.io" deployment job to succeed and update the www.jenkins.io website.
         > You'll have to update the top-level credential `trustedci_jenkinsio_fileshare_serviceprincipal_writer` on trusted.ci.jenkins.io UI.
         >
-        > This credential value can be retrieved in the Terraform state from `module.trustedci_jenkinsio_fileshare_serviceprincipal_writer.azuread_application.fileshare_serviceprincipal_writer_application_client_password`.
+        > This credential value can be retrieved in the Terraform state from `module.trustedci_jenkinsio_fileshare_serviceprincipal_writer.azuread_application.fileshare_serviceprincipal_writer`.
     trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer:
       service: "javadoc.jenkins.io"
       doc_how_to_get_credential: |
@@ -97,7 +97,7 @@ end_dates:
         > ⚠️ Merging this PR will prevent the "javadoc.jenkins.io" deployment job to succeed and update the www.jenkins.io website.
         > You'll have to update the top-level credential `trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer` on trusted.ci.jenkins.io UI.
         >
-        > This credential value can be retrieved in the Terraform state from `module.trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer.azuread_application.fileshare_serviceprincipal_writer_application_client_password`.
+        > This credential value can be retrieved in the Terraform state from `module.trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer.azuread_application.fileshare_serviceprincipal_writer`.
   publick8s:
     cronjob_geoip_data_fileshare_serviceprincipal_writer:
       service: "geoip"
@@ -107,12 +107,12 @@ end_dates:
         > ⚠️ Merging this PR will prevent the "geoip kubernetes cronjob" to succeed and update the mirrorbits geoip databases.
         > You'll have to update the sops secrets `./secrets/config/geoipdata/secrets.yaml`
         >
-        > This credential value can be retrieved in the Terraform state from `module.cronjob_geoip_data_fileshare_serviceprincipal_writer.azuread_application.fileshare_serviceprincipal_writer_application_client_password`.
+        > This credential value can be retrieved in the Terraform state from `module.cronjob_geoip_staging_fileshare_serviceprincipal_writer.azuread_application_password.fileshare_serviceprincipal_writer`.
     cronjob_geoip_data_staging_fileshare_serviceprincipal_writer:
       service: "geoip_staging"
       doc_how_to_get_credential: |
         > this is for the staging environment
         > ⚠️ Merging this PR will prevent the "geoip kubernetes cronjob" to succeed and update the mirrorbits geoip databases.
-        > You'll have to update the sops secrets `./secrets/config/geoipdata/secrets.yaml`
+        > You'll have to update the sops secrets `./secrets/config/geoipdata/staging-secrets.yaml`
         >
-        > This credential value can be retrieved in the Terraform state from `module.cronjob_geoip_data_fileshare_serviceprincipal_writer.azuread_application.fileshare_serviceprincipal_writer_application_client_password`.
+        > This credential value can be retrieved in the Terraform state from `module.cronjob_geoip_data_staging_fileshare_serviceprincipal_writer.azuread_application_password.fileshare_serviceprincipal_writer`.
