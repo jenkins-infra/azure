@@ -116,3 +116,20 @@ end_dates:
         > You'll have to update the sops secrets `./secrets/config/geoipdata/staging-secrets.yaml`
         >
         > This credential value can be retrieved in the Terraform state from `module.cronjob_geoip_data_staging_fileshare_serviceprincipal_writer.azuread_application_password.fileshare_serviceprincipal_writer`.
+updatecli_end_dates:
+  infra.ci.jenkins.io:
+    custom_hcl_key: resource.azuread_application_password.updatecli_infra_ci_jenkins_io.end_date
+    doc_how_to_get_credential: |
+      > [!IMPORTANT]
+      >
+      > ⚠️ Merging this PR will prevent updatecli to use `az` until the credential is updated on the controller.
+
+      You'll have to update the credential on infra.ci.jenkins.io's encrypted secrets:
+
+      - Update the secret value in jenkins-infra/chart-secrets (or kubernetes-management/secrets), add, commit and push the change
+      - Trigger a build of the `kubernetes-management` job on infra.ci.jenkins.io to ensure secret value is updated in Kubernetes secrets
+      - Finally, trigger a reload from jcasc or a controller restart (pod delete, or rollout) to make sure secrets are used to update the Jenkins credential.
+      - test by replaying a build on main `https://infra.ci.jenkins.io/job/updatecli/job/packer-images/job/main/` and check the logs for an azure check (⚠️ do not rely on green result)
+
+      The new password value, once the PR is merged and deployed, can be retrieved from the Terraform state,
+      by searching for `azuread_application_password.updatecli_infra_ci_jenkins_io.value`.
