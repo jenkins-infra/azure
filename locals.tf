@@ -46,10 +46,10 @@ locals {
   admin_username = "jenkins-infra-team"
 
   kubernetes_versions = {
-    "cijenkinsio_agents_1"      = "1.29.10"
-    "infracijenkinsio_agents_1" = "1.29.10"
-    "privatek8s"                = "1.29.10"
-    "publick8s"                 = "1.29.10"
+    "cijenkinsio_agents_1"      = "1.29.11"
+    "infracijenkinsio_agents_1" = "1.29.11"
+    "privatek8s"                = "1.29.11"
+    "publick8s"                 = "1.29.11"
   }
 
   ci_jenkins_io_fqdn                 = "ci.jenkins.io"
