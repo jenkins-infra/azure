@@ -29,6 +29,12 @@ resource "local_file" "jenkins_infra_data_report" {
         "pvc_name"   = kubernetes_persistent_volume_claim.updates_jenkins_io_geoipdata.metadata[0].name,
       }
     },
+    "publick8s" = {
+      hostname = azurerm_kubernetes_cluster.publick8s.kube_config[0].host,
+    },
+    "privatek8s" = {
+      hostname = azurerm_kubernetes_cluster.privatek8s.kube_config[0].host,
+    },
   })
   filename = "${path.module}/jenkins-infra-data-reports/azure.json"
 }
