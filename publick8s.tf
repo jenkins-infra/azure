@@ -25,11 +25,11 @@ data "azurerm_subnet" "public_vnet_data_tier" {
 
 #trivy:ignore:azure-container-logging #trivy:ignore:azure-container-limit-authorized-ips
 resource "azurerm_kubernetes_cluster" "publick8s" {
-  name                              = "publick8s-${random_pet.suffix_publick8s.id}"
+  name                              = local.aks_clusters["publick8s"].name
   location                          = azurerm_resource_group.publick8s.location
   resource_group_name               = azurerm_resource_group.publick8s.name
-  kubernetes_version                = local.kubernetes_versions["publick8s"]
-  dns_prefix                        = "publick8s-${random_pet.suffix_publick8s.id}"
+  kubernetes_version                = local.aks_clusters["publick8s"].kubernetes_version
+  dns_prefix                        = local.aks_clusters["publick8s"].name
   role_based_access_control_enabled = true # default value but made explicit to please trivy
   api_server_access_profile {
     authorized_ip_ranges = setunion(
@@ -85,7 +85,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     kubelet_disk_type    = "OS"
     os_disk_type         = "Ephemeral"
     os_disk_size_gb      = 50
-    orchestrator_version = local.kubernetes_versions["publick8s"]
+    orchestrator_version = local.aks_clusters["publick8s"].kubernetes_version
     auto_scaling_enabled = true
     min_count            = 2
     max_count            = 4
@@ -101,12 +101,10 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   tags = local.default_tags
 }
 
-
 data "azurerm_kubernetes_cluster" "publick8s" {
-  name                = "publick8s-${random_pet.suffix_publick8s.id}"
+  name                = local.aks_clusters["publick8s"].name
   resource_group_name = azurerm_resource_group.publick8s.name
 }
-
 
 resource "azurerm_kubernetes_cluster_node_pool" "x86small" {
   name    = "x86small"
@@ -116,7 +114,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "x86small" {
   }
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 100 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
-  orchestrator_version  = local.kubernetes_versions["publick8s"]
+  orchestrator_version  = local.aks_clusters["publick8s"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   auto_scaling_enabled  = true
   min_count             = 0
@@ -139,7 +137,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "arm64small2" {
   }
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
-  orchestrator_version  = local.kubernetes_versions["publick8s"]
+  orchestrator_version  = local.aks_clusters["publick8s"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
   auto_scaling_enabled  = true
   min_count             = 0
