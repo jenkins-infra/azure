@@ -30,10 +30,10 @@ resource "local_file" "jenkins_infra_data_report" {
       }
     },
     "publick8s" = {
-      hostname = azurerm_kubernetes_cluster.publick8s.kube_config[0].host,
+      hostname = data.azurerm_kubernetes_cluster.publick8s.fqdn,
     },
     "privatek8s" = {
-      hostname = azurerm_kubernetes_cluster.privatek8s.kube_config[0].host,
+      hostname = data.azurerm_kubernetes_cluster.privatek8s.fqdn,
     },
   })
   filename = "${path.module}/jenkins-infra-data-reports/azure.json"
