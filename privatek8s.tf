@@ -35,11 +35,11 @@ data "azurerm_subnet" "privatek8s_release_ci_controller_tier" {
 
 #trivy:ignore:azure-container-logging #trivy:ignore:azure-container-limit-authorized-ips
 resource "azurerm_kubernetes_cluster" "privatek8s" {
-  name                              = "privatek8s-${random_pet.suffix_privatek8s.id}"
+  name                              = local.aks_clusters["privatek8s"].name
   location                          = azurerm_resource_group.privatek8s.location
   resource_group_name               = azurerm_resource_group.privatek8s.name
-  kubernetes_version                = local.kubernetes_versions["privatek8s"]
-  dns_prefix                        = "privatek8s-${random_pet.suffix_privatek8s.id}"
+  kubernetes_version                = local.aks_clusters["privatek8s"].kubernetes_version
+  dns_prefix                        = local.aks_clusters["privatek8s"].name
   role_based_access_control_enabled = true # default value but made explicit to please trivy
 
   api_server_access_profile {
@@ -82,7 +82,7 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
     os_sku               = "Ubuntu"
     os_disk_type         = "Ephemeral"
     os_disk_size_gb      = 50 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dav4-dasv4-series#dasv4-series (depends on the instance size)
-    orchestrator_version = local.kubernetes_versions["privatek8s"]
+    orchestrator_version = local.aks_clusters["privatek8s"].kubernetes_version
     kubelet_disk_type    = "OS"
     auto_scaling_enabled = true
     min_count            = 1
@@ -111,7 +111,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linuxpool" {
   }
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 100 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
-  orchestrator_version  = local.kubernetes_versions["privatek8s"]
+  orchestrator_version  = local.aks_clusters["privatek8s"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   auto_scaling_enabled  = true
   min_count             = 0
@@ -136,7 +136,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infraci_controller" {
   os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
-  orchestrator_version  = local.kubernetes_versions["privatek8s"]
+  orchestrator_version  = local.aks_clusters["privatek8s"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   auto_scaling_enabled  = true
   min_count             = 1
@@ -165,7 +165,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "releaseci_controller" {
   os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
-  orchestrator_version  = local.kubernetes_versions["privatek8s"]
+  orchestrator_version  = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   auto_scaling_enabled  = true
   min_count             = 1
@@ -191,7 +191,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "releasepool" {
   }
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 200 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
-  orchestrator_version  = local.kubernetes_versions["privatek8s"]
+  orchestrator_version  = local.aks_clusters["privatek8s"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   auto_scaling_enabled  = true
   min_count             = 0
@@ -217,7 +217,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "windows2019pool" {
   }
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 100 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
-  orchestrator_version  = local.kubernetes_versions["privatek8s"]
+  orchestrator_version  = local.aks_clusters["privatek8s"].kubernetes_version
   os_type               = "Windows"
   os_sku                = "Windows2019"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
@@ -236,6 +236,11 @@ resource "azurerm_kubernetes_cluster_node_pool" "windows2019pool" {
   }
 
   tags = local.default_tags
+}
+
+data "azurerm_kubernetes_cluster" "privatek8s" {
+  name                = local.aks_clusters["privatek8s"].name
+  resource_group_name = azurerm_resource_group.privatek8s.name
 }
 
 # Allow cluster to manage LBs in the privatek8s-tier subnet (Public LB)

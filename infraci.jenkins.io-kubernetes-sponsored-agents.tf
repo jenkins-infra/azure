@@ -15,7 +15,7 @@ data "azurerm_subnet" "infraci_jenkins_io_kubernetes_agent_sponsorship" {
 #trivy:ignore:avd-azu-0040 # No need to enable oms_agent for Azure monitoring as we already have datadog
 resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
   provider = azurerm.jenkins-sponsorship
-  name     = "infracijenkinsio-agents-1"
+  name     = local.aks_clusters["infracijenkinsio_agents_1"].name
   sku_tier = "Standard"
   ## Private cluster requires network setup to allow API access from:
   # - infra.ci.jenkins.io agents (for both terraform job agents and kubernetes-management agents)
@@ -25,7 +25,7 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
   dns_prefix                          = "infracijenkinsioagents1" # Avoid hyphens in this DNS host
   location                            = azurerm_resource_group.infracijio_kubernetes_agents_sponsorship.location
   resource_group_name                 = azurerm_resource_group.infracijio_kubernetes_agents_sponsorship.name
-  kubernetes_version                  = local.kubernetes_versions["infracijenkinsio_agents_1"]
+  kubernetes_version                  = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
   role_based_access_control_enabled   = true # default value but made explicit to please trivy
 
   image_cleaner_interval_hours = 48
@@ -54,7 +54,7 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
     os_sku               = "AzureLinux"
     os_disk_type         = "Ephemeral"
     os_disk_size_gb      = 75 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
-    orchestrator_version = local.kubernetes_versions["infracijenkinsio_agents_1"]
+    orchestrator_version = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
     kubelet_disk_type    = "OS"
     auto_scaling_enabled = true
     min_count            = 2 # for best practices
@@ -80,7 +80,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_agents_1_sponsorsh
   os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 300 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dasv5-dadsv5-series (depends on the instance size)
-  orchestrator_version  = local.kubernetes_versions["infracijenkinsio_agents_1"]
+  orchestrator_version  = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.id
   auto_scaling_enabled  = true
   min_count             = 0
@@ -115,7 +115,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_agents_1_sponsorshi
   os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv5-series?tabs=sizebasic (depends on the instance size)
-  orchestrator_version  = local.kubernetes_versions["infracijenkinsio_agents_1"]
+  orchestrator_version  = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.id
   auto_scaling_enabled  = true
   min_count             = 1 # Azure autoscaler with ARM64 is really slow when starting from zero nodes.

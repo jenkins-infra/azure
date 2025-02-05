@@ -45,11 +45,23 @@ locals {
 
   admin_username = "jenkins-infra-team"
 
-  kubernetes_versions = {
-    "cijenkinsio_agents_1"      = "1.29.11"
-    "infracijenkinsio_agents_1" = "1.29.11"
-    "privatek8s"                = "1.29.11"
-    "publick8s"                 = "1.29.11"
+  aks_clusters = {
+    "cijenkinsio_agents_1" = {
+      name               = "cijenkinsio-agents-1",
+      kubernetes_version = "1.29.11",
+    }
+    "infracijenkinsio_agents_1" = {
+      name               = "infracijenkinsio-agents-1",
+      kubernetes_version = "1.29.11",
+    }
+    "privatek8s" = {
+      name               = "privatek8s-${random_pet.suffix_privatek8s.id}",
+      kubernetes_version = "1.29.11",
+    }
+    "publick8s" = {
+      name               = "publick8s-${random_pet.suffix_publick8s.id}",
+      kubernetes_version = "1.29.11",
+    }
   }
 
   ci_jenkins_io_fqdn                 = "ci.jenkins.io"
