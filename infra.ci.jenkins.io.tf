@@ -333,7 +333,10 @@ resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_disk_reader" 
   scope = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins.id
 
   permissions {
-    actions = ["Microsoft.Compute/disks/read"]
+    actions = [
+      "Microsoft.Compute/disks/read",
+      "Microsoft.Compute/disks/write",
+    ]
   }
 }
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_azurerm_privatek8s" {

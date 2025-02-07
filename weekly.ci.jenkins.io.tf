@@ -58,7 +58,10 @@ resource "azurerm_role_definition" "weekly_ci_jenkins_io_controller_disk_reader"
   scope = azurerm_resource_group.weekly_ci_controller.id
 
   permissions {
-    actions = ["Microsoft.Compute/disks/read"]
+    actions = [
+      "Microsoft.Compute/disks/read",
+      "Microsoft.Compute/disks/write",
+    ]
   }
 }
 resource "azurerm_role_assignment" "weekly_ci_jenkins_io_allow_azurerm" {
