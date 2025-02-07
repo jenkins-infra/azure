@@ -65,7 +65,10 @@ resource "azurerm_role_definition" "ldap_jenkins_io_controller_disk_reader" {
   scope = azurerm_resource_group.ldap.id
 
   permissions {
-    actions = ["Microsoft.Compute/disks/read"]
+    actions = [
+      "Microsoft.Compute/disks/read",
+      "Microsoft.Compute/disks/write",
+    ]
   }
 }
 resource "azurerm_role_assignment" "ldap_jenkins_io_allow_azurerm" {
