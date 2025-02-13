@@ -153,6 +153,22 @@ resource "azurerm_network_security_rule" "allow_outbound_https_from_cijio_to_cij
   network_security_group_name  = module.ci_jenkins_io_sponsorship.controller_nsg_name
 }
 
+## Allow ci.jenkins.io to reach aws.ci.jenkins.io
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_cijio_to_awscijio" {
+  provider               = azurerm.jenkins-sponsorship
+  name                   = "allow-out-https-from-cijio-to-awscijio"
+  priority               = 3900
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "22"
+  source_address_prefix  = "*"
+  destination_address_prefixes = ["3.146.166.108/32"]
+  resource_group_name          = module.ci_jenkins_io_sponsorship.controller_resourcegroup_name
+  network_security_group_name  = module.ci_jenkins_io_sponsorship.controller_nsg_name
+}
+
 ## Allow access to/from ACR endpoint
 resource "azurerm_network_security_rule" "allow_out_https_from_cijio_agents_to_acr" {
   provider                = azurerm.jenkins-sponsorship
