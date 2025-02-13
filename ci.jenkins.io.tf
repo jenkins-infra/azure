@@ -110,7 +110,7 @@ resource "azurerm_dns_cname_record" "ci_jenkins_io" {
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
-  record              = module.ci_jenkins_io_sponsorship.controller_public_fqdn
+  record              = "aws.ci.jenkins.io"
   tags                = local.default_tags
 }
 resource "azurerm_dns_cname_record" "assets_ci_jenkins_io" {
@@ -118,7 +118,7 @@ resource "azurerm_dns_cname_record" "assets_ci_jenkins_io" {
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
-  record              = module.ci_jenkins_io_sponsorship.controller_public_fqdn
+  record              = "assets.aws.ci.jenkins.io"
   tags                = local.default_tags
 }
 resource "azurerm_private_dns_a_record" "artifact_caching_proxy" {
