@@ -48,7 +48,7 @@ locals {
   aks_clusters = {
     "cijenkinsio_agents_1" = {
       name               = "cijenkinsio-agents-1",
-      kubernetes_version = "1.29.11",
+      kubernetes_version = "1.30.7",
     }
     "infracijenkinsio_agents_1" = {
       name               = "infracijenkinsio-agents-1",
