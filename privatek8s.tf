@@ -165,7 +165,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "releaseci_controller" {
   os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
-  orchestrator_version  = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
+  orchestrator_version  = local.aks_clusters["privatek8s"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   auto_scaling_enabled  = true
   min_count             = 1
