@@ -52,7 +52,7 @@ locals {
     }
     "infracijenkinsio_agents_1" = {
       name               = "infracijenkinsio-agents-1",
-      kubernetes_version = "1.29.11",
+      kubernetes_version = "1.30.7",
     }
     "privatek8s" = {
       name               = "privatek8s-${random_pet.suffix_privatek8s.id}",
