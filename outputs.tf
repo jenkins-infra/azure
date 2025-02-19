@@ -29,6 +29,11 @@ resource "local_file" "jenkins_infra_data_report" {
         "pvc_name"   = kubernetes_persistent_volume_claim.updates_jenkins_io_geoipdata.metadata[0].name,
       }
     },
+    "ldap.jenkins.io" = {
+      "share_name" = azurerm_storage_share.ldap.name
+      "share_uri"  = "/",
+      "pvc_name"   = kubernetes_persistent_volume_claim.ldap_jenkins_io_backup.metadata[0].name,
+    },
     "publick8s" = {
       hostname           = data.azurerm_kubernetes_cluster.publick8s.fqdn,
       kubernetes_version = local.aks_clusters["publick8s"].kubernetes_version
