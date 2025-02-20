@@ -114,7 +114,7 @@ import {
 resource "azurerm_storage_share" "ldap" {
   name               = "ldap"
   storage_account_id = azurerm_storage_account.ldap_backups.id
-  ## TODO: shall we shrink?
+  # Unless this is a Premium Storage, we only pay for the storage we consume. Let's use existing quota.
   quota = 5120 # 5To
 }
 
@@ -158,9 +158,9 @@ resource "kubernetes_persistent_volume" "ldap_jenkins_io_backup" {
   }
   spec {
     capacity = {
-      ## TODO: sync and shrink
-      # storage = "${azurerm_storage_share.ldap.quota}Gi"
-      storage = "100Gi"
+      # between 3 to 8 years of LDAP ldip backups
+      # TODO: We should purge backups older than 1 year (username, email and password data)
+      storage = "10Gi"
     }
     access_modes                     = ["ReadWriteMany"]
     persistent_volume_reclaim_policy = "Retain"
@@ -206,8 +206,7 @@ resource "kubernetes_persistent_volume_claim" "ldap_jenkins_io_backup" {
     storage_class_name = kubernetes_persistent_volume.ldap_jenkins_io_backup.spec[0].storage_class_name
     resources {
       requests = {
-        ## TODO: sync with PV or file share
-        storage = "100Gi"
+        storage = kubernetes_persistent_volume.ldap_jenkins_io_backup.spec[0].capacity.storage
       }
     }
   }
