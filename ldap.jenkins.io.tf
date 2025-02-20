@@ -107,10 +107,6 @@ resource "azurerm_storage_account_network_rules" "ldap_access" {
   ]
   bypass = ["Metrics", "Logging", "AzureServices"]
 }
-import {
-  to = azurerm_storage_share.ldap
-  id = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/ldap/providers/Microsoft.Storage/storageAccounts/ldapjenkinsiobackups/fileServices/default/shares/ldap"
-}
 resource "azurerm_storage_share" "ldap" {
   name               = "ldap"
   storage_account_id = azurerm_storage_account.ldap_backups.id
@@ -119,11 +115,6 @@ resource "azurerm_storage_share" "ldap" {
 }
 
 ## Kubernetes Resources (static provision of persistent volumes)
-import {
-  to       = kubernetes_namespace.ldap
-  provider = kubernetes.publick8s
-  id       = "ldap"
-}
 resource "kubernetes_namespace" "ldap" {
   provider = kubernetes.publick8s
 
