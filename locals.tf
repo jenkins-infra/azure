@@ -60,7 +60,7 @@ locals {
     }
     "publick8s" = {
       name               = "publick8s-${random_pet.suffix_publick8s.id}",
-      kubernetes_version = "1.29.11",
+      kubernetes_version = "1.30.7",
     }
   }
 
