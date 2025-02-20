@@ -171,10 +171,10 @@ resource "kubernetes_persistent_volume" "ldap_jenkins_io_backup" {
         driver  = "file.csi.azure.com"
         fs_type = "ext4"
         # `volumeHandle` must be unique on the cluster for this volume
-        volume_handle = "${kubernetes_secret.ldap_jenkins_io_backup.metadata[0].namespace}-${azurerm_storage_share.ldap.name}"
+        volume_handle = "${azurerm_storage_share.ldap.name}-rwx"
         read_only     = false
         volume_attributes = {
-          resourceGroup = azurerm_resource_group.ldap.name
+          resourceGroup = azurerm_storage_account.ldap_backups.resource_group_name
           shareName     = azurerm_storage_share.ldap.name
         }
         node_stage_secret_ref {
@@ -187,8 +187,9 @@ resource "kubernetes_persistent_volume" "ldap_jenkins_io_backup" {
 }
 resource "kubernetes_persistent_volume_claim" "ldap_jenkins_io_backup" {
   provider = kubernetes.publick8s
+
   metadata {
-    name      = "ldap-jenkins-io-backup"
+    name      = kubernetes_persistent_volume.ldap_jenkins_io_backup.metadata[0].name
     namespace = kubernetes_secret.ldap_jenkins_io_backup.metadata[0].namespace
   }
   spec {
