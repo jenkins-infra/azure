@@ -30,9 +30,12 @@ resource "local_file" "jenkins_infra_data_report" {
       }
     },
     "ldap.jenkins.io" = {
-      "share_name" = azurerm_storage_share.ldap.name
-      "share_uri"  = "/",
-      "pvc_name"   = kubernetes_persistent_volume_claim.ldap_jenkins_io_backup.metadata[0].name,
+      "data" = {
+        "pvc_name" = kubernetes_persistent_volume_claim.ldap_jenkins_io_data.metadata[0].name,
+      },
+      "backup" = {
+        "pvc_name" = kubernetes_persistent_volume_claim.ldap_jenkins_io_backup.metadata[0].name,
+      },
     },
     "publick8s" = {
       hostname           = data.azurerm_kubernetes_cluster.publick8s.fqdn,
