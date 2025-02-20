@@ -94,25 +94,112 @@ resource "azurerm_storage_account_network_rules" "ldap_access" {
   storage_account_id = azurerm_storage_account.ldap_backups.id
 
   default_action = "Deny"
-  ip_rules = flatten(concat(
-    [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value]
-  ))
+  ip_rules = flatten(
+    concat(
+      [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value],
+    )
+  )
   virtual_network_subnet_ids = [
     data.azurerm_subnet.publick8s_tier.id,
     data.azurerm_subnet.privatek8s_tier.id,                                  # required for management from infra.ci (terraform)
     data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.id, # infra.ci Azure VM agents
     data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id,  # infra.ci container VM agents
   ]
-  # Grant access to trusted Azure Services like Azure Backup (see # https://learn.microsoft.com/en-gb/azure/storage/common/storage-network-security?tabs=azure-portal#exceptions)
-  bypass = ["AzureServices"]
+  bypass = ["Metrics", "Logging", "AzureServices"]
 }
-# TODO: find out how to create this without the 403 error encountered in #394, #396 & #398
-# resource "azurerm_storage_share" "ldap" {
-#   name                 = "ldap"
-#   storage_account_name = azurerm_storage_account.ldap_backups.name
-#   quota                = 5120 # 5To
-# }
-output "ldap_backups_primary_access_key" {
-  value     = azurerm_storage_account.ldap_backups.primary_access_key
-  sensitive = true
+resource "azurerm_storage_share" "ldap" {
+  name               = "ldap"
+  storage_account_id = azurerm_storage_account.ldap_backups.id
+  # Unless this is a Premium Storage, we only pay for the storage we consume. Let's use existing quota.
+  quota = 5120 # 5To
+}
+
+## Kubernetes Resources (static provision of persistent volumes)
+resource "kubernetes_namespace" "ldap" {
+  provider = kubernetes.publick8s
+
+  metadata {
+    name = "ldap"
+    labels = {
+      name = "ldap"
+    }
+  }
+}
+resource "kubernetes_secret" "ldap_jenkins_io_backup" {
+  provider = kubernetes.publick8s
+
+  metadata {
+    name      = "ldap-backup-storage"
+    namespace = kubernetes_namespace.ldap.metadata[0].name
+  }
+
+  data = {
+    azurestorageaccountname = azurerm_storage_account.ldap_backups.name
+    azurestorageaccountkey  = azurerm_storage_account.ldap_backups.primary_access_key
+  }
+
+  type = "Opaque"
+}
+
+# Persistent Data available in read and write
+resource "kubernetes_persistent_volume" "ldap_jenkins_io_backup" {
+  provider = kubernetes.publick8s
+  metadata {
+    name = "ldap-jenkins-io-backup"
+  }
+  spec {
+    capacity = {
+      # between 3 to 8 years of LDAP ldip backups
+      # TODO: We should purge backups older than 1 year (username, email and password data)
+      storage = "10Gi"
+    }
+    access_modes                     = ["ReadWriteMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.statically_provisioned_publick8s.id
+    mount_options = [
+      "dir_mode=0777",
+      "file_mode=0777",
+      "uid=0",
+      "gid=0",
+      "mfsymlinks",
+      "cache=strict", # Default on usual kernels but worth setting it explicitly
+      "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+      "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+    ]
+    persistent_volume_source {
+      csi {
+        driver  = "file.csi.azure.com"
+        fs_type = "ext4"
+        # `volumeHandle` must be unique on the cluster for this volume
+        volume_handle = "${azurerm_storage_share.ldap.name}-rwx"
+        read_only     = false
+        volume_attributes = {
+          resourceGroup = azurerm_storage_account.ldap_backups.resource_group_name
+          shareName     = azurerm_storage_share.ldap.name
+        }
+        node_stage_secret_ref {
+          name      = kubernetes_secret.ldap_jenkins_io_backup.metadata[0].name
+          namespace = kubernetes_secret.ldap_jenkins_io_backup.metadata[0].namespace
+        }
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "ldap_jenkins_io_backup" {
+  provider = kubernetes.publick8s
+
+  metadata {
+    name      = kubernetes_persistent_volume.ldap_jenkins_io_backup.metadata[0].name
+    namespace = kubernetes_secret.ldap_jenkins_io_backup.metadata[0].namespace
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.ldap_jenkins_io_backup.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.ldap_jenkins_io_backup.metadata[0].name
+    storage_class_name = kubernetes_persistent_volume.ldap_jenkins_io_backup.spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = kubernetes_persistent_volume.ldap_jenkins_io_backup.spec[0].capacity.storage
+      }
+    }
+  }
 }
