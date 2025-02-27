@@ -1,8 +1,5 @@
 resource "local_file" "jenkins_infra_data_report" {
   content = jsonencode({
-    "artifact-caching-proxy.privatelink.azurecr.io" = {
-      "service_ip" = tolist(azurerm_private_dns_a_record.artifact_caching_proxy.records)[0],
-    },
     "public_redis" = {
       "service_hostname" = azurerm_redis_cache.public_redis.hostname,
       "service_port"     = azurerm_redis_cache.public_redis.port,
@@ -44,10 +41,6 @@ resource "local_file" "jenkins_infra_data_report" {
     "privatek8s" = {
       hostname           = data.azurerm_kubernetes_cluster.privatek8s.fqdn,
       kubernetes_version = local.aks_clusters["privatek8s"].kubernetes_version
-    },
-    "cijenkinsio_agents_1" = {
-      # No hostname as it is a private control plane
-      kubernetes_version = local.aks_clusters["cijenkinsio_agents_1"].kubernetes_version
     },
     "infracijenkinsio_agents_1" = {
       # No hostname as it is a private control plane
