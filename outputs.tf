@@ -45,10 +45,6 @@ resource "local_file" "jenkins_infra_data_report" {
       hostname           = data.azurerm_kubernetes_cluster.privatek8s.fqdn,
       kubernetes_version = local.aks_clusters["privatek8s"].kubernetes_version
     },
-    "cijenkinsio_agents_1" = {
-      # No hostname as it is a private control plane
-      kubernetes_version = local.aks_clusters["cijenkinsio_agents_1"].kubernetes_version
-    },
     "infracijenkinsio_agents_1" = {
       # No hostname as it is a private control plane
       kubernetes_version = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
