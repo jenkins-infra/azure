@@ -21,11 +21,6 @@ resource "azurerm_container_registry" "dockerhub_mirror" {
 
 locals {
   acr_private_links = {
-    "cijenkinsio" = {
-      "subnet_id" = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id
-      "vnet_id"   = data.azurerm_virtual_network.public_jenkins_sponsorship.id
-      "rg_name"   = data.azurerm_virtual_network.public_jenkins_sponsorship.resource_group_name
-    },
     "certcijenkinsio" = {
       "subnet_id" = data.azurerm_subnet.cert_ci_jenkins_io_sponsorship_ephemeral_agents.id,
       "vnet_id"   = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsorship.id
