@@ -185,21 +185,3 @@ resource "azurerm_role_assignment" "cijio_agents_networkcontributor_vnet" {
   principal_id                     = azurerm_kubernetes_cluster.cijenkinsio_agents_1.identity[0].principal_id
   skip_service_principal_aad_check = true
 }
-
-# Configure the jenkins-infra/kubernetes-management admin service account
-module "cijenkinsio_agents_1_admin_sa" {
-  providers = {
-    kubernetes = kubernetes.cijenkinsio_agents_1
-  }
-  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
-  cluster_name               = azurerm_kubernetes_cluster.cijenkinsio_agents_1.name
-  cluster_hostname           = azurerm_kubernetes_cluster.cijenkinsio_agents_1.fqdn
-  cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.cluster_ca_certificate
-}
-output "kubeconfig_cijenkinsio_agents_1" {
-  sensitive = true
-  value     = module.cijenkinsio_agents_1_admin_sa.kubeconfig
-}
-output "cijenkinsio_agents_1_kube_config_command" {
-  value = "az aks get-credentials --name ${azurerm_kubernetes_cluster.cijenkinsio_agents_1.name} --resource-group ${azurerm_kubernetes_cluster.cijenkinsio_agents_1.resource_group_name}"
-}
