@@ -17,7 +17,8 @@ resource "azurerm_storage_account" "archives" {
   network_rules {
     default_action = "Deny"
     ip_rules = flatten(concat(
-      [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value]
+      [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value],
+      [local.external_services["pkg.origin.jenkins.io"]],
     ))
     virtual_network_subnet_ids = [
       data.azurerm_subnet.privatek8s_tier.id,
@@ -32,6 +33,15 @@ resource "azurerm_storage_account" "archives" {
 }
 
 ## Archived items
+# Container for the logs archive (2019 -> 2025) of the legacy `updates.jenkins.io` service which used to be in the 'pkg' CloudBees AWS VM
+resource "azurerm_storage_container" "legacy_updatesjio_logs" {
+  name                  = "legacy-updatesjio-logs"
+  storage_account_name  = azurerm_storage_account.archives.name
+  container_access_type = "private"
+  metadata = merge(local.default_tags, {
+    helpdesk = "https://github.com/jenkins-infra/helpdesk/issues/2649"
+  })
+}
 
 # Container for the dump of confluence databases
 resource "azurerm_storage_container" "confluence_dumps" {
