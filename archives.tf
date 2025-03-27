@@ -18,7 +18,6 @@ resource "azurerm_storage_account" "archives" {
     default_action = "Deny"
     ip_rules = flatten(concat(
       [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value],
-      [local.external_services["pkg.origin.jenkins.io"]],
     ))
     virtual_network_subnet_ids = [
       data.azurerm_subnet.privatek8s_tier.id,
