@@ -497,11 +497,10 @@ module "publick8s_admin_sa" {
   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.publick8s.kube_config.0.cluster_ca_certificate
 }
 
-output "kubeconfig_publick8s" {
-  sensitive = true
-  value     = module.publick8s_admin_sa.kubeconfig
-}
+# Retrieve effective outbound IPs
+data "azurerm_public_ip" "publick8s_lb_outbound" {
+  for_each = toset(concat(flatten(azurerm_kubernetes_cluster.publick8s.network_profile[*].load_balancer_profile[*].effective_outbound_ips)))
 
-output "publick8s_kube_config_command" {
-  value = "az aks get-credentials --name ${azurerm_kubernetes_cluster.publick8s.name} --resource-group ${azurerm_kubernetes_cluster.publick8s.resource_group_name}"
+  name                = element(split("/", each.key), "-1")
+  resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
 }
