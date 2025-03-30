@@ -37,7 +37,7 @@ resource "local_file" "jenkins_infra_data_report" {
     "publick8s" = {
       hostname           = data.azurerm_kubernetes_cluster.publick8s.fqdn,
       kubernetes_version = local.aks_clusters["publick8s"].kubernetes_version
-      pod_cidrs          = azurerm_kubernetes_cluster.publick8s.network_profile[*].pod_cidrs,
+      pod_cidrs          = concat(flatten(azurerm_kubernetes_cluster.publick8s.network_profile[*].pod_cidrs)),
       lb_outbound_ips = {
         "ipv4" = [for id, pip in data.azurerm_public_ip.publick8s_lb_outbound : pip.ip_address if can(cidrnetmask("${pip.ip_address}/32"))],
         "ipv6" = [for id, pip in data.azurerm_public_ip.publick8s_lb_outbound : pip.ip_address if !can(cidrnetmask("${pip.ip_address}/32"))],
