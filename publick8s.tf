@@ -499,7 +499,9 @@ module "publick8s_admin_sa" {
 
 # Retrieve effective outbound IPs
 data "azurerm_public_ip" "publick8s_lb_outbound" {
-  for_each = toset(concat(flatten(azurerm_kubernetes_cluster.publick8s.network_profile[*].load_balancer_profile[*].effective_outbound_ips)))
+  ## Disable this resource when running in terratest
+  # to avoid the error "The "for_each" set includes values derived from resource attributes that cannot be determined until apply"
+  for_each = var.terratest ? toset([]) : toset(concat(flatten(azurerm_kubernetes_cluster.publick8s.network_profile[*].load_balancer_profile[*].effective_outbound_ips)))
 
   name                = element(split("/", each.key), "-1")
   resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
