@@ -34,6 +34,11 @@ resource "local_file" "jenkins_infra_data_report" {
         "pvc_name" = kubernetes_persistent_volume_claim.ldap_jenkins_io_backup.metadata[0].name,
       },
     },
+    "puppet.jenkins.io" = {
+      "ipv4" = azurerm_public_ip.puppet_jenkins_io.ip_address,
+      # DMZ: same in and out public IP
+      "outbound_ips" = azurerm_public_ip.puppet_jenkins_io.ip_address,
+    },
     "publick8s" = {
       hostname           = data.azurerm_kubernetes_cluster.publick8s.fqdn,
       kubernetes_version = local.aks_clusters["publick8s"].kubernetes_version
