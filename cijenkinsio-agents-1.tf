@@ -3,7 +3,6 @@ resource "azurerm_resource_group" "cijenkinsio_kubernetes_agents" {
   name     = "cijenkinsio-kubernetes-agents"
   location = var.location
   tags     = local.default_tags
-
 }
 
 #trivy:ignore:avd-azu-0040 # No need to enable oms_agent for Azure monitoring as we already have datadog
