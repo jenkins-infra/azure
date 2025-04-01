@@ -3,7 +3,6 @@ resource "azurerm_resource_group" "cijenkinsio_kubernetes_agents" {
   name     = "cijenkinsio-kubernetes-agents"
   location = var.location
   tags     = local.default_tags
-
 }
 
 #trivy:ignore:avd-azu-0040 # No need to enable oms_agent for Azure monitoring as we already have datadog
@@ -142,4 +141,20 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_bom_1" {
   }
 
   tags = local.default_tags
+}
+
+# Configure the jenkins-infra/kubernetes-management admin service account
+module "cijenkinsio_agents_1_admin_sa" {
+  providers = {
+    kubernetes = kubernetes.cijenkinsio_agents_1
+  }
+  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
+  cluster_name               = azurerm_kubernetes_cluster.cijenkinsio_agents_1.name
+  cluster_hostname           = azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.host
+  cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.cluster_ca_certificate
+}
+
+output "kubeconfig_cijenkinsio_agents_1" {
+  sensitive = true
+  value     = module.cijenkinsio_agents_1_admin_sa.kubeconfig
 }
