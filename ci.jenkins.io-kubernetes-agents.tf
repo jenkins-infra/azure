@@ -37,10 +37,10 @@ resource "azurerm_kubernetes_cluster" "cijenkinsio_agents_1" {
   default_node_pool {
     name                         = "systempool1"
     only_critical_addons_enabled = true                # This property is the only valid way to add the "CriticalAddonsOnly=true:NoSchedule" taint to the default node pool
-    vm_size                      = "Standard_D4pds_v5" # At least 4 vCPUS/4 Gb as per AKS best practises
+    vm_size                      = "Standard_D4ads_v5" # At least 4 vCPUS/4 Gb as per AKS best practises
     os_sku                       = "AzureLinux"
     os_disk_type                 = "Ephemeral"
-    os_disk_size_gb              = 150 # Ref. Cache storage size athttps://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
+    os_disk_size_gb              = 150 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
     orchestrator_version         = local.aks_clusters["cijenkinsio_agents_1"].kubernetes_version
     kubelet_disk_type            = "OS"
     auto_scaling_enabled         = false
@@ -54,12 +54,12 @@ resource "azurerm_kubernetes_cluster" "cijenkinsio_agents_1" {
 }
 
 # Node pool to host "jenkins-infra" applications required on this cluster such as ACP or datadog's cluster-agent, e.g. "Not agent, neither AKS System tools"
-resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_n2_applications" {
+resource "azurerm_kubernetes_cluster_node_pool" "linux_applications" {
   provider              = azurerm.jenkins-sponsorship
-  name                  = "la64n2app"
-  vm_size               = "Standard_D4pds_v5"
+  name                  = "lx86app"
+  vm_size               = "Standard_D4ads_v5"
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
+  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
   orchestrator_version  = local.aks_clusters["cijenkinsio_agents_1"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.cijenkinsio_agents_1.id
   auto_scaling_enabled  = true
@@ -89,7 +89,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_agents_1" {
   name                  = "lx86n3agt1"
   vm_size               = "Standard_D16ads_v5"
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
+  os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
   orchestrator_version  = local.aks_clusters["cijenkinsio_agents_1"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.cijenkinsio_agents_1.id
   auto_scaling_enabled  = true
@@ -119,7 +119,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_bom_1" {
   name                  = "lx86n3bom1"
   vm_size               = "Standard_D16ads_v5"
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
+  os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
   orchestrator_version  = local.aks_clusters["cijenkinsio_agents_1"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.cijenkinsio_agents_1.id
   auto_scaling_enabled  = true
