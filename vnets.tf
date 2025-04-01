@@ -138,9 +138,3 @@ data "azurerm_subnet" "infra_ci_jenkins_io_sponsorship_packer_builds" {
   virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name
   resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.resource_group_name
 }
-# data "azurerm_subnet" "ci_jenkins_io_ephemeral_agents_jenkins_sponsorship" {
-#   provider             = azurerm.jenkins-sponsorship
-#   name                 = "${data.azurerm_virtual_network.public_jenkins_sponsorship.name}-ci_jenkins_io_agents"
-#   virtual_network_name = data.azurerm_virtual_network.public_jenkins_sponsorship.name
-#   resource_group_name  = data.azurerm_virtual_network.public_jenkins_sponsorship.resource_group_name
-# }
