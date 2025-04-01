@@ -65,12 +65,13 @@ locals {
   }
 
   ci_jenkins_io_fqdn = "ci.jenkins.io"
+  cijenkinsio_agents_1_compute_zones = [1]
+  ci_jenkins_io_agents_1_pod_cidr    = "10.100.0.0/14" # 10.100.0.1 - 10.103.255.255
 
   infracijenkinsio_agents_1_compute_zones = [1]
   infraci_jenkins_io_agents_1_pod_cidr    = "10.100.0.0/14" # 10.100.0.1 - 10.103.255.255
 
   publick8s_compute_zones            = [3]
-  cijenkinsio_agents_1_compute_zones = [1]
 
   end_dates = yamldecode(data.local_file.locals_yaml.content).end_dates
 }
