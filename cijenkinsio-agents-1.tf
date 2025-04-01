@@ -153,3 +153,8 @@ module "cijenkinsio_agents_1_admin_sa" {
   cluster_hostname           = azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.host
   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.cluster_ca_certificate
 }
+
+output "kubeconfig_cijenkinsio_agents_1" {
+  sensitive = true
+  value     = module.cijenkinsio_agents_1_admin_sa.kubeconfig
+}
