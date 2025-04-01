@@ -6,13 +6,6 @@ resource "azurerm_resource_group" "cijenkinsio_kubernetes_agents" {
 
 }
 
-data "azurerm_subnet" "ci_jenkins_io_kubernetes_sponsorship" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "${data.azurerm_virtual_network.public_jenkins_sponsorship.name}-ci_jenkins_io_kubernetes"
-  resource_group_name  = data.azurerm_resource_group.public_jenkins_sponsorship.name
-  virtual_network_name = data.azurerm_virtual_network.public_jenkins_sponsorship.name
-}
-
 #trivy:ignore:avd-azu-0040 # No need to enable oms_agent for Azure monitoring as we already have datadog
 resource "azurerm_kubernetes_cluster" "cijenkinsio_agents_1" {
   provider = azurerm.jenkins-sponsorship
@@ -160,13 +153,4 @@ module "cijenkinsio_agents_1_admin_sa" {
   cluster_name               = azurerm_kubernetes_cluster.cijenkinsio_agents_1.name
   cluster_hostname           = azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.host
   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.cluster_ca_certificate
-}
-
-output "kubeconfig_cijenkinsio_agents_1" {
-  sensitive = true
-  value     = module.cijenkinsio_agents_1_admin_sa.kubeconfig
-}
-
-output "cijenkinsio_agents_1_kube_config_command" {
-  value = "az aks get-credentials --name ${azurerm_kubernetes_cluster.cijenkinsio_agents_1.name} --resource-group ${azurerm_kubernetes_cluster.cijenkinsio_agents_1.resource_group_name}"
 }

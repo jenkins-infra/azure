@@ -34,6 +34,7 @@ data "azurerm_resource_group" "trusted_ci_jenkins_io_sponsorship" {
   name     = "trusted-ci-jenkins-io-sponsorship"
 }
 
+
 ################################################################################
 ## Virtual Networks
 ################################################################################
@@ -137,4 +138,10 @@ data "azurerm_subnet" "infra_ci_jenkins_io_sponsorship_packer_builds" {
   name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name}-packer-builds"
   virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name
   resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.resource_group_name
+}
+data "azurerm_subnet" "ci_jenkins_io_kubernetes_sponsorship" {
+  provider             = azurerm.jenkins-sponsorship
+  name                 = "${data.azurerm_virtual_network.public_jenkins_sponsorship.name}-ci_jenkins_io_kubernetes"
+  resource_group_name  = data.azurerm_resource_group.public_jenkins_sponsorship.name
+  virtual_network_name = data.azurerm_virtual_network.public_jenkins_sponsorship.name
 }
