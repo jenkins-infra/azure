@@ -21,10 +21,6 @@ resource "azurerm_kubernetes_cluster" "cijenkinsio_agents_1" {
   dns_prefix                          = replace(local.aks_clusters.cijenkinsio_agents_1.name, "-", "") # Avoid hyphens in this DNS host
   role_based_access_control_enabled   = true                                                           # default value but made explicit to please trivy
 
-  upgrade_override {
-    force_upgrade_enabled = false
-  }
-
   image_cleaner_interval_hours = 48
 
   network_profile {
