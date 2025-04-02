@@ -387,15 +387,6 @@ resource "azurerm_dns_a_record" "private_privatek8s" {
   tags                = local.default_tags
 }
 
-output "privatek8s_kube_config" {
-  value     = azurerm_kubernetes_cluster.privatek8s.kube_config_raw
-  sensitive = true
-}
-
-output "privatek8s_public_ip_address" {
-  value = azurerm_public_ip.public_privatek8s.ip_address
-}
-
 # Configure the jenkins-infra/kubernetes-management admin service account
 module "privatek8s_admin_sa" {
   providers = {
@@ -405,6 +396,10 @@ module "privatek8s_admin_sa" {
   cluster_name               = azurerm_kubernetes_cluster.privatek8s.name
   cluster_hostname           = azurerm_kubernetes_cluster.privatek8s.kube_config.0.host
   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.privatek8s.kube_config.0.cluster_ca_certificate
+}
+output "kubeconfig_management_privatek8s" {
+  sensitive = true
+  value     = module.privatek8s_admin_sa.kubeconfig
 }
 
 # Retrieve effective outbound IPs

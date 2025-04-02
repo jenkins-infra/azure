@@ -41,7 +41,7 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
     network_policy      = "azure"
     outbound_type       = "userAssignedNATGateway"
     load_balancer_sku   = "standard" # Required to customize the outbound type
-    pod_cidr            = local.infraci_jenkins_io_agents_1_pod_cidr
+    pod_cidr            = local.aks_clusters.infracijenkinsio_agents_1.pod_cidr
   }
 
   identity {
@@ -67,7 +67,7 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
     vnet_subnet_id       = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
     tags                 = local.default_tags
     # Avoid deploying system pool in the same zone as other node pools
-    zones = [for zone in local.infracijenkinsio_agents_1_compute_zones : zone + 1]
+    zones = [for zone in local.aks_clusters.infracijenkinsio_agents_1.compute_zones : zone + 1]
   }
 
   tags = local.default_tags
@@ -90,7 +90,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_agents_1_sponsorsh
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 20
-  zones                 = local.infracijenkinsio_agents_1_compute_zones
+  zones                 = local.aks_clusters.infracijenkinsio_agents_1.compute_zones
   vnet_subnet_id        = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
 
   node_labels = {
@@ -125,7 +125,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_agents_1_sponsorshi
   auto_scaling_enabled  = true
   min_count             = 1 # Azure autoscaler with ARM64 is really slow when starting from zero nodes.
   max_count             = 20
-  zones                 = local.infracijenkinsio_agents_1_compute_zones # need to be on zone 1 for arm availability
+  zones                 = local.aks_clusters.infracijenkinsio_agents_1.compute_zones
   vnet_subnet_id        = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
 
   node_labels = {
@@ -150,13 +150,10 @@ module "infracijenkinsio_agents_1_admin_sa_sponsorship" {
   }
   source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
   cluster_name               = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.name
-  cluster_hostname           = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.fqdn
+  cluster_hostname           = local.aks_clusters_outputs.infracijenkinsio_agents_1.cluster_hostname
   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.kube_config.0.cluster_ca_certificate
 }
-output "kubeconfig_infracijenkinsio_agents_1" {
+output "kubeconfig_management_infracijenkinsio_agents_1" {
   sensitive = true
   value     = module.infracijenkinsio_agents_1_admin_sa_sponsorship.kubeconfig
-}
-output "infracijenkinsio_agents_1_kube_config_command" {
-  value = "az aks get-credentials --name ${azurerm_kubernetes_cluster.infracijenkinsio_agents_1.name} --resource-group ${azurerm_kubernetes_cluster.infracijenkinsio_agents_1.resource_group_name}"
 }
