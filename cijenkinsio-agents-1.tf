@@ -1,6 +1,6 @@
 resource "azurerm_resource_group" "cijenkinsio_kubernetes_agents" {
   provider = azurerm.jenkins-sponsorship
-  name     = "cijenkinsio-kubernetes-agents"
+  name     = local.aks_clusters.cijenkinsio_agents_1.name
   location = var.location
   tags     = local.default_tags
 }
@@ -8,7 +8,7 @@ resource "azurerm_resource_group" "cijenkinsio_kubernetes_agents" {
 #trivy:ignore:avd-azu-0040 # No need to enable oms_agent for Azure monitoring as we already have datadog
 resource "azurerm_kubernetes_cluster" "cijenkinsio_agents_1" {
   provider = azurerm.jenkins-sponsorship
-  name     = local.aks_clusters["cijenkinsio_agents_1"].name
+  name     = local.aks_clusters.cijenkinsio_agents_1.name
   ## Private cluster requires network setup to allow API access from:
   # - infra.ci.jenkins.io agents (for both terraform job agents and kubernetes-management agents)
   # - ci.jenkins.io controller to allow spawning agents (nominal usage)
@@ -17,9 +17,15 @@ resource "azurerm_kubernetes_cluster" "cijenkinsio_agents_1" {
   private_cluster_public_fqdn_enabled = true
   location                            = azurerm_resource_group.cijenkinsio_kubernetes_agents.location
   resource_group_name                 = azurerm_resource_group.cijenkinsio_kubernetes_agents.name
-  kubernetes_version                  = local.aks_clusters["cijenkinsio_agents_1"].kubernetes_version
-  dns_prefix                          = local.aks_clusters["cijenkinsio_agents_1"].name
-  role_based_access_control_enabled   = true # default value but made explicit to please trivy
+  kubernetes_version                  = local.aks_clusters.cijenkinsio_agents_1.kubernetes_version
+  dns_prefix                          = replace(local.aks_clusters.cijenkinsio_agents_1.name, "-", "") # Avoid hyphens in this DNS host
+  role_based_access_control_enabled   = true                                                           # default value but made explicit to please trivy
+
+  upgrade_override {
+    force_upgrade_enabled = false
+  }
+
+  image_cleaner_interval_hours = 48
 
   network_profile {
     network_plugin      = "azure"
@@ -27,6 +33,7 @@ resource "azurerm_kubernetes_cluster" "cijenkinsio_agents_1" {
     network_policy      = "azure"
     outbound_type       = "userAssignedNATGateway"
     load_balancer_sku   = "standard" # Required to customize the outbound type
+    pod_cidr            = local.aks_clusters.cijenkinsio_agents_1.pod_cidr
   }
 
   identity {
@@ -34,24 +41,25 @@ resource "azurerm_kubernetes_cluster" "cijenkinsio_agents_1" {
   }
 
   default_node_pool {
-    name                         = "systempool1"
+    name                         = "syspool"
     only_critical_addons_enabled = true                # This property is the only valid way to add the "CriticalAddonsOnly=true:NoSchedule" taint to the default node pool
-    vm_size                      = "Standard_D4ads_v5" # At least 4 vCPUS/4 Gb as per AKS best practises
-    os_sku                       = "AzureLinux"
-    os_disk_type                 = "Ephemeral"
-    os_disk_size_gb              = 150 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
-    orchestrator_version         = local.aks_clusters["cijenkinsio_agents_1"].kubernetes_version
-    kubelet_disk_type            = "OS"
-    auto_scaling_enabled         = false
-    node_count                   = 3 # 3 nodes for HA as per AKS best practises
-    vnet_subnet_id               = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id
-    tags                         = local.default_tags
-    zones                        = local.aks_clusters.cijenkinsio_agents_1.compute_zones
+    vm_size                      = "Standard_D2ads_v5" # At least 2 vCPUS as per AKS best practises
+    temporary_name_for_rotation  = "syspooltemp"
     upgrade_settings {
-      drain_timeout_in_minutes      = 0
-      max_surge                     = "10%"
-      node_soak_duration_in_minutes = 0
+      max_surge = "10%"
     }
+    os_sku               = "AzureLinux"
+    os_disk_type         = "Ephemeral"
+    os_disk_size_gb      = 75 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
+    orchestrator_version = local.aks_clusters.cijenkinsio_agents_1.kubernetes_version
+    kubelet_disk_type    = "OS"
+    auto_scaling_enabled = true
+    min_count            = 2 # for best practices
+    max_count            = 3 # for upgrade
+    vnet_subnet_id       = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id
+    tags                 = local.default_tags
+    # Avoid deploying system pool in the same zone as other node pools
+    zones = [for zone in local.aks_clusters.cijenkinsio_agents_1.compute_zones : zone + 1]
   }
 
   tags = local.default_tags
@@ -59,12 +67,16 @@ resource "azurerm_kubernetes_cluster" "cijenkinsio_agents_1" {
 
 # Node pool to host "jenkins-infra" applications required on this cluster such as ACP or datadog's cluster-agent, e.g. "Not agent, neither AKS System tools"
 resource "azurerm_kubernetes_cluster_node_pool" "linux_applications" {
-  provider              = azurerm.jenkins-sponsorship
-  name                  = "lx86app"
-  vm_size               = "Standard_D4ads_v5"
+  provider = azurerm.jenkins-sponsorship
+  name     = "lx86n2app"
+  vm_size  = "Standard_D4ads_v5"
+  upgrade_settings {
+    max_surge = "10%"
+  }
   os_disk_type          = "Ephemeral"
+  os_sku                = "AzureLinux"
   os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
-  orchestrator_version  = local.aks_clusters["cijenkinsio_agents_1"].kubernetes_version
+  orchestrator_version  = local.aks_clusters.cijenkinsio_agents_1.kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.cijenkinsio_agents_1.id
   auto_scaling_enabled  = true
   min_count             = 1
@@ -88,17 +100,21 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_applications" {
 }
 
 # Node pool to host ci.jenkins.io agents for usual builds
-resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_agents_1" {
-  provider              = azurerm.jenkins-sponsorship
-  name                  = "lx86n3agt1"
-  vm_size               = "Standard_D16ads_v5"
+resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n3_agents_1" {
+  provider = azurerm.jenkins-sponsorship
+  name     = "lx86n3agt1"
+  vm_size  = "Standard_D16ads_v5"
+  upgrade_settings {
+    max_surge = "10%"
+  }
+  os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
-  orchestrator_version  = local.aks_clusters["cijenkinsio_agents_1"].kubernetes_version
+  orchestrator_version  = local.aks_clusters.cijenkinsio_agents_1.kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.cijenkinsio_agents_1.id
   auto_scaling_enabled  = true
   min_count             = 0
-  max_count             = 50 # 4 pods per nodes, max 200 nodes
+  max_count             = 40 # 3 pods per nodes, max 120 pods - due to quotas
   zones                 = local.aks_clusters.cijenkinsio_agents_1.compute_zones
   vnet_subnet_id        = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id
 
@@ -118,13 +134,17 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_agents_1" {
 }
 
 # Node pool to host ci.jenkins.io agents for BOM builds
-resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_bom_1" {
-  provider              = azurerm.jenkins-sponsorship
-  name                  = "lx86n3bom1"
-  vm_size               = "Standard_D16ads_v5"
+resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n3_bom_1" {
+  provider = azurerm.jenkins-sponsorship
+  name     = "lx86n3bom1"
+  vm_size  = "Standard_D16ads_v5"
+  upgrade_settings {
+    max_surge = "10%"
+  }
+  os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
-  orchestrator_version  = local.aks_clusters["cijenkinsio_agents_1"].kubernetes_version
+  orchestrator_version  = local.aks_clusters.cijenkinsio_agents_1.kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.cijenkinsio_agents_1.id
   auto_scaling_enabled  = true
   min_count             = 0
@@ -148,8 +168,18 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_bom_1" {
   tags = local.default_tags
 }
 
+# Allow AKS to manipulate LBs, PLS and join subnets - https://learn.microsoft.com/en-us/azure/aks/internal-lb?tabs=set-service-annotations#use-private-networks (see Note)
+resource "azurerm_role_assignment" "cijio_agents_1_networkcontributor_vnet" {
+  provider                         = azurerm.jenkins-sponsorship
+  scope                            = data.azurerm_virtual_network.public_jenkins_sponsorship.id
+  role_definition_name             = "Network Contributor"
+  principal_id                     = azurerm_kubernetes_cluster.cijenkinsio_agents_1.identity[0].principal_id
+  skip_service_principal_aad_check = true
+}
+
 # Configure the jenkins-infra/kubernetes-management admin service account
 module "cijenkinsio_agents_1_admin_sa" {
+  depends_on = [azurerm_kubernetes_cluster.cijenkinsio_agents_1]
   providers = {
     kubernetes = kubernetes.cijenkinsio_agents_1
   }

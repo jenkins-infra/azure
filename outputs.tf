@@ -56,11 +56,11 @@ resource "local_file" "jenkins_infra_data_report" {
       },
     },
     "cijenkinsio_agents_1" = {
-      # No hostname as it is a private control plane
+      hostname           = local.aks_clusters_outputs.cijenkinsio_agents_1.cluster_hostname
       kubernetes_version = local.aks_clusters["cijenkinsio_agents_1"].kubernetes_version
     },
     "infracijenkinsio_agents_1" = {
-      # No hostname as it is a private control plane
+      hostname           = local.aks_clusters_outputs.infracijenkinsio_agents_1.cluster_hostname
       kubernetes_version = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
     }
   })
