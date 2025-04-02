@@ -55,10 +55,6 @@ resource "local_file" "jenkins_infra_data_report" {
         "ipv4" = [for id, pip in data.azurerm_public_ip.privatek8s_lb_outbound : pip.ip_address if can(cidrnetmask("${pip.ip_address}/32"))],
       },
     },
-    "cijenkinsio_agents_1" = {
-      # No hostname as it is a private control plane
-      kubernetes_version = local.aks_clusters["cijenkinsio_agents_1"].kubernetes_version
-    },
     "infracijenkinsio_agents_1" = {
       # No hostname as it is a private control plane
       kubernetes_version = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
