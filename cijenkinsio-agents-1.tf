@@ -46,7 +46,7 @@ resource "azurerm_kubernetes_cluster" "cijenkinsio_agents_1" {
     node_count                   = 3 # 3 nodes for HA as per AKS best practises
     vnet_subnet_id               = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id
     tags                         = local.default_tags
-    zones                        = local.cijenkinsio_agents_1_compute_zones
+    zones                        = local.aks_clusters.cijenkinsio_agents_1.compute_zones
   }
 
   tags = local.default_tags
@@ -64,7 +64,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_applications" {
   auto_scaling_enabled  = true
   min_count             = 1
   max_count             = 3 # 2 nodes always up for HA, a 3rd one is allowed for surge upgrades
-  zones                 = local.cijenkinsio_agents_1_compute_zones
+  zones                 = local.aks_clusters.cijenkinsio_agents_1.compute_zones
   vnet_subnet_id        = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id
 
   node_labels = {
@@ -94,7 +94,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_agents_1" {
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 50 # 4 pods per nodes, max 200 nodes
-  zones                 = local.cijenkinsio_agents_1_compute_zones
+  zones                 = local.aks_clusters.cijenkinsio_agents_1.compute_zones
   vnet_subnet_id        = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id
 
   node_labels = {
@@ -124,7 +124,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n4_bom_1" {
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 50
-  zones                 = local.cijenkinsio_agents_1_compute_zones
+  zones                 = local.aks_clusters.cijenkinsio_agents_1.compute_zones
   vnet_subnet_id        = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id
 
   node_labels = {
@@ -150,11 +150,12 @@ module "cijenkinsio_agents_1_admin_sa" {
   }
   source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
   cluster_name               = azurerm_kubernetes_cluster.cijenkinsio_agents_1.name
-  cluster_hostname           = azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.host
+  cluster_hostname           = local.aks_clusters_outputs.cijenkinsio_agents_1.cluster_hostname
   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.cluster_ca_certificate
 }
 
-output "kubeconfig_cijenkinsio_agents_1" {
+# For infra.ci credentials
+output "kubeconfig_management_cijenkinsio_agents_1" {
   sensitive = true
   value     = module.cijenkinsio_agents_1_admin_sa.kubeconfig
 }

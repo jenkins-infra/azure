@@ -97,7 +97,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     max_count            = 4
     vnet_subnet_id       = data.azurerm_subnet.publick8s_tier.id
     tags                 = local.default_tags
-    zones                = local.publick8s_compute_zones
+    zones                = local.aks_clusters.publick8s.compute_zones
   }
 
   identity {
@@ -125,7 +125,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "x86small" {
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 10
-  zones                 = local.publick8s_compute_zones
+  zones                 = local.aks_clusters.publick8s.compute_zones
   vnet_subnet_id        = data.azurerm_subnet.publick8s_tier.id
 
   lifecycle {
@@ -449,23 +449,6 @@ resource "azurerm_dns_a_record" "private_publick8s" {
   tags                = local.default_tags
 }
 
-output "publick8s_kube_config" {
-  value     = azurerm_kubernetes_cluster.publick8s.kube_config_raw
-  sensitive = true
-}
-
-output "publick8s_public_ipv4_address" {
-  value = azurerm_public_ip.publick8s_ipv4.ip_address
-}
-
-output "publick8s_public_ipv6_address" {
-  value = azurerm_public_ip.publick8s_ipv6.ip_address
-}
-
-output "ldap_jenkins_io_ipv4_address" {
-  value = azurerm_public_ip.ldap_jenkins_io_ipv4.ip_address
-}
-
 # Configure the jenkins-infra/kubernetes-management admin service account
 module "publick8s_admin_sa" {
   providers = {
@@ -475,6 +458,10 @@ module "publick8s_admin_sa" {
   cluster_name               = azurerm_kubernetes_cluster.publick8s.name
   cluster_hostname           = azurerm_kubernetes_cluster.publick8s.kube_config.0.host
   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.publick8s.kube_config.0.cluster_ca_certificate
+}
+output "kubeconfig_management_pub" {
+  sensitive = true
+  value     = module.infracijenkinsio_agents_1_admin_sa_sponsorship.kubeconfig
 }
 
 # Retrieve effective outbound IPs
