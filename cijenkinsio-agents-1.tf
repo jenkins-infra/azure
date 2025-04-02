@@ -47,6 +47,11 @@ resource "azurerm_kubernetes_cluster" "cijenkinsio_agents_1" {
     vnet_subnet_id               = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id
     tags                         = local.default_tags
     zones                        = local.aks_clusters.cijenkinsio_agents_1.compute_zones
+    upgrade_settings {
+      drain_timeout_in_minutes      = 0
+      max_surge                     = "10%"
+      node_soak_duration_in_minutes = 0
+    }
   }
 
   tags = local.default_tags
