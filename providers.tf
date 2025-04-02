@@ -28,14 +28,6 @@ provider "kubernetes" {
 }
 
 provider "kubernetes" {
-  alias                  = "cijenkinsio_agents_1"
-  host                   = local.aks_clusters_outputs.cijenkinsio_agents_1.cluster_hostname
-  client_certificate     = base64decode(azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.client_certificate)
-  client_key             = base64decode(azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.client_key)
-  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.cijenkinsio_agents_1.kube_config.0.cluster_ca_certificate)
-}
-
-provider "kubernetes" {
   alias                  = "infracijenkinsio_agents_1"
   host                   = local.aks_clusters_outputs.infracijenkinsio_agents_1.cluster_hostname
   client_certificate     = base64decode(azurerm_kubernetes_cluster.infracijenkinsio_agents_1.kube_config.0.client_certificate)
