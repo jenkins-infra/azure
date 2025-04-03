@@ -1,10 +1,7 @@
-resource "azurerm_resource_group" "ci_jenkins_io" {
-  provider = azurerm.jenkins-sponsorship
-  name     = "ci-jenkins-io"
-  location = var.location
-  tags     = local.default_tags
+moved {
+  from = azurerm_resource_group.ci_jenkins_io
+  to   = module.ci_jenkins_io_sponsorship.azurerm_resource_group.controller
 }
-
 ####################################################################################
 ## Resources for the Controller VM
 ####################################################################################
@@ -16,9 +13,7 @@ module "ci_jenkins_io_sponsorship" {
     azuread     = azuread
   }
 
-  service_fqdn                 = "sponsorship.${local.ci_jenkins_io_fqdn}"
-  dns_zone_name                = data.azurerm_dns_zone.jenkinsio.name
-  dns_resourcegroup_name       = data.azurerm_resource_group.proddns_jenkinsio.name
+  service_fqdn                 = local.ci_jenkins_io_fqdn
   location                     = data.azurerm_virtual_network.public_jenkins_sponsorship.location
   admin_username               = local.admin_username
   admin_ssh_publickey          = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDKvZ23dkvhjSU0Gxl5+mKcBOwmR7gqJDYeA1/Xzl3otV4CtC5te5Vx7YnNEFDXD6BsNkFaliXa34yE37WMdWl+exIURBMhBLmOPxEP/cWA5ZbXP//78ejZsxawBpBJy27uQhdcR0zVoMJc8Q9ShYl5YT/Tq1UcPq2wTNFvnrBJL1FrpGT+6l46BTHI+Wpso8BK64LsfX3hKnJEGuHSM0GAcYQSpXAeGS9zObKyZpk3of/Qw/2sVilIOAgNODbwqyWgEBTjMUln71Mjlt1hsEkv3K/VdvpFNF8VNq5k94VX6Rvg5FQBRL5IrlkuNwGWcBbl8Ydqk4wrD3b/PrtuLBEUsqbNhLnlEvFcjak+u2kzCov73csN/oylR0Tkr2y9x2HfZgDJVtvKjkkc4QERo7AqlTuy1whGfDYsioeabVLjZ9ahPjakv9qwcBrEEF+pAya7Q3AgNFVSdPgLDEwEO8GUHaxAjtyXXv9+yPdoDGmG3Pfn3KqM6UZjHCxne3Dr5ZE="
@@ -27,9 +22,14 @@ module "ci_jenkins_io_sponsorship" {
   controller_subnet_name       = data.azurerm_subnet.ci_jenkins_io_controller_sponsorship.name
   controller_os_disk_size_gb   = 64
   controller_data_disk_size_gb = 512
-  controller_vm_size           = "Standard_D8as_v5"
+  controller_vm_size           = "Standard_D8pds_v6"
   is_public                    = true
+  enable_public_ipv6           = true
   default_tags                 = local.default_tags
+  enable_vm_system_identity    = true
+
+  controller_resourcegroup_name = "ci-jenkins-io"
+
   jenkins_infra_ips = {
     ldap_ipv4         = azurerm_public_ip.ldap_jenkins_io_ipv4.ip_address
     puppet_ipv4       = azurerm_public_ip.puppet_jenkins_io.ip_address
@@ -75,42 +75,6 @@ module "ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
   }
 }
 
-data "azurerm_subnet" "ci_jenkins_io_aci_agents_jenkins_sponsorship" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "${data.azurerm_virtual_network.public_jenkins_sponsorship.name}-ci_jenkins_io_aci"
-  virtual_network_name = data.azurerm_virtual_network.public_jenkins_sponsorship.name
-  resource_group_name  = data.azurerm_virtual_network.public_jenkins_sponsorship.resource_group_name
-}
-
-module "ci_jenkins_io_aci_agents_sponsorship" {
-  providers = {
-    azurerm = azurerm.jenkins-sponsorship
-  }
-  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-aci-agents"
-
-  controller_ips = compact([
-    module.ci_jenkins_io_sponsorship.controller_private_ipv4,
-    module.ci_jenkins_io_sponsorship.controller_public_ipv4
-  ])
-
-  jenkins_infra_ips = {
-    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
-    acp_service_ips   = azurerm_private_dns_a_record.artifact_caching_proxy.records
-  }
-
-  service_fqdn                = local.ci_jenkins_io_fqdn
-  service_short_stripped_name = "ci-jenkins-io"
-
-  aci_agents_resource_group_name = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_resource_group_name
-
-  controller_service_principal_id = module.ci_jenkins_io_sponsorship.controller_service_principal_id
-
-  aci_agents_network_rg_name = data.azurerm_subnet.ci_jenkins_io_aci_agents_jenkins_sponsorship.resource_group_name
-  aci_agents_network_name    = data.azurerm_subnet.ci_jenkins_io_aci_agents_jenkins_sponsorship.virtual_network_name
-  aci_agents_subnet_name     = data.azurerm_subnet.ci_jenkins_io_aci_agents_jenkins_sponsorship.name
-  controller_rg_name         = module.ci_jenkins_io_sponsorship.controller_resourcegroup_name
-}
-
 ## Service DNS records
 resource "azurerm_dns_cname_record" "ci_jenkins_io" {
   name                = trimsuffix(trimsuffix(local.ci_jenkins_io_fqdn, data.azurerm_dns_zone.jenkinsio.name), ".")
@@ -127,6 +91,34 @@ resource "azurerm_dns_cname_record" "assets_ci_jenkins_io" {
   ttl                 = 60
   record              = "assets.aws.ci.jenkins.io"
   tags                = local.default_tags
+}
+resource "azurerm_dns_a_record" "azure_ci_jenkins_io" {
+  name                = "azure.ci"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  records             = [module.ci_jenkins_io_sponsorship.controller_public_ipv4]
+}
+resource "azurerm_dns_a_record" "assets_azure_ci_jenkins_io_controller" {
+  name                = "assets.azure.ci"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  records             = [module.ci_jenkins_io_sponsorship.controller_public_ipv4]
+}
+resource "azurerm_dns_aaaa_record" "azure_ci_jenkins_io" {
+  name                = "azure.ci"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  records             = [module.ci_jenkins_io_sponsorship.controller_public_ipv6]
+}
+resource "azurerm_dns_aaaa_record" "assets_azure_ci_jenkins_io_controller" {
+  name                = "assets.azure.ci"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  records             = [module.ci_jenkins_io_sponsorship.controller_public_ipv6]
 }
 resource "azurerm_private_dns_a_record" "artifact_caching_proxy" {
   provider            = azurerm.jenkins-sponsorship
@@ -226,12 +218,14 @@ resource "azurerm_network_security_rule" "allow_in_http_from_cijio_agents_to_acp
   network_security_group_name  = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
 }
 
-
+####################################################################################
+## Resources for Azure File Persistent Volumes (cache, artifacts, etc.)
+####################################################################################
 resource "azurerm_storage_account" "ci_jenkins_io" {
   provider            = azurerm.jenkins-sponsorship
   name                = "cijenkinsio"
-  resource_group_name = azurerm_resource_group.ci_jenkins_io.name
-  location            = azurerm_resource_group.ci_jenkins_io.location
+  resource_group_name = module.ci_jenkins_io_sponsorship.controller_resourcegroup_name
+  location            = data.azurerm_virtual_network.public_jenkins_sponsorship.location
 
   account_tier                      = "Premium"
   account_kind                      = "FileStorage"
