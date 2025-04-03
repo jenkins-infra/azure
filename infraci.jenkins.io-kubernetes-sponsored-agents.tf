@@ -143,6 +143,39 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_agents_1_sponsorshi
   tags = local.default_tags
 }
 
+resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_agents_2_sponsorship" {
+  provider = azurerm.jenkins-sponsorship
+  name     = "la64n14agt2"
+  vm_size  = "Standard_D16pds_v5" # temporarily upgrade https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv5-series?tabs=sizebasic 	16vcpu 	64Go 	600ssd
+  upgrade_settings {
+    max_surge = "10%"
+  }
+  os_sku                = "AzureLinux"
+  os_disk_type          = "Ephemeral"
+  os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv5-series?tabs=sizebasic (depends on the instance size)
+  orchestrator_version  = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.id
+  auto_scaling_enabled  = true
+  min_count             = 1 # Azure autoscaler with ARM64 is really slow when starting from zero nodes.
+  max_count             = 20
+  zones                 = [3]
+  vnet_subnet_id        = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
+
+  node_labels = {
+    "jenkins" = "infra.ci.jenkins.io"
+    "role"    = "jenkins-agents"
+  }
+  node_taints = [
+    "infra.ci.jenkins.io/agents=true:NoSchedule",
+  ]
+
+  lifecycle {
+    ignore_changes = [node_count]
+  }
+
+  tags = local.default_tags
+}
+
 # Configure the jenkins-infra/kubernetes-management admin service account
 module "infracijenkinsio_agents_1_admin_sa_sponsorship" {
   providers = {
