@@ -164,6 +164,19 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n3_bom_1" {
   tags = local.default_tags
 }
 
+resource "kubernetes_storage_class" "statically_provisioned_cijenkinsio_agents_1" {
+  metadata {
+    name = "statically-provisioned"
+  }
+  storage_provisioner = "file.csi.azure.com"
+  reclaim_policy      = "Retain"
+  parameters = {
+    skuname = "Premium_LRS"
+  }
+  provider               = kubernetes.cijenkinsio_agents_1
+  allow_volume_expansion = true
+}
+
 # Allow AKS to manipulate LBs, PLS and join subnets - https://learn.microsoft.com/en-us/azure/aks/internal-lb?tabs=set-service-annotations#use-private-networks (see Note)
 resource "azurerm_role_assignment" "cijio_agents_1_networkcontributor_vnet" {
   provider                         = azurerm.jenkins-sponsorship
@@ -190,3 +203,190 @@ output "kubeconfig_management_cijenkinsio_agents_1" {
   sensitive = true
   value     = module.cijenkinsio_agents_1_admin_sa.kubeconfig
 }
+
+################################################################################################################################################################
+## We define 3 PVCs (and associated PVs) all using the same Azure File Storage
+## - 1 ReadWriteMany in a custom namespace which will be used to populate cache in a "non Jenkins agents namespace" (to avoid access through ci.jenkins.io)
+## - 1 ReadOnlyMany per "Jenkins agents namespace" to allow consumption by container agents
+################################################################################################################################################################
+# Kubernetes Resources: PV and PVC must be statically provisioned
+# Ref. https://github.com/awslabs/mountpoint-s3-csi-driver/tree/main?tab=readme-ov-file#features
+resource "kubernetes_namespace" "ci_jenkins_io_jenkins_agents" {
+  provider = kubernetes.cijenkinsio_agents_1
+
+  for_each = local.aks_clusters.cijenkinsio_agents_1.agent_namespaces
+
+  metadata {
+    name = each.key
+    labels = {
+      name = "${each.key}"
+    }
+  }
+}
+
+resource "kubernetes_namespace" "ci_jenkins_io_maven_cache" {
+  provider = kubernetes.cijenkinsio_agents_1
+
+  metadata {
+    name = "maven-cache"
+    labels = {
+      name = "maven-cache"
+    }
+  }
+}
+resource "kubernetes_secret" "ci_jenkins_io_maven_cache" {
+  provider = kubernetes.cijenkinsio_agents_1
+
+  metadata {
+    name      = "ci-jenkins-io-maven-cache"
+    namespace = kubernetes_namespace.ci_jenkins_io_maven_cache.metadata[0].name
+  }
+
+  data = {
+    azurestorageaccountname = azurerm_storage_account.ci_jenkins_io.name
+    azurestorageaccountkey  = azurerm_storage_account.ci_jenkins_io.primary_access_key
+  }
+
+  type = "Opaque"
+}
+
+### ReadOnly PVs consumed by Jenkins agents
+resource "kubernetes_persistent_volume" "ci_jenkins_io_maven_cache_readonly" {
+  provider = kubernetes.cijenkinsio_agents_1
+
+  for_each = local.aks_clusters.cijenkinsio_agents_1.agent_namespaces
+
+  metadata {
+    name = format("%s-%s", azurerm_storage_share.ci_jenkins_io_maven_cache.name, lower(each.key))
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_storage_share.ci_jenkins_io_maven_cache.quota}Gi"
+    }
+    access_modes                     = ["ReadOnlyMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.statically_provisioned_cijenkinsio_agents_1.id
+    # Ensure that only the designated PVC can claim this PV (to avoid injection as PV are not namespaced)
+    claim_ref {                                                        # To ensure no other PVCs can claim this PV
+      namespace = each.key                                             # Namespace is required even though it's in "default" namespace.
+      name      = azurerm_storage_share.ci_jenkins_io_maven_cache.name # Name of your PVC (cannot be a direct reference to avoid cyclical errors)
+    }
+    mount_options = [
+      "dir_mode=0777",
+      "file_mode=0777",
+      "uid=0",
+      "gid=0",
+      "mfsymlinks",
+      "cache=strict", # Default on usual kernels but worth setting it explicitly
+      "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+      "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+    ]
+    persistent_volume_source {
+      csi {
+        driver  = "file.csi.azure.com"
+        fs_type = "ext4"
+        # `volumeHandle` must be unique on the cluster for this volume
+        volume_handle = format("%s-%s", azurerm_storage_share.ci_jenkins_io_maven_cache.name, lower(each.key))
+        read_only     = true
+        volume_attributes = {
+          resourceGroup = azurerm_storage_account.ci_jenkins_io.resource_group_name
+          shareName     = azurerm_storage_share.ci_jenkins_io_maven_cache.name
+        }
+        node_stage_secret_ref {
+          name      = kubernetes_secret.ci_jenkins_io_maven_cache.metadata[0].name
+          namespace = kubernetes_secret.ci_jenkins_io_maven_cache.metadata[0].namespace
+        }
+      }
+    }
+  }
+}
+### ReadOnly PVCs consumed by Jenkins agents
+resource "kubernetes_persistent_volume_claim" "ci_jenkins_io_maven_cache_readonly" {
+  provider = kubernetes.cijenkinsio_agents_1
+
+  for_each = local.aks_clusters.cijenkinsio_agents_1.agent_namespaces
+
+  metadata {
+    name      = azurerm_storage_share.ci_jenkins_io_maven_cache.name
+    namespace = each.key
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.ci_jenkins_io_maven_cache_readonly[each.key].spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.ci_jenkins_io_maven_cache_readonly[each.key].metadata.0.name
+    storage_class_name = kubernetes_persistent_volume.ci_jenkins_io_maven_cache_readonly[each.key].spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = kubernetes_persistent_volume.ci_jenkins_io_maven_cache_readonly[each.key].spec[0].capacity.storage
+      }
+    }
+  }
+}
+
+### ReadWrite PV used to fill the cache
+resource "kubernetes_persistent_volume" "ci_jenkins_io_maven_cache_write" {
+  provider = kubernetes.cijenkinsio_agents_1
+
+  metadata {
+    name = format("%s-%s", azurerm_storage_share.ci_jenkins_io_maven_cache.name, kubernetes_namespace.ci_jenkins_io_maven_cache.metadata[0].name)
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_storage_share.ci_jenkins_io_maven_cache.quota}Gi"
+    }
+    access_modes                     = ["ReadWriteMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = "" # Required for static provisioning (even if empty)
+    # Ensure that only the designated PVC can claim this PV (to avoid injection as PV are not namespaced)
+    claim_ref {                                                                   # To ensure no other PVCs can claim this PV
+      namespace = kubernetes_namespace.ci_jenkins_io_maven_cache.metadata[0].name # Namespace is required even though it's in "default" namespace.
+      name      = azurerm_storage_share.ci_jenkins_io_maven_cache.name            # Name of your PVC
+    }
+    mount_options = [
+      "dir_mode=0777",
+      "file_mode=0777",
+      "uid=0",
+      "gid=0",
+      "mfsymlinks",
+      "cache=strict", # Default on usual kernels but worth setting it explicitly
+      "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+      "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+    ]
+    persistent_volume_source {
+      csi {
+        driver  = "file.csi.azure.com"
+        fs_type = "ext4"
+        # `volumeHandle` must be unique on the cluster for this volume
+        volume_handle = format("%s-%s", azurerm_storage_share.ci_jenkins_io_maven_cache.name, kubernetes_namespace.ci_jenkins_io_maven_cache.metadata[0].name)
+        read_only     = false
+        volume_attributes = {
+          resourceGroup = azurerm_storage_account.ci_jenkins_io.resource_group_name
+          shareName     = azurerm_storage_share.ci_jenkins_io_maven_cache.name
+        }
+        node_stage_secret_ref {
+          name      = kubernetes_secret.ci_jenkins_io_maven_cache.metadata[0].name
+          namespace = kubernetes_secret.ci_jenkins_io_maven_cache.metadata[0].namespace
+        }
+      }
+    }
+  }
+}
+### ReadWrite PVC used to fill the cache
+resource "kubernetes_persistent_volume_claim" "ci_jenkins_io_maven_cache_write" {
+  provider = kubernetes.cijenkinsio_agents_1
+
+  metadata {
+    name      = azurerm_storage_share.ci_jenkins_io_maven_cache.name
+    namespace = kubernetes_namespace.ci_jenkins_io_maven_cache.metadata[0].name
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.ci_jenkins_io_maven_cache_write.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.ci_jenkins_io_maven_cache_write.metadata.0.name
+    storage_class_name = kubernetes_persistent_volume.ci_jenkins_io_maven_cache_write.spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = kubernetes_persistent_volume.ci_jenkins_io_maven_cache_write.spec[0].capacity.storage
+      }
+    }
+  }
+}
+################################################################################################################################################################

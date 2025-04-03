@@ -58,6 +58,12 @@ resource "local_file" "jenkins_infra_data_report" {
     "cijenkinsio_agents_1" = {
       hostname           = local.aks_clusters_outputs.cijenkinsio_agents_1.cluster_hostname
       kubernetes_version = local.aks_clusters["cijenkinsio_agents_1"].kubernetes_version
+      agent_namespaces   = local.aks_clusters.cijenkinsio_agents_1.agent_namespaces,
+      maven_cache_pvcs = merge(
+        { for agent_ns, agent_setup in local.aks_clusters.cijenkinsio_agents_1.agent_namespaces :
+        agent_ns => kubernetes_persistent_volume_claim.ci_jenkins_io_maven_cache_readonly[agent_ns].metadata[0].name },
+        { "${kubernetes_namespace.ci_jenkins_io_maven_cache.metadata[0].name}" = kubernetes_persistent_volume_claim.ci_jenkins_io_maven_cache_write.metadata[0].name },
+      ),
     },
     "infracijenkinsio_agents_1" = {
       hostname           = local.aks_clusters_outputs.infracijenkinsio_agents_1.cluster_hostname
