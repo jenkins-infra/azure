@@ -66,6 +66,14 @@ locals {
       kubernetes_version = "1.31.6",
       pod_cidr           = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
       compute_zones      = [1],
+      agent_namespaces = {
+        "jenkins-agents" = {
+          pods_quota = 150,
+        },
+        "jenkins-agents-bom" = {
+          pods_quota = 150,
+        },
+      },
     },
   }
 
