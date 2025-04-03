@@ -32,6 +32,7 @@ resource "azurerm_storage_account" "ci_jenkins_io" {
       data.azurerm_subnet.ci_jenkins_io_controller_sponsorship.id,
       data.azurerm_subnet.ci_jenkins_io_ephemeral_agents_jenkins_sponsorship.id,
       data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id,
+      data.azurerm_subnet.privatek8s_tier.id,                                  # required for management from infra.ci (terraform)
       data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.id, # infra.ci Azure VM agents
       data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id,  # infra.ci container VM agents
     ]
@@ -39,9 +40,9 @@ resource "azurerm_storage_account" "ci_jenkins_io" {
   }
 }
 resource "azurerm_storage_share" "ci_jenkins_io_maven_cache" {
-  name               = "ci-jenkins-io-maven-cache"
-  storage_account_id = azurerm_storage_account.ci_jenkins_io.id
-  quota              = 100 # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
+  name                 = "ci-jenkins-io-maven-cache"
+  storage_account_name = azurerm_storage_account.ci_jenkins_io.name
+  quota                = 100 # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
 }
 
 ## Service DNS records
