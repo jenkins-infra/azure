@@ -39,9 +39,9 @@ resource "azurerm_storage_account" "ci_jenkins_io" {
   }
 }
 resource "azurerm_storage_share" "ci_jenkins_io_maven_cache" {
-  name               = "ci-jenkins-io-maven-cache"
-  storage_account_id = azurerm_storage_account.ci_jenkins_io.id
-  quota              = 100 # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
+  name                 = "ci-jenkins-io-maven-cache"
+  storage_account_name = azurerm_storage_account.ci_jenkins_io.name
+  quota                = 100 # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
 }
 
 ## Service DNS records
