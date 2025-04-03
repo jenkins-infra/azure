@@ -48,7 +48,7 @@ locals {
   aks_clusters = {
     "infracijenkinsio_agents_1" = {
       name               = "infracijenkinsio-agents-1",
-      kubernetes_version = "1.30.7",
+      kubernetes_version = "1.31.6",
       compute_zones      = [1],
       pod_cidr           = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
     },
