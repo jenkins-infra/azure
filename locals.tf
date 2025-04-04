@@ -22,11 +22,13 @@ locals {
     }
   }
 
+  # TODO: track with updatecli
   external_services = {
-    "updates.jenkins.io"    = "52.202.51.185"
-    "s390x.jenkins.io"      = "148.100.84.76"
-    "pkg.origin.jenkins.io" = "52.202.51.185"
-    "archives.jenkins.io"   = "46.101.121.132"
+    "updates.jenkins.io"     = "52.202.51.185",
+    "s390x.jenkins.io"       = "148.100.84.76",
+    "pkg.origin.jenkins.io"  = "52.202.51.185",
+    "archives.jenkins.io"    = "46.101.121.132",
+    "private.vpn.jenkins.io" = "172.176.126.194",
   }
 
   # Ref. https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-githubs-ip-addresses
@@ -46,6 +48,10 @@ locals {
   admin_username = "jenkins-infra-team"
 
   aks_clusters = {
+    "cijenkinsio_agents_1" = {
+      name               = "cijenkinsio-agents-1",
+      kubernetes_version = "1.30.7",
+    }
     "infracijenkinsio_agents_1" = {
       name               = "infracijenkinsio-agents-1",
       kubernetes_version = "1.31.6",
@@ -93,7 +99,9 @@ locals {
     },
   }
 
-  ci_jenkins_io_fqdn = "ci.jenkins.io"
+  ci_jenkins_io_fqdn                 = "ci.jenkins.io"
+  cijenkinsio_agents_1_compute_zones = [1]
+  ci_jenkins_io_agents_1_pod_cidr    = "10.100.0.0/14" # 10.100.0.1 - 10.103.255.255
 
   end_dates = yamldecode(data.local_file.locals_yaml.content).end_dates
 }
