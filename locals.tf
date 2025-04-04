@@ -22,11 +22,13 @@ locals {
     }
   }
 
+  # TODO: track with updatecli
   external_services = {
-    "updates.jenkins.io"    = "52.202.51.185"
-    "s390x.jenkins.io"      = "148.100.84.76"
-    "pkg.origin.jenkins.io" = "52.202.51.185"
-    "archives.jenkins.io"   = "46.101.121.132"
+    "updates.jenkins.io"     = "52.202.51.185",
+    "s390x.jenkins.io"       = "148.100.84.76",
+    "pkg.origin.jenkins.io"  = "52.202.51.185",
+    "archives.jenkins.io"    = "46.101.121.132",
+    "private.vpn.jenkins.io" = "172.176.126.194",
   }
 
   # Ref. https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-githubs-ip-addresses
