@@ -152,6 +152,7 @@ resource "azurerm_network_security_rule" "allow_outbound_https_from_cijio_to_cij
   network_security_group_name  = module.ci_jenkins_io_sponsorship.controller_nsg_name
 }
 
+# TODO: remove once migration is complete
 ## Allow ci.jenkins.io to reach aws.ci.jenkins.io
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_cijio_to_awscijio" {
   provider                     = azurerm.jenkins-sponsorship
