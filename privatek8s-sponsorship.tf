@@ -49,11 +49,11 @@ resource "azurerm_kubernetes_cluster" "privatek8s_sponsorship" {
   kubernetes_version                  = local.aks_clusters["privatek8s_sponsorship"].kubernetes_version
   role_based_access_control_enabled   = true # default value but made explicit to please trivy
 
-## TODO need to understand how it's handled `upgrade_override`
-#   upgrade_override {
-#     # TODO: disable to avoid "surprise" upgrades
-#     force_upgrade_enabled = true
-#   }
+  ## TODO need to understand how it's handled `upgrade_override`
+  #   upgrade_override {
+  #     # TODO: disable to avoid "surprise" upgrades
+  #     force_upgrade_enabled = true
+  #   }
 
   image_cleaner_interval_hours = 48
 
@@ -136,7 +136,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infraci_controller_sponsorship"
   auto_scaling_enabled  = true
   min_count             = 1
   max_count             = 2
-  zones                 = local.aks_clusters.infracijenkinsio_agents_1.compute_zones # same zones as infraci agents to avoid network cost
+  zones                 = [1] # same zones as infraci agents to avoid network cost TODO track with updatecli
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsorship_infra_ci_controller_tier.id
 
   node_taints = [

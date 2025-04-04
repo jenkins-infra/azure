@@ -48,10 +48,6 @@ locals {
   admin_username = "jenkins-infra-team"
 
   aks_clusters = {
-    "cijenkinsio_agents_1" = {
-      name               = "cijenkinsio-agents-1",
-      kubernetes_version = "1.30.7",
-    }
     "infracijenkinsio_agents_1" = {
       name               = "infracijenkinsio-agents-1",
       kubernetes_version = "1.31.6",
@@ -61,7 +57,6 @@ locals {
     "privatek8s_sponsorship" = {
       name               = "privatek8s-sponsorship",
       kubernetes_version = "1.31.6",
-      compute_zones      = [3],
       pod_cidr           = "10.50.0.0/14", # 10.48.0.1 - 10.51.255.255
     },
     "privatek8s" = {
