@@ -31,9 +31,12 @@ module "ci_jenkins_io_sponsorship" {
   controller_resourcegroup_name = "ci-jenkins-io"
 
   jenkins_infra_ips = {
-    ldap_ipv4         = azurerm_public_ip.ldap_jenkins_io_ipv4.ip_address
-    puppet_ipv4       = azurerm_public_ip.puppet_jenkins_io.ip_address
-    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
+    ldap_ipv4   = azurerm_public_ip.ldap_jenkins_io_ipv4.ip_address
+    puppet_ipv4 = azurerm_public_ip.puppet_jenkins_io.ip_address
+    privatevpn_subnet = compact(flatten(concat(
+      data.azurerm_subnet.private_vnet_data_tier.address_prefixes, # Routing through the private VPN interface (when destination is the VM private IPv4)
+      [local.external_services["private.vpn.jenkins.io"]],         # Routing through the public VPN outbound IP (when destination is reachable through Internet gateway)
+    ))),
   }
   controller_service_principal_ids = [
     data.azuread_service_principal.terraform_production.object_id,
@@ -71,7 +74,6 @@ module "ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
 
   jenkins_infra_ips = {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
-    # acp_service_ips = azurerm_private_dns_a_record.artifact_caching_proxy.records
   }
 }
 
