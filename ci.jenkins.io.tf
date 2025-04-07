@@ -26,7 +26,6 @@ module "ci_jenkins_io_sponsorship" {
   is_public                    = true
   enable_public_ipv6           = true
   default_tags                 = local.default_tags
-  enable_vm_system_identity    = true
 
   controller_resourcegroup_name = "ci-jenkins-io"
 
