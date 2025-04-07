@@ -77,6 +77,13 @@ resource "local_file" "jenkins_infra_data_report" {
         "ipv4" = module.ci_jenkins_io_sponsorship.controller_public_ipv4,
         "ipv6" = module.ci_jenkins_io_sponsorship.controller_public_ipv6,
       },
+      "azure-vm-agents" = {
+        "resource_group_name"         = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_resource_group_name,
+        "network_resource_group_name" = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_network_rg_name,
+        "virtual_network_name"        = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_network_name,
+        "sub_network_name"            = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_subnet_name,
+        "storage_account_name"        = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_storage_account_name,
+      },
     }
   })
   filename = "${path.module}/jenkins-infra-data-reports/azure.json"
