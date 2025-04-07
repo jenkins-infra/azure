@@ -27,7 +27,7 @@ module "cert_ci_jenkins_io" {
   controller_service_principal_ids = [
     data.azuread_service_principal.terraform_production.object_id,
   ]
-  controller_service_principal_end_date = "2025-04-15T00:00:00Z"
+  controller_service_principal_end_date = "2025-07-06T00:00:00Z"
   controller_packer_rg_ids = [
     azurerm_resource_group.packer_images["prod"].id
   ]
