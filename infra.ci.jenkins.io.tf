@@ -421,7 +421,7 @@ resource "azuread_service_principal" "updatecli_infra_ci_jenkins_io" {
 resource "azuread_application_password" "updatecli_infra_ci_jenkins_io" {
   application_id = azuread_application.updatecli_infra_ci_jenkins_io.id
   display_name   = "updatecli_infra.ci.jenkins.io-tf-managed"
-  end_date       = "2025-04-18T00:00:00Z"
+  end_date       = "2025-07-06T00:00:00Z"
 }
 
 resource "azurerm_role_definition" "vm_images_reader" {
