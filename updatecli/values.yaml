@@ -19,19 +19,6 @@ controllers_azurevm_client_end_dates:
 
       Finally, verify both Azure Credential and Azure VM clouds by checking that a click on the "Verify <...>" buttons returns a success,
       then restart the controller to ensure that the old credential is not kept in cache.
-  cert.ci.jenkins.io:
-    doc_how_to_get_credential: |
-      > [!IMPORTANT]
-      >
-      > ⚠️ Merging this PR will prevent starting new Azure VM agents until the credential is updated on the controller.
-
-      You'll have to update **manually** the top-level credential `azure-jenkins-sponsorship-credentials` on the Jenkins UI.
-
-      The new password value, once the PR is merged and deployed, can be retrieved from the Terraform state,
-      by searching for `module.cert_ci_jenkins_io.azuread_application_password.controller.value`.
-
-      Finally, verify both Azure Credential and Azure VM clouds by checking that a click on the "Verify <...>" buttons returns a success,
-      then restart the controller to ensure that the old credential is not kept in cache.
   infra.ci.jenkins.io:
     custom_hcl_key: resource.azuread_application_password.infra_ci_jenkins_io.end_date
     doc_how_to_get_credential: |
