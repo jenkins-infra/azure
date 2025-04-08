@@ -150,7 +150,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_n3_bom_1" {
 
   node_labels = {
     "jenkins" = "ci.jenkins.io"
-    "role"    = "jenkins-agents"
+    "role"    = "jenkins-agents-bom"
   }
   node_taints = [
     "ci.jenkins.io/agents=true:NoSchedule",
