@@ -5,34 +5,6 @@ resource "azurerm_resource_group" "privatek8s_sponsorship" {
   tags     = local.default_tags
 }
 
-data "azurerm_subnet" "privatek8s_sponsorship_tier" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "privatek8s-sponsorship-tier"
-  resource_group_name  = data.azurerm_resource_group.private.name
-  virtual_network_name = data.azurerm_virtual_network.private.name
-}
-
-data "azurerm_subnet" "privatek8s_sponsorship_release_tier" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "privatek8s-sponsorship-release-tier"
-  resource_group_name  = data.azurerm_resource_group.private.name
-  virtual_network_name = data.azurerm_virtual_network.private.name
-}
-
-data "azurerm_subnet" "privatek8s_sponsorship_infra_ci_controller_tier" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "privatek8s-sponsorship-infraci-ctrl-tier"
-  resource_group_name  = data.azurerm_resource_group.private.name
-  virtual_network_name = data.azurerm_virtual_network.private.name
-}
-
-data "azurerm_subnet" "privatek8s_sponsorship_release_ci_controller_tier" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "privatek8s-sponsorship-releaseci-ctrl-tier"
-  resource_group_name  = data.azurerm_resource_group.private.name
-  virtual_network_name = data.azurerm_virtual_network.private.name
-}
-
 #trivy:ignore:azure-container-logging #trivy:ignore:azure-container-limit-authorized-ips
 resource "azurerm_kubernetes_cluster" "privatek8s_sponsorship" {
   provider = azurerm.jenkins-sponsorship
