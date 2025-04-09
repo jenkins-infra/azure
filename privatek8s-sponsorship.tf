@@ -376,13 +376,3 @@ output "kubeconfig_management_privatek8s_sponsorship" {
   sensitive = true
   value     = module.privatek8s_sponsorship_admin_sa.kubeconfig
 }
-
-# Retrieve effective outbound IPs
-data "azurerm_public_ip" "privatek8s_sponsorship_lb_outbound" {
-  ## Disable this resource when running in terratest
-  # to avoid the error "The "for_each" set includes values derived from resource attributes that cannot be determined until apply"
-  for_each = var.terratest ? toset([]) : toset(concat(flatten(azurerm_kubernetes_cluster.privatek8s_sponsorship.network_profile[*].load_balancer_profile[*].effective_outbound_ips)))
-
-  name                = element(split("/", each.key), "-1")
-  resource_group_name = azurerm_kubernetes_cluster.privatek8s_sponsorship.node_resource_group
-}
