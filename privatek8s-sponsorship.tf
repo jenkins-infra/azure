@@ -228,27 +228,6 @@ resource "azurerm_role_assignment" "privatek8s_sponsorship_publicip_networkcontr
   skip_service_principal_aad_check = true
 }
 
-# Allow cluster to manage get.jenkins.io storage account
-resource "azurerm_role_assignment" "getjenkinsio_storage_account_contributor_sponsorship" {
-  provider                         = azurerm.jenkins-sponsorship
-  scope                            = azurerm_storage_account.get_jenkins_io.id
-  role_definition_name             = "Storage Account Contributor"
-  principal_id                     = azurerm_kubernetes_cluster.privatek8s_sponsorship.identity[0].principal_id
-  skip_service_principal_aad_check = true
-}
-
-resource "kubernetes_storage_class" "managed_csi_premium_retain_sponsorship" {
-  provider = kubernetes.privatek8s_sponsorship
-  metadata {
-    name = "managed-csi-premium-retain"
-  }
-  storage_provisioner = "disk.csi.azure.com"
-  reclaim_policy      = "Retain"
-  parameters = {
-    skuname = "Premium_LRS"
-  }
-}
-
 # Used by the release.ci Azurefile PVC mounts
 resource "kubernetes_storage_class" "privatek8s_sponsorship_azurefile_csi_premium_retain" {
   provider = kubernetes.privatek8s_sponsorship
@@ -261,45 +240,6 @@ resource "kubernetes_storage_class" "privatek8s_sponsorship_azurefile_csi_premiu
     skuname = "Premium_LRS"
   }
   mount_options = ["dir_mode=0777", "file_mode=0777", "uid=1000", "gid=1000", "mfsymlinks", "nobrl"]
-
-}
-
-resource "kubernetes_storage_class" "managed_csi_premium_ZRS_retain_private_sponsorship" {
-  provider = kubernetes.privatek8s_sponsorship
-  metadata {
-    name = "managed-csi-premium-zrs-retain"
-  }
-  storage_provisioner = "disk.csi.azure.com"
-  reclaim_policy      = "Retain"
-  parameters = {
-    skuname = "Premium_ZRS"
-  }
-  allow_volume_expansion = true
-}
-
-# https://learn.microsoft.com/en-us/java/api/com.microsoft.azure.management.storage.skuname?view=azure-java-legacy#field-summary
-resource "kubernetes_storage_class" "managed_csi_standard_ZRS_retain_private_sponsorship" {
-  provider = kubernetes.privatek8s_sponsorship
-  metadata {
-    name = "managed-csi-standard-zrs-retain"
-  }
-  storage_provisioner = "disk.csi.azure.com"
-  reclaim_policy      = "Retain"
-  parameters = {
-    skuname = " Standard_ZRS"
-  }
-  allow_volume_expansion = true
-}
-
-# TODO: remove this class once all PV/PVCs have been patched
-resource "kubernetes_storage_class" "statically_provisionned_privatek8s_sponsorship" {
-  provider = kubernetes.privatek8s_sponsorship
-  metadata {
-    name = "statically-provisionned"
-  }
-  storage_provisioner    = "disk.csi.azure.com"
-  reclaim_policy         = "Retain"
-  allow_volume_expansion = true
 }
 
 # Used by all the controller (for their Jenkins Home PVCs)
