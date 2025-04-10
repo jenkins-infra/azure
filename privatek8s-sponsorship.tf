@@ -53,7 +53,7 @@ resource "azurerm_kubernetes_cluster" "privatek8s_sponsorship" {
     }
     os_sku               = "AzureLinux"
     os_disk_type         = "Ephemeral"
-    os_disk_size_gb      = 75 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
+    os_disk_size_gb      = 75 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/sizes/general-purpose/dadsv5-series?tabs=sizestoragelocal (depends on the instance size)
     orchestrator_version = local.aks_clusters["privatek8s_sponsorship"].kubernetes_version
     kubelet_disk_type    = "OS"
     auto_scaling_enabled = true
@@ -70,18 +70,18 @@ resource "azurerm_kubernetes_cluster" "privatek8s_sponsorship" {
 resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_linuxpool" {
   provider = azurerm.jenkins-sponsorship
   name     = "linuxpool"
-  vm_size  = "Standard_D4s_v3"
+  vm_size  = "Standard_D4ads_v5"
   upgrade_settings {
     max_surge = "10%"
   }
   os_disk_type          = "Ephemeral"
   os_sku                = "AzureLinux"
-  os_disk_size_gb       = 100 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
+  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/sizes/general-purpose/dadsv5-series?tabs=sizestoragelocal (depends on the instance size)
   orchestrator_version  = local.aks_clusters["privatek8s_sponsorship"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s_sponsorship.id
   auto_scaling_enabled  = true
   min_count             = 0
-  max_count             = 5
+  max_count             = 3
   zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsorship_tier.id
 
@@ -138,7 +138,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releacic
   auto_scaling_enabled  = true
   min_count             = 1
   max_count             = 2
-  zones                 = [3] # same as releasepool
+  zones                 = [3]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsorship_release_ci_controller_tier.id
 
   node_taints = [
@@ -154,18 +154,18 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releacic
 resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releasepool" {
   provider = azurerm.jenkins-sponsorship
   name     = "releasepool"
-  vm_size  = "Standard_D8s_v3" # 8 vCPU 32 GiB RAM
+  vm_size  = "Standard_D8ads_v5" # 8 vCPU 32 GiB RAM
   upgrade_settings {
     max_surge = "10%"
   }
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 200 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
+  os_disk_size_gb       = 300 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
   orchestrator_version  = local.aks_clusters["privatek8s_sponsorship"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s_sponsorship.id
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 3
-  zones                 = [3] # same as release controller
+  zones                 = azurerm_kubernetes_cluster_node_pool.privatek8s_sponsorship_releacictrl.zones
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsorship_release_tier.id
   node_taints = [
     "jenkins=release.ci.jenkins.io:NoSchedule",
@@ -181,12 +181,12 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releasep
 resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releasepool_w2019" {
   provider = azurerm.jenkins-sponsorship
   name     = "w2019"
-  vm_size  = "Standard_D4s_v3" # 4 vCPU 16 GiB RAM
+  vm_size  = "Standard_D4pds_v5" # 4 vCPU 16 GiB RAM
   upgrade_settings {
     max_surge = "10%"
   }
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 100 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dv3-dsv3-series#dsv3-series (depends on the instance size)
+  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
   orchestrator_version  = local.aks_clusters["privatek8s_sponsorship"].kubernetes_version
   os_type               = "Windows"
   os_sku                = "Windows2019"
@@ -194,7 +194,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releasep
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 3
-  zones                 = [3]
+  zones                 = azurerm_kubernetes_cluster_node_pool.privatek8s_sponsorship_releacictrl.zones
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsorship_release_tier.id
   node_taints = [
     "os=windows:NoSchedule",
