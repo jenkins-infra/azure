@@ -350,9 +350,14 @@ resource "azurerm_dns_a_record" "privatek8s_sponsorship_private" {
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 300
-  ### TODO UPDATE
-  records = ["10.248.1.5"] # External IP of the private-nginx ingress LoadBalancer, created by https://github.com/jenkins-infra/kubernetes-management/blob/54a0d4aa72b15f4236abcfbde00a080905bbb890/clusters/privatek8s.yaml#L112-L118
-  tags    = local.default_tags
+  records = [
+    # Let's specify an IP at the end of the range to have low probability of being used
+    cidrhost(
+      data.azurerm_subnet.privatek8s_sponsorship_tier.address_prefixes[0],
+      -2,
+    )
+  ]
+  tags = local.default_tags
 }
 
 # Configure the jenkins-infra/kubernetes-management admin service account
