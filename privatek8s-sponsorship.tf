@@ -267,7 +267,7 @@ resource "kubernetes_storage_class" "privatek8s_sponsorship_statically_provision
 resource "azurerm_public_ip" "privatek8s_sponsorship" {
   provider            = azurerm.jenkins-sponsorship
   name                = "public-privatek8s"
-  resource_group_name = azurerm_resource_group.prod_public_ips.name
+  resource_group_name = azurerm_resource_group.prod_public_ips_sponsorship.name
   location            = var.location
   allocation_method   = "Static"
   sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
