@@ -61,7 +61,7 @@ resource "azurerm_kubernetes_cluster" "privatek8s_sponsorship" {
     max_count            = 3 # for upgrade
     vnet_subnet_id       = data.azurerm_subnet.privatek8s_sponsorship_tier.id
     tags                 = local.default_tags
-    zones                = [3]
+    zones                = [1, 2] # Many zones to ensure it is always able to provide machines in the region. Note: Zone 3 is not allowed for system pool.
   }
 
   tags = local.default_tags
@@ -267,7 +267,7 @@ resource "kubernetes_storage_class" "privatek8s_sponsorship_statically_provision
 resource "azurerm_public_ip" "privatek8s_sponsorship" {
   provider            = azurerm.jenkins-sponsorship
   name                = "public-privatek8s"
-  resource_group_name = azurerm_resource_group.prod_public_ips.name
+  resource_group_name = azurerm_resource_group.prod_public_ips_sponsorship.name
   location            = var.location
   allocation_method   = "Static"
   sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
