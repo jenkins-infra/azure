@@ -208,11 +208,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releasep
   tags = local.default_tags
 }
 
-# data "azurerm_kubernetes_cluster" "privatek8s" {
-#   name                = local.aks_clusters["privatek8s"].name
-#   resource_group_name = azurerm_resource_group.privatek8s.name
-# }
-
 # Allow cluster to manage network resources in the privatek8s_sponsorship_tier subnet
 # It is used for managing the LBs of the public and private ingress controllers
 resource "azurerm_role_assignment" "privatek8s_sponsorship_networkcontributor" {
