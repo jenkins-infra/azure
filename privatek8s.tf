@@ -248,7 +248,8 @@ data "azurerm_kubernetes_cluster" "privatek8s" {
   resource_group_name = azurerm_resource_group.privatek8s.name
 }
 
-# Allow cluster to manage LBs in the privatek8s-tier subnet (Public LB)
+# Allow cluster to manage network resources in the privatek8s_tier subnet
+# It is used for managing the LBs of the public ingress controller
 resource "azurerm_role_assignment" "privatek8s_networkcontributor" {
   scope                            = data.azurerm_subnet.privatek8s_tier.id
   role_definition_name             = "Network Contributor"
@@ -256,7 +257,8 @@ resource "azurerm_role_assignment" "privatek8s_networkcontributor" {
   skip_service_principal_aad_check = true
 }
 
-# Allow cluster to manage LBs in the data-tier subnet (internal LBs)
+# Allow cluster to manage network resources in the private_vnet_data_tier subnet
+# It is used for managing the LB of the private ingress controller
 resource "azurerm_role_assignment" "datatier_networkcontributor" {
   scope                            = data.azurerm_subnet.private_vnet_data_tier.id
   role_definition_name             = "Network Contributor"
@@ -264,7 +266,8 @@ resource "azurerm_role_assignment" "datatier_networkcontributor" {
   skip_service_principal_aad_check = true
 }
 
-# Allow cluster to manage private IP
+# Allow cluster to manage the public IP public_privatek8s
+# It is used for managing the public IP of the LBs of the public ingress controller
 resource "azurerm_role_assignment" "publicip_networkcontributor" {
   scope                            = azurerm_public_ip.public_privatek8s.id
   role_definition_name             = "Network Contributor"
@@ -273,6 +276,7 @@ resource "azurerm_role_assignment" "publicip_networkcontributor" {
 }
 
 # Allow cluster to manage get.jenkins.io storage account
+## TODO: for what usage?
 resource "azurerm_role_assignment" "getjenkinsio_storage_account_contributor" {
   scope                            = azurerm_storage_account.get_jenkins_io.id
   role_definition_name             = "Storage Account Contributor"

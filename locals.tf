@@ -54,6 +54,11 @@ locals {
       compute_zones      = [1],
       pod_cidr           = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
     },
+    "privatek8s_sponsorship" = {
+      name               = "privatek8s-sponsorship",
+      kubernetes_version = "1.31.6",
+      pod_cidr           = "10.50.0.0/14", # 10.48.0.1 - 10.51.255.255
+    },
     "privatek8s" = {
       name               = "privatek8s-${random_pet.suffix_privatek8s.id}",
       kubernetes_version = "1.30.7",
@@ -86,6 +91,9 @@ locals {
     },
     "infracijenkinsio_agents_1" = {
       cluster_hostname = "https://${azurerm_kubernetes_cluster.infracijenkinsio_agents_1.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
+    },
+    "privatek8s_sponsorship" = {
+      cluster_hostname = "https://${azurerm_kubernetes_cluster.privatek8s_sponsorship.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
     },
   }
 
