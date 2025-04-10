@@ -92,6 +92,9 @@ locals {
     "infracijenkinsio_agents_1" = {
       cluster_hostname = "https://${azurerm_kubernetes_cluster.infracijenkinsio_agents_1.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
     },
+    "privatek8s_sponsorship" = {
+      cluster_hostname = "https://${azurerm_kubernetes_cluster.privatek8s_sponsorship.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
+    },
   }
 
   ci_jenkins_io_fqdn = "ci.jenkins.io"
