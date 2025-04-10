@@ -58,6 +58,19 @@ resource "local_file" "jenkins_infra_data_report" {
         "ipv4" = [for id, pip in data.azurerm_public_ip.privatek8s_lb_outbound : pip.ip_address if can(cidrnetmask("${pip.ip_address}/32"))],
       },
     },
+    "privatek8s_sponsorship" = {
+      hostname           = local.aks_clusters_outputs.privatek8s_sponsorship.cluster_hostname,
+      kubernetes_version = local.aks_clusters["privatek8s_sponsorship"].kubernetes_version,
+      # Outbound IPs are in azure-net (NAT gateway outbound IPs
+      public_inbound_lb = {
+        "public_ip_name"    = azurerm_public_ip.privatek8s_sponsorship.name,
+        "public_ip_rg_name" = azurerm_public_ip.privatek8s_sponsorship.resource_group_name,
+        "subnet"            = data.azurerm_subnet.privatek8s_sponsorship_tier.name,
+      }
+      private_inbound_ips = {
+        "ipv4" = azurerm_dns_a_record.privatek8s_sponsorship_private.records,
+      }
+    },
     "cijenkinsio_agents_1" = {
       hostname           = local.aks_clusters_outputs.cijenkinsio_agents_1.cluster_hostname
       kubernetes_version = local.aks_clusters["cijenkinsio_agents_1"].kubernetes_version

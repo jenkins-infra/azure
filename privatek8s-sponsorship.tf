@@ -67,7 +67,7 @@ resource "azurerm_kubernetes_cluster" "privatek8s_sponsorship" {
   tags = local.default_tags
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "linuxpool_sponsorship" {
+resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_linuxpool" {
   provider = azurerm.jenkins-sponsorship
   name     = "linuxpool"
   vm_size  = "Standard_D4s_v3"
@@ -93,7 +93,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linuxpool_sponsorship" {
 }
 
 # nodepool dedicated for the infra.ci.jenkins.io controller
-resource "azurerm_kubernetes_cluster_node_pool" "infraci_controller_sponsorship" {
+resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_infracictrl" {
   provider = azurerm.jenkins-sponsorship
   name     = "infracictrl"
   vm_size  = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
@@ -123,7 +123,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infraci_controller_sponsorship"
 }
 
 # nodepool dedicated for the release.ci.jenkins.io controller
-resource "azurerm_kubernetes_cluster_node_pool" "releaseci_controller_sponsorship" {
+resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releacictrl" {
   provider = azurerm.jenkins-sponsorship
   name     = "releacictrl"
   vm_size  = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
@@ -151,7 +151,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "releaseci_controller_sponsorshi
 
   tags = local.default_tags
 }
-resource "azurerm_kubernetes_cluster_node_pool" "releasepool_sponsorship" {
+resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releasepool" {
   provider = azurerm.jenkins-sponsorship
   name     = "releasepool"
   vm_size  = "Standard_D8s_v3" # 8 vCPU 32 GiB RAM
@@ -178,7 +178,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "releasepool_sponsorship" {
   tags = local.default_tags
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "windows2019pool_sponsorship" {
+resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releasepool_w2019" {
   provider = azurerm.jenkins-sponsorship
   name     = "w2019"
   vm_size  = "Standard_D4s_v3" # 4 vCPU 16 GiB RAM
@@ -213,7 +213,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "windows2019pool_sponsorship" {
 #   resource_group_name = azurerm_resource_group.privatek8s.name
 # }
 
-# Allow cluster to manage LBs in the privatek8s_sponsorship_tier-tier subnet (Public LB)
+# Allow cluster to manage network resources in the privatek8s_sponsorship_tier subnet
+# It is used for managing the LBs of the public and private ingress controllers
 resource "azurerm_role_assignment" "privatek8s_sponsorship_networkcontributor" {
   provider                         = azurerm.jenkins-sponsorship
   scope                            = data.azurerm_subnet.privatek8s_sponsorship_tier.id
@@ -222,19 +223,11 @@ resource "azurerm_role_assignment" "privatek8s_sponsorship_networkcontributor" {
   skip_service_principal_aad_check = true
 }
 
-# Allow cluster to manage LBs in the data-tier subnet (internal LBs)
-resource "azurerm_role_assignment" "datatier_networkcontributor_sponsorship" {
+# Allow cluster to manage the public IP privatek8s_sponsorship
+# It is used for managing the public IP of the LB of the public ingress controller
+resource "azurerm_role_assignment" "privatek8s_sponsorship_publicip_networkcontributor" {
   provider                         = azurerm.jenkins-sponsorship
-  scope                            = data.azurerm_subnet.private_vnet_data_tier.id
-  role_definition_name             = "Network Contributor"
-  principal_id                     = azurerm_kubernetes_cluster.privatek8s_sponsorship.identity[0].principal_id
-  skip_service_principal_aad_check = true
-}
-
-# Allow cluster to manage private IP
-resource "azurerm_role_assignment" "publicip_networkcontributor_sponsorship" {
-  provider                         = azurerm.jenkins-sponsorship
-  scope                            = azurerm_public_ip.public_privatek8s_sponsorship.id
+  scope                            = azurerm_public_ip.privatek8s_sponsorship.id
   role_definition_name             = "Network Contributor"
   principal_id                     = azurerm_kubernetes_cluster.privatek8s_sponsorship.identity[0].principal_id
   skip_service_principal_aad_check = true
@@ -261,7 +254,8 @@ resource "kubernetes_storage_class" "managed_csi_premium_retain_sponsorship" {
   }
 }
 
-resource "kubernetes_storage_class" "azurefile_csi_premium_retain_sponsorship" {
+# Used by the release.ci Azurefile PVC mounts
+resource "kubernetes_storage_class" "privatek8s_sponsorship_azurefile_csi_premium_retain" {
   provider = kubernetes.privatek8s_sponsorship
   metadata {
     name = "azurefile-csi-premium-retain"
@@ -313,7 +307,8 @@ resource "kubernetes_storage_class" "statically_provisionned_privatek8s_sponsors
   allow_volume_expansion = true
 }
 
-resource "kubernetes_storage_class" "statically_provisioned_privatek8s_sponsorship" {
+# Used by all the controller (for their Jenkins Home PVCs)
+resource "kubernetes_storage_class" "privatek8s_sponsorship_statically_provisioned" {
   provider = kubernetes.privatek8s_sponsorship
   metadata {
     name = "statically-provisioned"
@@ -324,7 +319,8 @@ resource "kubernetes_storage_class" "statically_provisioned_privatek8s_sponsorsh
 }
 
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/privatek8s.yaml
-resource "azurerm_public_ip" "public_privatek8s_sponsorship" {
+# Use case is to allow incoming webhooks
+resource "azurerm_public_ip" "privatek8s_sponsorship" {
   provider            = azurerm.jenkins-sponsorship
   name                = "public-privatek8s"
   resource_group_name = azurerm_resource_group.prod_public_ips.name
@@ -333,27 +329,29 @@ resource "azurerm_public_ip" "public_privatek8s_sponsorship" {
   sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
   tags                = local.default_tags
 }
-resource "azurerm_management_lock" "public_privatek8s_sponsorship_publicip" {
+resource "azurerm_management_lock" "privatek8s_sponsorship_publicip" {
   provider   = azurerm.jenkins-sponsorship
   name       = "public-privatek8s-publicip"
-  scope      = azurerm_public_ip.public_privatek8s_sponsorship.id
+  scope      = azurerm_public_ip.privatek8s_sponsorship.id
   lock_level = "CanNotDelete"
   notes      = "Locked because this is a sensitive resource that should not be removed when privatek8s is removed"
 }
 
-resource "azurerm_dns_a_record" "public_privatek8s_sponsorship" {
-  provider            = azurerm.jenkins-sponsorship
-  name                = "public.privatek8s"
+resource "azurerm_dns_a_record" "privatek8s_sponsorship_public" {
+  ## TODO: uncomment for migration from old cluster
+  # name                = "public.privatek8s"
+  name                = "public.privatek8s-sponsorship"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 300
-  records             = [azurerm_public_ip.public_privatek8s_sponsorship.ip_address]
+  records             = [azurerm_public_ip.privatek8s_sponsorship.ip_address]
   tags                = local.default_tags
 }
 
-resource "azurerm_dns_a_record" "private_privatek8s_sponsorship" {
-  provider            = azurerm.jenkins-sponsorship
-  name                = "private.privatek8s"
+resource "azurerm_dns_a_record" "privatek8s_sponsorship_private" {
+  ## TODO: uncomment for migration from old cluster
+  # name                = "private.privatek8s"
+  name                = "private.privatek8s-sponsorship"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 300
