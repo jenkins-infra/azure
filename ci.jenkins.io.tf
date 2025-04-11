@@ -135,6 +135,28 @@ resource "azurerm_private_dns_a_record" "artifact_caching_proxy" {
   ]
 }
 
+## Block all requests from our denylist (abuse, LLMs, etc.)
+resource "azurerm_network_security_rule" "deny_inbound_all_ipv4_from_denylist_to_cijio" {
+  provider               = azurerm.jenkins-sponsorship
+  name                   = "deny-inbound-all-from-denylist-to-cijio"
+  priority               = 4000 # Smaller number, bigger priority.
+  direction              = "Inbound"
+  access                 = "Deny"
+  protocol               = "*"
+  source_port_range      = "*"
+  destination_port_range = "*"
+  source_address_prefixes = [
+    "47.79.0.0/16", # AliBaba Singapore block - https://github.com/jenkins-infra/helpdesk/issues/4575
+    "47.82.0.0/16", # AliBaba Singapore block - https://github.com/jenkins-infra/helpdesk/issues/4575
+  ]
+  destination_address_prefixes = [
+    module.ci_jenkins_io_sponsorship.controller_public_ipv4,
+    module.ci_jenkins_io_sponsorship.controller_private_ipv4,
+  ]
+  resource_group_name         = module.ci_jenkins_io_sponsorship.controller_resourcegroup_name
+  network_security_group_name = module.ci_jenkins_io_sponsorship.controller_nsg_name
+}
+
 ## Allow ci.jenkins.io to reach the private AKS cluster API
 resource "azurerm_network_security_rule" "allow_outbound_https_from_cijio_to_cijenkinsio_agents_1_api" {
   provider               = azurerm.jenkins-sponsorship
@@ -148,23 +170,6 @@ resource "azurerm_network_security_rule" "allow_outbound_https_from_cijio_to_cij
   source_address_prefix  = module.ci_jenkins_io_sponsorship.controller_private_ipv4 # Only private IPv4
   # All IPs has the endpoint NIC may change inside this subnet
   destination_address_prefixes = data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.address_prefixes
-  resource_group_name          = module.ci_jenkins_io_sponsorship.controller_resourcegroup_name
-  network_security_group_name  = module.ci_jenkins_io_sponsorship.controller_nsg_name
-}
-
-# TODO: remove once migration is complete
-## Allow ci.jenkins.io to reach aws.ci.jenkins.io
-resource "azurerm_network_security_rule" "allow_outbound_ssh_from_cijio_to_awscijio" {
-  provider                     = azurerm.jenkins-sponsorship
-  name                         = "allow-out-https-from-cijio-to-awscijio"
-  priority                     = 3900
-  direction                    = "Outbound"
-  access                       = "Allow"
-  protocol                     = "Tcp"
-  source_port_range            = "*"
-  destination_port_range       = "22"
-  source_address_prefix        = "*"
-  destination_address_prefixes = ["3.146.166.108/32"]
   resource_group_name          = module.ci_jenkins_io_sponsorship.controller_resourcegroup_name
   network_security_group_name  = module.ci_jenkins_io_sponsorship.controller_nsg_name
 }
