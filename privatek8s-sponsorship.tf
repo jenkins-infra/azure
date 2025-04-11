@@ -82,7 +82,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_linuxpoo
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 3
-  zones                 = [3]
+  zones                 = [1, 2]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsorship_tier.id
 
   lifecycle {
@@ -108,7 +108,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_infracic
   auto_scaling_enabled  = true
   min_count             = 1
   max_count             = 2
-  zones                 = [1] # same zones as infraci agents to avoid network cost TODO track with updatecli
+  zones                 = [2, 3]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsorship_infra_ci_controller_tier.id
 
   node_taints = [
@@ -138,7 +138,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releacic
   auto_scaling_enabled  = true
   min_count             = 1
   max_count             = 2
-  zones                 = [3]
+  zones                 = [2, 3]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsorship_release_ci_controller_tier.id
 
   node_taints = [
@@ -165,7 +165,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releasep
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 3
-  zones                 = azurerm_kubernetes_cluster_node_pool.privatek8s_sponsorship_releacictrl.zones
+  zones                 = [1, 2]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsorship_release_tier.id
   node_taints = [
     "jenkins=release.ci.jenkins.io:NoSchedule",
@@ -180,21 +180,23 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releasep
 
 resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releasepool_w2019" {
   provider = azurerm.jenkins-sponsorship
-  name     = "w2019"
-  vm_size  = "Standard_D4pds_v5" # 4 vCPU 16 GiB RAM
+  # TODO: switch to w2022
+  name    = "w2019"
+  vm_size = "Standard_D4ads_v5" # 4 vCPU 16 GiB RAM
   upgrade_settings {
     max_surge = "10%"
   }
-  os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
-  orchestrator_version  = local.aks_clusters["privatek8s_sponsorship"].kubernetes_version
-  os_type               = "Windows"
+  os_disk_type         = "Ephemeral"
+  os_disk_size_gb      = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
+  orchestrator_version = local.aks_clusters["privatek8s_sponsorship"].kubernetes_version
+  os_type              = "Windows"
+  # TODO: switch to w2022
   os_sku                = "Windows2019"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s_sponsorship.id
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 3
-  zones                 = azurerm_kubernetes_cluster_node_pool.privatek8s_sponsorship_releacictrl.zones
+  zones                 = [1, 2]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsorship_release_tier.id
   node_taints = [
     "os=windows:NoSchedule",
@@ -228,39 +230,6 @@ resource "azurerm_role_assignment" "privatek8s_sponsorship_publicip_networkcontr
   skip_service_principal_aad_check = true
 }
 
-# Used by the release.ci Azurefile PVC mounts
-resource "kubernetes_storage_class" "privatek8s_sponsorship_azurefile_csi_premium_retain" {
-  provider = kubernetes.privatek8s_sponsorship
-  metadata {
-    name = "azurefile-csi-premium-retain"
-  }
-  storage_provisioner = "file.csi.azure.com"
-  reclaim_policy      = "Retain"
-  parameters = {
-    skuname = "Premium_LRS"
-  }
-  mount_options = [
-    "dir_mode=0777",
-    "file_mode=0777",
-    "uid=0",
-    "gid=0",
-    "mfsymlinks",
-    "cache=strict", # Default on usual kernels but worth setting it explicitly
-    "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
-    "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
-  ]
-}
-
-# Used by all the controller (for their Jenkins Home PVCs)
-resource "kubernetes_storage_class" "privatek8s_sponsorship_statically_provisioned" {
-  provider = kubernetes.privatek8s_sponsorship
-  metadata {
-    name = "statically-provisioned"
-  }
-  storage_provisioner    = "disk.csi.azure.com"
-  reclaim_policy         = "Retain"
-  allow_volume_expansion = true
-}
 
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/privatek8s.yaml
 # Use case is to allow incoming webhooks
@@ -309,17 +278,53 @@ resource "azurerm_dns_a_record" "privatek8s_sponsorship_private" {
   tags = local.default_tags
 }
 
-# Configure the jenkins-infra/kubernetes-management admin service account
-module "privatek8s_sponsorship_admin_sa" {
-  providers = {
-    kubernetes = kubernetes.privatek8s_sponsorship
-  }
-  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
-  cluster_name               = azurerm_kubernetes_cluster.privatek8s_sponsorship.name
-  cluster_hostname           = azurerm_kubernetes_cluster.privatek8s_sponsorship.kube_config.0.host
-  cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.privatek8s_sponsorship.kube_config.0.cluster_ca_certificate
-}
-output "kubeconfig_management_privatek8s_sponsorship" {
-  sensitive = true
-  value     = module.privatek8s_sponsorship_admin_sa.kubeconfig
-}
+
+## TODO: uncomment to apply once routing is set up
+# # Used by the release.ci Azurefile PVC mounts
+# resource "kubernetes_storage_class" "privatek8s_sponsorship_azurefile_csi_premium_retain" {
+#   provider = kubernetes.privatek8s_sponsorship
+#   metadata {
+#     name = "azurefile-csi-premium-retain"
+#   }
+#   storage_provisioner = "file.csi.azure.com"
+#   reclaim_policy      = "Retain"
+#   parameters = {
+#     skuname = "Premium_LRS"
+#   }
+#   mount_options = [
+#     "dir_mode=0777",
+#     "file_mode=0777",
+#     "uid=0",
+#     "gid=0",
+#     "mfsymlinks",
+#     "cache=strict", # Default on usual kernels but worth setting it explicitly
+#     "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+#     "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+#   ]
+# }
+
+# # Used by all the controller (for their Jenkins Home PVCs)
+# resource "kubernetes_storage_class" "privatek8s_sponsorship_statically_provisioned" {
+#   provider = kubernetes.privatek8s_sponsorship
+#   metadata {
+#     name = "statically-provisioned"
+#   }
+#   storage_provisioner    = "disk.csi.azure.com"
+#   reclaim_policy         = "Retain"
+#   allow_volume_expansion = true
+# }
+
+# # Configure the jenkins-infra/kubernetes-management admin service account
+# module "privatek8s_sponsorship_admin_sa" {
+#   providers = {
+#     kubernetes = kubernetes.privatek8s_sponsorship
+#   }
+#   source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
+#   cluster_name               = azurerm_kubernetes_cluster.privatek8s_sponsorship.name
+#   cluster_hostname           = azurerm_kubernetes_cluster.privatek8s_sponsorship.kube_config.0.host
+#   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.privatek8s_sponsorship.kube_config.0.cluster_ca_certificate
+# }
+# output "kubeconfig_management_privatek8s_sponsorship" {
+#   sensitive = true
+#   value     = module.privatek8s_sponsorship_admin_sa.kubeconfig
+# }
