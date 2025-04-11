@@ -108,7 +108,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_infracic
   auto_scaling_enabled  = true
   min_count             = 1
   max_count             = 2
-  zones                 = [1] # same zones as infraci agents to avoid network cost TODO track with updatecli
+  zones                 = [2, 3]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsorship_infra_ci_controller_tier.id
 
   node_taints = [
@@ -138,7 +138,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releacic
   auto_scaling_enabled  = true
   min_count             = 1
   max_count             = 2
-  zones                 = [3]
+  zones                 = [2, 3]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsorship_release_ci_controller_tier.id
 
   node_taints = [
