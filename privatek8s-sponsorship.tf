@@ -82,7 +82,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_linuxpoo
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 3
-  zones                 = [3]
+  zones                 = [1, 2]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsorship_tier.id
 
   lifecycle {
