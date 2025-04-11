@@ -180,21 +180,23 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releasep
 
 resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releasepool_w2019" {
   provider = azurerm.jenkins-sponsorship
-  name     = "w2019"
-  vm_size  = "Standard_D4pds_v5" # 4 vCPU 16 GiB RAM
+  # TODO: switch to w2022
+  name    = "w2019"
+  vm_size = "Standard_D4ads_v5" # 4 vCPU 16 GiB RAM
   upgrade_settings {
     max_surge = "10%"
   }
-  os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
-  orchestrator_version  = local.aks_clusters["privatek8s_sponsorship"].kubernetes_version
-  os_type               = "Windows"
+  os_disk_type         = "Ephemeral"
+  os_disk_size_gb      = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
+  orchestrator_version = local.aks_clusters["privatek8s_sponsorship"].kubernetes_version
+  os_type              = "Windows"
+  # TODO: switch to w2022
   os_sku                = "Windows2019"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s_sponsorship.id
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 3
-  zones                 = azurerm_kubernetes_cluster_node_pool.privatek8s_sponsorship_releacictrl.zones
+  zones                 = [1, 2]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsorship_release_tier.id
   node_taints = [
     "os=windows:NoSchedule",
