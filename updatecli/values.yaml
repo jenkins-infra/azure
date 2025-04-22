@@ -6,19 +6,6 @@ github:
   owner: "jenkins-infra"
   repository: "azure"
 controllers_azurevm_client_end_dates:
-  trusted.ci.jenkins.io:
-    doc_how_to_get_credential: |
-      > [!IMPORTANT]
-      >
-      > ⚠️ Merging this PR will prevent starting new Azure VM agents until the credential is updated on the controller.
-
-      You'll have to update **manually** the top-level credential `azure-jenkins-sponsorship-credentials` on the Jenkins UI.
-
-      The new password value, once the PR is merged and deployed, can be retrieved from the Terraform state,
-      by searching for `module.trusted_ci_jenkins_io.azuread_application_password.controller`.
-
-      Finally, verify both Azure Credential and Azure VM clouds by checking that a click on the "Verify <...>" buttons returns a success,
-      then restart the controller to ensure that the old credential is not kept in cache.
   infra.ci.jenkins.io:
     custom_hcl_key: resource.azuread_application_password.infra_ci_jenkins_io.end_date
     doc_how_to_get_credential: |
@@ -54,6 +41,15 @@ end_dates:
       service: "stats.jenkins.io"
       secret: "STATS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
   trusted_ci_jenkins_io:
+    trustedci_jenkinsio_fileshare_serviceprincipal_writer:
+      service: "www.jenkins.io"
+      doc_how_to_get_credential: |
+        > [!IMPORTANT]
+        >
+        > ⚠️ Merging this PR will prevent the "jenkins.io" deployment job to succeed and update the www.jenkins.io website.
+        > You'll have to update the top-level credential `trustedci_jenkinsio_fileshare_serviceprincipal_writer` on trusted.ci.jenkins.io UI.
+        >
+        > This credential value can be retrieved in the Terraform state from `module.trustedci_jenkinsio_fileshare_serviceprincipal_writer.azuread_application.fileshare_serviceprincipal_writer`.
     trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer:
       service: "javadoc.jenkins.io"
       doc_how_to_get_credential: |
