@@ -279,52 +279,51 @@ resource "azurerm_dns_a_record" "privatek8s_sponsorship_private" {
 }
 
 
-## TODO: uncomment to apply once routing is set up
-# # Used by the release.ci Azurefile PVC mounts
-# resource "kubernetes_storage_class" "privatek8s_sponsorship_azurefile_csi_premium_retain" {
-#   provider = kubernetes.privatek8s_sponsorship
-#   metadata {
-#     name = "azurefile-csi-premium-retain"
-#   }
-#   storage_provisioner = "file.csi.azure.com"
-#   reclaim_policy      = "Retain"
-#   parameters = {
-#     skuname = "Premium_LRS"
-#   }
-#   mount_options = [
-#     "dir_mode=0777",
-#     "file_mode=0777",
-#     "uid=0",
-#     "gid=0",
-#     "mfsymlinks",
-#     "cache=strict", # Default on usual kernels but worth setting it explicitly
-#     "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
-#     "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
-#   ]
-# }
+# Used by the release.ci Azurefile PVC mounts
+resource "kubernetes_storage_class" "privatek8s_sponsorship_azurefile_csi_premium_retain" {
+  provider = kubernetes.privatek8s_sponsorship
+  metadata {
+    name = "azurefile-csi-premium-retain"
+  }
+  storage_provisioner = "file.csi.azure.com"
+  reclaim_policy      = "Retain"
+  parameters = {
+    skuname = "Premium_LRS"
+  }
+  mount_options = [
+    "dir_mode=0777",
+    "file_mode=0777",
+    "uid=0",
+    "gid=0",
+    "mfsymlinks",
+    "cache=strict", # Default on usual kernels but worth setting it explicitly
+    "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+    "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+  ]
+}
 
-# # Used by all the controller (for their Jenkins Home PVCs)
-# resource "kubernetes_storage_class" "privatek8s_sponsorship_statically_provisioned" {
-#   provider = kubernetes.privatek8s_sponsorship
-#   metadata {
-#     name = "statically-provisioned"
-#   }
-#   storage_provisioner    = "disk.csi.azure.com"
-#   reclaim_policy         = "Retain"
-#   allow_volume_expansion = true
-# }
+# Used by all the controller (for their Jenkins Home PVCs)
+resource "kubernetes_storage_class" "privatek8s_sponsorship_statically_provisioned" {
+  provider = kubernetes.privatek8s_sponsorship
+  metadata {
+    name = "statically-provisioned"
+  }
+  storage_provisioner    = "disk.csi.azure.com"
+  reclaim_policy         = "Retain"
+  allow_volume_expansion = true
+}
 
-# # Configure the jenkins-infra/kubernetes-management admin service account
-# module "privatek8s_sponsorship_admin_sa" {
-#   providers = {
-#     kubernetes = kubernetes.privatek8s_sponsorship
-#   }
-#   source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
-#   cluster_name               = azurerm_kubernetes_cluster.privatek8s_sponsorship.name
-#   cluster_hostname           = azurerm_kubernetes_cluster.privatek8s_sponsorship.kube_config.0.host
-#   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.privatek8s_sponsorship.kube_config.0.cluster_ca_certificate
-# }
-# output "kubeconfig_management_privatek8s_sponsorship" {
-#   sensitive = true
-#   value     = module.privatek8s_sponsorship_admin_sa.kubeconfig
-# }
+# Configure the jenkins-infra/kubernetes-management admin service account
+module "privatek8s_sponsorship_admin_sa" {
+  providers = {
+    kubernetes = kubernetes.privatek8s_sponsorship
+  }
+  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
+  cluster_name               = azurerm_kubernetes_cluster.privatek8s_sponsorship.name
+  cluster_hostname           = azurerm_kubernetes_cluster.privatek8s_sponsorship.kube_config.0.host
+  cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.privatek8s_sponsorship.kube_config.0.cluster_ca_certificate
+}
+output "kubeconfig_management_privatek8s_sponsorship" {
+  sensitive = true
+  value     = module.privatek8s_sponsorship_admin_sa.kubeconfig
+}

@@ -44,12 +44,12 @@ resource "azurerm_storage_share" "get_jenkins_io" {
   name                 = "mirrorbits"
   storage_account_name = azurerm_storage_account.get_jenkins_io.name
   # 512.14GiB used (Beginning 2024)
-  quota                = 700
+  quota = 700
 }
 
 resource "azurerm_storage_share" "get_jenkins_io_website" {
   name                 = "website"
   storage_account_name = azurerm_storage_account.get_jenkins_io.name
   # Minimal size, 1.6GiB used in 2020
-  quota                = 100
+  quota = 100
 }
