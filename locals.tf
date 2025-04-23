@@ -63,7 +63,7 @@ locals {
     },
     "privatek8s" = {
       name               = "privatek8s-${random_pet.suffix_privatek8s.id}",
-      kubernetes_version = "1.30.7",
+      kubernetes_version = "1.31.6",
     },
     "publick8s" = {
       name               = "publick8s-${random_pet.suffix_publick8s.id}",
