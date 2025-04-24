@@ -67,7 +67,7 @@ locals {
     },
     "publick8s" = {
       name               = "publick8s-${random_pet.suffix_publick8s.id}",
-      kubernetes_version = "1.30.7",
+      kubernetes_version = "1.31.6",
       compute_zones      = [3],
     },
     "cijenkinsio_agents_1" = {
