@@ -32,7 +32,7 @@ resource "azurerm_storage_account" "stats_jenkins_io" {
 }
 
 resource "azurerm_storage_share" "stats_jenkins_io" {
-  name                 = "stats-jenkins-io"
-  storage_account_name = azurerm_storage_account.stats_jenkins_io.name
-  quota                = 5
+  name               = "stats-jenkins-io"
+  storage_account_id = azurerm_storage_account.stats_jenkins_io.id
+  quota              = 5
 }

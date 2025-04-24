@@ -32,7 +32,7 @@ resource "azurerm_storage_account" "docs_jenkins_io" {
 }
 
 resource "azurerm_storage_share" "docs_jenkins_io" {
-  name                 = "docs-jenkins-io"
-  storage_account_name = azurerm_storage_account.docs_jenkins_io.name
-  quota                = 5
+  name               = "docs-jenkins-io"
+  storage_account_id = azurerm_storage_account.docs_jenkins_io.id
+  quota              = 5
 }

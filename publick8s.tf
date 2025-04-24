@@ -331,9 +331,9 @@ resource "azurerm_storage_account" "publick8s" {
 
 # GeoIP data shared data (needs a reusable secret to mount the file storage for at least all mirrorbits applications)
 resource "azurerm_storage_share" "geoip_data" {
-  name                 = "geoip-data"
-  storage_account_name = azurerm_storage_account.publick8s.name
-  quota                = 1 # GeoIP databses weight around 80Mb
+  name               = "geoip-data"
+  storage_account_id = azurerm_storage_account.publick8s.id
+  quota              = 1 # GeoIP databses weight around 80Mb
 }
 resource "kubernetes_namespace" "geoip_data" {
   provider = kubernetes.publick8s

@@ -35,7 +35,7 @@ resource "azurerm_storage_account" "archives" {
 # Container for the logs archive (2019 -> 2025) of the legacy `updates.jenkins.io` service which used to be in the 'pkg' CloudBees AWS VM
 resource "azurerm_storage_container" "legacy_updatesjio_logs" {
   name                  = "legacy-updatesjio-logs"
-  storage_account_name  = azurerm_storage_account.archives.name
+  storage_account_id    = azurerm_storage_account.archives.id
   container_access_type = "private"
   metadata = merge(local.default_tags, {
     helpdesk = "https://github.com/jenkins-infra/helpdesk/issues/2649"
@@ -45,7 +45,7 @@ resource "azurerm_storage_container" "legacy_updatesjio_logs" {
 # Container for the dump of confluence databases
 resource "azurerm_storage_container" "confluence_dumps" {
   name                  = "confluence-databases-dump"
-  storage_account_name  = azurerm_storage_account.archives.name
+  storage_account_id    = azurerm_storage_account.archives.id
   container_access_type = "private"
   metadata = merge(local.default_tags, {
     helpdesk = "https://github.com/jenkins-infra/helpdesk/issues/3249"
