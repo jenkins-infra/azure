@@ -212,9 +212,16 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releasep
 
 # Allow cluster to manage network resources in the privatek8s_sponsorship_tier subnet
 # It is used for managing the LBs of the public and private ingress controllers
-resource "azurerm_role_assignment" "privatek8s_sponsorship_networkcontributor" {
+resource "azurerm_role_assignment" "privatek8s_sponsorship_subnets_networkcontributor" {
+  for_each = toset([
+    data.azurerm_subnet.privatek8s_sponsorship_tier.id,
+    data.azurerm_subnet.privatek8s_sponsorship_infra_ci_controller_tier.id,
+    data.azurerm_subnet.privatek8s_sponsorship_release_ci_controller_tier.id,
+    data.azurerm_subnet.privatek8s_sponsorship_release_tier.id,
+  ])
+
   provider                         = azurerm.jenkins-sponsorship
-  scope                            = data.azurerm_subnet.privatek8s_sponsorship_tier.id
+  scope                            = each.key
   role_definition_name             = "Network Contributor"
   principal_id                     = azurerm_kubernetes_cluster.privatek8s_sponsorship.identity[0].principal_id
   skip_service_principal_aad_check = true
