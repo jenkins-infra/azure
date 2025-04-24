@@ -320,7 +320,7 @@ module "privatek8s_sponsorship_admin_sa" {
   }
   source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
   cluster_name               = azurerm_kubernetes_cluster.privatek8s_sponsorship.name
-  cluster_hostname           = azurerm_kubernetes_cluster.privatek8s_sponsorship.kube_config.0.host
+  cluster_hostname           = local.aks_clusters_outputs.privatek8s_sponsorship.cluster_hostname
   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.privatek8s_sponsorship.kube_config.0.cluster_ca_certificate
 }
 output "kubeconfig_management_privatek8s_sponsorship" {
