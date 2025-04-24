@@ -35,7 +35,7 @@ resource "azurerm_storage_account" "plugins_jenkins_io" {
 }
 
 resource "azurerm_storage_share" "plugins_jenkins_io" {
-  name                 = "plugins-jenkins-io"
-  storage_account_name = azurerm_storage_account.plugins_jenkins_io.name
-  quota                = 100 # Minimum size when using a Premium storage account
+  name               = "plugins-jenkins-io"
+  storage_account_id = azurerm_storage_account.plugins_jenkins_io.id
+  quota              = 100 # Minimum size when using a Premium storage account
 }

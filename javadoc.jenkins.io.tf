@@ -37,7 +37,7 @@ resource "azurerm_storage_account" "javadoc_jenkins_io" {
 }
 
 resource "azurerm_storage_share" "javadoc_jenkins_io" {
-  name                 = "javadoc-jenkins-io"
-  storage_account_name = azurerm_storage_account.javadoc_jenkins_io.name
-  quota                = 100 # Minimum size when using a Premium storage account
+  name               = "javadoc-jenkins-io"
+  storage_account_id = azurerm_storage_account.javadoc_jenkins_io.id
+  quota              = 100 # Minimum size when using a Premium storage account
 }

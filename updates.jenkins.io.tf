@@ -44,10 +44,10 @@ resource "azurerm_storage_account" "updates_jenkins_io" {
 }
 # This storage account is expected to replace both "updates_jenkins_io_content" and "updates_jenkins_io_redirects"
 resource "azurerm_storage_share" "updates_jenkins_io_data" {
-  name                 = "updates-jenkins-io-data"
-  storage_account_name = azurerm_storage_account.updates_jenkins_io.name
-  quota                = 100   # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
-  enabled_protocol     = "NFS" # Require a Premium Storage Account
+  name               = "updates-jenkins-io-data"
+  storage_account_id = azurerm_storage_account.updates_jenkins_io.id
+  quota              = 100   # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
+  enabled_protocol   = "NFS" # Require a Premium Storage Account
 }
 
 ## Kubernetes Resources (static provision of persistent volumes)
