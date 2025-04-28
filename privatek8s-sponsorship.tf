@@ -320,6 +320,210 @@ resource "kubernetes_storage_class" "privatek8s_sponsorship_statically_provision
   allow_volume_expansion = true
 }
 
+## Persistent Volumes
+# File shares used by release.ci.jenkins.io agents (storing pkg.jion, get.jio, etc. data)
+resource "kubernetes_namespace" "jenkins_release_agents" {
+  provider = kubernetes.privatek8s_sponsorship
+
+  metadata {
+    name = "jenkins-release-agents"
+    labels = {
+      name = "jenkins-release-agents"
+    }
+  }
+}
+resource "kubernetes_secret" "core_packages" {
+  provider = kubernetes.privatek8s_sponsorship
+
+  wait_for_service_account_token = false
+
+  metadata {
+    name      = "core-packages"
+    namespace = kubernetes_namespace.jenkins_release_agents.metadata[0].name
+  }
+
+  data = {
+    azurestorageaccountname = base64encode(azurerm_storage_account.get_jenkins_io.name)
+    azurestorageaccountkey  = base64encode(azurerm_storage_account.get_jenkins_io.primary_access_key)
+  }
+
+  type = "Opaque"
+}
+locals {
+  privatek8s_sponsorship_core_packages = {
+    "binary" = {
+      share_name = azurerm_storage_share.get_jenkins_io.name,
+      size_in_gb = azurerm_storage_share.get_jenkins_io.quota,
+    },
+    "website" = {
+      share_name = azurerm_storage_share.get_jenkins_io_website.name,
+      size_in_gb = azurerm_storage_share.get_jenkins_io_website.quota,
+    },
+  }
+}
+resource "kubernetes_persistent_volume" "privatek8s_sponsorship_core_packages" {
+  provider = kubernetes.privatek8s_sponsorship
+
+  for_each = local.privatek8s_sponsorship_core_packages
+
+  metadata {
+    name = "${each.key}-core-packages"
+  }
+  spec {
+    capacity = {
+      storage = "${each.value["size_in_gb"]}Gi"
+    }
+    access_modes                     = ["ReadWriteMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.privatek8s_sponsorship_statically_provisioned.id
+    mount_options = [
+      "dir_mode=0777",
+      "file_mode=0777",
+      "uid=1000",
+      "gid=1000",
+      "mfsymlinks",
+      "cache=strict", # Default on usual kernels but worth setting it explicitly
+      "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+      "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+    ]
+    persistent_volume_source {
+      csi {
+        driver = "file.csi.azure.com"
+        # fs_type = "ext4"
+        # `volumeHandle` must be unique on the cluster for this volume
+        volume_handle = "${each.key}-core-packages"
+        read_only     = false
+        volume_attributes = {
+          resourceGroup = azurerm_resource_group.get_jenkins_io.name
+          shareName     = each.value["share_name"]
+        }
+        node_stage_secret_ref {
+          name      = kubernetes_secret.core_packages.metadata[0].name
+          namespace = kubernetes_secret.core_packages.metadata[0].namespace
+        }
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "privatek8s_sponsorship_core_packages" {
+  provider = kubernetes.privatek8s_sponsorship
+
+  for_each = local.privatek8s_sponsorship_core_packages
+
+  metadata {
+    name      = "${each.key}-core-packages"
+    namespace = kubernetes_secret.core_packages.metadata[0].namespace
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.privatek8s_sponsorship_core_packages[each.key].spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.privatek8s_sponsorship_core_packages[each.key].metadata[0].name
+    storage_class_name = kubernetes_persistent_volume.privatek8s_sponsorship_core_packages[each.key].spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = "${each.value["size_in_gb"]}Gi"
+      }
+    }
+  }
+}
+# Data for infra.ci
+resource "kubernetes_persistent_volume" "jenkins_infra_data_sponsorship" {
+  provider = kubernetes.privatek8s_sponsorship
+  for_each = local.jenkins_infra_data_sponsorship
+  metadata {
+    name = each.key
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_managed_disk.jenkins_infra_data_sponsorship[each.key].disk_size_gb}Gi"
+    }
+    access_modes                     = ["ReadWriteOnce"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.privatek8s_sponsorship_statically_provisioned.id
+    persistent_volume_source {
+      csi {
+        driver        = "disk.csi.azure.com"
+        volume_handle = azurerm_managed_disk.jenkins_infra_data_sponsorship[each.key].id
+      }
+    }
+  }
+}
+resource "kubernetes_namespace" "jenkins_infra" {
+  provider = kubernetes.privatek8s_sponsorship
+  metadata {
+    name = "jenkins-infra"
+    labels = {
+      name = "jenkins-infra"
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "jenkins_infra_data_sponsorship" {
+  provider = kubernetes.privatek8s_sponsorship
+  for_each = local.jenkins_infra_data_sponsorship
+  metadata {
+    name      = "jenkins-infra-data"
+    namespace = kubernetes_namespace.jenkins_infra.metadata.0.name
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.jenkins_infra_data_sponsorship[each.key].spec.0.access_modes
+    volume_name        = kubernetes_persistent_volume.jenkins_infra_data_sponsorship[each.key].metadata.0.name
+    storage_class_name = kubernetes_persistent_volume.jenkins_infra_data_sponsorship[each.key].spec.0.storage_class_name
+    resources {
+      requests = {
+        storage = "${azurerm_managed_disk.jenkins_infra_data_sponsorship[each.key].disk_size_gb}Gi"
+      }
+    }
+  }
+}
+# Data for release.ci
+resource "kubernetes_persistent_volume" "jenkins_release_data_sponsorship" {
+  provider = kubernetes.privatek8s_sponsorship
+  for_each = local.jenkins_release_data_sponsorship
+  metadata {
+    name = each.key
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_managed_disk.jenkins_release_data_sponsorship[each.key].disk_size_gb}Gi"
+    }
+    access_modes                     = ["ReadWriteOnce"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.privatek8s_sponsorship_statically_provisioned.id
+    persistent_volume_source {
+      csi {
+        driver        = "disk.csi.azure.com"
+        volume_handle = azurerm_managed_disk.jenkins_release_data_sponsorship[each.key].id
+      }
+    }
+  }
+}
+resource "kubernetes_namespace" "jenkins_release" {
+  provider = kubernetes.privatek8s_sponsorship
+  metadata {
+    name = "jenkins-release"
+    labels = {
+      name = "jenkins-release"
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "jenkins_release_data_sponsorship" {
+  provider = kubernetes.privatek8s_sponsorship
+  for_each = local.jenkins_release_data_sponsorship
+  metadata {
+    name      = "jenkins-release-data"
+    namespace = kubernetes_namespace.jenkins_release.metadata.0.name
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.jenkins_release_data_sponsorship[each.key].spec.0.access_modes
+    volume_name        = kubernetes_persistent_volume.jenkins_release_data_sponsorship[each.key].metadata.0.name
+    storage_class_name = kubernetes_persistent_volume.jenkins_release_data_sponsorship[each.key].spec.0.storage_class_name
+    resources {
+      requests = {
+        storage = "${azurerm_managed_disk.jenkins_release_data_sponsorship[each.key].disk_size_gb}Gi"
+      }
+    }
+  }
+}
+
 # Configure the jenkins-infra/kubernetes-management admin service account
 module "privatek8s_sponsorship_admin_sa" {
   providers = {
