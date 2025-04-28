@@ -322,11 +322,6 @@ resource "kubernetes_storage_class" "privatek8s_sponsorship_statically_provision
 
 ## Persistent Volumes
 # File shares used by release.ci.jenkins.io agents (storing pkg.jion, get.jio, etc. data)
-import {
-  to       = kubernetes_namespace.jenkins_release_agents
-  id       = "jenkins-release-agents"
-  provider = kubernetes.privatek8s_sponsorship
-}
 resource "kubernetes_namespace" "jenkins_release_agents" {
   provider = kubernetes.privatek8s_sponsorship
 
@@ -336,11 +331,6 @@ resource "kubernetes_namespace" "jenkins_release_agents" {
       name = "jenkins-release-agents"
     }
   }
-}
-import {
-  to       = kubernetes_secret.core_packages
-  id       = "jenkins-release-agents/core-packages"
-  provider = kubernetes.privatek8s_sponsorship
 }
 resource "kubernetes_secret" "core_packages" {
   provider = kubernetes.privatek8s_sponsorship
@@ -370,16 +360,6 @@ locals {
       size_in_gb = azurerm_storage_share.get_jenkins_io_website.quota,
     },
   }
-}
-import {
-  to       = kubernetes_persistent_volume.privatek8s_sponsorship_core_packages["binary"]
-  id       = "binary-core-packages"
-  provider = kubernetes.privatek8s_sponsorship
-}
-import {
-  to       = kubernetes_persistent_volume.privatek8s_sponsorship_core_packages["website"]
-  id       = "website-core-packages"
-  provider = kubernetes.privatek8s_sponsorship
 }
 resource "kubernetes_persistent_volume" "privatek8s_sponsorship_core_packages" {
   provider = kubernetes.privatek8s_sponsorship
@@ -424,16 +404,6 @@ resource "kubernetes_persistent_volume" "privatek8s_sponsorship_core_packages" {
       }
     }
   }
-}
-import {
-  to       = kubernetes_persistent_volume_claim.privatek8s_sponsorship_core_packages["binary"]
-  id       = "jenkins-release-agents/binary-core-packages"
-  provider = kubernetes.privatek8s_sponsorship
-}
-import {
-  to       = kubernetes_persistent_volume_claim.privatek8s_sponsorship_core_packages["website"]
-  id       = "jenkins-release-agents/website-core-packages"
-  provider = kubernetes.privatek8s_sponsorship
 }
 resource "kubernetes_persistent_volume_claim" "privatek8s_sponsorship_core_packages" {
   provider = kubernetes.privatek8s_sponsorship
