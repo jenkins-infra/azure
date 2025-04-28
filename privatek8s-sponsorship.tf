@@ -548,7 +548,7 @@ resource "kubernetes_persistent_volume_claim" "jenkins_release_data_sponsorship"
     storage_class_name = kubernetes_persistent_volume.jenkins_release_data_sponsorship[each.key].spec.0.storage_class_name
     resources {
       requests = {
-        storage = "${azurerm_managed_disk.jenkins_infra_data_sponsorship[each.key].disk_size_gb}Gi"
+        storage = "${azurerm_managed_disk.jenkins_release_data_sponsorship[each.key].disk_size_gb}Gi"
       }
     }
   }
