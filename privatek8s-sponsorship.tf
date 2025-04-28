@@ -322,16 +322,6 @@ resource "kubernetes_storage_class" "privatek8s_sponsorship_statically_provision
 
 ## Persistent Volumes
 # File shares used by release.ci.jenkins.io agents (storing pkg.jion, get.jio, etc. data)
-resource "kubernetes_namespace" "jenkins_release_agents" {
-  provider = kubernetes.privatek8s_sponsorship
-
-  metadata {
-    name = "jenkins-release-agents"
-    labels = {
-      name = "jenkins-release-agents"
-    }
-  }
-}
 resource "kubernetes_secret" "core_packages" {
   provider = kubernetes.privatek8s_sponsorship
 
@@ -339,7 +329,7 @@ resource "kubernetes_secret" "core_packages" {
 
   metadata {
     name      = "core-packages"
-    namespace = kubernetes_namespace.jenkins_release_agents.metadata[0].name
+    namespace = kubernetes_namespace.privatek8s_sponsorship["jenkins-release-agents"].metadata[0].name
   }
 
   data = {
@@ -447,21 +437,12 @@ resource "kubernetes_persistent_volume" "jenkins_infra_data_sponsorship" {
     }
   }
 }
-resource "kubernetes_namespace" "jenkins_infra" {
-  provider = kubernetes.privatek8s_sponsorship
-  metadata {
-    name = "jenkins-infra"
-    labels = {
-      name = "jenkins-infra"
-    }
-  }
-}
 resource "kubernetes_persistent_volume_claim" "jenkins_infra_data_sponsorship" {
   provider = kubernetes.privatek8s_sponsorship
   for_each = local.jenkins_infra_data_sponsorship
   metadata {
-    name      = "jenkins-infra-data"
-    namespace = kubernetes_namespace.jenkins_infra.metadata.0.name
+    name      = each.key
+    namespace = kubernetes_namespace.privatek8s_sponsorship["jenkins-infra"].metadata.0.name
   }
   spec {
     access_modes       = kubernetes_persistent_volume.jenkins_infra_data_sponsorship[each.key].spec.0.access_modes
@@ -496,12 +477,13 @@ resource "kubernetes_persistent_volume" "jenkins_release_data_sponsorship" {
     }
   }
 }
-resource "kubernetes_namespace" "jenkins_release" {
+resource "kubernetes_namespace" "privatek8s_sponsorship" {
+  for_each = toset(["jenkins-release", "jenkins-infra", "jenkins-release-agents"])
   provider = kubernetes.privatek8s_sponsorship
   metadata {
-    name = "jenkins-release"
+    name = each.key
     labels = {
-      name = "jenkins-release"
+      name = each.key
     }
   }
 }
@@ -509,8 +491,8 @@ resource "kubernetes_persistent_volume_claim" "jenkins_release_data_sponsorship"
   provider = kubernetes.privatek8s_sponsorship
   for_each = local.jenkins_release_data_sponsorship
   metadata {
-    name      = "jenkins-release-data"
-    namespace = kubernetes_namespace.jenkins_release.metadata.0.name
+    name      = each.key
+    namespace = kubernetes_namespace.privatek8s_sponsorship["jenkins-release"].metadata.0.name
   }
   spec {
     access_modes       = kubernetes_persistent_volume.jenkins_release_data_sponsorship[each.key].spec.0.access_modes
