@@ -288,6 +288,27 @@ resource "azurerm_managed_disk" "jenkins_infra_data" {
   tags                 = local.default_tags
 }
 
+locals {
+  jenkins_infra_data_sponsorship = {
+    "jenkins-infra-data" = {},
+    "jenkins-infra-data-import" = {
+      source_resource_id = "/subscriptions/1311c09f-aee0-4d6c-99a4-392c2b543204/resourceGroups/backup-sponsorhip/providers/Microsoft.Compute/snapshots/20250528-infra.ci-data"
+    },
+  }
+}
+resource "azurerm_managed_disk" "jenkins_infra_data_sponsorship" {
+  for_each             = local.jenkins_infra_data_sponsorship
+  provider             = azurerm.jenkins-sponsorship
+  name                 = each.key
+  location             = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.location
+  resource_group_name  = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
+  storage_account_type = "StandardSSD_ZRS"
+  create_option        = contains(keys(each.value), "source_resource_id") ? "Copy" : "Empty"
+  source_resource_id   = lookup(each.value, "source_resource_id", null)
+  disk_size_gb         = 64
+  tags                 = local.default_tags
+}
+
 resource "kubernetes_persistent_volume" "jenkins_infra_data" {
   provider = kubernetes.privatek8s
   metadata {
