@@ -303,7 +303,7 @@ locals {
   jenkins_infra_data_sponsorship = {
     "jenkins-infra-data" = {},
     "jenkins-infra-data-import" = {
-      source_resource_id = "/subscriptions/1311c09f-aee0-4d6c-99a4-392c2b543204/resourceGroups/backup-sponsorhip/providers/Microsoft.Compute/snapshots/20250528-infra.ci-data"
+      source_resource_id = "/subscriptions/1311c09f-aee0-4d6c-99a4-392c2b543204/resourceGroups/backup-sponsorhip/providers/Microsoft.Compute/snapshots/20250429-infra.ci-data"
     },
   }
 }
