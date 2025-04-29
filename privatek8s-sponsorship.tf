@@ -333,8 +333,8 @@ resource "kubernetes_secret" "core_packages" {
   }
 
   data = {
-    azurestorageaccountname = base64encode(azurerm_storage_account.get_jenkins_io.name)
-    azurestorageaccountkey  = base64encode(azurerm_storage_account.get_jenkins_io.primary_access_key)
+    azurestorageaccountname = azurerm_storage_account.get_jenkins_io.name
+    azurestorageaccountkey  = azurerm_storage_account.get_jenkins_io.primary_access_key
   }
 
   type = "Opaque"

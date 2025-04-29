@@ -9,7 +9,7 @@ resource "azurerm_role_definition" "private_vnet_reader" {
 
 resource "azurerm_role_definition" "private_sponsorship_vnet_reader" {
   provider = azurerm.jenkins-sponsorship
-  name     = "ReadPrivateVNET"
+  name     = "ReadPrivateSponsorshipVNET"
   scope    = data.azurerm_virtual_network.private_sponsorship.id
 
   permissions {
