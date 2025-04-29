@@ -67,6 +67,17 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_subnet_privat
   role_definition_id = azurerm_role_definition.private_vnet_reader.role_definition_resource_id
   principal_id       = azuread_service_principal.infra_ci_jenkins_io.object_id
 }
+resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_sponsorship_subnet_role" {
+  scope                = data.azurerm_subnet.privatek8s_sponsorship_tier.id
+  role_definition_name = "Virtual Machine Contributor"
+  principal_id         = azuread_service_principal.infra_ci_jenkins_io.object_id
+}
+resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_sponsorship_private_vnet_reader" {
+  provider           = azurerm.jenkins-sponsorship
+  scope              = data.azurerm_virtual_network.private_sponsorship.id
+  role_definition_id = azurerm_role_definition.private_sponsorship_vnet_reader.role_definition_resource_id
+  principal_id       = azuread_service_principal.infra_ci_jenkins_io.object_id
+}
 
 # Required to allow azcopy sync of contributors.jenkins.io File Share
 module "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer" {
