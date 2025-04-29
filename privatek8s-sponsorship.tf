@@ -415,16 +415,16 @@ resource "kubernetes_persistent_volume_claim" "privatek8s_sponsorship_core_packa
     }
   }
 }
-# Data for infra.ci
+# Persistent Volumes for infra.ci controller
 resource "kubernetes_persistent_volume" "jenkins_infra_data_sponsorship" {
   provider = kubernetes.privatek8s_sponsorship
-  for_each = local.jenkins_infra_data_sponsorship
+
   metadata {
-    name = each.key
+    name = "jenkins-infra-data"
   }
   spec {
     capacity = {
-      storage = "${azurerm_managed_disk.jenkins_infra_data_sponsorship[each.key].disk_size_gb}Gi"
+      storage = "${azurerm_managed_disk.jenkins_infra_data_sponsorship.disk_size_gb}Gi"
     }
     access_modes                     = ["ReadWriteOnce"]
     persistent_volume_reclaim_policy = "Retain"
@@ -432,39 +432,39 @@ resource "kubernetes_persistent_volume" "jenkins_infra_data_sponsorship" {
     persistent_volume_source {
       csi {
         driver        = "disk.csi.azure.com"
-        volume_handle = azurerm_managed_disk.jenkins_infra_data_sponsorship[each.key].id
+        volume_handle = azurerm_managed_disk.jenkins_infra_data_sponsorship.id
       }
     }
   }
 }
 resource "kubernetes_persistent_volume_claim" "jenkins_infra_data_sponsorship" {
   provider = kubernetes.privatek8s_sponsorship
-  for_each = local.jenkins_infra_data_sponsorship
+
   metadata {
-    name      = each.key
+    name      = "jenkins-infra-data"
     namespace = kubernetes_namespace.privatek8s_sponsorship["jenkins-infra"].metadata.0.name
   }
   spec {
-    access_modes       = kubernetes_persistent_volume.jenkins_infra_data_sponsorship[each.key].spec.0.access_modes
-    volume_name        = kubernetes_persistent_volume.jenkins_infra_data_sponsorship[each.key].metadata.0.name
-    storage_class_name = kubernetes_persistent_volume.jenkins_infra_data_sponsorship[each.key].spec.0.storage_class_name
+    access_modes       = kubernetes_persistent_volume.jenkins_infra_data_sponsorship.spec.0.access_modes
+    volume_name        = kubernetes_persistent_volume.jenkins_infra_data_sponsorship.metadata.0.name
+    storage_class_name = kubernetes_persistent_volume.jenkins_infra_data_sponsorship.spec.0.storage_class_name
     resources {
       requests = {
-        storage = "${azurerm_managed_disk.jenkins_infra_data_sponsorship[each.key].disk_size_gb}Gi"
+        storage = "${azurerm_managed_disk.jenkins_infra_data_sponsorship.disk_size_gb}Gi"
       }
     }
   }
 }
-# Data for release.ci
+# Persistent Volumes for release.ci controller
 resource "kubernetes_persistent_volume" "jenkins_release_data_sponsorship" {
   provider = kubernetes.privatek8s_sponsorship
-  for_each = local.jenkins_release_data_sponsorship
+
   metadata {
-    name = each.key
+    name = "jenkins-release-data"
   }
   spec {
     capacity = {
-      storage = "${azurerm_managed_disk.jenkins_release_data_sponsorship[each.key].disk_size_gb}Gi"
+      storage = "${azurerm_managed_disk.jenkins_release_data_sponsorship.disk_size_gb}Gi"
     }
     access_modes                     = ["ReadWriteOnce"]
     persistent_volume_reclaim_policy = "Retain"
@@ -472,7 +472,7 @@ resource "kubernetes_persistent_volume" "jenkins_release_data_sponsorship" {
     persistent_volume_source {
       csi {
         driver        = "disk.csi.azure.com"
-        volume_handle = azurerm_managed_disk.jenkins_release_data_sponsorship[each.key].id
+        volume_handle = azurerm_managed_disk.jenkins_release_data_sponsorship.id
       }
     }
   }
@@ -489,18 +489,18 @@ resource "kubernetes_namespace" "privatek8s_sponsorship" {
 }
 resource "kubernetes_persistent_volume_claim" "jenkins_release_data_sponsorship" {
   provider = kubernetes.privatek8s_sponsorship
-  for_each = local.jenkins_release_data_sponsorship
+
   metadata {
-    name      = each.key
+    name      = "jenkins-release-data"
     namespace = kubernetes_namespace.privatek8s_sponsorship["jenkins-release"].metadata.0.name
   }
   spec {
-    access_modes       = kubernetes_persistent_volume.jenkins_release_data_sponsorship[each.key].spec.0.access_modes
-    volume_name        = kubernetes_persistent_volume.jenkins_release_data_sponsorship[each.key].metadata.0.name
-    storage_class_name = kubernetes_persistent_volume.jenkins_release_data_sponsorship[each.key].spec.0.storage_class_name
+    access_modes       = kubernetes_persistent_volume.jenkins_release_data_sponsorship.spec.0.access_modes
+    volume_name        = kubernetes_persistent_volume.jenkins_release_data_sponsorship.metadata.0.name
+    storage_class_name = kubernetes_persistent_volume.jenkins_release_data_sponsorship.spec.0.storage_class_name
     resources {
       requests = {
-        storage = "${azurerm_managed_disk.jenkins_release_data_sponsorship[each.key].disk_size_gb}Gi"
+        storage = "${azurerm_managed_disk.jenkins_release_data_sponsorship.disk_size_gb}Gi"
       }
     }
   }
