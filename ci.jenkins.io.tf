@@ -254,6 +254,7 @@ resource "azurerm_storage_account" "ci_jenkins_io" {
       data.azurerm_subnet.ci_jenkins_io_controller_sponsorship.id,
       data.azurerm_subnet.ci_jenkins_io_ephemeral_agents_jenkins_sponsorship.id,
       data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id,
+      data.azurerm_subnet.privatek8s_sponsorship_tier.id,                      # required for management from infra.ci (terraform)
       data.azurerm_subnet.privatek8s_tier.id,                                  # required for management from infra.ci (terraform)
       data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.id, # infra.ci Azure VM agents
       data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id,  # infra.ci container VM agents
