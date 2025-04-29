@@ -51,13 +51,6 @@ resource "local_file" "jenkins_infra_data_report" {
         "ipv6" = [for id, pip in data.azurerm_public_ip.publick8s_lb_outbound : pip.ip_address if !can(cidrnetmask("${pip.ip_address}/32"))],
       },
     },
-    "privatek8s" = {
-      hostname           = data.azurerm_kubernetes_cluster.privatek8s.fqdn,
-      kubernetes_version = local.aks_clusters["privatek8s"].kubernetes_version,
-      lb_outbound_ips = {
-        "ipv4" = [for id, pip in data.azurerm_public_ip.privatek8s_lb_outbound : pip.ip_address if can(cidrnetmask("${pip.ip_address}/32"))],
-      },
-    },
     "privatek8s_sponsorship" = {
       hostname           = local.aks_clusters_outputs.privatek8s_sponsorship.cluster_hostname,
       kubernetes_version = local.aks_clusters["privatek8s_sponsorship"].kubernetes_version,

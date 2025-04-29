@@ -243,11 +243,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "windows2019pool" {
   tags = local.default_tags
 }
 
-data "azurerm_kubernetes_cluster" "privatek8s" {
-  name                = local.aks_clusters["privatek8s"].name
-  resource_group_name = azurerm_resource_group.privatek8s.name
-}
-
 # Allow cluster to manage network resources in the privatek8s_tier subnet
 # It is used for managing the LBs of the public ingress controller
 resource "azurerm_role_assignment" "privatek8s_networkcontributor" {
@@ -284,79 +279,6 @@ resource "azurerm_role_assignment" "getjenkinsio_storage_account_contributor" {
   skip_service_principal_aad_check = true
 }
 
-resource "kubernetes_storage_class" "managed_csi_premium_retain" {
-  metadata {
-    name = "managed-csi-premium-retain"
-  }
-  storage_provisioner = "disk.csi.azure.com"
-  reclaim_policy      = "Retain"
-  parameters = {
-    skuname = "Premium_LRS"
-  }
-  provider = kubernetes.privatek8s
-}
-
-resource "kubernetes_storage_class" "azurefile_csi_premium_retain" {
-  metadata {
-    name = "azurefile-csi-premium-retain"
-  }
-  storage_provisioner = "file.csi.azure.com"
-  reclaim_policy      = "Retain"
-  parameters = {
-    skuname = "Premium_LRS"
-  }
-  mount_options = ["dir_mode=0777", "file_mode=0777", "uid=1000", "gid=1000", "mfsymlinks", "nobrl"]
-  provider      = kubernetes.privatek8s
-}
-
-resource "kubernetes_storage_class" "managed_csi_premium_ZRS_retain_private" {
-  metadata {
-    name = "managed-csi-premium-zrs-retain"
-  }
-  storage_provisioner = "disk.csi.azure.com"
-  reclaim_policy      = "Retain"
-  parameters = {
-    skuname = "Premium_ZRS"
-  }
-  provider               = kubernetes.privatek8s
-  allow_volume_expansion = true
-}
-
-# https://learn.microsoft.com/en-us/java/api/com.microsoft.azure.management.storage.skuname?view=azure-java-legacy#field-summary
-resource "kubernetes_storage_class" "managed_csi_standard_ZRS_retain_private" {
-  metadata {
-    name = "managed-csi-standard-zrs-retain"
-  }
-  storage_provisioner = "disk.csi.azure.com"
-  reclaim_policy      = "Retain"
-  parameters = {
-    skuname = " Standard_ZRS"
-  }
-  provider               = kubernetes.privatek8s
-  allow_volume_expansion = true
-}
-
-# TODO: remove this class once all PV/PVCs have been patched
-resource "kubernetes_storage_class" "statically_provisionned_privatek8s" {
-  metadata {
-    name = "statically-provisionned"
-  }
-  storage_provisioner    = "disk.csi.azure.com"
-  reclaim_policy         = "Retain"
-  provider               = kubernetes.privatek8s
-  allow_volume_expansion = true
-}
-
-resource "kubernetes_storage_class" "statically_provisioned_privatek8s" {
-  metadata {
-    name = "statically-provisioned"
-  }
-  storage_provisioner    = "disk.csi.azure.com"
-  reclaim_policy         = "Retain"
-  provider               = kubernetes.privatek8s
-  allow_volume_expansion = true
-}
-
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/privatek8s.yaml
 resource "azurerm_public_ip" "public_privatek8s" {
   name                = "public-privatek8s"
@@ -389,29 +311,4 @@ resource "azurerm_dns_a_record" "private_privatek8s" {
   ttl                 = 300
   records             = ["10.248.1.5"] # External IP of the private-nginx ingress LoadBalancer, created by https://github.com/jenkins-infra/kubernetes-management/blob/54a0d4aa72b15f4236abcfbde00a080905bbb890/clusters/privatek8s.yaml#L112-L118
   tags                = local.default_tags
-}
-
-# Configure the jenkins-infra/kubernetes-management admin service account
-module "privatek8s_admin_sa" {
-  providers = {
-    kubernetes = kubernetes.privatek8s
-  }
-  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
-  cluster_name               = azurerm_kubernetes_cluster.privatek8s.name
-  cluster_hostname           = azurerm_kubernetes_cluster.privatek8s.kube_config.0.host
-  cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.privatek8s.kube_config.0.cluster_ca_certificate
-}
-output "kubeconfig_management_privatek8s" {
-  sensitive = true
-  value     = module.privatek8s_admin_sa.kubeconfig
-}
-
-# Retrieve effective outbound IPs
-data "azurerm_public_ip" "privatek8s_lb_outbound" {
-  ## Disable this resource when running in terratest
-  # to avoid the error "The "for_each" set includes values derived from resource attributes that cannot be determined until apply"
-  for_each = var.terratest ? toset([]) : toset(concat(flatten(azurerm_kubernetes_cluster.privatek8s.network_profile[*].load_balancer_profile[*].effective_outbound_ips)))
-
-  name                = element(split("/", each.key), "-1")
-  resource_group_name = azurerm_kubernetes_cluster.privatek8s.node_resource_group
 }
