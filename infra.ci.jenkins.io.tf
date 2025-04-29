@@ -308,6 +308,25 @@ resource "azurerm_managed_disk" "jenkins_infra_data_sponsorship" {
   disk_size_gb         = 64
   tags                 = local.default_tags
 }
+# Required to allow AKS CSI driver to access the Azure disk
+resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_sponsorship_disk_reader" {
+  provider = azurerm.jenkins-sponsorship
+  name     = "ReadInfraCISponsorshipDisk"
+  scope    = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.id
+
+  permissions {
+    actions = [
+      "Microsoft.Compute/disks/read",
+      "Microsoft.Compute/disks/write",
+    ]
+  }
+}
+resource "azurerm_role_assignment" "infra_ci_jenkins_io_controller_sponsorship_disk_reader" {
+  provider           = azurerm.jenkins-sponsorship
+  scope              = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.id
+  role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_sponsorship_disk_reader.role_definition_resource_id
+  principal_id       = azurerm_kubernetes_cluster.privatek8s_sponsorship.identity[0].principal_id
+}
 
 resource "kubernetes_persistent_volume" "jenkins_infra_data" {
   provider = kubernetes.privatek8s
