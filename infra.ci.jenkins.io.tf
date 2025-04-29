@@ -1,18 +1,13 @@
-/** One resource group for the agents **/
-resource "azurerm_resource_group" "infra_ci_jenkins_io_agents" {
-  name     = "infra-agents"
+####################################################################################
+## Sponsorship subscription specific resources for controller
+####################################################################################
+# This resource group hosts resources used for agents only managed by terraform or administrators
+# such as NSG for agents subnet (we don't want azure-vm-agents jenkins plugin to access this RG)
+resource "azurerm_resource_group" "infra_ci_jenkins_io_controller_jenkins_sponsorship" {
+  provider = azurerm.jenkins-sponsorship
+  name     = "infra-ci-jenkins-io-controller"
   location = var.location
-}
-
-/** Agent Resources **/
-resource "azurerm_storage_account" "infra_ci_jenkins_io_agents" {
-  name                     = "infraciagents"
-  resource_group_name      = azurerm_resource_group.infra_ci_jenkins_io_agents.name
-  location                 = azurerm_resource_group.infra_ci_jenkins_io_agents.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  min_tls_version          = "TLS1_2" # default value, needed for tfsec
-  tags                     = local.default_tags
+  tags     = local.default_tags
 }
 
 # Azure AD resources to allow controller to spawn agents in Azure
@@ -46,30 +41,9 @@ resource "azuread_application_password" "infra_ci_jenkins_io" {
   display_name   = "infra.ci.jenkins.io-tf-managed"
   end_date       = "2025-06-14T00:00:00Z"
 }
-# Allow Service Principal to manage AzureRM resources inside the agents resource groups
-resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_azurerm" {
-  scope                = azurerm_resource_group.infra_ci_jenkins_io_agents.id
-  role_definition_name = "Contributor"
-  principal_id         = azuread_service_principal.infra_ci_jenkins_io.object_id
-}
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_packer" {
   scope                = azurerm_resource_group.packer_images["prod"].id
   role_definition_name = "Reader"
-  principal_id         = azuread_service_principal.infra_ci_jenkins_io.object_id
-}
-resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_subnet_role" {
-  scope                = data.azurerm_subnet.privatek8s_tier.id
-  role_definition_name = "Virtual Machine Contributor"
-  principal_id         = azuread_service_principal.infra_ci_jenkins_io.object_id
-}
-resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_subnet_private_vnet_reader" {
-  scope              = data.azurerm_virtual_network.private.id
-  role_definition_id = azurerm_role_definition.private_vnet_reader.role_definition_resource_id
-  principal_id       = azuread_service_principal.infra_ci_jenkins_io.object_id
-}
-resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_sponsorship_subnet_role" {
-  scope                = data.azurerm_subnet.privatek8s_sponsorship_tier.id
-  role_definition_name = "Virtual Machine Contributor"
   principal_id         = azuread_service_principal.infra_ci_jenkins_io.object_id
 }
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_sponsorship_private_vnet_reader" {
@@ -144,17 +118,7 @@ locals {
   infra_ci_jenkins_io_service_short_name          = trimprefix(trimprefix(local.infra_ci_jenkins_io_fqdn, "jenkins.io"), ".")
   infra_ci_jenkins_io_service_short_stripped_name = replace(local.infra_ci_jenkins_io_service_short_name, ".", "-")
 }
-####################################################################################
-## Sponsorship subscription specific resources for controller
-####################################################################################
-# This resource group hosts resources used for agents only managed by terraform or administrators
-# such as NSG for agents subnet (we don't want azure-vm-agents jenkins plugin to access this RG)
-resource "azurerm_resource_group" "infra_ci_jenkins_io_controller_jenkins_sponsorship" {
-  provider = azurerm.jenkins-sponsorship
-  name     = "infra-ci-jenkins-io-controller"
-  location = var.location
-  tags     = local.default_tags
-}
+
 # Required to allow controller to check for subnets inside the sponsorship network
 resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_vnet_sponsorship_reader" {
   provider = azurerm.jenkins-sponsorship
@@ -183,7 +147,7 @@ module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
   ephemeral_agents_network_name    = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.virtual_network_name
   ephemeral_agents_subnet_name     = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.name
   controller_rg_name               = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
-  controller_ips                   = data.azurerm_subnet.privatek8s_infra_ci_controller_tier.address_prefixes # Pod IPs: controller IP may change in the pods IP subnet
+  controller_ips                   = data.azurerm_subnet.privatek8s_sponsorship_infra_ci_controller_tier.address_prefixes # Pod IPs: controller IP may change in the pods IP subnet
   controller_service_principal_id  = azuread_service_principal.infra_ci_jenkins_io.object_id
   default_tags                     = local.default_tags
   storage_account_name             = "infraciagentssub" # Max 24 chars
@@ -282,40 +246,13 @@ output "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer_application_c
   value     = module.infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
 
-# This resource group hosts resources used by the controller on the main subscription
-resource "azurerm_resource_group" "infra_ci_jenkins_io_controller_jenkins" {
-  name     = "infra-ci-jenkins-io-controller"
-  location = var.location
-  tags     = local.default_tags
-}
-
-resource "azurerm_managed_disk" "jenkins_infra_data" {
-  name                 = "jenkins-infra-data"
-  location             = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins.location
-  resource_group_name  = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins.name
-  storage_account_type = "StandardSSD_ZRS"
-  create_option        = "Empty"
-  disk_size_gb         = 64
-  tags                 = local.default_tags
-}
-
-locals {
-  jenkins_infra_data_sponsorship = {
-    "jenkins-infra-data" = {},
-    "jenkins-infra-data-import" = {
-      source_resource_id = "/subscriptions/1311c09f-aee0-4d6c-99a4-392c2b543204/resourceGroups/backup-sponsorhip/providers/Microsoft.Compute/snapshots/20250429-infra.ci-data"
-    },
-  }
-}
 resource "azurerm_managed_disk" "jenkins_infra_data_sponsorship" {
-  for_each             = local.jenkins_infra_data_sponsorship
   provider             = azurerm.jenkins-sponsorship
-  name                 = each.key
+  name                 = "jenkins-infra-data"
   location             = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.location
   resource_group_name  = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
   storage_account_type = "StandardSSD_ZRS"
-  create_option        = contains(keys(each.value), "source_resource_id") ? "Copy" : "Empty"
-  source_resource_id   = lookup(each.value, "source_resource_id", null)
+  create_option        = "Empty"
   disk_size_gb         = 64
   tags                 = local.default_tags
 }
@@ -337,63 +274,6 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_controller_sponsorship_d
   scope              = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.id
   role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_sponsorship_disk_reader.role_definition_resource_id
   principal_id       = azurerm_kubernetes_cluster.privatek8s_sponsorship.identity[0].principal_id
-}
-
-resource "kubernetes_persistent_volume" "jenkins_infra_data" {
-  provider = kubernetes.privatek8s
-  metadata {
-    name = "jenkins-infra-pv"
-  }
-  spec {
-    capacity = {
-      storage = "${azurerm_managed_disk.jenkins_infra_data.disk_size_gb}Gi"
-    }
-    access_modes                     = ["ReadWriteOnce"]
-    persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = kubernetes_storage_class.statically_provisionned_privatek8s.id
-    persistent_volume_source {
-      csi {
-        driver        = "disk.csi.azure.com"
-        volume_handle = azurerm_managed_disk.jenkins_infra_data.id
-      }
-    }
-  }
-}
-
-resource "kubernetes_persistent_volume_claim" "jenkins_infra_data" {
-  provider = kubernetes.privatek8s
-  metadata {
-    name      = "jenkins-infra-data"
-    namespace = "jenkins-infra"
-  }
-  spec {
-    access_modes       = kubernetes_persistent_volume.jenkins_infra_data.spec[0].access_modes
-    volume_name        = kubernetes_persistent_volume.jenkins_infra_data.metadata.0.name
-    storage_class_name = kubernetes_storage_class.statically_provisionned_privatek8s.id
-    resources {
-      requests = {
-        storage = "${azurerm_managed_disk.jenkins_infra_data.disk_size_gb}Gi"
-      }
-    }
-  }
-}
-
-# Required to allow AKS CSI driver to access the Azure disk
-resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_disk_reader" {
-  name  = "ReadinfraCIDisk"
-  scope = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins.id
-
-  permissions {
-    actions = [
-      "Microsoft.Compute/disks/read",
-      "Microsoft.Compute/disks/write",
-    ]
-  }
-}
-resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_azurerm_privatek8s" {
-  scope              = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins.id
-  role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_disk_reader.role_definition_resource_id
-  principal_id       = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
 }
 
 ## Allow access to/from ACR endpoint
@@ -433,7 +313,6 @@ resource "azurerm_network_security_rule" "allow_in_https_from_infra_ephemeral_ag
   resource_group_name         = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
 }
-
 
 # Azure SP for updatecli with minimum rights
 resource "azurerm_resource_group" "updatecli_infra_ci_jenkins_io" {
