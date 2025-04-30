@@ -238,7 +238,7 @@ resource "azurerm_role_assignment" "privatek8s_sponsorship_publicip_networkcontr
 }
 
 
-# Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/privatek8s.yaml
+# Used later by the load balancer deployed on the cluster
 # Use case is to allow incoming webhooks
 resource "azurerm_public_ip" "privatek8s_sponsorship" {
   provider            = azurerm.jenkins-sponsorship
@@ -254,12 +254,10 @@ resource "azurerm_management_lock" "privatek8s_sponsorship_publicip" {
   name       = "public-privatek8s-publicip"
   scope      = azurerm_public_ip.privatek8s_sponsorship.id
   lock_level = "CanNotDelete"
-  notes      = "Locked because this is a sensitive resource that should not be removed when privatek8s is removed"
+  notes      = "Locked because this is a sensitive resource that should not be removed when privatek8s-sponsorship is removed"
 }
 
 resource "azurerm_dns_a_record" "privatek8s_sponsorship_public" {
-  ## TODO: uncomment for migration from old cluster
-  # name                = "public.privatek8s"
   name                = "public.privatek8s-sponsorship"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
@@ -269,8 +267,6 @@ resource "azurerm_dns_a_record" "privatek8s_sponsorship_public" {
 }
 
 resource "azurerm_dns_a_record" "privatek8s_sponsorship_private" {
-  ## TODO: uncomment for migration from old cluster
-  # name                = "private.privatek8s"
   name                = "private.privatek8s-sponsorship"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name

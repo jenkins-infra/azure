@@ -45,8 +45,6 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
         flatten(
           concat(
             [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value],
-            # privatek8s outbound IPs (traffic routed through gateways or outbound LBs)
-            module.jenkins_infra_shared_data.outbound_ips["privatek8s.jenkins.io"],
             # publick8s outbound IPs (traffic routed through gateways or outbound LBs)
             module.jenkins_infra_shared_data.outbound_ips["publick8s.jenkins.io"],
             # trusted.ci subnet (UC agents need to execute mirrorbits scans)
