@@ -163,5 +163,4 @@ module "cert_ci_jenkins_io_letsencrypt" {
   dns_rg_name      = data.azurerm_resource_group.proddns_jenkinsio.name
   parent_zone_name = data.azurerm_dns_zone.jenkinsio.name
   principal_id     = module.cert_ci_jenkins_io.controller_service_principal_id
-
 }
