@@ -41,7 +41,8 @@ resource "azurerm_postgresql_flexible_server" "public_db" {
   administrator_login           = local.public_db_pgsql_admin_login
   administrator_password        = random_password.public_db_pgsql_admin_password.result
   sku_name                      = "B_Standard_B1ms" # 1vCore / 2 Gb - https://docs.microsoft.com/en-us/azure/virtual-machines/sizes-b-series-burstable
-  storage_mb                    = "131072"
+  storage_mb                    = "262144"
+  storage_tier                  = "P15"
   version                       = "13"
   zone                          = "1"
   private_dns_zone_id           = azurerm_private_dns_zone.public_db_pgsql.id
