@@ -48,10 +48,6 @@ removed {
 # }
 
 ## TODO: remove once the DB is migrated in public-db
-import {
-  to = azurerm_postgresql_flexible_server.uplink_migration_runtime
-  id = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/public/providers/Microsoft.DBforPostgreSQL/flexibleServers/uplink-migration-runtime"
-}
 resource "azurerm_postgresql_flexible_server" "uplink_migration_runtime" {
   name                          = "uplink-migration-runtime"
   resource_group_name           = data.azurerm_resource_group.public.name
