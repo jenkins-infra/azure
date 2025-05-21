@@ -31,7 +31,7 @@ resource "azuread_service_principal" "packer" {
 resource "azuread_application_password" "packer" {
   display_name   = "packer-tf-managed"
   application_id = azuread_application.packer.id
-  end_date       = "2025-05-22T00:00:00Z"
+  end_date       = "2025-08-18T00:00:00Z"
 }
 
 ## Dev Resources are used by the pull requests in jenkins-infra/packer-images
