@@ -50,3 +50,13 @@ resource "azurerm_storage_container" "confluence_dumps" {
     helpdesk = "https://github.com/jenkins-infra/helpdesk/issues/3249"
   })
 }
+
+# Container for the dump of confluence databases - ref. https://github.com/jenkins-infra/helpdesk/issues/4667
+resource "azurerm_storage_container" "uplink_db_pre_20250521" {
+  name                  = "uplink-db-pre-20250521"
+  storage_account_id    = azurerm_storage_account.archives.id
+  container_access_type = "private"
+  metadata = merge(local.default_tags, {
+    helpdesk = "https://github.com/jenkins-infra/helpdesk/issues/3249"
+  })
+}
