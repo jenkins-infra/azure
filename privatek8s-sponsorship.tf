@@ -21,11 +21,7 @@ resource "azurerm_kubernetes_cluster" "privatek8s_sponsorship" {
   kubernetes_version                  = local.aks_clusters["privatek8s_sponsorship"].kubernetes_version
   role_based_access_control_enabled   = true # default value but made explicit to please trivy
 
-  ## TODO need to understand how it's handled `upgrade_override`
-  #   upgrade_override {
-  #     # TODO: disable to avoid "surprise" upgrades
-  #     force_upgrade_enabled = true
-  #   }
+  oidc_issuer_enabled = true
 
   image_cleaner_interval_hours = 48
 
