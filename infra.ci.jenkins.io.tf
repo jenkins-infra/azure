@@ -66,7 +66,7 @@ resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io" {
 }
 resource "azurerm_federated_identity_credential" "infra_ci_jenkins_io" {
   provider            = azurerm.jenkins-sponsorship
-  name                = "infra.ci.jenkins.io"
+  name                = "infracijenkinsio"
   resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
   audience            = ["api://AzureADTokenExchange"]
   issuer              = azurerm_kubernetes_cluster.privatek8s_sponsorship.oidc_issuer_url
