@@ -39,7 +39,7 @@ resource "azuread_service_principal" "infra_ci_jenkins_io" {
 resource "azuread_application_password" "infra_ci_jenkins_io" {
   application_id = azuread_application.infra_ci_jenkins_io.id
   display_name   = "infra.ci.jenkins.io-tf-managed"
-  end_date       = "2025-09-05T00:00:00Z"
+  end_date       = "2025-09-06T00:00:00Z"
 }
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_packer" {
   scope                = azurerm_resource_group.packer_images["prod"].id
