@@ -19,6 +19,9 @@ data "azurerm_resource_group" "public_jenkins_sponsorship" {
   provider = azurerm.jenkins-sponsorship
   name     = "public-jenkins-sponsorship"
 }
+data "azurerm_resource_group" "infra_ci_jenkins_io" {
+  name = "infra-ci-jenkins-io"
+}
 data "azurerm_resource_group" "infra_ci_jenkins_io_sponsorship" {
   provider = azurerm.jenkins-sponsorship
   name     = "infra-ci-jenkins-io-sponsorship"
@@ -64,6 +67,10 @@ data "azurerm_virtual_network" "public_jenkins_sponsorship" {
 data "azurerm_virtual_network" "public_db" {
   name                = "${data.azurerm_resource_group.public.name}-db-vnet"
   resource_group_name = data.azurerm_resource_group.public.name
+}
+data "azurerm_virtual_network" "infra_ci_jenkins_io" {
+  name                = "${data.azurerm_resource_group.infra_ci_jenkins_io.name}-vnet"
+  resource_group_name = data.azurerm_resource_group.infra_ci_jenkins_io.name
 }
 data "azurerm_virtual_network" "infra_ci_jenkins_io_sponsorship" {
   provider            = azurerm.jenkins-sponsorship
