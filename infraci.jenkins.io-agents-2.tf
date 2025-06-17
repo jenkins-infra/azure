@@ -25,11 +25,6 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_2" {
   kubernetes_version                  = local.aks_clusters["infracijenkinsio_agents_2"].kubernetes_version
   role_based_access_control_enabled   = true # default value but made explicit to please trivy
 
-  upgrade_override {
-    # TODO: disable to avoid "surprise" upgrades
-    force_upgrade_enabled = true
-  }
-
   image_cleaner_interval_hours = 48
 
   network_profile {
