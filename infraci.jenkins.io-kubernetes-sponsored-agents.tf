@@ -124,7 +124,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_agents_2_sponsorshi
   auto_scaling_enabled  = true
   min_count             = 1 # Azure autoscaler with ARM64 is really slow when starting from zero nodes.
   max_count             = 20
-  zones                 = [3]
+  zones                 = local.aks_clusters.compute_zones.arm64_pool
   vnet_subnet_id        = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
 
   node_labels = {
