@@ -25,11 +25,6 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_2" {
   kubernetes_version                  = local.aks_clusters["infracijenkinsio_agents_2"].kubernetes_version
   role_based_access_control_enabled   = true # default value but made explicit to please trivy
 
-  upgrade_override {
-    # TODO: disable to avoid "surprise" upgrades
-    force_upgrade_enabled = true
-  }
-
   image_cleaner_interval_hours = 48
 
   network_profile {
@@ -71,7 +66,7 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_2" {
 
 # Node pool to host infra.ci.jenkins.io x86_64 agents
 # number of pods per node calculated with https://github.com/jenkins-infra/kubernetes-management/blob/9c14f72867170e9755f3434fb6f6dd3a8606686a/config/jenkins_infra.ci.jenkins.io.yaml#L137-L208
-resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_agents_1" {
+resource "azurerm_kubernetes_cluster_node_pool" "infracijenkinsio_agents_2_linux_x86_64_agents_1" {
   name    = "lx86n14agt1"
   vm_size = "Standard_D8ads_v5" # https://learn.microsoft.com/en-us/azure/virtual-machines/dasv5-dadsv5-series Standard_D8ads_v5 	8vcpu 	32Go 	300ssd
   upgrade_settings {
@@ -108,7 +103,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_agents_1" {
 
 # # Node pool to host infra.ci.jenkins.io arm64 agents
 # number of pods per node calculated with https://github.com/jenkins-infra/kubernetes-management/blob/9c14f72867170e9755f3434fb6f6dd3a8606686a/config/jenkins_infra.ci.jenkins.io.yaml#L137-L208
-resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_agents_2" {
+resource "azurerm_kubernetes_cluster_node_pool" "infracijenkinsio_agents_2_linux_arm64_agents_2" {
 
   name    = "la64n14agt2"
   vm_size = "Standard_D16pds_v5" # temporarily upgrade https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv5-series?tabs=sizebasic 	16vcpu 	64Go 	600ssd
