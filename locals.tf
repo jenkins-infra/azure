@@ -51,6 +51,12 @@ locals {
     "infracijenkinsio_agents_1" = {
       name               = "infracijenkinsio-agents-1",
       kubernetes_version = "1.31.6",
+      # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
+      pod_cidr = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
+    },
+    "infracijenkinsio_agents_2" = {
+      name               = "infracijenkinsio-agents-2",
+      kubernetes_version = "1.31.6",
       compute_zones      = [1],
       # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
       pod_cidr = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
@@ -81,6 +87,11 @@ locals {
         },
       },
     },
+    "compute_zones" = {
+      system_pool = [1, 2], # Note: Zone 3 is not allowed for system pool.
+      arm64_pool  = [2, 3],
+      amd64_pool  = [1, 2],
+    }
   }
 
   # These cluster_hostname cannot be on the 'local.aks_cluster' to avoid cyclic dependencies (when expanding the map)
@@ -90,6 +101,9 @@ locals {
     },
     "infracijenkinsio_agents_1" = {
       cluster_hostname = "https://${azurerm_kubernetes_cluster.infracijenkinsio_agents_1.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
+    },
+    "infracijenkinsio_agents_2" = {
+      cluster_hostname = "https://${azurerm_kubernetes_cluster.infracijenkinsio_agents_2.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
     },
     "privatek8s_sponsorship" = {
       cluster_hostname = "https://${azurerm_kubernetes_cluster.privatek8s_sponsorship.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
