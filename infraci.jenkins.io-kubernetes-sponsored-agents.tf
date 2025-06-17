@@ -66,8 +66,7 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
     max_count            = 3 # for upgrade
     vnet_subnet_id       = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
     tags                 = local.default_tags
-    # Avoid deploying system pool in the same zone as other node pools
-    zones = [for zone in local.aks_clusters.infracijenkinsio_agents_1.compute_zones : zone + 1]
+    zones                = local.aks_clusters.compute_zones.system_pool
   }
 
   tags = local.default_tags
@@ -90,7 +89,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_agents_1_sponsorsh
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 20
-  zones                 = local.aks_clusters.infracijenkinsio_agents_1.compute_zones
+  zones                 = local.aks_clusters.compute_zones.amd64_pool
   vnet_subnet_id        = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id
 
   node_labels = {

@@ -78,6 +78,10 @@ resource "local_file" "jenkins_infra_data_report" {
       hostname           = local.aks_clusters_outputs.infracijenkinsio_agents_1.cluster_hostname
       kubernetes_version = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
     },
+    "infracijenkinsio_agents_2" = {
+      hostname           = local.aks_clusters_outputs.infracijenkinsio_agents_2.cluster_hostname
+      kubernetes_version = local.aks_clusters["infracijenkinsio_agents_2"].kubernetes_version
+    },
     "azure.ci.jenkins.io" = {
       "service_ips" = {
         "ipv4" = module.ci_jenkins_io_sponsorship.controller_public_ipv4,

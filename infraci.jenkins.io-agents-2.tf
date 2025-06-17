@@ -1,10 +1,10 @@
-resource "azurerm_resource_group" "infracijio_kubernetes_agents" {
-  name     = "infra-ci-jenkins-io-kubernetes-agents-2"
+resource "azurerm_resource_group" "infracijenkinsio_agents_2" {
+  name     = local.aks_clusters["infracijenkinsio_agents_2"].name
   location = var.location
   tags     = local.default_tags
 }
 
-data "azurerm_subnet" "infraci_jenkins_io_kubernetes_agent" {
+data "azurerm_subnet" "infracijenkinsio_agents_2" {
   name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io.name}-kubernetes-agents"
   resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io.resource_group_name
   virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io.name
@@ -20,8 +20,8 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_2" {
   private_cluster_enabled             = true
   private_cluster_public_fqdn_enabled = true
   dns_prefix                          = "infracijenkinsioagents2" # Avoid hyphens in this DNS host
-  location                            = azurerm_resource_group.infracijio_kubernetes_agents.location
-  resource_group_name                 = azurerm_resource_group.infracijio_kubernetes_agents.name
+  location                            = azurerm_resource_group.infracijenkinsio_agents_2.location
+  resource_group_name                 = azurerm_resource_group.infracijenkinsio_agents_2.name
   kubernetes_version                  = local.aks_clusters["infracijenkinsio_agents_2"].kubernetes_version
   role_based_access_control_enabled   = true # default value but made explicit to please trivy
 
@@ -61,10 +61,9 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_2" {
     auto_scaling_enabled = true
     min_count            = 2 # for best practices
     max_count            = 3 # for upgrade
-    vnet_subnet_id       = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent.id
+    vnet_subnet_id       = data.azurerm_subnet.infracijenkinsio_agents_2.id
     tags                 = local.default_tags
-    # Avoid deploying system pool in the same zone as other node pools
-    zones = [for zone in local.aks_clusters.infracijenkinsio_agents_2.compute_zones : zone + 1]
+    zones                = local.aks_clusters.compute_zones.system_pool
   }
 
   tags = local.default_tags
@@ -89,8 +88,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_x86_64_agents_1" {
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 20
-  zones                 = local.aks_clusters.infracijenkinsio_agents_2.compute_zones
-  vnet_subnet_id        = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent.id
+  zones                 = local.aks_clusters.compute_zones.amd64_pool
+  vnet_subnet_id        = data.azurerm_subnet.infracijenkinsio_agents_2.id
 
   node_labels = {
     "jenkins" = "infra.ci.jenkins.io"
@@ -127,8 +126,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_agents_2" {
   auto_scaling_enabled  = true
   min_count             = 1 # Azure autoscaler with ARM64 is really slow when starting from zero nodes.
   max_count             = 20
-  zones                 = [3]
-  vnet_subnet_id        = data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent.id
+  zones                 = local.aks_clusters.compute_zones.arm64_pool
+  vnet_subnet_id        = data.azurerm_subnet.infracijenkinsio_agents_2.id
 
   node_labels = {
     "jenkins" = "infra.ci.jenkins.io"
