@@ -124,7 +124,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_agents_2" {
   orchestrator_version  = local.aks_clusters["infracijenkinsio_agents_2"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.infracijenkinsio_agents_2.id
   auto_scaling_enabled  = true
-  min_count             = 1 # Azure autoscaler with ARM64 is really slow when starting from zero nodes.
+  min_count             = 0
   max_count             = 20
   zones                 = local.aks_clusters.compute_zones.arm64_pool
   vnet_subnet_id        = data.azurerm_subnet.infracijenkinsio_agents_2.id
