@@ -137,18 +137,17 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracijenkinsio_agents_2_linux
   tags = local.default_tags
 }
 
-# egg and chicken, this will be added after the creation of the cluster by terraform
-# Configure the jenkins-infra/kubernetes-management admin service account
-# module "infracijenkinsio_agents_2_admin_sa" {
-#   providers = {
-#     kubernetes = kubernetes.infracijenkinsio_agents_2
-#   }
-#   source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
-#   cluster_name               = azurerm_kubernetes_cluster.infracijenkinsio_agents_2.name
-#   cluster_hostname           = local.aks_clusters_outputs.infracijenkinsio_agents_2.cluster_hostname
-#   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.infracijenkinsio_agents_2.kube_config.0.cluster_ca_certificate
-# }
-# output "kubeconfig_management_infracijenkinsio_agents_2" {
-#   sensitive = true
-#   value     = module.infracijenkinsio_agents_2_admin_sa.kubeconfig
-# }
+#Configure the jenkins-infra/kubernetes-management admin service account
+module "infracijenkinsio_agents_2_admin_sa" {
+  providers = {
+    kubernetes = kubernetes.infracijenkinsio_agents_2
+  }
+  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
+  cluster_name               = azurerm_kubernetes_cluster.infracijenkinsio_agents_2.name
+  cluster_hostname           = local.aks_clusters_outputs.infracijenkinsio_agents_2.cluster_hostname
+  cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.infracijenkinsio_agents_2.kube_config.0.cluster_ca_certificate
+}
+output "kubeconfig_management_infracijenkinsio_agents_2" {
+  sensitive = true
+  value     = module.infracijenkinsio_agents_2_admin_sa.kubeconfig
+}
