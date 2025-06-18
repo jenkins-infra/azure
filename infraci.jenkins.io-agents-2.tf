@@ -67,8 +67,8 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_2" {
 # Node pool to host infra.ci.jenkins.io x86_64 agents
 # number of pods per node calculated with https://github.com/jenkins-infra/kubernetes-management/blob/9c14f72867170e9755f3434fb6f6dd3a8606686a/config/jenkins_infra.ci.jenkins.io.yaml#L137-L208
 resource "azurerm_kubernetes_cluster_node_pool" "infracijenkinsio_agents_2_linux_x86_64_agents_1" {
-  name    = "lx86n14agt1"
-  vm_size = "Standard_D8ads_v5" # https://learn.microsoft.com/en-us/azure/virtual-machines/dasv5-dadsv5-series Standard_D8ads_v5 	8vcpu 	32Go 	300ssd
+  name                  = "lx86n14agt1"
+  vm_size               = "Standard_D8ads_v5" # https://learn.microsoft.com/en-us/azure/virtual-machines/dasv5-dadsv5-series Standard_D8ads_v5 	8vcpu 	32Go 	300ssd
   os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 300 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dasv5-dadsv5-series (depends on the instance size)
@@ -102,8 +102,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracijenkinsio_agents_2_linux
 # number of pods per node calculated with https://github.com/jenkins-infra/kubernetes-management/blob/9c14f72867170e9755f3434fb6f6dd3a8606686a/config/jenkins_infra.ci.jenkins.io.yaml#L137-L208
 resource "azurerm_kubernetes_cluster_node_pool" "infracijenkinsio_agents_2_linux_arm64_agents_2" {
 
-  name    = "la64n14agt2"
-  vm_size = "Standard_D16pds_v5" # temporarily upgrade https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv5-series?tabs=sizebasic 	16vcpu 	64Go 	600ssd
+  name                  = "la64n14agt2"
+  vm_size               = "Standard_D16pds_v5" # temporarily upgrade https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv5-series?tabs=sizebasic 	16vcpu 	64Go 	600ssd
   os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 600 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv5-series?tabs=sizebasic (depends on the instance size)
@@ -133,18 +133,17 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracijenkinsio_agents_2_linux
   tags = local.default_tags
 }
 
-# egg and chicken, this will be added after the creation of the cluster by terraform
-# Configure the jenkins-infra/kubernetes-management admin service account
-# module "infracijenkinsio_agents_2_admin_sa" {
-#   providers = {
-#     kubernetes = kubernetes.infracijenkinsio_agents_2
-#   }
-#   source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
-#   cluster_name               = azurerm_kubernetes_cluster.infracijenkinsio_agents_2.name
-#   cluster_hostname           = local.aks_clusters_outputs.infracijenkinsio_agents_2.cluster_hostname
-#   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.infracijenkinsio_agents_2.kube_config.0.cluster_ca_certificate
-# }
-# output "kubeconfig_management_infracijenkinsio_agents_2" {
-#   sensitive = true
-#   value     = module.infracijenkinsio_agents_2_admin_sa.kubeconfig
-# }
+#Configure the jenkins-infra/kubernetes-management admin service account
+module "infracijenkinsio_agents_2_admin_sa" {
+  providers = {
+    kubernetes = kubernetes.infracijenkinsio_agents_2
+  }
+  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
+  cluster_name               = azurerm_kubernetes_cluster.infracijenkinsio_agents_2.name
+  cluster_hostname           = local.aks_clusters_outputs.infracijenkinsio_agents_2.cluster_hostname
+  cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.infracijenkinsio_agents_2.kube_config.0.cluster_ca_certificate
+}
+output "kubeconfig_management_infracijenkinsio_agents_2" {
+  sensitive = true
+  value     = module.infracijenkinsio_agents_2_admin_sa.kubeconfig
+}
