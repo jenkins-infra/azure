@@ -84,11 +84,13 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracijenkinsio_agents_2_linux
   vnet_subnet_id        = data.azurerm_subnet.infracijenkinsio_agents_2.id
 
   node_labels = {
-    "jenkins" = "infra.ci.jenkins.io"
-    "role"    = "jenkins-agents"
+    "jenkins"                               = "infra.ci.jenkins.io"
+    "role"                                  = "jenkins-agents"
+    "kubernetes.azure.com/scalesetpriority" = "spot"
   }
   node_taints = [
     "infra.ci.jenkins.io/agents=true:NoSchedule",
+    "kubernetes.azure.com/scalesetpriority=spot:NoSchedule"
   ]
 
   lifecycle {
@@ -119,11 +121,13 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracijenkinsio_agents_2_linux
   vnet_subnet_id        = data.azurerm_subnet.infracijenkinsio_agents_2.id
 
   node_labels = {
-    "jenkins" = "infra.ci.jenkins.io"
-    "role"    = "jenkins-agents"
+    "jenkins"                               = "infra.ci.jenkins.io"
+    "role"                                  = "jenkins-agents"
+    "kubernetes.azure.com/scalesetpriority" = "spot"
   }
   node_taints = [
     "infra.ci.jenkins.io/agents=true:NoSchedule",
+    "kubernetes.azure.com/scalesetpriority=spot:NoSchedule"
   ]
 
   lifecycle {
