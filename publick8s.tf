@@ -58,6 +58,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
       data.azurerm_subnet.private_vnet_data_tier.address_prefixes,
       # privatek8s-sponsorship nodes subnet
       data.azurerm_subnet.privatek8s_sponsorship_tier.address_prefixes,
+      data.azurerm_subnet.infracijenkinsio_agents_2.address_prefixes,
     )
   }
 
