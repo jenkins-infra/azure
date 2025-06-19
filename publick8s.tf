@@ -51,14 +51,16 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
             module.jenkins_infra_shared_data.outbound_ips["trusted.ci.jenkins.io"],
             module.jenkins_infra_shared_data.outbound_ips["trusted.sponsorship.ci.jenkins.io"],
             module.jenkins_infra_shared_data.outbound_ips["infracijenkinsioagents1.jenkins.io"],
+            # infracijioagent2
+            # TODO track with updatecli or use private AKS API (Ref. https://github.com/jenkins-infra/helpdesk/issues/4617)
+            "20.10.193.4/32",
+            # TODO track with updatecli or use private AKS API (Ref. https://github.com/jenkins-infra/helpdesk/issues/4617)
+            "172.210.200.59/32",
           )
         )
       ),
       # private VPN access
       data.azurerm_subnet.private_vnet_data_tier.address_prefixes,
-      # privatek8s-sponsorship nodes subnet
-      data.azurerm_subnet.privatek8s_sponsorship_tier.address_prefixes,
-      data.azurerm_subnet.infracijenkinsio_agents_2.address_prefixes,
     )
   }
 
