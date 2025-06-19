@@ -424,6 +424,7 @@ resource "azurerm_key_vault" "infra_ci_jenkins_io_vault" {
     virtual_network_subnet_ids = [
       data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.id,
       data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id,
+      data.azurerm_subnet.infracijenkinsio_agents_2.id,
     ]
   }
 
