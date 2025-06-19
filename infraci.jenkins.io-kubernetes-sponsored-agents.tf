@@ -5,13 +5,6 @@ resource "azurerm_resource_group" "infracijio_kubernetes_agents_sponsorship" {
   tags     = local.default_tags
 }
 
-data "azurerm_subnet" "infraci_jenkins_io_kubernetes_agent_sponsorship" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name}-kubernetes-agents"
-  resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.resource_group_name
-  virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name
-}
-
 #trivy:ignore:avd-azu-0040 # No need to enable oms_agent for Azure monitoring as we already have datadog
 resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
   provider = azurerm.jenkins-sponsorship
