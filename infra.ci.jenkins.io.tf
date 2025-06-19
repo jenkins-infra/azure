@@ -398,3 +398,81 @@ resource "azurerm_role_assignment" "updatecli_infra_ci_jenkins_io_allow_images_l
   role_definition_id = azurerm_role_definition.vm_images_reader.role_definition_resource_id
   principal_id       = azuread_service_principal.updatecli_infra_ci_jenkins_io.object_id
 }
+
+resource "azurerm_key_vault" "infra_ci_jenkins_io_vault" {
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  name                = "prodjenkinsinfra"
+  location            = "East US"
+  resource_group_name = "prodjenkinsinfra"
+  sku_name            = "premium"
+
+  enabled_for_disk_encryption     = true
+  soft_delete_retention_days      = 90
+  purge_protection_enabled        = false
+  enable_rbac_authorization       = false
+  enabled_for_deployment          = false
+  enabled_for_template_deployment = false
+  # Adding a network rule with `public_network_access_enabled` set to `true` (default) selects the option "Enabled from selected virtual networks and IP addresses"
+  public_network_access_enabled = true
+  # Adding a network rule with `public_network_access_enabled` set to `true` (default) selects the option "Enabled from selected virtual networks and IP addresses"
+  network_acls {
+    bypass         = "AzureServices"
+    default_action = "Deny"
+    ip_rules = [
+      "82.64.5.129/32",
+    ]
+    virtual_network_subnet_ids = [
+      data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.id,
+      data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id,
+    ]
+  }
+
+  # smerle
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = "0a9ca009-8333-4351-9a8a-b02244ff72b1"
+
+    key_permissions = [
+      "Encrypt",
+      "Decrypt",
+    ]
+  }
+
+  # dduportal
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = "8bb006a6-3d5f-45e0-be59-91af3db79da3"
+
+    key_permissions = [
+      "Decrypt",
+      "Encrypt",
+    ]
+  }
+
+  # tim jacomb
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = "62ea8f6b-2604-46a6-b1cf-d2aaa15ba0c6"
+
+    key_permissions = [
+      "Decrypt",
+      "Encrypt",
+    ]
+  }
+
+  # infra
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = "cfcd6abd-898d-417b-8474-fc1d93705cce"
+
+    key_permissions = [
+      "Get",
+      "List",
+      "Purge",
+      "Decrypt",
+      "Encrypt",
+      "Verify",
+      "Sign",
+    ]
+  }
+}
