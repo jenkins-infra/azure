@@ -53,9 +53,9 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
             module.jenkins_infra_shared_data.outbound_ips["infracijenkinsioagents1.jenkins.io"],
             # infracijioagent2
             # TODO track with updatecli or use private AKS API (Ref. https://github.com/jenkins-infra/helpdesk/issues/4617)
-            "20.10.193.4/32",
+            ["20.10.193.4/32"],
             # TODO track with updatecli or use private AKS API (Ref. https://github.com/jenkins-infra/helpdesk/issues/4617)
-            "172.210.200.59/32",
+            ["172.210.200.59/32"],
           )
         )
       ),
