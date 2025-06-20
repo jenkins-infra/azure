@@ -296,11 +296,16 @@ resource "azurerm_storage_account" "publick8s" {
         [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value],
       )
     )
-    virtual_network_subnet_ids = [
-      data.azurerm_subnet.publick8s_tier.id,
-      data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.id, # infra.ci (Terraform management) Azure VM agents
-      data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id,  # infra.ci (Terraform management) container agents
-    ]
+    virtual_network_subnet_ids = concat(
+      [
+        # Required for using and populating the resource
+        data.azurerm_subnet.publick8s_tier.id,
+        # TODO: check if still needed? (used to be infra.ci container agents when they were in the privatek8s cluster)
+        data.azurerm_subnet.privatek8s_sponsorship_tier.id,
+      ],
+      # Required for managing the resource
+      local.app_subnets["infra.ci.jenkins.io"].agents,
+    )
     bypass = ["Metrics", "Logging", "AzureServices"]
   }
 }

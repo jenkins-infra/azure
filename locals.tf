@@ -113,4 +113,54 @@ locals {
   ci_jenkins_io_fqdn = "ci.jenkins.io"
 
   end_dates = yamldecode(data.local_file.locals_yaml.content).end_dates
+
+  app_subnets = {
+    "ci.jenkins.io" = {
+      "controller" = [data.azurerm_subnet.ci_jenkins_io_controller_sponsorship.id],
+      "agents" = [
+        # VM agents (sponsored subscription)
+        data.azurerm_subnet.ci_jenkins_io_ephemeral_agents_jenkins_sponsorship.id,
+        # Container agents (sponsored subscription)
+        data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id,
+      ],
+    },
+    "release.ci.jenkins.io" = {
+      "controller" = [data.azurerm_subnet.privatek8s_sponsorship_release_ci_controller_tier.id],
+      "agents" = [
+        # Container agents (sponsored subscription)
+        data.azurerm_subnet.privatek8s_sponsorship_release_tier.id,
+      ],
+    },
+    "infra.ci.jenkins.io" = {
+      "controller" = [data.azurerm_subnet.privatek8s_sponsorship_infra_ci_controller_tier.id],
+      "agents" = [
+        # VM agents (sponsored subscription)
+        data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.id,
+        # Container agents (sponsored subscription)
+        data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id,
+        # Container agents (CDF subscription)
+        data.azurerm_subnet.infracijenkinsio_agents_2.id,
+      ],
+    },
+    "trusted.ci.jenkins.io" = {
+      "controller" = [data.azurerm_subnet.trusted_ci_jenkins_io_controller.id],
+      "agents" = [
+        # Permanent agents (Update Center generation)
+        data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.id,
+        # VM agents (sponsored subscription)
+        data.azurerm_subnet.trusted_ci_jenkins_io_sponsorship_ephemeral_agents.id,
+        # VM agents (CDF subscription)
+        data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.id,
+      ],
+    },
+    "cert.ci.jenkins.io" = {
+      "controller" = [data.azurerm_subnet.cert_ci_jenkins_io_controller.id],
+      "agents" = [
+        # VM agents (sponsored subscription)
+        data.azurerm_subnet.cert_ci_jenkins_io_sponsorship_ephemeral_agents.id,
+        # VM agents (CDF subscription)
+        data.azurerm_subnet.cert_ci_jenkins_io_ephemeral_agents.id,
+      ],
+    },
+  }
 }
