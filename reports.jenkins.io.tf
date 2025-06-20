@@ -98,6 +98,7 @@ resource "kubernetes_namespace" "builds_reports_jenkins_io" {
   }
 }
 resource "kubernetes_service_account" "builds_reports_jenkins_io" {
+  provider = kubernetes.publick8s
   metadata {
     name      = azurerm_storage_share.builds_reports_jenkins_io.name
     namespace = kubernetes_namespace.builds_reports_jenkins_io.metadata[0].name
