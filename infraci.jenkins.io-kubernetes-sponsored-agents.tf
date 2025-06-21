@@ -20,6 +20,7 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
   resource_group_name                 = azurerm_resource_group.infracijio_kubernetes_agents_sponsorship.name
   kubernetes_version                  = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
   role_based_access_control_enabled   = true # default value but made explicit to please trivy
+  oidc_issuer_enabled                 = true
 
   upgrade_override {
     # TODO: disable to avoid "surprise" upgrades
