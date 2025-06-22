@@ -137,6 +137,27 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux_arm64_agents_2_sponsorshi
   tags = local.default_tags
 }
 
+import {
+  to = kubernetes_namespace.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents
+  id = "jenkins-infra-agents"
+}
+
+import {
+  to = kubernetes_namespace.infracijenkinsio_agents_2_infra_ci_jenkins_io_agents
+  id = "jenkins-infra-agents"
+}
+
+resource "kubernetes_namespace" "infracijenkinsio_agents_1_infra_ci_jenkins_io_agents" {
+  provider = kubernetes.infracijenkinsio_agents_1
+
+  metadata {
+    name = "jenkins-infra-agents"
+    labels = {
+      name = "jenkins-infra-agents"
+    }
+  }
+}
+
 # Configure the jenkins-infra/kubernetes-management admin service account
 module "infracijenkinsio_agents_1_admin_sa_sponsorship" {
   providers = {

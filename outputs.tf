@@ -7,6 +7,9 @@ resource "local_file" "jenkins_infra_data_report" {
       "service_hostname" = azurerm_redis_cache.public_redis.hostname,
       "service_port"     = azurerm_redis_cache.public_redis.port,
     },
+    "infra.ci.jenkins.io" = {
+      "agents_identity" = azurerm_user_assigned_identity.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.id,
+    },
     "updates.jenkins.io" = {
       "content" = {
         "share_name" = azurerm_storage_share.updates_jenkins_io_data.name,
@@ -77,10 +80,12 @@ resource "local_file" "jenkins_infra_data_report" {
     "infracijenkinsio_agents_1" = {
       hostname           = local.aks_clusters_outputs.infracijenkinsio_agents_1.cluster_hostname
       kubernetes_version = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
+      agent_namespaces   = kubernetes_namespace.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name,
     },
     "infracijenkinsio_agents_2" = {
       hostname           = local.aks_clusters_outputs.infracijenkinsio_agents_2.cluster_hostname
       kubernetes_version = local.aks_clusters["infracijenkinsio_agents_2"].kubernetes_version
+      agent_namespaces   = kubernetes_namespace.infracijenkinsio_agents_2_infra_ci_jenkins_io_agents.metadata[0].name,
     },
     "azure.ci.jenkins.io" = {
       "service_ips" = {

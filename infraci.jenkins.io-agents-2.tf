@@ -132,6 +132,17 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracijenkinsio_agents_2_linux
   tags = local.default_tags
 }
 
+resource "kubernetes_namespace" "infracijenkinsio_agents_2_infra_ci_jenkins_io_agents" {
+  provider = kubernetes.infracijenkinsio_agents_2
+
+  metadata {
+    name = "jenkins-infra-agents"
+    labels = {
+      name = "jenkins-infra-agents"
+    }
+  }
+}
+
 #Configure the jenkins-infra/kubernetes-management admin service account
 module "infracijenkinsio_agents_2_admin_sa" {
   providers = {
