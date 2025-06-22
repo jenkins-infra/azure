@@ -163,6 +163,7 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_vnet_reader" {
   role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_vnet_sponsorship_reader.role_definition_resource_id
   principal_id       = azurerm_user_assigned_identity.infra_ci_jenkins_io.principal_id
 }
+
 module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
   providers = {
     azurerm = azurerm.jenkins-sponsorship
@@ -342,6 +343,45 @@ resource "azurerm_network_security_rule" "allow_in_https_from_infra_ephemeral_ag
   )
   resource_group_name         = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
+}
+
+resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
+  provider            = azurerm.jenkins-sponsorship
+  location            = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.location
+  name                = "infra-ci-jenkins-io-agents-sponsorship"
+  resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
+}
+# The Controller identity must be able to operate this identity to assign it to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
+resource "azurerm_role_assignment" "infra_ci_jenkins_io_operate_agent_identity" {
+  provider             = azurerm.jenkins-sponsorship
+  scope                = azurerm_user_assigned_identity.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.id
+  role_definition_name = "Managed Identity Operator"
+  principal_id         = azuread_service_principal.infra_ci_jenkins_io.object_id
+}
+resource "azurerm_role_assignment" "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship_write_buildsreports_share" {
+  provider = azurerm.jenkins-sponsorship
+  scope    = azurerm_storage_account.builds_reports_jenkins_io.id
+  # Allow writing
+  role_definition_name = "Storage File Data Privileged Contributor"
+  principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.principal_id
+}
+resource "azurerm_federated_identity_credential" "infracijenkinsio_agents_2_infra_ci_jenkins_io_agents" {
+  provider            = azurerm.jenkins-sponsorship
+  name                = "infra-ci-jenkins-io-agents2"
+  resource_group_name = azurerm_user_assigned_identity.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.resource_group_name
+  audience            = ["api://AzureADTokenExchange"]
+  issuer              = azurerm_kubernetes_cluster.infracijenkinsio_agents_2.oidc_issuer_url
+  parent_id           = azurerm_user_assigned_identity.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.id
+  subject             = "system:serviceaccount:${kubernetes_namespace.infracijenkinsio_agents_2_infra_ci_jenkins_io_agents.metadata[0].name}:default"
+}
+resource "azurerm_federated_identity_credential" "infracijenkinsio_agents_1_infra_ci_jenkins_io_agents" {
+  provider            = azurerm.jenkins-sponsorship
+  name                = "infra-ci-jenkins-io-agents1-sponsorship"
+  resource_group_name = azurerm_user_assigned_identity.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.resource_group_name
+  audience            = ["api://AzureADTokenExchange"]
+  issuer              = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.oidc_issuer_url
+  parent_id           = azurerm_user_assigned_identity.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.id
+  subject             = "system:serviceaccount:${kubernetes_namespace.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}:default"
 }
 
 # Azure SP for updatecli with minimum rights
