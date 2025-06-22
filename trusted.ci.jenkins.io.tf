@@ -64,6 +64,27 @@ module "trusted_ci_jenkins_io_azurevm_agents" {
   }
 }
 
+resource "azurerm_user_assigned_identity" "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
+  provider            = azurerm.jenkins-sponsorship
+  location            = azurerm_resource_group.trusted_ci_jenkins_io_controller_jenkins_sponsorship.location
+  name                = "trusted-ci-jenkins-io-agents-sponsorship"
+  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller_jenkins_sponsorship.name
+}
+# The Controller identity must be able to operate this identity to assign it to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
+resource "azurerm_role_assignment" "trusted_ci_jenkins_io_operate_agent_identity" {
+  provider             = azurerm.jenkins-sponsorship
+  scope                = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.id
+  role_definition_name = "Managed Identity Operator"
+  principal_id         = module.trusted_ci_jenkins_io.controller_service_principal_id
+}
+resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsorship_write_buildsreports_share" {
+  provider = azurerm.jenkins-sponsorship
+  scope    = azurerm_storage_account.builds_reports_jenkins_io.id
+  # Allow writing
+  role_definition_name = "Storage File Data Privileged Contributor"
+  principal_id         = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.principal_id
+}
+
 # Required to allow azcopy sync of jenkins.io File Share
 module "trustedci_jenkinsio_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
