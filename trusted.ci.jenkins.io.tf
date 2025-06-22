@@ -281,6 +281,11 @@ resource "azurerm_linux_virtual_machine" "trusted_permanent_agent" {
     sku       = "minimal-22_04-lts-gen2"
     version   = "latest"
   }
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.id]
+  }
 }
 resource "azurerm_managed_disk" "trusted_permanent_agent_data_disk" {
   name                 = "trusted-permanent-agent-data-disk"
