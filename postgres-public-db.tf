@@ -55,7 +55,7 @@ resource "azurerm_postgresql_flexible_server" "public_db" {
     (or through VPN tunnelling)
     **/
     azurerm_private_dns_zone_virtual_network_link.public_db_pgsql["private-vnet"],
-    azurerm_private_dns_zone_virtual_network_link.public_db_pgsql["infracijenkinsio-sponsorship-vnet"],
+    azurerm_private_dns_zone_virtual_network_link.public_db_pgsql["infracijenkinsio-vnet"],
   ]
 }
 resource "azurerm_private_dns_zone" "public_db_pgsql" {
@@ -64,10 +64,10 @@ resource "azurerm_private_dns_zone" "public_db_pgsql" {
 }
 resource "azurerm_private_dns_zone_virtual_network_link" "public_db_pgsql" {
   for_each = {
-    "public-vnet"                       = data.azurerm_virtual_network.public.id,
-    "publicdb-vnet"                     = data.azurerm_virtual_network.public_db.id,
-    "private-vnet"                      = data.azurerm_virtual_network.private.id,
-    "infracijenkinsio-sponsorship-vnet" = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.id,
+    "public-vnet"           = data.azurerm_virtual_network.public.id,
+    "publicdb-vnet"         = data.azurerm_virtual_network.public_db.id,
+    "private-vnet"          = data.azurerm_virtual_network.private.id,
+    "infracijenkinsio-vnet" = data.azurerm_virtual_network.infra_ci_jenkins_io.id,
   }
   name                  = "${each.key}-to-publicdbpgsql"
   resource_group_name   = data.azurerm_resource_group.public.name
