@@ -374,16 +374,6 @@ resource "azurerm_federated_identity_credential" "infracijenkinsio_agents_2_infr
   parent_id           = azurerm_user_assigned_identity.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.id
   subject             = "system:serviceaccount:${kubernetes_namespace.infracijenkinsio_agents_2_infra_ci_jenkins_io_agents.metadata[0].name}:default"
 }
-resource "azurerm_federated_identity_credential" "infracijenkinsio_agents_1_infra_ci_jenkins_io_agents" {
-  provider            = azurerm.jenkins-sponsorship
-  name                = "infra-ci-jenkins-io-agents1-sponsorship"
-  resource_group_name = azurerm_user_assigned_identity.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.resource_group_name
-  audience            = ["api://AzureADTokenExchange"]
-  issuer              = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.oidc_issuer_url
-  parent_id           = azurerm_user_assigned_identity.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.id
-  subject             = "system:serviceaccount:${kubernetes_namespace.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}:default"
-}
-
 # Azure SP for updatecli with minimum rights
 resource "azurerm_resource_group" "updatecli_infra_ci_jenkins_io" {
   name     = "updatecli-infra-ci-jenkins-io"

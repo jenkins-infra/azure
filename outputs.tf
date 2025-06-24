@@ -77,11 +77,6 @@ resource "local_file" "jenkins_infra_data_report" {
         { "${kubernetes_namespace.ci_jenkins_io_maven_cache.metadata[0].name}" = kubernetes_persistent_volume_claim.ci_jenkins_io_maven_cache_write.metadata[0].name },
       ),
     },
-    "infracijenkinsio_agents_1" = {
-      hostname           = local.aks_clusters_outputs.infracijenkinsio_agents_1.cluster_hostname
-      kubernetes_version = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
-      agent_namespaces   = kubernetes_namespace.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name,
-    },
     "infracijenkinsio_agents_2" = {
       hostname           = local.aks_clusters_outputs.infracijenkinsio_agents_2.cluster_hostname
       kubernetes_version = local.aks_clusters["infracijenkinsio_agents_2"].kubernetes_version

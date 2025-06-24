@@ -441,10 +441,6 @@ module "publick8s_admin_sa" {
   cluster_hostname           = azurerm_kubernetes_cluster.publick8s.kube_config.0.host
   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.publick8s.kube_config.0.cluster_ca_certificate
 }
-output "kubeconfig_management_pub" {
-  sensitive = true
-  value     = module.infracijenkinsio_agents_1_admin_sa_sponsorship.kubeconfig
-}
 
 # Retrieve effective outbound IPs
 data "azurerm_public_ip" "publick8s_lb_outbound" {
