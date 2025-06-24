@@ -48,13 +48,6 @@ locals {
   admin_username = "jenkins-infra-team"
 
   aks_clusters = {
-    "infracijenkinsio_agents_1" = {
-      name               = "infracijenkinsio-agents-1",
-      kubernetes_version = "1.31.6",
-      compute_zones      = [1],
-      # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
-      pod_cidr = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
-    },
     "infracijenkinsio_agents_2" = {
       name               = "infracijenkinsio-agents-2",
       kubernetes_version = "1.31.6",
@@ -98,9 +91,6 @@ locals {
   aks_clusters_outputs = {
     "cijenkinsio_agents_1" = {
       cluster_hostname = "https://${azurerm_kubernetes_cluster.cijenkinsio_agents_1.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
-    },
-    "infracijenkinsio_agents_1" = {
-      cluster_hostname = "https://${azurerm_kubernetes_cluster.infracijenkinsio_agents_1.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
     },
     "infracijenkinsio_agents_2" = {
       cluster_hostname = "https://${azurerm_kubernetes_cluster.infracijenkinsio_agents_2.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
