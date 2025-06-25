@@ -131,7 +131,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracijenkinsio_agents_2_linux
 
   tags = local.default_tags
 }
-
 resource "kubernetes_namespace" "infracijenkinsio_agents_2_infra_ci_jenkins_io_agents" {
   provider = kubernetes.infracijenkinsio_agents_2
 

@@ -24,7 +24,6 @@ resource "azurerm_storage_account" "archives" {
       [data.azurerm_subnet.privatek8s_sponsorship_tier.id],
       # Required for managing the resource
       local.app_subnets["infra.ci.jenkins.io"].agents,
-      local.app_subnets["infra.ci.jenkins.io"].agents,
     )
     bypass = ["AzureServices"]
   }

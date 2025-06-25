@@ -126,8 +126,6 @@ locals {
       "agents" = [
         # VM agents (sponsored subscription)
         data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.id,
-        # Container agents (sponsored subscription)
-        data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id,
         # Container agents (CDF subscription)
         data.azurerm_subnet.infracijenkinsio_agents_2.id,
       ],
