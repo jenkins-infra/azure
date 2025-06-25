@@ -451,11 +451,7 @@ resource "azurerm_key_vault" "infra_ci_jenkins_io_vault" {
     ip_rules = [
       "82.64.5.129/32",
     ]
-    virtual_network_subnet_ids = [
-      data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.id,
-      data.azurerm_subnet.infraci_jenkins_io_kubernetes_agent_sponsorship.id,
-      data.azurerm_subnet.infracijenkinsio_agents_2.id,
-    ]
+    virtual_network_subnet_ids = local.app_subnets["infra.ci.jenkins.io"].agents
   }
 
   # smerle
