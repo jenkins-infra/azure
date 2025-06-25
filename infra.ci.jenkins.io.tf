@@ -371,8 +371,10 @@ resource "azurerm_federated_identity_credential" "infracijenkinsio_agents_2_infr
   resource_group_name = azurerm_user_assigned_identity.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.resource_group_name
   audience            = ["api://AzureADTokenExchange"]
   issuer              = azurerm_kubernetes_cluster.infracijenkinsio_agents_2.oidc_issuer_url
-  parent_id           = azurerm_user_assigned_identity.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.id
-  subject             = "system:serviceaccount:${kubernetes_namespace.infracijenkinsio_agents_2_infra_ci_jenkins_io_agents.metadata[0].name}:default"
+  # Force dependency on the service account setup to ensure its annotations is not forgotten
+  # Ref.
+  parent_id = kubernetes_service_account.infracijenkinsio_agents_2_infra_ci_jenkins_io_agents.metadata[0].annotations["azure.workload.identity/client-id"]
+  subject   = "system:serviceaccount:${kubernetes_namespace.infracijenkinsio_agents_2_infra_ci_jenkins_io_agents.metadata[0].name}:${kubernetes_service_account.infracijenkinsio_agents_2_infra_ci_jenkins_io_agents.metadata[0].name}"
 }
 # Azure SP for updatecli with minimum rights
 resource "azurerm_resource_group" "updatecli_infra_ci_jenkins_io" {

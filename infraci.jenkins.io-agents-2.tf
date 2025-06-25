@@ -141,6 +141,18 @@ resource "kubernetes_namespace" "infracijenkinsio_agents_2_infra_ci_jenkins_io_a
     }
   }
 }
+resource "kubernetes_service_account" "infracijenkinsio_agents_2_infra_ci_jenkins_io_agents" {
+  provider = kubernetes.infracijenkinsio_agents_2
+
+  metadata {
+    name      = "jenkins-infra-agent"
+    namespace = kubernetes_namespace.infracijenkinsio_agents_2_infra_ci_jenkins_io_agents.metadata[0].name
+
+    annotations = {
+      "azure.workload.identity/client-id" = azurerm_user_assigned_identity.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.id
+    }
+  }
+}
 
 #Configure the jenkins-infra/kubernetes-management admin service account
 module "infracijenkinsio_agents_2_admin_sa" {
