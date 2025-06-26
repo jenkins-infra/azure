@@ -18,6 +18,8 @@ resource "local_file" "jenkins_infra_data_report" {
       },
     },
     "infra.ci.jenkins.io" = {
+      "controller_namespace"       = kubernetes_namespace.privatek8s_sponsorship_jenkins_infra_controller.metadata[0].name,
+      "controller_service_account" = kubernetes_service_account.privatek8s_sponsorship_jenkins_infra_controller.metadata[0].name,
       "agents_azure_vms" = {
         "resource_group_name"         = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_resource_group_name,
         "network_resource_group_name" = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_network_rg_name,

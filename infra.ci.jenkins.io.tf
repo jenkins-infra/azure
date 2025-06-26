@@ -64,16 +64,6 @@ resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io" {
   name                = "infracijenkinsio"
   resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
 }
-resource "azurerm_federated_identity_credential" "infra_ci_jenkins_io" {
-  provider            = azurerm.jenkins-sponsorship
-  name                = "infracijenkinsio"
-  resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
-  audience            = ["api://AzureADTokenExchange"]
-  issuer              = azurerm_kubernetes_cluster.privatek8s_sponsorship.oidc_issuer_url
-  parent_id           = azurerm_user_assigned_identity.infra_ci_jenkins_io.id
-  # TODO: Sync to (or from) the controller helm chart installation values in https://github.com/jenkins-infra/kubernetes-management/blob/main/config/jenkins_infra.ci.jenkins.io.yaml
-  subject = "system:serviceaccount:jenkins-infra:jenkins-infra-controller"
-}
 
 # Required to allow azcopy sync of contributors.jenkins.io File Share
 module "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer" {

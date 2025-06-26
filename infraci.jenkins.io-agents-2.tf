@@ -155,7 +155,6 @@ resource "kubernetes_service_account" "infracijenkinsio_agents_2_infra_ci_jenkin
     }
   }
 }
-
 resource "azurerm_federated_identity_credential" "infracijenkinsio_agents_2_infra_ci_jenkins_io_agents" {
   name                = "infracijenkinsio-agents-2-${kubernetes_service_account.infracijenkinsio_agents_2_infra_ci_jenkins_io_agents.metadata[0].name}"
   resource_group_name = azurerm_kubernetes_cluster.infracijenkinsio_agents_2.resource_group_name
