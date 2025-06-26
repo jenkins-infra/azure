@@ -17,8 +17,10 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_2" {
   location                            = azurerm_resource_group.infracijenkinsio_agents_2.location
   resource_group_name                 = azurerm_resource_group.infracijenkinsio_agents_2.name
   kubernetes_version                  = local.aks_clusters["infracijenkinsio_agents_2"].kubernetes_version
-  role_based_access_control_enabled   = true # default value but made explicit to please trivy
-  oidc_issuer_enabled                 = true
+  # default value but made explicit to please trivy
+  role_based_access_control_enabled = true
+  oidc_issuer_enabled               = true
+  workload_identity_enabled         = true
 
   image_cleaner_interval_hours = 48
 

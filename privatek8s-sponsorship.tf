@@ -19,9 +19,10 @@ resource "azurerm_kubernetes_cluster" "privatek8s_sponsorship" {
   location                            = azurerm_resource_group.privatek8s_sponsorship.location
   resource_group_name                 = azurerm_resource_group.privatek8s_sponsorship.name
   kubernetes_version                  = local.aks_clusters["privatek8s_sponsorship"].kubernetes_version
-  role_based_access_control_enabled   = true # default value but made explicit to please trivy
-
-  oidc_issuer_enabled = true
+  # default value but made explicit to please trivy
+  role_based_access_control_enabled = true
+  oidc_issuer_enabled               = true
+  workload_identity_enabled         = true
 
   image_cleaner_interval_hours = 48
 
