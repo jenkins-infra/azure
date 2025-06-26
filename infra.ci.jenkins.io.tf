@@ -352,7 +352,7 @@ resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_azurevm_agents_je
   resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
 }
 # The Controller identity must be able to operate this identity to assign it to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
-resource "azurerm_role_assignment" "infra_ci_jenkins_io_operate_agent_identity" {
+resource "azurerm_role_assignment" "infra_ci_jenkins_io_operate_agent_identity_jenkins_sponsorship" {
   provider             = azurerm.jenkins-sponsorship
   scope                = azurerm_user_assigned_identity.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.id
   role_definition_name = "Managed Identity Operator"
@@ -364,6 +364,24 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_azurevm_agents_jenkins_s
   # Allow writing
   role_definition_name = "Storage File Data Privileged Contributor"
   principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.principal_id
+}
+
+resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_agents" {
+  location            = var.location
+  name                = "infra-ci-jenkins-io-agents"
+  resource_group_name = azurerm_kubernetes_cluster.infracijenkinsio_agents_2.resource_group_name
+}
+# The Controller identity must be able to operate this identity to assign it to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
+resource "azurerm_role_assignment" "infra_ci_jenkins_io_operate_agent_identity" {
+  scope                = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents.id
+  role_definition_name = "Managed Identity Operator"
+  principal_id         = azuread_service_principal.infra_ci_jenkins_io.object_id
+}
+resource "azurerm_role_assignment" "infra_ci_jenkins_io_azurevm_agents_write_buildsreports_share" {
+  scope = azurerm_storage_account.builds_reports_jenkins_io.id
+  # Allow writing
+  role_definition_name = "Storage File Data Privileged Contributor"
+  principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents.principal_id
 }
 
 # Azure SP for updatecli with minimum rights
