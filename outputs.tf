@@ -18,7 +18,7 @@ resource "local_file" "jenkins_infra_data_report" {
       },
     },
     "infra.ci.jenkins.io" = {
-      "controller_namespace"       = kubernetes_namespace.privatek8s_sponsorship_jenkins_infra_controller.metadata[0].name,
+      "controller_namespace"       = kubernetes_namespace.privatek8s_sponsorship["jenkins-infra"].metadata[0].name,
       "controller_service_account" = kubernetes_service_account.privatek8s_sponsorship_jenkins_infra_controller.metadata[0].name,
       "agents_azure_vms" = {
         "resource_group_name"         = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_resource_group_name,
@@ -40,6 +40,9 @@ resource "local_file" "jenkins_infra_data_report" {
           "agents_service_account" = kubernetes_service_account.infracijenkinsio_agents_2_infra_ci_jenkins_io_agents.metadata[0].name,
         },
       },
+    },
+    "release.ci.jenkins.io" = {
+      "controller_namespace" = kubernetes_namespace.privatek8s_sponsorship["jenkins-release"].metadata[0].name,
     },
     "trusted.ci.jenkins.io" = {
       "agents_azure_vms" = {
