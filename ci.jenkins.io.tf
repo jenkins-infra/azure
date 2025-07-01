@@ -194,6 +194,22 @@ resource "azurerm_network_security_rule" "allow_out_https_from_cijio_agents_to_a
   network_security_group_name = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_nsg_name
 }
 
+## Allow access to aws.ci.jenkins.io for migration (ref. https://github.com/jenkins-infra/helpdesk/issues/4688)
+resource "azurerm_network_security_rule" "allow_out_ssh_from_controller_to_awscijio" {
+  provider                = azurerm.jenkins-sponsorship
+  name                    = "allow-out-ssh-from-controller-to-awscijio"
+  priority                = 4051
+  direction               = "Outbound"
+  access                  = "Allow"
+  protocol                = "Tcp"
+  source_port_range       = "*"
+  destination_port_range  = "22"
+  source_address_prefixes = [module.ci_jenkins_io_sponsorship.controller_private_ipv4]
+  destination_address_prefixes = ["18.217.202.59/32"]
+  resource_group_name          = module.ci_jenkins_io_sponsorship.controller_resourcegroup_name
+  network_security_group_name  = module.ci_jenkins_io_sponsorship.controller_nsg_name
+}
+
 ## Allow access to/from Artifact Caching Proxy (internal LB)
 resource "azurerm_network_security_rule" "allow_out_http_from_cijio_agents_to_acp" {
   provider                     = azurerm.jenkins-sponsorship
