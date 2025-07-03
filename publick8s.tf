@@ -349,7 +349,7 @@ module "cronjob_geoip_data_fileshare_serviceprincipal_writer" {
   service_fqdn               = "${azurerm_resource_group.publick8s.name}-fileshare_serviceprincipal_writer-redirects"
   active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url       = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date = "2025-07-06T00:00:00Z"
+  service_principal_end_date = "2025-10-01T00:00:00Z"
   file_share_id              = azurerm_storage_share.geoip_data.id
   storage_account_id         = azurerm_storage_account.publick8s.id
   default_tags               = local.default_tags
