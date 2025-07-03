@@ -76,21 +76,21 @@ module "ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
 }
 
 ## Service DNS records
-resource "azurerm_dns_cname_record" "ci_jenkins_io" {
-  name                = trimsuffix(trimsuffix(local.ci_jenkins_io_fqdn, data.azurerm_dns_zone.jenkinsio.name), ".")
-  zone_name           = data.azurerm_dns_zone.jenkinsio.name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 60
-  record              = "azure.ci.jenkins.io"
-  tags                = local.default_tags
+
+# Moved to azure-net
+removed {
+  from = azurerm_dns_cname_record.ci_jenkins_io
+
+  lifecycle {
+    destroy = false
+  }
 }
-resource "azurerm_dns_cname_record" "assets_ci_jenkins_io" {
-  name                = "assets.${azurerm_dns_cname_record.ci_jenkins_io.name}"
-  zone_name           = data.azurerm_dns_zone.jenkinsio.name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 60
-  record              = "assets.azure.ci.jenkins.io"
-  tags                = local.default_tags
+removed {
+  from = azurerm_dns_cname_record.assets_ci_jenkins_io
+
+  lifecycle {
+    destroy = false
+  }
 }
 resource "azurerm_dns_a_record" "azure_ci_jenkins_io" {
   name                = "azure.ci"
