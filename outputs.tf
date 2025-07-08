@@ -1,8 +1,5 @@
 resource "local_file" "jenkins_infra_data_report" {
   content = jsonencode({
-    "artifact-caching-proxy.privatelink.azurecr.io" = {
-      "service_ip" = tolist(azurerm_private_dns_a_record.artifact_caching_proxy.records)[0],
-    },
     "public_redis" = {
       "service_hostname" = azurerm_redis_cache.public_redis.hostname,
       "service_port"     = azurerm_redis_cache.public_redis.port,
@@ -111,19 +108,6 @@ resource "local_file" "jenkins_infra_data_report" {
         "ipv4" = azurerm_dns_a_record.privatek8s_sponsorship_private.records,
       }
     },
-    "azure.ci.jenkins.io" = {
-      "service_ips" = {
-        "ipv4" = module.ci_jenkins_io_sponsorship.controller_public_ipv4,
-        "ipv6" = module.ci_jenkins_io_sponsorship.controller_public_ipv6,
-      },
-      "agents_azure_vms" = {
-        "resource_group_name"         = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_resource_group_name,
-        "network_resource_group_name" = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_network_rg_name,
-        "virtual_network_name"        = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_network_name,
-        "sub_network_name"            = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_subnet_name,
-        "storage_account_name"        = module.ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_storage_account_name,
-      },
-    }
   })
   filename = "${path.module}/jenkins-infra-data-reports/azure.json"
 }
