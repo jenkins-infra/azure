@@ -36,9 +36,10 @@ resource "azurerm_role_assignment" "release_ci_jenkins_io_controller_sponsorship
 }
 
 resource "azurerm_user_assigned_identity" "release_ci_jenkins_io_agents" {
+  provider            = azurerm.jenkins-sponsorship
   location            = var.location
   name                = "release-ci-jenkins-io-agents"
-  resource_group_name = azurerm_resource_group.release_ci_jenkins_io_controller_jenkins_sponsorship.name
+  resource_group_name = azurerm_kubernetes_cluster.privatek8s_sponsorship.resource_group_name
 }
 resource "azurerm_role_assignment" "release_ci_jenkins_io_azurevm_agents_write_buildsreports_share" {
   scope = azurerm_storage_account.builds_reports_jenkins_io.id

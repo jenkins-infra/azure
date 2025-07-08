@@ -517,7 +517,7 @@ resource "kubernetes_service_account" "privatek8s_sponsorship_jenkins_infra_cont
 resource "azurerm_federated_identity_credential" "privatek8s_sponsorship_jenkins_infra_controller" {
   provider            = azurerm.jenkins-sponsorship
   name                = "privatek8s-sponsorship-${kubernetes_service_account.privatek8s_sponsorship_jenkins_infra_controller.metadata[0].name}"
-  resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
+  resource_group_name = azurerm_kubernetes_cluster.privatek8s_sponsorship.resource_group_name
   audience            = ["api://AzureADTokenExchange"]
   issuer              = azurerm_kubernetes_cluster.privatek8s_sponsorship.oidc_issuer_url
   parent_id           = azurerm_user_assigned_identity.infra_ci_jenkins_io.id
