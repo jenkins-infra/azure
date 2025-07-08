@@ -15,10 +15,6 @@ data "azurerm_resource_group" "private_sponsorship" {
   provider = azurerm.jenkins-sponsorship
   name     = "private-sponsorship"
 }
-data "azurerm_resource_group" "public_jenkins_sponsorship" {
-  provider = azurerm.jenkins-sponsorship
-  name     = "public-jenkins-sponsorship"
-}
 data "azurerm_resource_group" "infra_ci_jenkins_io" {
   name = "infra-ci-jenkins-io"
 }
@@ -57,11 +53,6 @@ data "azurerm_virtual_network" "private_sponsorship" {
   provider            = azurerm.jenkins-sponsorship
   name                = "${data.azurerm_resource_group.private_sponsorship.name}-vnet"
   resource_group_name = data.azurerm_resource_group.private_sponsorship.name
-}
-data "azurerm_virtual_network" "public_jenkins_sponsorship" {
-  provider            = azurerm.jenkins-sponsorship
-  name                = "${data.azurerm_resource_group.public_jenkins_sponsorship.name}-vnet"
-  resource_group_name = data.azurerm_resource_group.public_jenkins_sponsorship.name
 }
 # Reference to the PostgreSQL/MySql dedicated network external resources
 data "azurerm_virtual_network" "public_db" {
