@@ -159,24 +159,6 @@ data "azurerm_subnet" "infra_ci_jenkins_io_sponsorship_packer_builds" {
   virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name
   resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.resource_group_name
 }
-data "azurerm_subnet" "ci_jenkins_io_controller_sponsorship" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "${data.azurerm_virtual_network.public_jenkins_sponsorship.name}-ci_jenkins_io_controller"
-  virtual_network_name = data.azurerm_virtual_network.public_jenkins_sponsorship.name
-  resource_group_name  = data.azurerm_virtual_network.public_jenkins_sponsorship.resource_group_name
-}
-data "azurerm_subnet" "ci_jenkins_io_ephemeral_agents_jenkins_sponsorship" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "${data.azurerm_virtual_network.public_jenkins_sponsorship.name}-ci_jenkins_io_agents"
-  virtual_network_name = data.azurerm_virtual_network.public_jenkins_sponsorship.name
-  resource_group_name  = data.azurerm_virtual_network.public_jenkins_sponsorship.resource_group_name
-}
-data "azurerm_subnet" "ci_jenkins_io_kubernetes_sponsorship" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "${data.azurerm_virtual_network.public_jenkins_sponsorship.name}-ci_jenkins_io_kubernetes"
-  resource_group_name  = data.azurerm_resource_group.public_jenkins_sponsorship.name
-  virtual_network_name = data.azurerm_virtual_network.public_jenkins_sponsorship.name
-}
 data "azurerm_subnet" "privatek8s_sponsorship_tier" {
   provider             = azurerm.jenkins-sponsorship
   name                 = "privatek8s-sponsorship-tier"

@@ -65,21 +65,6 @@ locals {
       kubernetes_version = "1.31.6",
       compute_zones      = [3],
     },
-    "cijenkinsio_agents_1" = {
-      name               = "cijenkinsio-agents-1",
-      kubernetes_version = "1.31.6",
-      # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
-      pod_cidr      = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
-      compute_zones = [1],
-      agent_namespaces = {
-        "jenkins-agents" = {
-          pods_quota = 150,
-        },
-        "jenkins-agents-bom" = {
-          pods_quota = 150,
-        },
-      },
-    },
     "compute_zones" = {
       system_pool = [1, 2], # Note: Zone 3 is not allowed for system pool.
       arm64_pool  = [2, 3],
@@ -89,9 +74,6 @@ locals {
 
   # These cluster_hostname cannot be on the 'local.aks_cluster' to avoid cyclic dependencies (when expanding the map)
   aks_clusters_outputs = {
-    "cijenkinsio_agents_1" = {
-      cluster_hostname = "https://${azurerm_kubernetes_cluster.cijenkinsio_agents_1.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
-    },
     "infracijenkinsio_agents_2" = {
       cluster_hostname = "https://${azurerm_kubernetes_cluster.infracijenkinsio_agents_2.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
     },
@@ -100,20 +82,9 @@ locals {
     },
   }
 
-  ci_jenkins_io_fqdn = "ci.jenkins.io"
-
   end_dates = yamldecode(data.local_file.locals_yaml.content).end_dates
 
   app_subnets = {
-    "ci.jenkins.io" = {
-      "controller" = [data.azurerm_subnet.ci_jenkins_io_controller_sponsorship.id],
-      "agents" = [
-        # VM agents (sponsored subscription)
-        data.azurerm_subnet.ci_jenkins_io_ephemeral_agents_jenkins_sponsorship.id,
-        # Container agents (sponsored subscription)
-        data.azurerm_subnet.ci_jenkins_io_kubernetes_sponsorship.id,
-      ],
-    },
     "release.ci.jenkins.io" = {
       "controller" = [data.azurerm_subnet.privatek8s_sponsorship_release_ci_controller_tier.id],
       "agents" = [
