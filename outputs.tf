@@ -40,6 +40,11 @@ resource "local_file" "jenkins_infra_data_report" {
     },
     "release.ci.jenkins.io" = {
       "controller_namespace" = kubernetes_namespace.privatek8s_sponsorship["jenkins-release"].metadata[0].name,
+      "agents_kubernetes_clusters" = {
+        "privatek8s_sponsorship" = {
+          "agents_service_account" = kubernetes_service_account.privatek8s_sponsorship_jenkins_release_agents.metadata[0].name,
+        }
+      }
     },
     "trusted.ci.jenkins.io" = {
       "agents_azure_vms" = {
