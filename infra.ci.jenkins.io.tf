@@ -448,9 +448,6 @@ resource "azurerm_key_vault" "infra_ci_jenkins_io_vault" {
   network_acls {
     bypass         = "AzureServices"
     default_action = "Deny"
-    ip_rules = [
-      "82.64.5.129/32",
-    ]
     virtual_network_subnet_ids = local.app_subnets["infra.ci.jenkins.io"].agents
   }
 
