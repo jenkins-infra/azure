@@ -446,8 +446,8 @@ resource "azurerm_key_vault" "infra_ci_jenkins_io_vault" {
   public_network_access_enabled = true
   # Adding a network rule with `public_network_access_enabled` set to `true` (default) selects the option "Enabled from selected virtual networks and IP addresses"
   network_acls {
-    bypass         = "AzureServices"
-    default_action = "Deny"
+    bypass                     = "AzureServices"
+    default_action             = "Deny"
     virtual_network_subnet_ids = local.app_subnets["infra.ci.jenkins.io"].agents
   }
 
