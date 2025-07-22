@@ -50,7 +50,6 @@ module "trusted_ci_jenkins_io" {
 module "trusted_ci_jenkins_io_azurevm_agents" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-azurevm-agents"
 
-  custom_resourcegroup_name        = "jenkinsinfra-trusted-ephemeral-agents"
   service_fqdn                     = module.trusted_ci_jenkins_io.service_fqdn
   service_short_stripped_name      = module.trusted_ci_jenkins_io.service_short_stripped_name
   ephemeral_agents_network_rg_name = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.resource_group_name
