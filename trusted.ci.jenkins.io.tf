@@ -535,33 +535,8 @@ module "trusted_ci_to_publick8s" {
 
   dns_a_record = "updates.jenkins.io-data"
 }
-module "trusted_ci_ephemeral_ephemeral_agents_to_publick8s" {
-  source = "./modules/private-resources"
-
-  providers = {
-    azurerm.pls       = azurerm
-    azurerm.resources = azurerm
-  }
-
-  name         = "trusted-ci-ephemeral-agents-to-publick8s"
-  location     = var.location
-  default_tags = local.default_tags
-  dns_rg_name  = data.azurerm_virtual_network.trusted_ci_jenkins_io.resource_group_name
-  fqdn         = module.trusted_ci_jenkins_io_letsencrypt.zone_name
-  vnet_id      = data.azurerm_virtual_network.trusted_ci_jenkins_io.id
-  subnet_id    = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.id
-  rg_name      = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.resource_group_name
-
-  # TODO: track with updatecli
-  # https://github.com/jenkins-infra/kubernetes-management/blob/8b026b6e13ab726ce8064e842479839b371daf13/config/updates.jenkins.io-rsyncd-data.yaml#L40-L41
-  pls_name    = "updates.jenkins.io-data"
-  pls_rg_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
-
-  dns_a_record = "updates.jenkins.io-data"
-}
 
 ## updates.jenkins.io's mirrorbits CLI Kubernetes Service (internal LB)
-## TODO: use updates_jenkins_io_data instead
 data "azurerm_private_link_service" "updates_jenkins_io_cli" {
   # https://github.com/jenkins-infra/kubernetes-management/blob/67e5741bf926c72c143604301132cbe6ada0bab8/config/updates.jenkins.io.yaml#L126
   name                = "updates.jenkins.io-cli"
