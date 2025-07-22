@@ -305,7 +305,7 @@ resource "azurerm_network_security_rule" "allow_out_from_trusted_ephemeral_agent
   ]
   source_address_prefixes     = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes
   destination_address_prefix  = module.trustedci_ephemeral_agents_private_resources.endpoint_ip
-  resource_group_name         = data.azurerm_resource_group.trusted_ci_jenkins_io.name
+  resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_out_many_from_trusted_agents_to_pkg" {
@@ -320,7 +320,7 @@ resource "azurerm_network_security_rule" "allow_out_many_from_trusted_agents_to_
   ]
   source_address_prefixes     = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes
   destination_address_prefix  = local.external_services["pkg.origin.jenkins.io"]
-  resource_group_name         = data.azurerm_resource_group.trusted_ci_jenkins_io.name
+  resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_out_many_from_trusted_agents_to_archive" {
@@ -335,7 +335,7 @@ resource "azurerm_network_security_rule" "allow_out_many_from_trusted_agents_to_
   ]
   source_address_prefixes     = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes
   destination_address_prefix  = local.external_services["archives.jenkins.io"]
-  resource_group_name         = data.azurerm_resource_group.trusted_ci_jenkins_io.name
+  resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 # Ignore the rule as it does not detect the IP restriction to only update.jenkins.io"s host
