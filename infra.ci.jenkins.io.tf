@@ -181,16 +181,16 @@ module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
 
 # Allow infra.ci VM agents to reach packer VMs with SSH on azure
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_to_packer_vms" {
-  provider                    = azurerm.jenkins-sponsorship
-  name                        = "allow-outbound-ssh-from-infraci-agents-to-packer-vms"
-  priority                    = 4080
-  direction                   = "Outbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "22"
-  source_address_prefix       = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.address_prefix
-  destination_address_prefixes  = [
+  provider               = azurerm.jenkins-sponsorship
+  name                   = "allow-outbound-ssh-from-infraci-agents-to-packer-vms"
+  priority               = 4080
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "22"
+  source_address_prefix  = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.address_prefix
+  destination_address_prefixes = [
     data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_packer_builds.address_prefix,
     data.azurerm_subnet.infra_ci_jenkins_io_packer_builds.address_prefix
   ]
