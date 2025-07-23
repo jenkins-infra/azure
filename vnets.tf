@@ -32,10 +32,6 @@ data "azurerm_resource_group" "cert_ci_jenkins_io_sponsorship" {
 data "azurerm_resource_group" "trusted_ci_jenkins_io" {
   name = "trusted-ci-jenkins-io"
 }
-data "azurerm_resource_group" "trusted_ci_jenkins_io_sponsorship" {
-  provider = azurerm.jenkins-sponsorship
-  name     = "trusted-ci-jenkins-io-sponsorship"
-}
 
 ################################################################################
 ## Virtual Networks
@@ -80,11 +76,6 @@ data "azurerm_virtual_network" "cert_ci_jenkins_io_sponsorship" {
 data "azurerm_virtual_network" "trusted_ci_jenkins_io" {
   name                = "trusted-ci-jenkins-io-vnet"
   resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
-}
-data "azurerm_virtual_network" "trusted_ci_jenkins_io_sponsorship" {
-  provider            = azurerm.jenkins-sponsorship
-  name                = "${data.azurerm_resource_group.trusted_ci_jenkins_io_sponsorship.name}-vnet"
-  resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io_sponsorship.name
 }
 
 ################################################################################
@@ -137,12 +128,6 @@ data "azurerm_subnet" "trusted_ci_jenkins_io_ephemeral_agents" {
   name                 = "${data.azurerm_virtual_network.trusted_ci_jenkins_io.name}-ephemeral-agents"
   resource_group_name  = data.azurerm_resource_group.trusted_ci_jenkins_io.name
   virtual_network_name = data.azurerm_virtual_network.trusted_ci_jenkins_io.name
-}
-data "azurerm_subnet" "trusted_ci_jenkins_io_sponsorship_ephemeral_agents" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "${data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsorship.name}-ephemeral-agents"
-  virtual_network_name = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsorship.name
-  resource_group_name  = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsorship.resource_group_name
 }
 data "azurerm_subnet" "infra_ci_jenkins_io_sponsorship_packer_builds" {
   provider             = azurerm.jenkins-sponsorship
