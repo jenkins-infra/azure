@@ -129,11 +129,10 @@ data "azurerm_subnet" "trusted_ci_jenkins_io_ephemeral_agents" {
   resource_group_name  = data.azurerm_resource_group.trusted_ci_jenkins_io.name
   virtual_network_name = data.azurerm_virtual_network.trusted_ci_jenkins_io.name
 }
-data "azurerm_subnet" "infra_ci_jenkins_io_sponsorship_packer_builds" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name}-packer-builds"
-  virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name
-  resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.resource_group_name
+data "azurerm_subnet" "infra_ci_jenkins_io_packer_builds" {
+  name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io.name}-packer-builds"
+  virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io.name
+  resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io.resource_group_name
 }
 data "azurerm_subnet" "privatek8s_sponsorship_tier" {
   provider             = azurerm.jenkins-sponsorship
@@ -158,4 +157,14 @@ data "azurerm_subnet" "privatek8s_sponsorship_release_ci_controller_tier" {
   name                 = "privatek8s-sponsorship-releaseci-ctrl-tier"
   resource_group_name  = data.azurerm_resource_group.private_sponsorship.name
   virtual_network_name = data.azurerm_virtual_network.private_sponsorship.name
+}
+
+###################################################
+## Resources migrated to CDF account
+###################################################
+data "azurerm_subnet" "infra_ci_jenkins_io_sponsorship_packer_builds" {
+  provider             = azurerm.jenkins-sponsorship
+  name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name}-packer-builds"
+  virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name
+  resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.resource_group_name
 }
