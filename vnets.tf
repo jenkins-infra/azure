@@ -159,9 +159,8 @@ data "azurerm_subnet" "privatek8s_sponsorship_release_ci_controller_tier" {
   virtual_network_name = data.azurerm_virtual_network.private_sponsorship.name
 }
 
-###################################################
-## Resources migrated to CDF account
-###################################################
+## Resources to be deleted as part of https://github.com/jenkins-infra/helpdesk/issues/4701,
+## when workload is migrated to CDF subscription
 data "azurerm_subnet" "infra_ci_jenkins_io_sponsorship_packer_builds" {
   provider             = azurerm.jenkins-sponsorship
   name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name}-packer-builds"

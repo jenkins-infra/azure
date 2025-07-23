@@ -129,10 +129,8 @@ resource "azurerm_role_assignment" "packer_role_manage_subnet_cdf" {
 }
 
 
-
-###################################################
-## Resources migrated to CDF account
-###################################################
+## Resources to be deleted as part of https://github.com/jenkins-infra/helpdesk/issues/4701,
+## when workload is migrated to CDF subscription
 
 resource "azurerm_resource_group" "packer_images" {
   provider = azurerm.jenkins-sponsorship

@@ -498,9 +498,8 @@ resource "azurerm_key_vault" "infra_ci_jenkins_io_vault" {
 }
 
 
-###################################################
-## Resources migrated to CDF account
-###################################################
+## Resources to be deleted as part of https://github.com/jenkins-infra/helpdesk/issues/4701,
+## when workload is migrated to CDF subscription
 
 # Allow infra.ci VM agents to reach packer VMs with SSH on azure
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_to_packer_vms" {
