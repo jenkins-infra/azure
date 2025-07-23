@@ -55,7 +55,7 @@ resource "azurerm_shared_image_gallery" "packer_images_cdf" {
   for_each = local.shared_galleries
 
   name                = "${each.key}_packer_images"
-  resource_group_name = azurerm_resource_group.packer_images[each.key].name
+  resource_group_name = azurerm_resource_group.packer_images_cdf[each.key].name
   location            = data.azurerm_virtual_network.infra_ci_jenkins_io.location # Location of the packer subnet in infra.ci
   description         = each.value.description
 
@@ -78,8 +78,8 @@ resource "azurerm_shared_image" "jenkins_agent_images_cdf" {
   )
 
   name                = format("jenkins-agent-%s", split("_", each.value)[1])
-  gallery_name        = azurerm_shared_image_gallery.packer_images[split("_", each.value)[0]].name
-  resource_group_name = azurerm_resource_group.packer_images[split("_", each.value)[0]].name
+  gallery_name        = azurerm_shared_image_gallery.packer_images_cdf[split("_", each.value)[0]].name
+  resource_group_name = azurerm_resource_group.packer_images_cdf[split("_", each.value)[0]].name
   location            = data.azurerm_virtual_network.infra_ci_jenkins_io.location # Location of the packer subnet in infra.ci
 
   architecture = length(regexall(".+arm64", split("_", each.value)[1])) > 0 ? "Arm64" : "x64"
@@ -108,7 +108,7 @@ resource "azurerm_shared_image" "jenkins_agent_images_cdf" {
 
 # Allow packer Service Principal to manage AzureRM resources inside the packer resource groups
 resource "azurerm_role_assignment" "packer_role_images_assignement_cdf" {
-  for_each = azurerm_resource_group.packer_images
+  for_each = azurerm_resource_group.packer_images_cdf
 
   scope                = each.value.id
   role_definition_name = "Contributor"
@@ -116,7 +116,7 @@ resource "azurerm_role_assignment" "packer_role_images_assignement_cdf" {
 }
 # Allow packer Service Principal to manage AzureRM resources inside the packer resource groups
 resource "azurerm_role_assignment" "packer_role_builds_assignement_cdf" {
-  for_each = azurerm_resource_group.packer_builds
+  for_each = azurerm_resource_group.packer_builds_cdf
 
   scope                = each.value.id
   role_definition_name = "Contributor"
