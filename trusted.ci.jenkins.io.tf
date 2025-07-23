@@ -290,8 +290,8 @@ resource "azurerm_subnet_network_security_group_association" "trusted_ci_permane
 }
 
 ## Outbound Rules (different set of priorities than Inbound rules) ##
-resource "azurerm_network_security_rule" "allow_out_from_trusted_ephemeral_agents_to_uc" {
-  name              = "allow-out-from-ephemeral-agents-to-uc"
+resource "azurerm_network_security_rule" "allow_out_from_trusted_all_to_uc" {
+  name              = "allow-out-from-trusted-all-to-uc"
   priority          = 4050
   direction         = "Outbound"
   access            = "Allow"
@@ -302,8 +302,13 @@ resource "azurerm_network_security_rule" "allow_out_from_trusted_ephemeral_agent
     "3390", # mirrorbits CLI (content-secured)
     "3391", # mirrorbits CLI (content-unsecured)
   ]
-  source_address_prefixes     = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes
-  destination_address_prefix  = module.trustedci_ephemeral_agents_private_resources.endpoint_ip
+  source_address_prefixes = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes
+  destination_address_prefixes = [
+    # UC-data (rsync)
+    module.trusted_ci_to_publick8s.endpoint_ip,
+    # UC-cli (mirrorbits CLI)
+    azurerm_private_endpoint.updates_jio_mirrorbits_cli_for_trustedci.private_service_connection[0].private_ip_address
+  ]
   resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
@@ -393,8 +398,8 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_bounce_to_ephe
 }
 
 ## Inbound Rules (different set of priorities than Outbound rules) ##
-resource "azurerm_network_security_rule" "allow_in_many_from_trusted_agents_to_pe" {
-  name              = "allow-in-many-from-trusted-agents-to-pe"
+resource "azurerm_network_security_rule" "allow_in_many_from_trusted_agents_to_uc" {
+  name              = "allow-in-many-from-trusted-agents-to-uc"
   priority          = 4050
   direction         = "Inbound"
   access            = "Allow"
@@ -405,10 +410,15 @@ resource "azurerm_network_security_rule" "allow_in_many_from_trusted_agents_to_p
     "3390", # mirrorbits CLI (content-secured)
     "3391", # mirrorbits CLI (content-unsecured)
   ]
-  source_address_prefix       = azurerm_linux_virtual_machine.trusted_bounce.private_ip_address
-  destination_address_prefix  = module.trustedci_ephemeral_agents_private_resources.endpoint_ip
-  resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
-  network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
+  source_address_prefixes = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes
+  destination_address_prefixes = [
+    # UC-data (rsync)
+    module.trusted_ci_to_publick8s.endpoint_ip,
+    # UC-cli (mirrorbits CLI)
+    azurerm_private_endpoint.updates_jio_mirrorbits_cli_for_trustedci.private_service_connection[0].private_ip_address
+  ]
+  resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+  network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_bounce_to_controller" {
   name                        = "allow-inbound-ssh-from-bounce-to-controller"
