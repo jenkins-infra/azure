@@ -11,7 +11,7 @@ resource "local_file" "jenkins_infra_data_report" {
         "virtual_network_name"        = module.cert_ci_jenkins_io_azurevm_agents.ephemeral_agents_network_name,
         "sub_network_name"            = module.cert_ci_jenkins_io_azurevm_agents.ephemeral_agents_subnet_name,
         "storage_account_name"        = module.cert_ci_jenkins_io_azurevm_agents.ephemeral_agents_storage_account_name,
-        "user_assigned_identity"      = azurerm_user_assigned_identity.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.id,
+        "user_assigned_identity"      = azurerm_user_assigned_identity.cert_ci_jenkins_io_jenkins_agents.id,
       },
     },
     "infra.ci.jenkins.io" = {
