@@ -113,8 +113,6 @@ locals {
     "cert.ci.jenkins.io" = {
       "controller" = [data.azurerm_subnet.cert_ci_jenkins_io_controller.id],
       "agents" = [
-        # VM agents (sponsored subscription)
-        data.azurerm_subnet.cert_ci_jenkins_io_sponsorship_ephemeral_agents.id,
         # VM agents (CDF subscription)
         data.azurerm_subnet.cert_ci_jenkins_io_ephemeral_agents.id,
       ],
