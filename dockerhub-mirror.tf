@@ -27,11 +27,11 @@ locals {
     #   "vnet_id"   = data.azurerm_virtual_network.cert_ci_jenkins_io.id
     #   "rg_name"   = data.azurerm_virtual_network.cert_ci_jenkins_io.resource_group_name
     # },
-    "infracijenkinsio" = {
-      "subnet_id" = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.id,
-      "vnet_id"   = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.id
-      "rg_name"   = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.resource_group_name
-    },
+    # "infracijenkinsio" = {
+    #   "subnet_id" = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.id,
+    #   "vnet_id"   = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.id
+    #   "rg_name"   = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.resource_group_name
+    # },
   }
 }
 
