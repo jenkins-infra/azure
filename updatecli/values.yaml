@@ -6,7 +6,7 @@ github:
   owner: "jenkins-infra"
   repository: "azure"
 controllers_azurevm_client_end_dates:
-  infra.ci.jenkins.io:
+  infra.ci.jenkins.io-agents-sponsored:
     custom_hcl_key: resource.azuread_application_password.infra_ci_jenkins_io.end_date
     doc_how_to_get_credential: |
       > [!IMPORTANT]
