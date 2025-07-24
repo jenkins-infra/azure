@@ -501,7 +501,7 @@ resource "kubernetes_persistent_volume_claim" "jenkins_release_data_sponsorship"
 
 ### Workload Identity Resources
 
-## For infra.ci.jenkins.io controller
+## For infra.ci.jenkins.io controllerinfracijenkinsio_agents_2_infra_ci_jenkins_io_agents
 resource "kubernetes_service_account" "privatek8s_sponsorship_jenkins_infra_controller" {
   provider = kubernetes.privatek8s_sponsorship
 
@@ -510,7 +510,7 @@ resource "kubernetes_service_account" "privatek8s_sponsorship_jenkins_infra_cont
     namespace = kubernetes_namespace.privatek8s_sponsorship["jenkins-infra"].metadata[0].name
 
     annotations = {
-      "azure.workload.identity/client-id" = azurerm_user_assigned_identity.infra_ci_jenkins_io.client_id,
+      "azure.workload.identity/client-id" = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.client_id,
     }
   }
 }
@@ -520,7 +520,7 @@ resource "azurerm_federated_identity_credential" "privatek8s_sponsorship_jenkins
   resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
   audience            = ["api://AzureADTokenExchange"]
   issuer              = azurerm_kubernetes_cluster.privatek8s_sponsorship.oidc_issuer_url
-  parent_id           = azurerm_user_assigned_identity.infra_ci_jenkins_io.id
+  parent_id           = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.id
   subject             = "system:serviceaccount:${kubernetes_namespace.privatek8s_sponsorship["jenkins-infra"].metadata[0].name}:${kubernetes_service_account.privatek8s_sponsorship_jenkins_infra_controller.metadata[0].name}"
 }
 ## End of infra.ci

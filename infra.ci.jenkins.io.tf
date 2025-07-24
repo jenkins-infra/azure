@@ -76,11 +76,10 @@ module "infra_ci_jenkins_io_azurevm_agents" {
   controller_rg_name               = azurerm_resource_group.infra_ci_jenkins_io_controller.name
   controller_ips                   = data.azurerm_subnet.privatek8s_sponsorship_infra_ci_controller_tier.address_prefixes # Pod IPs: controller IP may change in the pods IP subnet
   controller_service_principal_id  = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id
-  ## TODO: remove once sponsored subscrption agent are cleaned up if credentialless works
+  ## TODO: remove once sponsored subscription agent are cleaned up if credential-less works
   # additional_identities            = [azurerm_user_assigned_identity.infra_ci_jenkins_io.principal_id]
 
-  default_tags         = local.default_tags
-  storage_account_name = "infraciagentssub" # Max 24 chars
+  default_tags = local.default_tags
 
   jenkins_infra_ips = {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
@@ -185,7 +184,7 @@ resource "azurerm_managed_disk" "infra_ci_jenkins_io_data" {
 }
 # Required to allow AKS CSI driver to access the Azure disk
 resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_disk_reader" {
-  name  = "ReadInfraCISponsorshipDisk"
+  name  = "ReadInfraCIDisk"
   scope = azurerm_resource_group.infra_ci_jenkins_io_controller.id
 
   permissions {

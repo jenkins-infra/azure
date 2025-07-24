@@ -18,12 +18,12 @@ resource "local_file" "jenkins_infra_data_report" {
       "controller_namespace"       = kubernetes_namespace.privatek8s_sponsorship["jenkins-infra"].metadata[0].name,
       "controller_service_account" = kubernetes_service_account.privatek8s_sponsorship_jenkins_infra_controller.metadata[0].name,
       "agents_azure_vms" = {
-        "resource_group_name"         = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_resource_group_name,
-        "network_resource_group_name" = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_network_rg_name,
-        "virtual_network_name"        = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_network_name,
-        "sub_network_name"            = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_subnet_name,
-        "storage_account_name"        = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.ephemeral_agents_storage_account_name,
-        "user_assigned_identity"      = azurerm_user_assigned_identity.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship.id,
+        "resource_group_name"         = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_resource_group_name,
+        "network_resource_group_name" = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_network_rg_name,
+        "virtual_network_name"        = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_network_name,
+        "sub_network_name"            = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_subnet_name,
+        "storage_account_name"        = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_storage_account_name,
+        "user_assigned_identity"      = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents.id,
       },
       "agents_kubernetes_clusters" = {
         "infracijenkinsio_agents_2" = {
@@ -141,4 +141,11 @@ output "infraci_docsjenkinsio_fileshare_serviceprincipal_writer_application_clie
 output "infraci_docsjenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
   sensitive = true
   value     = module.infraci_docsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
+}
+output "infraci_statsjenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.infraci_statsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
+}
+output "infraci_statsjenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
+  sensitive = true
+  value     = module.infraci_statsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
