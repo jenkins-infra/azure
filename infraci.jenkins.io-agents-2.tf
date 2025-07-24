@@ -156,11 +156,12 @@ resource "kubernetes_service_account" "infracijenkinsio_agents_2_infra_ci_jenkin
   }
 }
 resource "azurerm_federated_identity_credential" "infracijenkinsio_agents_2_infra_ci_jenkins_io_agents" {
-  name                = "infracijenkinsio-agents-2-${kubernetes_service_account.infracijenkinsio_agents_2_infra_ci_jenkins_io_agents.metadata[0].name}"
-  resource_group_name = azurerm_kubernetes_cluster.infracijenkinsio_agents_2.resource_group_name
-  audience            = ["api://AzureADTokenExchange"]
-  issuer              = azurerm_kubernetes_cluster.infracijenkinsio_agents_2.oidc_issuer_url
-  parent_id           = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents.id
+  name      = "infracijenkinsio-agents-2-${kubernetes_service_account.infracijenkinsio_agents_2_infra_ci_jenkins_io_agents.metadata[0].name}"
+  audience  = ["api://AzureADTokenExchange"]
+  issuer    = azurerm_kubernetes_cluster.infracijenkinsio_agents_2.oidc_issuer_url
+  parent_id = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents.id
+  # RG must be the same for both the UAID and the federated ID
+  resource_group_name = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents.resource_group_name
   subject             = "system:serviceaccount:${kubernetes_namespace.infracijenkinsio_agents_2_infra_ci_jenkins_io_agents.metadata[0].name}:${kubernetes_service_account.infracijenkinsio_agents_2_infra_ci_jenkins_io_agents.metadata[0].name}"
 }
 

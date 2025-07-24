@@ -46,23 +46,11 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_packer" {
   role_definition_name = "Reader"
   principal_id         = azuread_service_principal.infra_ci_jenkins_io.object_id
 }
-resource "azurerm_role_assignment" "infra_ci_jenkins_io_read_packer" {
-  provider             = azurerm.jenkins-sponsorship
-  scope                = azurerm_resource_group.packer_images["prod"].id
-  role_definition_name = "Reader"
-  principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io.principal_id
-}
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_privatek8s_sponsorship_private_vnet_reader" {
   provider           = azurerm.jenkins-sponsorship
   scope              = data.azurerm_virtual_network.private_sponsorship.id
   role_definition_id = azurerm_role_definition.private_sponsorship_vnet_reader.role_definition_resource_id
   principal_id       = azuread_service_principal.infra_ci_jenkins_io.object_id
-}
-resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io" {
-  provider            = azurerm.jenkins-sponsorship
-  location            = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.location
-  name                = "infracijenkinsio"
-  resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
 }
 
 # Required to allow controller to check for subnets inside the sponsorship network
@@ -81,12 +69,6 @@ resource "azurerm_role_assignment" "infra_controller_vnet_reader" {
   role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_vnet_sponsorship_reader.role_definition_resource_id
   principal_id       = azuread_service_principal.infra_ci_jenkins_io.object_id
 }
-resource "azurerm_role_assignment" "infra_ci_jenkins_io_vnet_reader" {
-  provider           = azurerm.jenkins-sponsorship
-  scope              = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.id
-  role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_vnet_sponsorship_reader.role_definition_resource_id
-  principal_id       = azurerm_user_assigned_identity.infra_ci_jenkins_io.principal_id
-}
 
 module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
   providers = {
@@ -102,7 +84,6 @@ module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsorship" {
   controller_rg_name               = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
   controller_ips                   = data.azurerm_subnet.privatek8s_sponsorship_infra_ci_controller_tier.address_prefixes # Pod IPs: controller IP may change in the pods IP subnet
   controller_service_principal_id  = azuread_service_principal.infra_ci_jenkins_io.object_id
-  additional_identities            = [azurerm_user_assigned_identity.infra_ci_jenkins_io.principal_id]
 
   default_tags         = local.default_tags
   storage_account_name = "infraciagentssub" # Max 24 chars
