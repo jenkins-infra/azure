@@ -36,7 +36,6 @@ module "trusted_ci_jenkins_io" {
     "b847a030-25e1-4791-ad04-9e8484d87bce",
   ]
   controller_packer_rg_ids = [
-    azurerm_resource_group.packer_images["prod"].id,
     azurerm_resource_group.packer_images_cdf["prod"].id,
   ]
 

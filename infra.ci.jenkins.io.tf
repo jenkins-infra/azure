@@ -392,3 +392,35 @@ resource "azurerm_key_vault" "infra_ci_jenkins_io_vault" {
     ]
   }
 }
+
+#### TODO: resources to remove once privatek8s is migrated to CDF subscription
+resource "azurerm_resource_group" "infra_ci_jenkins_io_controller_jenkins_sponsorship" {
+  provider = azurerm.jenkins-sponsorship
+  name     = "infra-ci-jenkins-io-controller"
+  location = var.location
+  tags     = local.default_tags
+}
+resource "azurerm_managed_disk" "jenkins_infra_data_sponsorship" {
+  provider             = azurerm.jenkins-sponsorship
+  name                 = "jenkins-infra-data"
+  location             = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.location
+  resource_group_name  = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
+  storage_account_type = "StandardSSD_ZRS"
+  create_option        = "Empty"
+  disk_size_gb         = 64
+  tags                 = local.default_tags
+}
+# Required to allow AKS CSI driver to access the Azure disk
+resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_sponsorship_disk_reader" {
+  provider = azurerm.jenkins-sponsorship
+  name     = "ReadInfraCISponsorshipDisk"
+  scope    = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.id
+
+  permissions {
+    actions = [
+      "Microsoft.Compute/disks/read",
+      "Microsoft.Compute/disks/write",
+    ]
+  }
+}
+####

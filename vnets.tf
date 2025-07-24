@@ -18,10 +18,6 @@ data "azurerm_resource_group" "private_sponsorship" {
 data "azurerm_resource_group" "infra_ci_jenkins_io" {
   name = "infra-ci-jenkins-io"
 }
-data "azurerm_resource_group" "infra_ci_jenkins_io_sponsorship" {
-  provider = azurerm.jenkins-sponsorship
-  name     = "infra-ci-jenkins-io-sponsorship"
-}
 data "azurerm_resource_group" "cert_ci_jenkins_io" {
   name = "cert-ci-jenkins-io"
 }
@@ -54,11 +50,6 @@ data "azurerm_virtual_network" "public_db" {
 data "azurerm_virtual_network" "infra_ci_jenkins_io" {
   name                = "${data.azurerm_resource_group.infra_ci_jenkins_io.name}-vnet"
   resource_group_name = data.azurerm_resource_group.infra_ci_jenkins_io.name
-}
-data "azurerm_virtual_network" "infra_ci_jenkins_io_sponsorship" {
-  provider            = azurerm.jenkins-sponsorship
-  name                = "${data.azurerm_resource_group.infra_ci_jenkins_io_sponsorship.name}-vnet"
-  resource_group_name = data.azurerm_resource_group.infra_ci_jenkins_io_sponsorship.name
 }
 data "azurerm_virtual_network" "cert_ci_jenkins_io" {
   name                = "${data.azurerm_resource_group.cert_ci_jenkins_io.name}-vnet"
@@ -142,23 +133,3 @@ data "azurerm_subnet" "privatek8s_sponsorship_release_ci_controller_tier" {
   resource_group_name  = data.azurerm_resource_group.private_sponsorship.name
   virtual_network_name = data.azurerm_virtual_network.private_sponsorship.name
 }
-
-#### Resources to be deleted as part of https://github.com/jenkins-infra/helpdesk/issues/4701,
-## when workload is migrated to CDF subscription
-data "azurerm_subnet" "infra_ci_jenkins_io_sponsorship_packer_builds" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name}-packer-builds"
-  virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name
-  resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.resource_group_name
-}
-####
-
-#### Resources to be deleted as part of https://github.com/jenkins-infra/helpdesk/issues/4692,
-## when workload is migrated to CDF subscription
-data "azurerm_subnet" "infra_ci_jenkins_io_sponsorship_ephemeral_agents" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name}-ephemeral-agents"
-  virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.name
-  resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsorship.resource_group_name
-}
-####
