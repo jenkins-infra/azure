@@ -119,3 +119,26 @@ resource "local_file" "jenkins_infra_data_report" {
 output "jenkins_infra_data_report" {
   value = local_file.jenkins_infra_data_report.content
 }
+
+# infra.ci Azure storage credentials
+output "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
+}
+output "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
+  sensitive = true
+  value     = module.infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
+}
+output "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
+}
+output "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
+  sensitive = true
+  value     = module.infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
+}
+output "infraci_docsjenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.infraci_docsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
+}
+output "infraci_docsjenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
+  sensitive = true
+  value     = module.infraci_docsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
+}

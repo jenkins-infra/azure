@@ -118,4 +118,8 @@ locals {
       ],
     },
   }
+
+  infra_ci_jenkins_io_fqdn                        = "infra.ci.jenkins.io"
+  infra_ci_jenkins_io_service_short_name          = trimprefix(trimprefix(local.infra_ci_jenkins_io_fqdn, "jenkins.io"), ".")
+  infra_ci_jenkins_io_service_short_stripped_name = replace(local.infra_ci_jenkins_io_service_short_name, ".", "-")
 }
