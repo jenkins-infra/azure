@@ -28,7 +28,8 @@ module "cert_ci_jenkins_io" {
     data.azuread_service_principal.terraform_production.object_id,
   ]
   controller_packer_rg_ids = [
-    azurerm_resource_group.packer_images["prod"].id
+    azurerm_resource_group.packer_images["prod"].id,
+    azurerm_resource_group.packer_images_cdf["prod"].id,
   ]
 
   agent_ip_prefixes = concat(
