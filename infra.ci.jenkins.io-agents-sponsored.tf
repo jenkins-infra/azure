@@ -41,11 +41,6 @@ resource "azuread_application_password" "infra_ci_jenkins_io" {
   display_name   = "infra.ci.jenkins.io-tf-managed"
   end_date       = "2025-09-07T00:00:00Z"
 }
-resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_packer_sponso" {
-  scope                = azurerm_resource_group.packer_images["prod"].id
-  role_definition_name = "Reader"
-  principal_id         = azuread_service_principal.infra_ci_jenkins_io.object_id
-}
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_packer_cdf" {
   scope                = azurerm_resource_group.packer_images_cdf["prod"].id
   role_definition_name = "Reader"
@@ -110,7 +105,6 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents
   destination_port_range = "22"
   source_address_prefix  = data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_ephemeral_agents.address_prefix
   destination_address_prefixes = [
-    data.azurerm_subnet.infra_ci_jenkins_io_sponsorship_packer_builds.address_prefix,
     data.azurerm_subnet.infra_ci_jenkins_io_packer_builds.address_prefix
   ]
   resource_group_name         = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
