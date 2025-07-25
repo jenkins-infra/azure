@@ -104,18 +104,6 @@ resource "azurerm_key_vault" "dockerhub_mirror" {
     virtual_network_subnet_ids = local.app_subnets["infra.ci.jenkins.io"].agents
   }
 
-  # terraform-production
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = "f81f0ada-d62b-45cf-8e82-d51498fbfcf7"
-
-    # Required to allow data sources below to exist
-    secret_permissions = [
-      "Get",
-      "List",
-    ]
-  }
-
   sku_name = "standard"
 
   tags = local.default_tags
