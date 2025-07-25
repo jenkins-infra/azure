@@ -268,291 +268,293 @@ resource "azurerm_dns_a_record" "privatek8s_private" {
 }
 
 
-####################################################################################
-## Ressources from the Kubernetes provider
-####################################################################################
-# # Used by the release.ci Azurefile PVC mounts
-# resource "kubernetes_storage_class" "privatek8s_azurefile_csi_premium_retain" {
-#   provider = kubernetes.privatek8s
-#   metadata {
-#     name = "azurefile-csi-premium-retain"
-#   }
-#   storage_provisioner = "file.csi.azure.com"
-#   reclaim_policy      = "Retain"
-#   parameters = {
-#     skuname = "Premium_LRS"
-#   }
-#   mount_options = [
-#     "dir_mode=0777",
-#     "file_mode=0777",
-#     "uid=0",
-#     "gid=0",
-#     "mfsymlinks",
-#     "cache=strict", # Default on usual kernels but worth setting it explicitly
-#     "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
-#     "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
-#   ]
-# }
+###################################################################################
+# Ressources from the Kubernetes provider
+###################################################################################
+# Used by the release.ci Azurefile PVC mounts
+resource "kubernetes_storage_class" "privatek8s_azurefile_csi_premium_retain" {
+  provider = kubernetes.privatek8s
+  metadata {
+    name = "azurefile-csi-premium-retain"
+  }
+  storage_provisioner = "file.csi.azure.com"
+  reclaim_policy      = "Retain"
+  parameters = {
+    skuname = "Premium_LRS"
+  }
+  mount_options = [
+    "dir_mode=0777",
+    "file_mode=0777",
+    "uid=0",
+    "gid=0",
+    "mfsymlinks",
+    "cache=strict", # Default on usual kernels but worth setting it explicitly
+    "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+    "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+  ]
+}
 
-# # Used by all the controller (for their Jenkins Home PVCs)
-# resource "kubernetes_storage_class" "privatek8s_statically_provisioned" {
-#   provider = kubernetes.privatek8s
-#   metadata {
-#     name = "statically-provisioned"
-#   }
-#   storage_provisioner    = "disk.csi.azure.com"
-#   reclaim_policy         = "Retain"
-#   allow_volume_expansion = true
-# }
+# Used by all the controller (for their Jenkins Home PVCs)
+resource "kubernetes_storage_class" "privatek8s_statically_provisioned" {
+  provider = kubernetes.privatek8s
+  metadata {
+    name = "statically-provisioned"
+  }
+  storage_provisioner    = "disk.csi.azure.com"
+  reclaim_policy         = "Retain"
+  allow_volume_expansion = true
+}
 
-# ## Persistent Volumes
-# # File shares used by release.ci.jenkins.io agents (storing pkg.jion, get.jio, etc. data)
-# resource "kubernetes_secret" "core_packages" {
-#   provider = kubernetes.privatek8s
+## Persistent Volumes
+# File shares used by release.ci.jenkins.io agents (storing pkg.jion, get.jio, etc. data)
+resource "kubernetes_secret" "privatek8s_core_packages" {
+  provider = kubernetes.privatek8s
 
-#   wait_for_service_account_token = false
+  wait_for_service_account_token = false
 
-#   metadata {
-#     name      = "core-packages"
-#     namespace = kubernetes_namespace.privatek8s["jenkins-release-agents"].metadata[0].name
-#   }
+  metadata {
+    name      = "core-packages"
+    namespace = kubernetes_namespace.privatek8s["jenkins-release-agents"].metadata[0].name
+  }
 
-#   data = {
-#     azurestorageaccountname = azurerm_storage_account.get_jenkins_io.name
-#     azurestorageaccountkey  = azurerm_storage_account.get_jenkins_io.primary_access_key
-#   }
+  data = {
+    azurestorageaccountname = azurerm_storage_account.get_jenkins_io.name
+    azurestorageaccountkey  = azurerm_storage_account.get_jenkins_io.primary_access_key
+  }
 
-#   type = "Opaque"
-# }
-# locals {
-#   privatek8s_core_packages = {
-#     "binary" = {
-#       share_name = azurerm_storage_share.get_jenkins_io.name,
-#       size_in_gb = azurerm_storage_share.get_jenkins_io.quota,
-#     },
-#     "website" = {
-#       share_name = azurerm_storage_share.get_jenkins_io_website.name,
-#       size_in_gb = azurerm_storage_share.get_jenkins_io_website.quota,
-#     },
-#   }
-# }
-# resource "kubernetes_persistent_volume" "privatek8s_core_packages" {
-#   provider = kubernetes.privatek8s
+  type = "Opaque"
+}
+locals {
+  privatek8s_core_packages = {
+    "binary" = {
+      share_name = azurerm_storage_share.get_jenkins_io.name,
+      size_in_gb = azurerm_storage_share.get_jenkins_io.quota,
+    },
+    "website" = {
+      share_name = azurerm_storage_share.get_jenkins_io_website.name,
+      size_in_gb = azurerm_storage_share.get_jenkins_io_website.quota,
+    },
+  }
+}
+resource "kubernetes_persistent_volume" "privatek8s_core_packages" {
+  provider = kubernetes.privatek8s
 
-#   for_each = local.privatek8s_core_packages
+  for_each = local.privatek8s_core_packages
 
-#   metadata {
-#     name = "${each.key}-core-packages"
-#   }
-#   spec {
-#     capacity = {
-#       storage = "${each.value["size_in_gb"]}Gi"
-#     }
-#     access_modes                     = ["ReadWriteMany"]
-#     persistent_volume_reclaim_policy = "Retain"
-#     storage_class_name               = kubernetes_storage_class.privatek8s_statically_provisioned.id
-#     mount_options = [
-#       "dir_mode=0777",
-#       "file_mode=0777",
-#       "uid=1000",
-#       "gid=1000",
-#       "mfsymlinks",
-#       "cache=strict", # Default on usual kernels but worth setting it explicitly
-#       "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
-#       "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
-#     ]
-#     persistent_volume_source {
-#       csi {
-#         driver = "file.csi.azure.com"
-#         # fs_type = "ext4"
-#         # `volumeHandle` must be unique on the cluster for this volume
-#         volume_handle = "${each.key}-core-packages"
-#         read_only     = false
-#         volume_attributes = {
-#           resourceGroup = azurerm_resource_group.get_jenkins_io.name
-#           shareName     = each.value["share_name"]
-#         }
-#         node_stage_secret_ref {
-#           name      = kubernetes_secret.core_packages.metadata[0].name
-#           namespace = kubernetes_secret.core_packages.metadata[0].namespace
-#         }
-#       }
-#     }
-#   }
-# }
-# resource "kubernetes_persistent_volume_claim" "privatek8s_core_packages" {
-#   provider = kubernetes.privatek8s
+  metadata {
+    name = "${each.key}-core-packages"
+  }
+  spec {
+    capacity = {
+      storage = "${each.value["size_in_gb"]}Gi"
+    }
+    access_modes                     = ["ReadWriteMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.privatek8s_statically_provisioned.id
+    mount_options = [
+      "dir_mode=0777",
+      "file_mode=0777",
+      "uid=1000",
+      "gid=1000",
+      "mfsymlinks",
+      "cache=strict", # Default on usual kernels but worth setting it explicitly
+      "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+      "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+    ]
+    persistent_volume_source {
+      csi {
+        driver = "file.csi.azure.com"
+        # fs_type = "ext4"
+        # `volumeHandle` must be unique on the cluster for this volume
+        volume_handle = "${each.key}-core-packages"
+        read_only     = false
+        volume_attributes = {
+          resourceGroup = azurerm_resource_group.get_jenkins_io.name
+          shareName     = each.value["share_name"]
+        }
+        node_stage_secret_ref {
+          name      = kubernetes_secret.core_packages.metadata[0].name
+          namespace = kubernetes_secret.core_packages.metadata[0].namespace
+        }
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "privatek8s_core_packages" {
+  provider = kubernetes.privatek8s
 
-#   for_each = local.privatek8s_core_packages
+  for_each = local.privatek8s_core_packages
 
-#   metadata {
-#     name      = "${each.key}-core-packages"
-#     namespace = kubernetes_secret.core_packages.metadata[0].namespace
-#   }
-#   spec {
-#     access_modes       = kubernetes_persistent_volume.privatek8s_core_packages[each.key].spec[0].access_modes
-#     volume_name        = kubernetes_persistent_volume.privatek8s_core_packages[each.key].metadata[0].name
-#     storage_class_name = kubernetes_persistent_volume.privatek8s_core_packages[each.key].spec[0].storage_class_name
-#     resources {
-#       requests = {
-#         storage = "${each.value["size_in_gb"]}Gi"
-#       }
-#     }
-#   }
-# }
-# # Persistent Volumes for infra.ci controller
-# resource "kubernetes_persistent_volume" "jenkins_infra_data" {
-#   provider = kubernetes.privatek8s
+  metadata {
+    name      = "${each.key}-core-packages"
+    namespace = kubernetes_secret.core_packages.metadata[0].namespace
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.privatek8s_core_packages[each.key].spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.privatek8s_core_packages[each.key].metadata[0].name
+    storage_class_name = kubernetes_persistent_volume.privatek8s_core_packages[each.key].spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = "${each.value["size_in_gb"]}Gi"
+      }
+    }
+  }
+}
+# Persistent Volumes for infra.ci controller
+resource "kubernetes_persistent_volume" "privatek8s_infra_ci_jenkins_io_data" {
+  provider = kubernetes.privatek8s
 
-#   metadata {
-#     name = "jenkins-infra-data"
-#   }
-#   spec {
-#     capacity = {
-#       storage = "${azurerm_managed_disk.jenkins_infra_data.disk_size_gb}Gi"
-#     }
-#     access_modes                     = ["ReadWriteOnce"]
-#     persistent_volume_reclaim_policy = "Retain"
-#     storage_class_name               = kubernetes_storage_class.privatek8s_statically_provisioned.id
-#     persistent_volume_source {
-#       csi {
-#         driver        = "disk.csi.azure.com"
-#         volume_handle = azurerm_managed_disk.jenkins_infra_data.id
-#       }
-#     }
-#   }
-# }
-# resource "kubernetes_persistent_volume_claim" "jenkins_infra_data" {
-#   provider = kubernetes.privatek8s
+  metadata {
+    name = "infra-ci-jenkins-io-data"
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_managed_disk.infra_ci_jenkins_io_data.disk_size_gb}Gi"
+    }
+    access_modes                     = ["ReadWriteOnce"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.privatek8s_statically_provisioned.id
+    persistent_volume_source {
+      csi {
+        driver        = "disk.csi.azure.com"
+        volume_handle = azurerm_managed_disk.infra_ci_jenkins_io_data.id
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "privatek8s_infra_ci_jenkins_io_data" {
+  provider = kubernetes.privatek8s
 
-#   metadata {
-#     name      = "jenkins-infra-data"
-#     namespace = kubernetes_namespace.privatek8s["jenkins-infra"].metadata.0.name
-#   }
-#   spec {
-#     access_modes       = kubernetes_persistent_volume.jenkins_infra_data.spec.0.access_modes
-#     volume_name        = kubernetes_persistent_volume.jenkins_infra_data.metadata.0.name
-#     storage_class_name = kubernetes_persistent_volume.jenkins_infra_data.spec.0.storage_class_name
-#     resources {
-#       requests = {
-#         storage = "${azurerm_managed_disk.jenkins_infra_data.disk_size_gb}Gi"
-#       }
-#     }
-#   }
-# }
-# # Persistent Volumes for release.ci controller
-# resource "kubernetes_persistent_volume" "jenkins_release_data" {
-#   provider = kubernetes.privatek8s
+  metadata {
+    name      = "infra-ci-jenkins-io-data"
+    namespace = kubernetes_namespace.privatek8s["jenkins-infra"].metadata.0.name
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.privatek8s_infra_ci_jenkins_io_data.spec.0.access_modes
+    volume_name        = kubernetes_persistent_volume.privatek8s_infra_ci_jenkins_io_data.metadata.0.name
+    storage_class_name = kubernetes_persistent_volume.privatek8s_infra_ci_jenkins_io_data.spec.0.storage_class_name
+    resources {
+      requests = {
+        storage = "${azurerm_managed_disk.infra_ci_jenkins_io_data.disk_size_gb}Gi"
+      }
+    }
+  }
+}
+# Persistent Volumes for release.ci controller
+resource "kubernetes_persistent_volume" "privatek8s_release_ci_jenkins_io_data" {
+  provider = kubernetes.privatek8s
 
-#   metadata {
-#     name = "jenkins-release-data"
-#   }
-#   spec {
-#     capacity = {
-#       storage = "${azurerm_managed_disk.jenkins_release_data.disk_size_gb}Gi"
-#     }
-#     access_modes                     = ["ReadWriteOnce"]
-#     persistent_volume_reclaim_policy = "Retain"
-#     storage_class_name               = kubernetes_storage_class.privatek8s_statically_provisioned.id
-#     persistent_volume_source {
-#       csi {
-#         driver        = "disk.csi.azure.com"
-#         volume_handle = azurerm_managed_disk.jenkins_release_data.id
-#       }
-#     }
-#   }
-# }
-# resource "kubernetes_namespace" "privatek8s" {
-#   for_each = toset(["jenkins-release", "jenkins-infra", "jenkins-release-agents"])
-#   provider = kubernetes.privatek8s
-#   metadata {
-#     name = each.key
-#     labels = {
-#       name = each.key
-#     }
-#   }
-# }
-# resource "kubernetes_persistent_volume_claim" "jenkins_release_data" {
-#   provider = kubernetes.privatek8s
+  metadata {
+    name = "release-ci-jenkins-io-data"
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_managed_disk.release_ci_jenkins_io_data.disk_size_gb}Gi"
+    }
+    access_modes                     = ["ReadWriteOnce"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.privatek8s_statically_provisioned.id
+    persistent_volume_source {
+      csi {
+        driver        = "disk.csi.azure.com"
+        volume_handle = azurerm_managed_disk.release_ci_jenkins_io_data.id
+      }
+    }
+  }
+}
+resource "kubernetes_namespace" "privatek8s" {
+  for_each = toset(["jenkins-release", "jenkins-infra", "jenkins-release-agents"])
+  provider = kubernetes.privatek8s
+  metadata {
+    name = each.key
+    labels = {
+      name = each.key
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "privatek8s_release_ci_jenkins_io_data" {
+  provider = kubernetes.privatek8s
 
-#   metadata {
-#     name      = "jenkins-release-data"
-#     namespace = kubernetes_namespace.privatek8s["jenkins-release"].metadata.0.name
-#   }
-#   spec {
-#     access_modes       = kubernetes_persistent_volume.jenkins_release_data.spec.0.access_modes
-#     volume_name        = kubernetes_persistent_volume.jenkins_release_data.metadata.0.name
-#     storage_class_name = kubernetes_persistent_volume.jenkins_release_data.spec.0.storage_class_name
-#     resources {
-#       requests = {
-#         storage = "${azurerm_managed_disk.jenkins_release_data.disk_size_gb}Gi"
-#       }
-#     }
-#   }
-# }
+  metadata {
+    name      = "release-ci-jenkins-io-data"
+    namespace = kubernetes_namespace.privatek8s["jenkins-release"].metadata.0.name
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.privatek8s_release_ci_jenkins_io_data.spec.0.access_modes
+    volume_name        = kubernetes_persistent_volume.privatek8s_release_ci_jenkins_io_data.metadata.0.name
+    storage_class_name = kubernetes_persistent_volume.privatek8s_release_ci_jenkins_io_data.spec.0.storage_class_name
+    resources {
+      requests = {
+        storage = "${azurerm_managed_disk.release_ci_jenkins_io_data.disk_size_gb}Gi"
+      }
+    }
+  }
+}
 
 
-####################################################################################
-### Workload Identity Resources
-####################################################################################
-## For infra.ci.jenkins.io controller
-# resource "kubernetes_service_account" "privatek8s_jenkins_infra_controller" {
-#   provider = kubernetes.privatek8s
+###################################################################################
+## Workload Identity Resources
+###################################################################################
+# For infra.ci.jenkins.io controller
+resource "kubernetes_service_account" "privatek8s_infra_ci_jenkins_io_controller" {
+  provider = kubernetes.privatek8s
 
-#   metadata {
-#     name      = "jenkins-infra-controller"
-#     namespace = kubernetes_namespace.privatek8s["jenkins-infra"].metadata[0].name
+  metadata {
+    name      = "infra-ci-jenkins-io-controller"
+    namespace = kubernetes_namespace.privatek8s["jenkins-infra"].metadata[0].name
 
-#     annotations = {
-#       "azure.workload.identity/client-id" = azurerm_user_assigned_identity.infra_ci_jenkins_io.client_id,
-#     }
-#   }
-# }
-# resource "azurerm_federated_identity_credential" "privatek8s_jenkins_infra_controller" {
-#   name                = "privatek8s-${kubernetes_service_account.privatek8s_jenkins_infra_controller.metadata[0].name}"
-#   resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins.name
-#   audience            = ["api://AzureADTokenExchange"]
-#   issuer              = azurerm_kubernetes_cluster.privatek8s.oidc_issuer_url
-#   parent_id           = azurerm_user_assigned_identity.infra_ci_jenkins_io.id
-#   subject             = "system:serviceaccount:${kubernetes_namespace.privatek8s["jenkins-infra"].metadata[0].name}:${kubernetes_service_account.privatek8s_jenkins_infra_controller.metadata[0].name}"
-# }
-# ## End of infra.ci
+    annotations = {
+      "azure.workload.identity/client-id" = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.client_id,
+    }
+  }
+}
+resource "azurerm_federated_identity_credential" "privatek8s_infra_ci_jenkins_io_controller" {
+  name      = "privatek8s-${kubernetes_service_account.privatek8s_infra_ci_jenkins_io_controller.metadata[0].name}"
+  audience  = ["api://AzureADTokenExchange"]
+  issuer    = azurerm_kubernetes_cluster.privatek8s.oidc_issuer_url
+  parent_id = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.id
+  # RG must be the same for both the UAID and the federated ID (otherwise you get HTTP/404 during the "apply" phase)
+  resource_group_name = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.resource_group_name
+  subject             = "system:serviceaccount:${kubernetes_namespace.privatek8s["jenkins-infra"].metadata[0].name}:${kubernetes_service_account.privatek8s_infra_ci_jenkins_io_controller.metadata[0].name}"
+}
+## End of infra.ci
 
-# ## For release.ci.jenkins.io agents
-# resource "kubernetes_service_account" "privatek8s_jenkins_release_agents" {
-#   provider = kubernetes.privatek8s
+## For release.ci.jenkins.io agents
+resource "kubernetes_service_account" "privatek8s_release_ci_jenkins_io_agents" {
+  provider = kubernetes.privatek8s
 
-#   metadata {
-#     name      = "jenkins-release-agents"
-#     namespace = kubernetes_namespace.privatek8s["jenkins-release-agents"].metadata[0].name
+  metadata {
+    name      = "release-ci-jenkins-io-agents"
+    namespace = kubernetes_namespace.privatek8s["jenkins-release-agents"].metadata[0].name
 
-#     annotations = {
-#       "azure.workload.identity/client-id" = azurerm_user_assigned_identity.release_ci_jenkins_io_agents.client_id,
-#     }
-#   }
-# }
-# resource "azurerm_federated_identity_credential" "privatek8s_jenkins_release_agents" {
-#   name                = "privatek8s-${kubernetes_service_account.privatek8s_jenkins_release_agents.metadata[0].name}"
-#   resource_group_name = azurerm_kubernetes_cluster.privatek8s.resource_group_name
-#   audience            = ["api://AzureADTokenExchange"]
-#   issuer              = azurerm_kubernetes_cluster.privatek8s.oidc_issuer_url
-#   parent_id           = azurerm_user_assigned_identity.release_ci_jenkins_io_agents.id
-#   subject             = "system:serviceaccount:${kubernetes_namespace.privatek8s["jenkins-release-agents"].metadata[0].name}:${kubernetes_service_account.privatek8s_jenkins_release_agents.metadata[0].name}"
-# }
-# ## End of release.ci.jenkins.io agents
-# ### End of  Workload Identity Resources
+    annotations = {
+      "azure.workload.identity/client-id" = azurerm_user_assigned_identity.release_ci_jenkins_io_agents.client_id,
+    }
+  }
+}
+resource "azurerm_federated_identity_credential" "privatek8s_release_ci_jenkins_io_agents" {
+  name     = "privatek8s-${kubernetes_service_account.privatek8s_release_ci_jenkins_io_agents.metadata[0].name}"
+  audience = ["api://AzureADTokenExchange"]
+  issuer   = azurerm_kubernetes_cluster.privatek8s.oidc_issuer_url
+  # RG must be the same for both the UAID and the federated ID (otherwise you get HTTP/404 during the "apply" phase)
+  parent_id           = azurerm_user_assigned_identity.release_ci_jenkins_io_agents.id
+  resource_group_name = azurerm_user_assigned_identity.release_ci_jenkins_io_agents.resource_group_name
+  subject             = "system:serviceaccount:${kubernetes_namespace.privatek8s["jenkins-release-agents"].metadata[0].name}:${kubernetes_service_account.privatek8s_release_ci_jenkins_io_agents.metadata[0].name}"
+}
+## End of release.ci.jenkins.io agents
+### End of  Workload Identity Resources
 
-# # Configure the jenkins-infra/kubernetes-management admin service account
-# module "privatek8s_admin_sa" {
-#   providers = {
-#     kubernetes = kubernetes.privatek8s
-#   }
-#   source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
-#   cluster_name               = azurerm_kubernetes_cluster.privatek8s.name
-#   cluster_hostname           = local.aks_clusters_outputs.privatek8s.cluster_hostname
-#   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.privatek8s.kube_config.0.cluster_ca_certificate
-# }
-# output "kubeconfig_management_privatek8s" {
-#   sensitive = true
-#   value     = module.privatek8s_admin_sa.kubeconfig
-# }
+# Configure the jenkins-infra/kubernetes-management admin service account
+module "privatek8s_admin_sa" {
+  providers = {
+    kubernetes = kubernetes.privatek8s
+  }
+  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
+  cluster_name               = azurerm_kubernetes_cluster.privatek8s.name
+  cluster_hostname           = local.aks_clusters_outputs.privatek8s.cluster_hostname
+  cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.privatek8s.kube_config.0.cluster_ca_certificate
+}
+output "privatek8s_admin_sa_kubeconfig" {
+  sensitive = true
+  value     = module.privatek8s_admin_sa.kubeconfig
+}
