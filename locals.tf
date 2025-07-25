@@ -60,6 +60,12 @@ locals {
       # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
       pod_cidr = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
     },
+    "privatek8s" = {
+      name               = "privatek8s",
+      kubernetes_version = "1.31.6",
+      # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
+      pod_cidr = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
+    },
     "publick8s" = {
       name               = "publick8s-${random_pet.suffix_publick8s.id}",
       kubernetes_version = "1.31.6",

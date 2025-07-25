@@ -11,10 +11,6 @@ data "azurerm_resource_group" "public" {
 data "azurerm_resource_group" "private" {
   name = "private"
 }
-data "azurerm_resource_group" "private_sponsorship" {
-  provider = azurerm.jenkins-sponsorship
-  name     = "private-sponsorship"
-}
 data "azurerm_resource_group" "infra_ci_jenkins_io" {
   name = "infra-ci-jenkins-io"
 }
@@ -36,11 +32,6 @@ data "azurerm_virtual_network" "public" {
 data "azurerm_virtual_network" "private" {
   name                = "${data.azurerm_resource_group.private.name}-vnet"
   resource_group_name = data.azurerm_resource_group.private.name
-}
-data "azurerm_virtual_network" "private_sponsorship" {
-  provider            = azurerm.jenkins-sponsorship
-  name                = "${data.azurerm_resource_group.private_sponsorship.name}-vnet"
-  resource_group_name = data.azurerm_resource_group.private_sponsorship.name
 }
 # Reference to the PostgreSQL/MySql dedicated network external resources
 data "azurerm_virtual_network" "public_db" {
@@ -109,6 +100,38 @@ data "azurerm_subnet" "infra_ci_jenkins_io_packer_builds" {
   virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io.name
   resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io.resource_group_name
 }
+data "azurerm_subnet" "privatek8s_tier" {
+  name                 = "privatek8s-tier"
+  resource_group_name  = data.azurerm_resource_group.private.name
+  virtual_network_name = data.azurerm_virtual_network.private.name
+}
+data "azurerm_subnet" "privatek8s_release_tier" {
+  name                 = "privatek8s-release-tier"
+  resource_group_name  = data.azurerm_resource_group.private.name
+  virtual_network_name = data.azurerm_virtual_network.private.name
+}
+data "azurerm_subnet" "privatek8s_infra_ci_controller_tier" {
+  name                 = "privatek8s-infraci-ctrl-tier"
+  resource_group_name  = data.azurerm_resource_group.private.name
+  virtual_network_name = data.azurerm_virtual_network.private.name
+}
+data "azurerm_subnet" "privatek8s_release_ci_controller_tier" {
+  name                 = "privatek8s-releaseci-ctrl-tier"
+  resource_group_name  = data.azurerm_resource_group.private.name
+  virtual_network_name = data.azurerm_virtual_network.private.name
+}
+
+
+#### TODO: remove resources below as part of cleanup in https://github.com/jenkins-infra/helpdesk/issues/4690
+data "azurerm_resource_group" "private_sponsorship" {
+  provider = azurerm.jenkins-sponsorship
+  name     = "private-sponsorship"
+}
+data "azurerm_virtual_network" "private_sponsorship" {
+  provider            = azurerm.jenkins-sponsorship
+  name                = "${data.azurerm_resource_group.private_sponsorship.name}-vnet"
+  resource_group_name = data.azurerm_resource_group.private_sponsorship.name
+}
 data "azurerm_subnet" "privatek8s_sponsorship_tier" {
   provider             = azurerm.jenkins-sponsorship
   name                 = "privatek8s-sponsorship-tier"
@@ -133,3 +156,4 @@ data "azurerm_subnet" "privatek8s_sponsorship_release_ci_controller_tier" {
   resource_group_name  = data.azurerm_resource_group.private_sponsorship.name
   virtual_network_name = data.azurerm_virtual_network.private_sponsorship.name
 }
+####
