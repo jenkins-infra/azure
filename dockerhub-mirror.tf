@@ -137,10 +137,10 @@ resource "azurerm_key_vault" "dockerhub_mirror" {
     ]
   }
 
-  # infra
+  # terraform-production
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = "cfcd6abd-898d-417b-8474-fc1d93705cce"
+    object_id = "e651c485-66cf-4f54-aaa4-8d2c895a6bc3"
 
     key_permissions = [
       "Get",
