@@ -104,52 +104,15 @@ resource "azurerm_key_vault" "dockerhub_mirror" {
     virtual_network_subnet_ids = local.app_subnets["infra.ci.jenkins.io"].agents
   }
 
-  # smerle
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = "0a9ca009-8333-4351-9a8a-b02244ff72b1"
-
-    key_permissions = [
-      "Encrypt",
-      "Decrypt",
-    ]
-  }
-
-  # dduportal
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = "8bb006a6-3d5f-45e0-be59-91af3db79da3"
-
-    key_permissions = [
-      "Decrypt",
-      "Encrypt",
-    ]
-  }
-
-  # tim jacomb
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = "62ea8f6b-2604-46a6-b1cf-d2aaa15ba0c6"
-
-    key_permissions = [
-      "Decrypt",
-      "Encrypt",
-    ]
-  }
-
   # terraform-production
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
     object_id = "f81f0ada-d62b-45cf-8e82-d51498fbfcf7"
 
-    key_permissions = [
+    # Required to allow data sources below to exist
+    secret_permissions = [
       "Get",
       "List",
-      "Purge",
-      "Decrypt",
-      "Encrypt",
-      "Verify",
-      "Sign",
     ]
   }
 
