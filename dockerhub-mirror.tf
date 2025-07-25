@@ -133,8 +133,8 @@ resource "azurerm_container_registry_credential_set" "dockerhub" {
     type = "SystemAssigned"
   }
   authentication_credentials {
-    username_secret_id = "${azurerm_key_vault.dockerhub_mirror.vault_uri}/secrets/dockerhub-username"
-    password_secret_id = "${azurerm_key_vault.dockerhub_mirror.vault_uri}/secrets/dockerhub-password"
+    username_secret_id = "${azurerm_key_vault.dockerhub_mirror.vault_uri}secrets/dockerhub-username"
+    password_secret_id = "${azurerm_key_vault.dockerhub_mirror.vault_uri}secrets/dockerhub-password"
   }
 }
 resource "azurerm_role_assignment" "acr_read_keyvault_secrets" {
