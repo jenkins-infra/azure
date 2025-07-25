@@ -121,29 +121,32 @@ resource "azurerm_key_vault" "dockerhub_mirror" {
   tags = local.default_tags
 }
 
-# # IMPORTANT: when bootstrapping, multiple Terraform apply are required until ACR CredentialSet can be created by Terraform (unsupported by Terraform until https://github.com/hashicorp/terraform-provider-azurerm/issues/26539 is done).
-# # 1. Start by creating the dockerhub-username and docker-password in the Keyvault (once created) which requires the "Key Vault Secrets Officer"  or "Owner" role temporarily
-# # 2. Then create the CredentialSet in the registry (once created) with the name 'dockerhub'. It will be marked as "Unhealthy" (expected).
-# # 3. Then retrieve the principal ID and set it in the attributes below.
-# # 4. Finally re-run terraform apply one last time to create this azurerm_role_assignment and the ACR cache rule. The CredentialSet in ACR will be marked as "Healthy" right after this apply.
-# resource "azurerm_role_assignment" "acr_read_keyvault_secrets" {
-#   provider                         = azurerm.jenkins-sponsorship
-#   scope                            = azurerm_key_vault.dockerhub_mirror.id
-#   role_definition_name             = "Key Vault Secrets User"
-#   skip_service_principal_aad_check = true
-#   # Need to be retrieved manually from Azure UI -> Container Registries -> Select the "azurerm_key_vault.dockerhub_mirror" resource -> Services -> Cache -> Credentials -> select "dockerhub"
-#   principal_id = "90872c87-43ab-446d-89b2-741693c34b90"
-# }
-
-# resource "azurerm_container_registry_cache_rule" "mirror_dockerhub" {
-#   name                  = "mirror"
-#   provider              = azurerm.jenkins-sponsorship
-#   container_registry_id = azurerm_container_registry.dockerhub_mirror.id
-#   source_repo           = "docker.io/*"
-#   target_repo           = "*"
-
-#   # Credential created manually (unsupported by Terraform until https://github.com/hashicorp/terraform-provider-azurerm/issues/26539 is done).
-#   # Check dependent resource
-#   depends_on        = [azurerm_role_assignment.acr_read_keyvault_secrets]
-#   credential_set_id = "${azurerm_container_registry.dockerhub_mirror.id}/credentialSets/dockerhub"
-# }
+# IMPORTANT: when bootstrapping, 2 distincts "terraform apply" are required:
+# 1. The first one must create the Keyvault (at least: can do the ACR and Private Endpoints/DNS/network links).
+# 2. Then, the 2 secrets must be manually created with the respective names "dockerhub-username" and "dockerhub-password"
+# 3. Finally, the set of "data.azurerm_key_vault_secret" + ACR CredentialSet + Role assignement + Registry Cache rule can be created as a 2nd terraform deployment
+resource "azurerm_container_registry_credential_set" "dockerhub" {
+  name                  = "dockerhub"
+  container_registry_id = azurerm_container_registry.dockerhub_mirror.id
+  login_server          = "docker.io"
+  identity {
+    type = "SystemAssigned"
+  }
+  authentication_credentials {
+    username_secret_id = "${azurerm_key_vault.dockerhub_mirror.vault_uri}/secrets/dockerhub-username"
+    password_secret_id = "${azurerm_key_vault.dockerhub_mirror.vault_uri}/secrets/dockerhub-password"
+  }
+}
+resource "azurerm_role_assignment" "acr_read_keyvault_secrets" {
+  scope                            = azurerm_key_vault.dockerhub_mirror.id
+  role_definition_name             = "Key Vault Secrets User"
+  skip_service_principal_aad_check = true
+  principal_id                     = azurerm_container_registry_credential_set.dockerhub.identity[0].principal_id
+}
+resource "azurerm_container_registry_cache_rule" "mirror_dockerhub" {
+  name                  = "mirror"
+  container_registry_id = azurerm_container_registry.dockerhub_mirror.id
+  source_repo           = "docker.io/*"
+  target_repo           = "*"
+  credential_set_id     = azurerm_container_registry_credential_set.dockerhub.id
+}
