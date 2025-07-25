@@ -105,41 +105,40 @@ resource "azurerm_dns_a_record" "cert_ci_jenkins_io" {
 }
 
 ## Allow access to/from ACR endpoint
-# Uncomment as part of https://github.com/jenkins-infra/helpdesk/issues/4744
-# resource "azurerm_network_security_rule" "allow_out_https_from_cert_agents_to_acr" {
-#   name                    = "allow-out-https-from-agents-to-acr"
-#   priority                = 4050
-#   direction               = "Outbound"
-#   access                  = "Allow"
-#   protocol                = "Tcp"
-#   source_port_range       = "*"
-#   destination_port_range  = "443"
-#   source_address_prefixes = data.azurerm_subnet.cert_ci_jenkins_io_ephemeral_agents.address_prefixes
-#   destination_address_prefixes = distinct(
-#     flatten(
-#       [for rs in azurerm_private_endpoint.dockerhub_mirror["certcijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
-#     )
-#   )
-#   resource_group_name         = module.cert_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
-#   network_security_group_name = module.cert_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
-# }
-# resource "azurerm_network_security_rule" "allow_in_https_from_cert_agents_to_acr" {
-#   name                    = "allow-in-https-from-agents-to-acr"
-#   priority                = 4050
-#   direction               = "Inbound"
-#   access                  = "Allow"
-#   protocol                = "Tcp"
-#   source_port_range       = "*"
-#   destination_port_range  = "443"
-#   source_address_prefixes = data.azurerm_subnet.cert_ci_jenkins_io_ephemeral_agents.address_prefixes
-#   destination_address_prefixes = distinct(
-#     flatten(
-#       [for rs in azurerm_private_endpoint.dockerhub_mirror["certcijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
-#     )
-#   )
-#   resource_group_name         = module.cert_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
-#   network_security_group_name = module.cert_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
-# }
+resource "azurerm_network_security_rule" "allow_out_https_from_cert_agents_to_acr" {
+  name                    = "allow-out-https-from-agents-to-acr"
+  priority                = 4050
+  direction               = "Outbound"
+  access                  = "Allow"
+  protocol                = "Tcp"
+  source_port_range       = "*"
+  destination_port_range  = "443"
+  source_address_prefixes = data.azurerm_subnet.cert_ci_jenkins_io_ephemeral_agents.address_prefixes
+  destination_address_prefixes = distinct(
+    flatten(
+      [for rs in azurerm_private_endpoint.dockerhub_mirror["certcijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
+    )
+  )
+  resource_group_name         = module.cert_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+  network_security_group_name = module.cert_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+}
+resource "azurerm_network_security_rule" "allow_in_https_from_cert_agents_to_acr" {
+  name                    = "allow-in-https-from-agents-to-acr"
+  priority                = 4050
+  direction               = "Inbound"
+  access                  = "Allow"
+  protocol                = "Tcp"
+  source_port_range       = "*"
+  destination_port_range  = "443"
+  source_address_prefixes = data.azurerm_subnet.cert_ci_jenkins_io_ephemeral_agents.address_prefixes
+  destination_address_prefixes = distinct(
+    flatten(
+      [for rs in azurerm_private_endpoint.dockerhub_mirror["certcijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
+    )
+  )
+  resource_group_name         = module.cert_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+  network_security_group_name = module.cert_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+}
 
 module "cert_ci_jenkins_io_letsencrypt" {
   source = "./.shared-tools/terraform/modules/azure-letsencrypt-dns"
