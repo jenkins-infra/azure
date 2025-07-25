@@ -205,47 +205,46 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_controller_disk_reader" 
 }
 
 ## Allow access to/from ACR endpoint
-# Uncomment as part of https://github.com/jenkins-infra/helpdesk/issues/4744
-# resource "azurerm_network_security_rule" "allow_out_https_from_infra_ephemeral_agents_to_acr" {
-#   name                   = "allow-out-https-from-ephemeral-agents-to-acr"
-#   priority               = 4050
-#   direction              = "Outbound"
-#   access                 = "Allow"
-#   protocol               = "Tcp"
-#   source_port_range      = "*"
-#   destination_port_range = "443"
-#   source_address_prefixes = [
-#     data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
-#     data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
-#   ]
-#   destination_address_prefixes = distinct(
-#     flatten(
-#       [for rs in azurerm_private_endpoint.dockerhub_mirror["infracijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
-#     )
-#   )
-#   resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
-#   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
-# }
-# resource "azurerm_network_security_rule" "allow_in_https_from_infra_ephemeral_agents_to_acr" {
-#   name                   = "allow-in-https-from-ephemeral-agents-to-acr"
-#   priority               = 4050
-#   direction              = "Inbound"
-#   access                 = "Allow"
-#   protocol               = "Tcp"
-#   source_port_range      = "*"
-#   destination_port_range = "443"
-#   source_address_prefixes = [
-#     data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
-#     data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
-#   ]
-#   destination_address_prefixes = distinct(
-#     flatten(
-#       [for rs in azurerm_private_endpoint.dockerhub_mirror["infracijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
-#     )
-#   )
-#   resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
-#   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
-# }
+resource "azurerm_network_security_rule" "allow_out_https_from_infra_ephemeral_agents_to_acr" {
+  name                   = "allow-out-https-from-ephemeral-agents-to-acr"
+  priority               = 4050
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "443"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
+    data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
+  ]
+  destination_address_prefixes = distinct(
+    flatten(
+      [for rs in azurerm_private_endpoint.dockerhub_mirror["infracijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
+    )
+  )
+  resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+}
+resource "azurerm_network_security_rule" "allow_in_https_from_infra_ephemeral_agents_to_acr" {
+  name                   = "allow-in-https-from-ephemeral-agents-to-acr"
+  priority               = 4050
+  direction              = "Inbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "443"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
+    data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
+  ]
+  destination_address_prefixes = distinct(
+    flatten(
+      [for rs in azurerm_private_endpoint.dockerhub_mirror["infracijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
+    )
+  )
+  resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+}
 
 ## Identity assigned to agents workloads (allowing them to reach resources without any Azure credential)
 resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_agents" {
