@@ -534,7 +534,7 @@ resource "kubernetes_service_account" "privatek8s_sponsorship_jenkins_release_ag
     namespace = kubernetes_namespace.privatek8s_sponsorship["jenkins-release-agents"].metadata[0].name
 
     annotations = {
-      "azure.workload.identity/client-id" = azurerm_user_assigned_identity.release_ci_jenkins_io_agents.client_id,
+      "azure.workload.identity/client-id" = azurerm_user_assigned_identity.release_ci_jenkins_io_agents_sponsorship.client_id,
     }
   }
 }
@@ -544,8 +544,8 @@ resource "azurerm_federated_identity_credential" "privatek8s_sponsorship_jenkins
   audience = ["api://AzureADTokenExchange"]
   issuer   = azurerm_kubernetes_cluster.privatek8s_sponsorship.oidc_issuer_url
   # RG must be the same for both the UAID and the federated ID (otherwise you get HTTP/404 during the "apply" phase)
-  resource_group_name = azurerm_user_assigned_identity.release_ci_jenkins_io_agents.resource_group_name
-  parent_id           = azurerm_user_assigned_identity.release_ci_jenkins_io_agents.id
+  resource_group_name = azurerm_user_assigned_identity.release_ci_jenkins_io_agents_sponsorship.resource_group_name
+  parent_id           = azurerm_user_assigned_identity.release_ci_jenkins_io_agents_sponsorship.id
   subject             = "system:serviceaccount:${kubernetes_namespace.privatek8s_sponsorship["jenkins-release-agents"].metadata[0].name}:${kubernetes_service_account.privatek8s_sponsorship_jenkins_release_agents.metadata[0].name}"
 }
 ## End of release.ci.jenkins.io agents
