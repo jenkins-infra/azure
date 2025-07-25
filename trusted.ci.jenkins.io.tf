@@ -499,22 +499,6 @@ resource "azurerm_dns_a_record" "trusted_bounce" {
 ## Private network resources (endpoint, DNS, etc.)
 ####################################################################################
 ## updates.jenkins.io's internal services (RsyncDs, mirrorbits CLI, etc.)
-moved {
-  from = module.trustedci_permanent_agent_private_resources.azurerm_private_dns_a_record.dns_record
-  to   = module.trusted_ci_to_publick8s.azurerm_private_dns_a_record.dns_record
-}
-moved {
-  from = module.trustedci_permanent_agent_private_resources.azurerm_private_dns_zone_virtual_network_link.dns_vnet_link[0]
-  to   = module.trusted_ci_to_publick8s.azurerm_private_dns_zone_virtual_network_link.dns_vnet_link[0]
-}
-moved {
-  from = module.trustedci_permanent_agent_private_resources.azurerm_private_endpoint.pe
-  to   = module.trusted_ci_to_publick8s.azurerm_private_endpoint.pe
-}
-moved {
-  from = module.trustedci_permanent_agent_private_resources.azurerm_private_dns_zone.dnszone[0]
-  to   = module.trusted_ci_to_publick8s.azurerm_private_dns_zone.dnszone[0]
-}
 module "trusted_ci_to_publick8s" {
   source = "./modules/private-resources"
 
