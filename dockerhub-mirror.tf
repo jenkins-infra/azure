@@ -81,6 +81,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "dockerhub_mirror" {
   tags                 = local.default_tags
 }
 
+## TODO: factorize and simplify RBAC policy with other keyvaults
 #trivy:ignore:avd-azu-0016
 resource "azurerm_key_vault" "dockerhub_mirror" {
   name                = "dockerhubmirror"
@@ -94,11 +95,62 @@ resource "azurerm_key_vault" "dockerhub_mirror" {
   enabled_for_deployment          = true
   enabled_for_disk_encryption     = true
   enabled_for_template_deployment = true
-  public_network_access_enabled   = false
-
+  # Adding a network rule with `public_network_access_enabled` set to `true` (default) selects the option "Enabled from selected virtual networks and IP addresses"
+  public_network_access_enabled = true
+  # Adding a network rule with `public_network_access_enabled` set to `true` (default) selects the option "Enabled from selected virtual networks and IP addresses"
   network_acls {
-    bypass         = "AzureServices"
-    default_action = "Deny"
+    bypass                     = "AzureServices"
+    default_action             = "Deny"
+    virtual_network_subnet_ids = local.app_subnets["infra.ci.jenkins.io"].agents
+  }
+
+  # smerle
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = "0a9ca009-8333-4351-9a8a-b02244ff72b1"
+
+    key_permissions = [
+      "Encrypt",
+      "Decrypt",
+    ]
+  }
+
+  # dduportal
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = "8bb006a6-3d5f-45e0-be59-91af3db79da3"
+
+    key_permissions = [
+      "Decrypt",
+      "Encrypt",
+    ]
+  }
+
+  # tim jacomb
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = "62ea8f6b-2604-46a6-b1cf-d2aaa15ba0c6"
+
+    key_permissions = [
+      "Decrypt",
+      "Encrypt",
+    ]
+  }
+
+  # infra
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = "cfcd6abd-898d-417b-8474-fc1d93705cce"
+
+    key_permissions = [
+      "Get",
+      "List",
+      "Purge",
+      "Decrypt",
+      "Encrypt",
+      "Verify",
+      "Sign",
+    ]
   }
 
   sku_name = "standard"
