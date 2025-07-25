@@ -63,8 +63,8 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_linuxpool" {
-  name     = "linuxpool"
-  vm_size  = "Standard_D4ads_v5"
+  name    = "linuxpool"
+  vm_size = "Standard_D4ads_v5"
   upgrade_settings {
     max_surge = "10%"
   }
@@ -88,8 +88,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_linuxpool" {
 
 # nodepool dedicated for the infra.ci.jenkins.io controller
 resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_infracictrl" {
-  name     = "infracictrl"
-  vm_size  = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
+  name    = "infracictrl"
+  vm_size = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
   upgrade_settings {
     max_surge = "10%"
   }
@@ -117,8 +117,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_infracictrl" {
 
 # nodepool dedicated for the release.ci.jenkins.io controller
 resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_releacictrl" {
-  name     = "releacictrl"
-  vm_size  = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
+  name    = "releacictrl"
+  vm_size = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
   upgrade_settings {
     max_surge = "10%"
   }
@@ -145,8 +145,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_releacictrl" {
 }
 resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_releasepool" {
 
-  name     = "releasepool"
-  vm_size  = "Standard_D8ads_v5" # 8 vCPU 32 GiB RAM
+  name    = "releasepool"
+  vm_size = "Standard_D8ads_v5" # 8 vCPU 32 GiB RAM
   upgrade_settings {
     max_surge = "10%"
   }
