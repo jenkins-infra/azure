@@ -314,7 +314,7 @@ resource "kubernetes_secret" "privatek8s_core_packages" {
 
   metadata {
     name      = "core-packages"
-    namespace = kubernetes_namespace.privatek8s["jenkins-release-agents"].metadata[0].name
+    namespace = kubernetes_namespace.privatek8s["release-ci-jenkins-io-agents"].metadata[0].name
   }
 
   data = {
@@ -373,8 +373,8 @@ resource "kubernetes_persistent_volume" "privatek8s_core_packages" {
           shareName     = each.value["share_name"]
         }
         node_stage_secret_ref {
-          name      = kubernetes_secret.core_packages.metadata[0].name
-          namespace = kubernetes_secret.core_packages.metadata[0].namespace
+          name      = kubernetes_secret.privatek8s_core_packages.metadata[0].name
+          namespace = kubernetes_secret.privatek8s_core_packages.metadata[0].namespace
         }
       }
     }
@@ -387,7 +387,7 @@ resource "kubernetes_persistent_volume_claim" "privatek8s_core_packages" {
 
   metadata {
     name      = "${each.key}-core-packages"
-    namespace = kubernetes_secret.core_packages.metadata[0].namespace
+    namespace = kubernetes_secret.privatek8s_core_packages.metadata[0].namespace
   }
   spec {
     access_modes       = kubernetes_persistent_volume.privatek8s_core_packages[each.key].spec[0].access_modes
@@ -427,7 +427,7 @@ resource "kubernetes_persistent_volume_claim" "privatek8s_infra_ci_jenkins_io_da
 
   metadata {
     name      = "infra-ci-jenkins-io-data"
-    namespace = kubernetes_namespace.privatek8s["jenkins-infra"].metadata.0.name
+    namespace = kubernetes_namespace.privatek8s["infra-ci-jenkins-io"].metadata.0.name
   }
   spec {
     access_modes       = kubernetes_persistent_volume.privatek8s_infra_ci_jenkins_io_data.spec.0.access_modes
@@ -463,7 +463,7 @@ resource "kubernetes_persistent_volume" "privatek8s_release_ci_jenkins_io_data" 
   }
 }
 resource "kubernetes_namespace" "privatek8s" {
-  for_each = toset(["jenkins-release", "jenkins-infra", "jenkins-release-agents"])
+  for_each = toset(["release-ci-jenkins-io", "infra-ci-jenkins-io", "release-ci-jenkins-io-agents"])
   provider = kubernetes.privatek8s
   metadata {
     name = each.key
@@ -477,7 +477,7 @@ resource "kubernetes_persistent_volume_claim" "privatek8s_release_ci_jenkins_io_
 
   metadata {
     name      = "release-ci-jenkins-io-data"
-    namespace = kubernetes_namespace.privatek8s["jenkins-release"].metadata.0.name
+    namespace = kubernetes_namespace.privatek8s["release-ci-jenkins-io"].metadata.0.name
   }
   spec {
     access_modes       = kubernetes_persistent_volume.privatek8s_release_ci_jenkins_io_data.spec.0.access_modes
@@ -501,7 +501,7 @@ resource "kubernetes_service_account" "privatek8s_infra_ci_jenkins_io_controller
 
   metadata {
     name      = "infra-ci-jenkins-io-controller"
-    namespace = kubernetes_namespace.privatek8s["jenkins-infra"].metadata[0].name
+    namespace = kubernetes_namespace.privatek8s["infra-ci-jenkins-io"].metadata[0].name
 
     annotations = {
       "azure.workload.identity/client-id" = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.client_id,
@@ -515,7 +515,7 @@ resource "azurerm_federated_identity_credential" "privatek8s_infra_ci_jenkins_io
   parent_id = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.id
   # RG must be the same for both the UAID and the federated ID (otherwise you get HTTP/404 during the "apply" phase)
   resource_group_name = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.resource_group_name
-  subject             = "system:serviceaccount:${kubernetes_namespace.privatek8s["jenkins-infra"].metadata[0].name}:${kubernetes_service_account.privatek8s_infra_ci_jenkins_io_controller.metadata[0].name}"
+  subject             = "system:serviceaccount:${kubernetes_namespace.privatek8s["infra-ci-jenkins-io"].metadata[0].name}:${kubernetes_service_account.privatek8s_infra_ci_jenkins_io_controller.metadata[0].name}"
 }
 ## End of infra.ci
 
@@ -525,7 +525,7 @@ resource "kubernetes_service_account" "privatek8s_release_ci_jenkins_io_agents" 
 
   metadata {
     name      = "release-ci-jenkins-io-agents"
-    namespace = kubernetes_namespace.privatek8s["jenkins-release-agents"].metadata[0].name
+    namespace = kubernetes_namespace.privatek8s["release-ci-jenkins-io-agents"].metadata[0].name
 
     annotations = {
       "azure.workload.identity/client-id" = azurerm_user_assigned_identity.release_ci_jenkins_io_agents.client_id,
@@ -539,7 +539,7 @@ resource "azurerm_federated_identity_credential" "privatek8s_release_ci_jenkins_
   # RG must be the same for both the UAID and the federated ID (otherwise you get HTTP/404 during the "apply" phase)
   parent_id           = azurerm_user_assigned_identity.release_ci_jenkins_io_agents.id
   resource_group_name = azurerm_user_assigned_identity.release_ci_jenkins_io_agents.resource_group_name
-  subject             = "system:serviceaccount:${kubernetes_namespace.privatek8s["jenkins-release-agents"].metadata[0].name}:${kubernetes_service_account.privatek8s_release_ci_jenkins_io_agents.metadata[0].name}"
+  subject             = "system:serviceaccount:${kubernetes_namespace.privatek8s["release-ci-jenkins-io-agents"].metadata[0].name}:${kubernetes_service_account.privatek8s_release_ci_jenkins_io_agents.metadata[0].name}"
 }
 ## End of release.ci.jenkins.io agents
 ### End of  Workload Identity Resources
