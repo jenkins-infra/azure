@@ -519,7 +519,19 @@ resource "azurerm_federated_identity_credential" "privatek8s_infra_ci_jenkins_io
 }
 ## End of infra.ci
 
-## For release.ci.jenkins.io agents
+## For release.ci.jenkins.io
+resource "kubernetes_service_account" "privatek8s_release_ci_jenkins_io_controller" {
+  provider = kubernetes.privatek8s
+
+  metadata {
+    name      = "release-ci-jenkins-io-controller"
+    namespace = kubernetes_namespace.privatek8s["release-ci-jenkins-io"].metadata[0].name
+
+    annotations = {
+      "azure.workload.identity/client-id" = azurerm_user_assigned_identity.release_ci_jenkins_io_controller.client_id,
+    }
+  }
+}
 resource "kubernetes_service_account" "privatek8s_release_ci_jenkins_io_agents" {
   provider = kubernetes.privatek8s
 
