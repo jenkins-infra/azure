@@ -78,10 +78,8 @@ module "infra_ci_jenkins_io_azurevm_agents" {
   ephemeral_agents_network_name    = data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.virtual_network_name
   ephemeral_agents_subnet_name     = data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.name
   controller_rg_name               = azurerm_resource_group.infra_ci_jenkins_io_controller.name
-  controller_ips                   = data.azurerm_subnet.privatek8s_sponsorship_infra_ci_controller_tier.address_prefixes # Pod IPs: controller IP may change in the pods IP subnet
+  controller_ips                   = data.azurerm_subnet.privatek8s_infra_ci_controller_tier.address_prefixes # Pod IPs: controller IP may change in the pods IP subnet
   controller_service_principal_id  = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id
-  ## TODO: remove once sponsored subscription agent are cleaned up if credential-less works
-  # additional_identities            = [azurerm_user_assigned_identity.infra_ci_jenkins_io.principal_id]
 
   default_tags = local.default_tags
 
@@ -391,84 +389,3 @@ resource "azurerm_key_vault" "infra_ci_jenkins_io_vault" {
     ]
   }
 }
-
-#### TODO: resources to remove once privatek8s is migrated to CDF subscription
-resource "azurerm_managed_disk" "infra_ci_jenkins_io_data_import" {
-  name                 = "infra-ci-jenkins-io-data-import"
-  location             = azurerm_resource_group.infra_ci_jenkins_io_controller.location
-  resource_group_name  = azurerm_resource_group.infra_ci_jenkins_io_controller.name
-  storage_account_type = "StandardSSD_ZRS"
-  create_option        = "Copy"
-  source_resource_id   = "/subscriptions/1311c09f-aee0-4d6c-99a4-392c2b543204/resourceGroups/backup-sponsorhip/providers/Microsoft.Compute/snapshots/infra.ci-data-20250729-06h42Z"
-  disk_size_gb         = 64
-  tags                 = local.default_tags
-}
-resource "kubernetes_persistent_volume" "privatek8s_infra_ci_jenkins_io_data_import" {
-  provider = kubernetes.privatek8s
-
-  metadata {
-    name = "infra-ci-jenkins-io-data-import"
-  }
-  spec {
-    capacity = {
-      storage = "${azurerm_managed_disk.infra_ci_jenkins_io_data_import.disk_size_gb}Gi"
-    }
-    access_modes                     = ["ReadWriteOnce"]
-    persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = kubernetes_storage_class.privatek8s_statically_provisioned.id
-    persistent_volume_source {
-      csi {
-        driver        = "disk.csi.azure.com"
-        volume_handle = azurerm_managed_disk.infra_ci_jenkins_io_data_import.id
-      }
-    }
-  }
-}
-resource "kubernetes_persistent_volume_claim" "privatek8s_infra_ci_jenkins_io_data_import" {
-  provider = kubernetes.privatek8s
-
-  metadata {
-    name      = "infra-ci-jenkins-io-data-import"
-    namespace = kubernetes_namespace.privatek8s["infra-ci-jenkins-io"].metadata.0.name
-  }
-  spec {
-    access_modes       = kubernetes_persistent_volume.privatek8s_infra_ci_jenkins_io_data_import.spec.0.access_modes
-    volume_name        = kubernetes_persistent_volume.privatek8s_infra_ci_jenkins_io_data_import.metadata.0.name
-    storage_class_name = kubernetes_persistent_volume.privatek8s_infra_ci_jenkins_io_data_import.spec.0.storage_class_name
-    resources {
-      requests = {
-        storage = "${azurerm_managed_disk.infra_ci_jenkins_io_data_import.disk_size_gb}Gi"
-      }
-    }
-  }
-}
-resource "azurerm_resource_group" "infra_ci_jenkins_io_controller_jenkins_sponsorship" {
-  provider = azurerm.jenkins-sponsorship
-  name     = "infra-ci-jenkins-io-controller"
-  location = var.location
-  tags     = local.default_tags
-}
-resource "azurerm_managed_disk" "jenkins_infra_data_sponsorship" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "jenkins-infra-data"
-  location             = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.location
-  resource_group_name  = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.name
-  storage_account_type = "StandardSSD_ZRS"
-  create_option        = "Empty"
-  disk_size_gb         = 64
-  tags                 = local.default_tags
-}
-# Required to allow AKS CSI driver to access the Azure disk
-resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_sponsorship_disk_reader" {
-  provider = azurerm.jenkins-sponsorship
-  name     = "ReadInfraCISponsorshipDisk"
-  scope    = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsorship.id
-
-  permissions {
-    actions = [
-      "Microsoft.Compute/disks/read",
-      "Microsoft.Compute/disks/write",
-    ]
-  }
-}
-####

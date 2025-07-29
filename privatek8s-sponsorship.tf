@@ -89,36 +89,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_linuxpoo
   tags = local.default_tags
 }
 
-# nodepool dedicated for the infra.ci.jenkins.io controller
-resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_infracictrl" {
-  provider = azurerm.jenkins-sponsorship
-  name     = "infracictrl"
-  vm_size  = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
-  upgrade_settings {
-    max_surge = "10%"
-  }
-  os_sku                = "AzureLinux"
-  os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
-  orchestrator_version  = local.aks_clusters["privatek8s_sponsorship"].kubernetes_version
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s_sponsorship.id
-  auto_scaling_enabled  = true
-  min_count             = 1
-  max_count             = 2
-  zones                 = [2, 3]
-  vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsorship_infra_ci_controller_tier.id
-
-  node_taints = [
-    "jenkins=infra.ci.jenkins.io:NoSchedule",
-    "jenkins-component=controller:NoSchedule"
-  ]
-  lifecycle {
-    ignore_changes = [node_count]
-  }
-
-  tags = local.default_tags
-}
-
 # nodepool dedicated for the release.ci.jenkins.io controller
 resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releacictrl" {
   provider = azurerm.jenkins-sponsorship
@@ -212,7 +182,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsorship_releasep
 resource "azurerm_role_assignment" "privatek8s_sponsorship_subnets_networkcontributor" {
   for_each = toset([
     data.azurerm_subnet.privatek8s_sponsorship_tier.id,
-    data.azurerm_subnet.privatek8s_sponsorship_infra_ci_controller_tier.id,
     data.azurerm_subnet.privatek8s_sponsorship_release_ci_controller_tier.id,
     data.azurerm_subnet.privatek8s_sponsorship_release_tier.id,
   ])
@@ -408,46 +377,6 @@ resource "kubernetes_persistent_volume_claim" "privatek8s_sponsorship_core_packa
     }
   }
 }
-# Persistent Volumes for infra.ci controller
-resource "kubernetes_persistent_volume" "jenkins_infra_data_sponsorship" {
-  provider = kubernetes.privatek8s_sponsorship
-
-  metadata {
-    name = "jenkins-infra-data"
-  }
-  spec {
-    capacity = {
-      storage = "${azurerm_managed_disk.jenkins_infra_data_sponsorship.disk_size_gb}Gi"
-    }
-    access_modes                     = ["ReadWriteOnce"]
-    persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = kubernetes_storage_class.privatek8s_sponsorship_statically_provisioned.id
-    persistent_volume_source {
-      csi {
-        driver        = "disk.csi.azure.com"
-        volume_handle = azurerm_managed_disk.jenkins_infra_data_sponsorship.id
-      }
-    }
-  }
-}
-resource "kubernetes_persistent_volume_claim" "jenkins_infra_data_sponsorship" {
-  provider = kubernetes.privatek8s_sponsorship
-
-  metadata {
-    name      = "jenkins-infra-data"
-    namespace = kubernetes_namespace.privatek8s_sponsorship["jenkins-infra"].metadata.0.name
-  }
-  spec {
-    access_modes       = kubernetes_persistent_volume.jenkins_infra_data_sponsorship.spec.0.access_modes
-    volume_name        = kubernetes_persistent_volume.jenkins_infra_data_sponsorship.metadata.0.name
-    storage_class_name = kubernetes_persistent_volume.jenkins_infra_data_sponsorship.spec.0.storage_class_name
-    resources {
-      requests = {
-        storage = "${azurerm_managed_disk.jenkins_infra_data_sponsorship.disk_size_gb}Gi"
-      }
-    }
-  }
-}
 # Persistent Volumes for release.ci controller
 resource "kubernetes_persistent_volume" "jenkins_release_data_sponsorship" {
   provider = kubernetes.privatek8s_sponsorship
@@ -500,30 +429,6 @@ resource "kubernetes_persistent_volume_claim" "jenkins_release_data_sponsorship"
 }
 
 ### Workload Identity Resources
-
-## For infra.ci.jenkins.io controllerinfracijenkinsio_agents_2_infra_ci_jenkins_io_agents
-resource "kubernetes_service_account" "privatek8s_sponsorship_jenkins_infra_controller" {
-  provider = kubernetes.privatek8s_sponsorship
-
-  metadata {
-    name      = "jenkins-infra-controller"
-    namespace = kubernetes_namespace.privatek8s_sponsorship["jenkins-infra"].metadata[0].name
-
-    annotations = {
-      "azure.workload.identity/client-id" = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.client_id,
-    }
-  }
-}
-resource "azurerm_federated_identity_credential" "privatek8s_sponsorship_infra_ci_jenkins_io_controller" {
-  name     = "privatek8s-sponsorship-${kubernetes_service_account.privatek8s_sponsorship_jenkins_infra_controller.metadata[0].name}"
-  audience = ["api://AzureADTokenExchange"]
-  issuer   = azurerm_kubernetes_cluster.privatek8s_sponsorship.oidc_issuer_url
-  # RG must be the same for both the UAID and the federated ID (otherwise you get HTTP/404 during the "apply" phase)
-  resource_group_name = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.resource_group_name
-  parent_id           = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.id
-  subject             = "system:serviceaccount:${kubernetes_namespace.privatek8s_sponsorship["jenkins-infra"].metadata[0].name}:${kubernetes_service_account.privatek8s_sponsorship_jenkins_infra_controller.metadata[0].name}"
-}
-## End of infra.ci
 
 ## For release.ci.jenkins.io agents
 resource "kubernetes_service_account" "privatek8s_sponsorship_jenkins_release_agents" {
