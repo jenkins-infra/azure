@@ -3,7 +3,11 @@ resource "azurerm_resource_group" "release_ci_jenkins_io_controller" {
   location = var.location
   tags     = local.default_tags
 }
-
+resource "azurerm_user_assigned_identity" "release_ci_jenkins_io_controller" {
+  location            = azurerm_resource_group.release_ci_jenkins_io_controller.location
+  name                = "releasecijenkinsiocontroller"
+  resource_group_name = azurerm_resource_group.release_ci_jenkins_io_controller.name
+}
 resource "azurerm_managed_disk" "release_ci_jenkins_io_data" {
   name                 = "release-ci-jenkins-io-data"
   location             = azurerm_resource_group.release_ci_jenkins_io_controller.location
