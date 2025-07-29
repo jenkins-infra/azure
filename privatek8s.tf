@@ -150,6 +150,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_releasepool" {
   upgrade_settings {
     max_surge = "10%"
   }
+  os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
   os_disk_size_gb       = 300 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
   orchestrator_version  = local.aks_clusters["privatek8s"].kubernetes_version

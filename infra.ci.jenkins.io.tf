@@ -201,7 +201,7 @@ resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_disk_reader" 
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_controller_disk_reader" {
   scope              = azurerm_resource_group.infra_ci_jenkins_io_controller.id
   role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_disk_reader.role_definition_resource_id
-  principal_id       = azurerm_kubernetes_cluster.privatek8s_sponsorship.identity[0].principal_id
+  principal_id       = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
 }
 
 ## Allow access to/from ACR endpoint
