@@ -102,7 +102,7 @@ locals {
       ],
     },
     "infra.ci.jenkins.io" = {
-      "controller" = [data.azurerm_subnet.privatek8s_sponsorship_infra_ci_controller_tier.id],
+      "controller" = [data.azurerm_subnet.privatek8s_infra_ci_controller_tier.id],
       "agents" = [
         # VM agents (CDF subscription)
         data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.id,
