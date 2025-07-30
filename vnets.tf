@@ -120,22 +120,3 @@ data "azurerm_subnet" "privatek8s_release_ci_controller_tier" {
   resource_group_name  = data.azurerm_resource_group.private.name
   virtual_network_name = data.azurerm_virtual_network.private.name
 }
-
-
-#### TODO: remove resources below as part of cleanup in https://github.com/jenkins-infra/helpdesk/issues/4690
-data "azurerm_resource_group" "private_sponsorship" {
-  provider = azurerm.jenkins-sponsorship
-  name     = "private-sponsorship"
-}
-data "azurerm_virtual_network" "private_sponsorship" {
-  provider            = azurerm.jenkins-sponsorship
-  name                = "${data.azurerm_resource_group.private_sponsorship.name}-vnet"
-  resource_group_name = data.azurerm_resource_group.private_sponsorship.name
-}
-data "azurerm_subnet" "privatek8s_sponsorship_tier" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "privatek8s-sponsorship-tier"
-  resource_group_name  = data.azurerm_resource_group.private_sponsorship.name
-  virtual_network_name = data.azurerm_virtual_network.private_sponsorship.name
-}
-####

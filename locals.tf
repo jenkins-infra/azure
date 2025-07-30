@@ -54,12 +54,6 @@ locals {
       # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
       pod_cidr = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
     },
-    "privatek8s_sponsorship" = {
-      name               = "privatek8s-sponsorship",
-      kubernetes_version = "1.31.6",
-      # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
-      pod_cidr = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
-    },
     "privatek8s" = {
       name               = "privatek8s",
       kubernetes_version = "1.31.6",
@@ -86,9 +80,6 @@ locals {
     "privatek8s" = {
       cluster_hostname = "https://${azurerm_kubernetes_cluster.privatek8s.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
     },
-    "privatek8s_sponsorship" = {
-      cluster_hostname = "https://${azurerm_kubernetes_cluster.privatek8s_sponsorship.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
-    },
   }
 
   end_dates = yamldecode(data.local_file.locals_yaml.content).end_dates
@@ -97,7 +88,7 @@ locals {
     "release.ci.jenkins.io" = {
       "controller" = [data.azurerm_subnet.privatek8s_release_ci_controller_tier.id],
       "agents" = [
-        # Container agents (sponsored subscription)
+        # Container agents
         data.azurerm_subnet.privatek8s_release_tier.id,
       ],
     },

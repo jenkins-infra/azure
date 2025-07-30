@@ -14,12 +14,6 @@ resource "azurerm_resource_group" "prod_public_ips" {
   location = var.location
   tags     = local.default_tags
 }
-resource "azurerm_resource_group" "prod_public_ips_sponsorship" {
-  provider = azurerm.jenkins-sponsorship
-  name     = "prod-public-ips-sponsorship"
-  location = var.location
-  tags     = local.default_tags
-}
 
 data "azurerm_client_config" "current" {
 }
