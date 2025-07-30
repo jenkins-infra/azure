@@ -113,7 +113,6 @@ resource "azurerm_role_assignment" "privatek8s_sponsorship_publicip_networkcontr
   skip_service_principal_aad_check = true
 }
 
-
 # Used later by the load balancer deployed on the cluster
 # Use case is to allow incoming webhooks
 resource "azurerm_public_ip" "privatek8s_sponsorship" {
@@ -124,61 +123,4 @@ resource "azurerm_public_ip" "privatek8s_sponsorship" {
   allocation_method   = "Static"
   sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
   tags                = local.default_tags
-}
-resource "azurerm_management_lock" "privatek8s_sponsorship_publicip" {
-  provider   = azurerm.jenkins-sponsorship
-  name       = "public-privatek8s-publicip"
-  scope      = azurerm_public_ip.privatek8s_sponsorship.id
-  lock_level = "CanNotDelete"
-  notes      = "Locked because this is a sensitive resource that should not be removed when privatek8s-sponsorship is removed"
-}
-
-resource "azurerm_dns_a_record" "privatek8s_sponsorship_public" {
-  name                = "public.privatek8s-sponsorship"
-  zone_name           = data.azurerm_dns_zone.jenkinsio.name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 300
-  records             = [azurerm_public_ip.privatek8s_sponsorship.ip_address]
-  tags                = local.default_tags
-}
-
-resource "azurerm_dns_a_record" "privatek8s_sponsorship_private" {
-  name                = "private.privatek8s-sponsorship"
-  zone_name           = data.azurerm_dns_zone.jenkinsio.name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 300
-  records = [
-    # Let's specify an IP at the end of the range to have low probability of being used
-    cidrhost(
-      data.azurerm_subnet.privatek8s_sponsorship_tier.address_prefixes[0],
-      -2,
-    )
-  ]
-  tags = local.default_tags
-}
-
-# Used by all the controller (for their Jenkins Home PVCs)
-resource "kubernetes_storage_class" "privatek8s_sponsorship_statically_provisioned" {
-  provider = kubernetes.privatek8s_sponsorship
-  metadata {
-    name = "statically-provisioned"
-  }
-  storage_provisioner    = "disk.csi.azure.com"
-  reclaim_policy         = "Retain"
-  allow_volume_expansion = true
-}
-
-# Configure the jenkins-infra/kubernetes-management admin service account
-module "privatek8s_sponsorship_admin_sa" {
-  providers = {
-    kubernetes = kubernetes.privatek8s_sponsorship
-  }
-  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
-  cluster_name               = azurerm_kubernetes_cluster.privatek8s_sponsorship.name
-  cluster_hostname           = local.aks_clusters_outputs.privatek8s_sponsorship.cluster_hostname
-  cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.privatek8s_sponsorship.kube_config.0.cluster_ca_certificate
-}
-output "kubeconfig_management_privatek8s_sponsorship" {
-  sensitive = true
-  value     = module.privatek8s_sponsorship_admin_sa.kubeconfig
 }
