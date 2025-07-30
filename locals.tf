@@ -95,10 +95,10 @@ locals {
 
   app_subnets = {
     "release.ci.jenkins.io" = {
-      "controller" = [data.azurerm_subnet.privatek8s_sponsorship_release_ci_controller_tier.id],
+      "controller" = [data.azurerm_subnet.privatek8s_release_ci_controller_tier.id],
       "agents" = [
         # Container agents (sponsored subscription)
-        data.azurerm_subnet.privatek8s_sponsorship_release_tier.id,
+        data.azurerm_subnet.privatek8s_release_tier.id,
       ],
     },
     "infra.ci.jenkins.io" = {

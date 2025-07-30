@@ -138,16 +138,4 @@ data "azurerm_subnet" "privatek8s_sponsorship_tier" {
   resource_group_name  = data.azurerm_resource_group.private_sponsorship.name
   virtual_network_name = data.azurerm_virtual_network.private_sponsorship.name
 }
-data "azurerm_subnet" "privatek8s_sponsorship_release_tier" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "privatek8s-sponsorship-release-tier"
-  resource_group_name  = data.azurerm_resource_group.private_sponsorship.name
-  virtual_network_name = data.azurerm_virtual_network.private_sponsorship.name
-}
-data "azurerm_subnet" "privatek8s_sponsorship_release_ci_controller_tier" {
-  provider             = azurerm.jenkins-sponsorship
-  name                 = "privatek8s-sponsorship-releaseci-ctrl-tier"
-  resource_group_name  = data.azurerm_resource_group.private_sponsorship.name
-  virtual_network_name = data.azurerm_virtual_network.private_sponsorship.name
-}
 ####
