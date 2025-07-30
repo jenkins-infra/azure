@@ -20,8 +20,6 @@ resource "azurerm_storage_account" "archives" {
       [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value],
     ))
     virtual_network_subnet_ids = concat(
-      # TODO: check if still needed? (used to be infra.ci container agents when they were in the privatek8s cluster)
-      [data.azurerm_subnet.privatek8s_sponsorship_tier.id],
       # Required for managing the resource
       local.app_subnets["infra.ci.jenkins.io"].agents,
     )
