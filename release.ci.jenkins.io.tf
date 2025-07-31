@@ -81,52 +81,28 @@ resource "azurerm_key_vault" "prodreleasecore" {
     virtual_network_subnet_ids = local.app_subnets["release.ci.jenkins.io"].agents
   }
 
-  access_policy = [
-    {
-      application_id = null
-      certificate_permissions = [
-        "Get",
-        "List",
-        "Update",
-        "Create",
-        "Import",
-        "Delete",
-        "Recover",
-        "Backup",
-        "Restore",
-        "ManageContacts",
-        "ManageIssuers",
-        "GetIssuers",
-        "ListIssuers",
-        "SetIssuers",
-        "DeleteIssuers",
-      ]
-      key_permissions = [
-        "Get",
-        "List",
-        "Update",
-        "Create",
-        "Import",
-        "Delete",
-        "Recover",
-        "Backup",
-        "Restore",
-        "GetRotationPolicy",
-        "SetRotationPolicy",
-        "Rotate",
-      ]
-      object_id = "8bb006a6-3d5f-45e0-be59-91af3db79da3"
-      secret_permissions = [
-        "Get",
-        "List",
-        "Set",
-        "Delete",
-        "Recover",
-        "Backup",
-        "Restore",
-      ]
-      storage_permissions = []
-      tenant_id           = "4c45fef2-1ba7-4120-80a0-9e2d03e9c2b6"
-    },
-  ]
+  # releasecore Entra Application
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = "b6d73004-673f-4099-aa80-30e6e9dae314"
+
+    certificate_permissions = [
+      "Get",
+      "List",
+      "GetIssuers",
+      "ListIssuers",
+    ]
+
+    key_permissions = [
+      "Get",
+      "List",
+      "Decrypt",
+      "Verify",
+      "Encrypt",
+    ]
+    secret_permissions = [
+      "Get",
+      "List",
+    ]
+  }
 }
