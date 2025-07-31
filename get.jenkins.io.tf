@@ -42,7 +42,6 @@ resource "azurerm_storage_account" "get_jenkins_io" {
   }
 }
 
-
 resource "azurerm_storage_share" "get_jenkins_io" {
   name               = "mirrorbits"
   storage_account_id = azurerm_storage_account.get_jenkins_io.id

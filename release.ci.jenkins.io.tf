@@ -45,3 +45,64 @@ resource "azurerm_role_assignment" "release_ci_jenkins_io_azurevm_agents_write_b
   role_definition_name = "Storage File Data Privileged Contributor"
   principal_id         = azurerm_user_assigned_identity.release_ci_jenkins_io_agents.principal_id
 }
+
+import {
+  to = azurerm_resource_group.prodreleasecore
+  id = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/prodreleasecore"
+}
+resource "azurerm_resource_group" "prodreleasecore" {
+  name     = "prodreleasecore"
+  location = var.location
+  tags     = local.default_tags
+}
+import {
+  to = azurerm_key_vault.prodreleasecore
+  id = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/prodreleasecore/providers/Microsoft.KeyVault/vaults/prodreleasecore"
+}
+resource "azurerm_key_vault" "prodreleasecore" {
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  name                = "prodreleasecore"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.prodreleasecore.name
+  sku_name            = "standard"
+
+  enabled_for_disk_encryption     = false
+  soft_delete_retention_days      = 90
+  purge_protection_enabled        = false
+  enable_rbac_authorization       = false
+  enabled_for_deployment          = false
+  enabled_for_template_deployment = false
+  # Adding a network rule with `public_network_access_enabled` set to `true` (default) selects the option "Enabled from selected virtual networks and IP addresses"
+  public_network_access_enabled = true
+  # Adding a network rule with `public_network_access_enabled` set to `true` (default) selects the option "Enabled from selected virtual networks and IP addresses"
+  network_acls {
+    bypass                     = "AzureServices"
+    default_action             = "Deny"
+    virtual_network_subnet_ids = local.app_subnets["release.ci.jenkins.io"].agents
+  }
+
+  # releasecore Entra Application
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = "b6d73004-673f-4099-aa80-30e6e9dae314"
+
+    certificate_permissions = [
+      "Get",
+      "List",
+      "GetIssuers",
+      "ListIssuers",
+    ]
+
+    key_permissions = [
+      "Get",
+      "List",
+      "Decrypt",
+      "Verify",
+      "Encrypt",
+    ]
+    secret_permissions = [
+      "Get",
+      "List",
+    ]
+  }
+}
