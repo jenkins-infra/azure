@@ -46,18 +46,10 @@ resource "azurerm_role_assignment" "release_ci_jenkins_io_azurevm_agents_write_b
   principal_id         = azurerm_user_assigned_identity.release_ci_jenkins_io_agents.principal_id
 }
 
-import {
-  to = azurerm_resource_group.prodreleasecore
-  id = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/prodreleasecore"
-}
 resource "azurerm_resource_group" "prodreleasecore" {
   name     = "prodreleasecore"
   location = var.location
   tags     = local.default_tags
-}
-import {
-  to = azurerm_key_vault.prodreleasecore
-  id = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/prodreleasecore/providers/Microsoft.KeyVault/vaults/prodreleasecore"
 }
 resource "azurerm_key_vault" "prodreleasecore" {
   tenant_id           = data.azurerm_client_config.current.tenant_id
