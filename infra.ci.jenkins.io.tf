@@ -373,7 +373,7 @@ resource "azurerm_key_vault" "infra_ci_jenkins_io_vault" {
     ]
   }
 
-  # jenkinsinfrasops
+  # jenkinsinfraSOPS
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
     object_id = "cfcd6abd-898d-417b-8474-fc1d93705cce"
