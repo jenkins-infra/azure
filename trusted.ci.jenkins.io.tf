@@ -10,7 +10,7 @@ module "trusted_ci_jenkins_io" {
     azuread     = azuread
   }
 
-  service_fqdn                 = module.trusted_ci_jenkins_io_letsencrypt.zone_name
+  service_fqdn                 = azurerm_private_dns_zone.trusted_ci_jenkins_io.name
   location                     = data.azurerm_virtual_network.trusted_ci_jenkins_io.location
   admin_username               = local.admin_username
   admin_ssh_publickey          = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC5K7Ro7jBl5Kc68RdzG6EXHstIBFSxO5Da8SQJSMeCbb4cHTYuBBH8jNsAFcnkN64kEu+YhmlxaWEVEIrPgfGfs13ZL7v9p+Nt76tsz6gnVdAy2zCz607pAWe7p4bBn6T9zdZcBSnvjawO+8t/5ue4ngcfAjanN5OsOgLeD6yqVyP8YTERjW78jvp2TFrIYmgWMI5ES1ln32PQmRZwc1eAOsyGJW/YIBdOxaSkZ41qUvb9b3dCorGuCovpSK2EeNphjLPpVX/NRpVY4YlDqAcTCdLdDrEeVqkiA/VDCYNhudZTDa8f1iHwBE/GEtlKmoO6dxJ5LAkRk3RIVHYrmI6XXSw5l0tHhW5D12MNwzUfDxQEzBpGK5iSfOBt5zJ5OiI9ftnsq/GV7vCXfvMVGDLUC551P5/s/wM70QmHwhlGQNLNeJxRTvd6tL11bof3K+29ivFYUmpU17iVxYOWhkNY86WyngHU6Ux0zaczF3H6H0tpg1Ca/cFO428AVPw/RTJpcAe6OVKq5zwARNApQ/p6fJKUAdXap+PpQGZlQhPLkUbwtFXGTrpX9ePTcdzryCYjgrZouvy4ZMzruJiIbFUH8mRY3xVREVaIsJakruvgw3b14oQgcB4BwYVBBqi62xIvbRzAv7Su9t2jK6OR2z3sM/hLJRqIJ5oILMORa7XqrQ=="
@@ -122,7 +122,7 @@ module "trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer" {
 
 resource "azurerm_private_dns_a_record" "trusted_ci_controller" {
   name                = "@"
-  zone_name           = module.trusted_ci_to_publick8s.zone_name
+  zone_name           = azurerm_private_dns_zone.trusted_ci_jenkins_io.name
   resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
   ttl                 = 300
   records             = [module.trusted_ci_jenkins_io.controller_private_ipv4]
@@ -132,7 +132,7 @@ resource "azurerm_private_dns_a_record" "trusted_ci_controller" {
 ## Resources for the bounce (SSH bastion) VM
 ####################################################################################
 resource "azurerm_network_interface" "trusted_bounce" {
-  name                = "bounce.${module.trusted_ci_jenkins_io_letsencrypt.zone_name}"
+  name                = "bounce.${azurerm_private_dns_zone.trusted_ci_jenkins_io.name}"
   location            = data.azurerm_virtual_network.trusted_ci_jenkins_io.location
   resource_group_name = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   tags                = local.default_tags
@@ -144,7 +144,7 @@ resource "azurerm_network_interface" "trusted_bounce" {
   }
 }
 resource "azurerm_linux_virtual_machine" "trusted_bounce" {
-  name                            = "bounce.${module.trusted_ci_jenkins_io_letsencrypt.zone_name}"
+  name                            = "bounce.${azurerm_private_dns_zone.trusted_ci_jenkins_io.name}"
   resource_group_name             = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   location                        = data.azurerm_virtual_network.trusted_ci_jenkins_io.location
   size                            = "Standard_B1s"
@@ -161,12 +161,12 @@ resource "azurerm_linux_virtual_machine" "trusted_bounce" {
 
   user_data = base64encode(
     templatefile("./.shared-tools/terraform/cloudinit.tftpl", {
-      hostname       = "bounce.${module.trusted_ci_jenkins_io_letsencrypt.zone_name}",
+      hostname       = "bounce.${azurerm_private_dns_zone.trusted_ci_jenkins_io.name}",
       admin_username = local.admin_username
       }
     )
   )
-  computer_name = "bounce.${module.trusted_ci_jenkins_io_letsencrypt.zone_name}"
+  computer_name = "bounce.${azurerm_private_dns_zone.trusted_ci_jenkins_io.name}"
 
   # Encrypt all disks (ephemeral, temp dirs and data volumes) - https://learn.microsoft.com/en-us/azure/virtual-machines/disks-enable-host-based-encryption-portal?tabs=azure-powershell
   encryption_at_host_enabled = true
@@ -194,7 +194,7 @@ resource "azurerm_resource_group" "trusted_ci_jenkins_io_permanent_agents" {
   tags     = local.default_tags
 }
 resource "azurerm_network_interface" "trusted_permanent_agent" {
-  name                = "agent.${module.trusted_ci_jenkins_io_letsencrypt.zone_name}"
+  name                = "agent.${azurerm_private_dns_zone.trusted_ci_jenkins_io.name}"
   location            = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.location
   resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.name
   tags                = local.default_tags
@@ -206,7 +206,7 @@ resource "azurerm_network_interface" "trusted_permanent_agent" {
   }
 }
 resource "azurerm_linux_virtual_machine" "trusted_permanent_agent" {
-  name                            = "agent.${module.trusted_ci_jenkins_io_letsencrypt.zone_name}"
+  name                            = "agent.${azurerm_private_dns_zone.trusted_ci_jenkins_io.name}"
   resource_group_name             = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.name
   location                        = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.location
   tags                            = local.default_tags
@@ -224,11 +224,11 @@ resource "azurerm_linux_virtual_machine" "trusted_permanent_agent" {
 
   user_data = base64encode(
     templatefile("./.shared-tools/terraform/cloudinit.tftpl", {
-      hostname       = "agent.${module.trusted_ci_jenkins_io_letsencrypt.zone_name}",
+      hostname       = "agent.${azurerm_private_dns_zone.trusted_ci_jenkins_io.name}",
       admin_username = local.admin_username,
       }
   ))
-  computer_name = "agent.${module.trusted_ci_jenkins_io_letsencrypt.zone_name}"
+  computer_name = "agent.${azurerm_private_dns_zone.trusted_ci_jenkins_io.name}"
 
   # Encrypt all disks (ephemeral, temp dirs and data volumes) - https://learn.microsoft.com/en-us/azure/virtual-machines/disks-enable-host-based-encryption-portal?tabs=azure-powershell
   encryption_at_host_enabled = true
@@ -271,7 +271,7 @@ resource "azurerm_virtual_machine_data_disk_attachment" "trusted_permanent_agent
 }
 resource "azurerm_private_dns_a_record" "trusted_permanent_agent" {
   name                = "agent"
-  zone_name           = module.trusted_ci_to_publick8s.zone_name
+  zone_name           = azurerm_private_dns_zone.trusted_ci_jenkins_io.name
   resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
   ttl                 = 300
   records             = [azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address]
@@ -295,15 +295,12 @@ resource "azurerm_network_security_rule" "allow_out_from_trusted_all_to_uc" {
   source_port_range = "*"
   destination_port_ranges = [
     "22",   # SSH (for rsync)
-    "3390", # mirrorbits CLI (content-secured)
-    "3391", # mirrorbits CLI (content-unsecured)
+    "3390", # mirrorbits CLI (content)
   ]
   source_address_prefixes = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes
   destination_address_prefixes = [
-    # UC-data (rsync)
-    module.trusted_ci_to_publick8s.endpoint_ip,
-    # UC-cli (mirrorbits CLI)
-    azurerm_private_endpoint.updates_jio_mirrorbits_cli_for_trustedci.private_service_connection[0].private_ip_address
+    # Update Center (mirrorbits CLI, rsync, etc.)
+    azurerm_private_endpoint.updates_jenkins_io_for_trustedci.private_service_connection[0].private_ip_address,
   ]
   resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
@@ -403,15 +400,12 @@ resource "azurerm_network_security_rule" "allow_in_many_from_trusted_agents_to_u
   source_port_range = "*"
   destination_port_ranges = [
     "22",   # SSH (for rsync)
-    "3390", # mirrorbits CLI (content-secured)
-    "3391", # mirrorbits CLI (content-unsecured)
+    "3390", # mirrorbits CLI (content)
   ]
   source_address_prefixes = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes
   destination_address_prefixes = [
-    # UC-data (rsync)
-    module.trusted_ci_to_publick8s.endpoint_ip,
-    # UC-cli (mirrorbits CLI)
-    azurerm_private_endpoint.updates_jio_mirrorbits_cli_for_trustedci.private_service_connection[0].private_ip_address
+    # Update Center (mirrorbits CLI, rsync, etc.)
+    azurerm_private_endpoint.updates_jenkins_io_for_trustedci.private_service_connection[0].private_ip_address,
   ]
   resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
@@ -488,7 +482,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_internet_to_bou
 ####################################################################################
 resource "azurerm_dns_a_record" "trusted_bounce" {
   name                = "bounce"
-  zone_name           = module.trusted_ci_jenkins_io_letsencrypt.zone_name
+  zone_name           = azurerm_private_dns_zone.trusted_ci_jenkins_io.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
   records             = [azurerm_linux_virtual_machine.trusted_bounce.private_ip_address]
@@ -498,72 +492,59 @@ resource "azurerm_dns_a_record" "trusted_bounce" {
 ####################################################################################
 ## Private network resources (endpoint, DNS, etc.)
 ####################################################################################
-## updates.jenkins.io's internal services (RsyncDs, mirrorbits CLI, etc.)
-module "trusted_ci_to_publick8s" {
-  source = "./modules/private-resources"
+resource "azurerm_private_dns_zone" "trusted_ci_jenkins_io" {
+  name                = "trusted.ci.jenkins.io"
+  resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
+}
+resource "azurerm_private_dns_zone_virtual_network_link" "trusted_ci_jenkins_io" {
+  name                  = "trusted.ci.jenkins.io"
+  resource_group_name   = data.azurerm_resource_group.trusted_ci_jenkins_io.name
+  private_dns_zone_name = azurerm_private_dns_zone.trusted_ci_jenkins_io.name
+  virtual_network_id    = data.azurerm_virtual_network.trusted_ci_jenkins_io.id
 
-  providers = {
-    azurerm.pls       = azurerm
-    azurerm.resources = azurerm
-  }
-
-  name         = "trusted-ci-to-publick8s"
-  location     = var.location
-  default_tags = local.default_tags
-  dns_rg_name  = data.azurerm_resource_group.trusted_ci_jenkins_io.name
-  fqdn         = module.trusted_ci_jenkins_io_letsencrypt.zone_name
-  vnet_id      = data.azurerm_virtual_network.trusted_ci_jenkins_io.id
-  subnet_id    = data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.id
-  rg_name      = data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.resource_group_name
-
-  # TODO: track with updatecli
-  # https://github.com/jenkins-infra/kubernetes-management/blob/8b026b6e13ab726ce8064e842479839b371daf13/config/updates.jenkins.io-rsyncd-data.yaml#L40-L41
-  pls_name    = "updates.jenkins.io-data"
-  pls_rg_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
-
-
-  dns_a_record = "updates.jenkins.io-data"
+  registration_enabled = true
+  tags                 = local.default_tags
+}
+resource "azurerm_private_dns_a_record" "updates_jenkins_io" {
+  name                = "updates.jenkins.io"
+  zone_name           = azurerm_private_dns_zone.trusted_ci_jenkins_io.name
+  resource_group_name = azurerm_private_dns_zone.trusted_ci_jenkins_io.resource_group_name
+  ttl                 = 60
+  records             = [azurerm_private_endpoint.updates_jenkins_io_for_trustedci.private_service_connection[0].private_ip_address]
 }
 
 ## updates.jenkins.io's mirrorbits CLI Kubernetes Service (internal LB)
-data "azurerm_private_link_service" "updates_jenkins_io_cli" {
-  # https://github.com/jenkins-infra/kubernetes-management/blob/67e5741bf926c72c143604301132cbe6ada0bab8/config/updates.jenkins.io.yaml#L126
-  name                = "updates.jenkins.io-cli"
+data "azurerm_private_link_service" "updates_jenkins_io" {
+  # https://github.com/jenkins-infra/kubernetes-management/
+  name                = "updates.jenkins.io"
   resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
 }
-resource "azurerm_private_endpoint" "updates_jio_mirrorbits_cli_for_trustedci" {
-  name = "${data.azurerm_private_link_service.updates_jenkins_io_cli.name}-for-trustedci"
+resource "azurerm_private_endpoint" "updates_jenkins_io_for_trustedci" {
+  name = "${data.azurerm_private_link_service.updates_jenkins_io.name}-for-trustedci"
 
   location            = var.location
   resource_group_name = data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.resource_group_name
   subnet_id           = data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.id
 
-  custom_network_interface_name = "${data.azurerm_private_link_service.updates_jenkins_io_cli.name}-for-trustedci-nic"
+  custom_network_interface_name = "${data.azurerm_private_link_service.updates_jenkins_io.name}-for-trustedci-nic"
 
   private_service_connection {
-    name                           = "${data.azurerm_private_link_service.updates_jenkins_io_cli.name}-for-trustedci"
-    private_connection_resource_id = data.azurerm_private_link_service.updates_jenkins_io_cli.id
+    name                           = "${data.azurerm_private_link_service.updates_jenkins_io.name}-for-trustedci"
+    private_connection_resource_id = data.azurerm_private_link_service.updates_jenkins_io.id
     is_manual_connection           = false
   }
   private_dns_zone_group {
-    name                 = module.trusted_ci_jenkins_io_letsencrypt.zone_name
-    private_dns_zone_ids = [module.trusted_ci_to_publick8s.zone_id]
+    name                 = azurerm_private_dns_zone.trusted_ci_jenkins_io.name
+    private_dns_zone_ids = [azurerm_private_dns_zone.trusted_ci_jenkins_io.id]
   }
   tags = local.default_tags
-}
-resource "azurerm_private_dns_a_record" "updates_jio_mirrorbits_cli_for_trustedci" {
-  name                = "updates.jio-cli"
-  zone_name           = module.trusted_ci_to_publick8s.zone_name
-  resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
-  ttl                 = 60
-  records             = [azurerm_private_endpoint.updates_jio_mirrorbits_cli_for_trustedci.private_service_connection[0].private_ip_address]
 }
 
 module "trusted_ci_jenkins_io_letsencrypt" {
   source = "./.shared-tools/terraform/modules/azure-letsencrypt-dns"
 
   default_tags     = local.default_tags
-  zone_name        = "trusted.ci.jenkins.io"
+  zone_name        = azurerm_private_dns_zone.trusted_ci_jenkins_io.name
   dns_rg_name      = data.azurerm_resource_group.proddns_jenkinsio.name
   parent_zone_name = data.azurerm_dns_zone.jenkinsio.name
   principal_id     = module.trusted_ci_jenkins_io.controller_service_principal_id
