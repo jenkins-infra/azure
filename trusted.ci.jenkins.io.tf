@@ -294,12 +294,11 @@ resource "azurerm_network_security_rule" "allow_out_from_trusted_all_to_uc" {
   protocol          = "Tcp"
   source_port_range = "*"
   destination_port_ranges = [
-    "22",   # SSH (for rsync)
     "3390", # mirrorbits CLI (content)
   ]
   source_address_prefixes = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes
   destination_address_prefixes = [
-    # Update Center (mirrorbits CLI, rsync, etc.)
+    # Update Center (mirrorbits CLI)
     azurerm_private_endpoint.updates_jenkins_io_for_trustedci.private_service_connection[0].private_ip_address,
   ]
   resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
@@ -399,12 +398,11 @@ resource "azurerm_network_security_rule" "allow_in_many_from_trusted_agents_to_u
   protocol          = "Tcp"
   source_port_range = "*"
   destination_port_ranges = [
-    "22",   # SSH (for rsync)
     "3390", # mirrorbits CLI (content)
   ]
   source_address_prefixes = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes
   destination_address_prefixes = [
-    # Update Center (mirrorbits CLI, rsync, etc.)
+    # Update Center (mirrorbits CLI)
     azurerm_private_endpoint.updates_jenkins_io_for_trustedci.private_service_connection[0].private_ip_address,
   ]
   resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name

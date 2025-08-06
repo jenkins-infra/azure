@@ -65,14 +65,9 @@ resource "local_file" "jenkins_infra_data_report" {
         "share_uri"  = "/content/",
         "pvc_name"   = kubernetes_persistent_volume_claim.updates_jenkins_io_data.metadata[0].name,
       },
-      "redirections-unsecured" = {
+      "redirections" = {
         "share_name" = azurerm_storage_share.updates_jenkins_io_data.name
-        "share_uri"  = "/redirections-unsecured/",
-        "pvc_name"   = kubernetes_persistent_volume_claim.updates_jenkins_io_data.metadata[0].name,
-      },
-      "redirections-secured" = {
-        "share_name" = azurerm_storage_share.updates_jenkins_io_data.name
-        "share_uri"  = "/redirections-secured/",
+        "share_uri"  = "/redirections/",
         "pvc_name"   = kubernetes_persistent_volume_claim.updates_jenkins_io_data.metadata[0].name,
       },
       "geoip_data" = {
