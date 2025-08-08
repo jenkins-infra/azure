@@ -26,24 +26,24 @@ provider "registry.terraform.io/cyrilgdn/postgresql" {
 }
 
 provider "registry.terraform.io/hashicorp/azuread" {
-  version = "3.4.0"
+  version = "3.5.0"
   hashes = [
-    "h1:2rAM1pT8sXeViTLMU7Tvd5sDSYuZeavFPVbe5xWgJ3A=",
-    "h1:CkN8DpmNYWU9mvlrmOpzFdPofGjKgrnL8leImrSL9Uk=",
-    "h1:D4wPDjiMNuWQcB1cYQIbS9M68QwQ2BQ8TdcamU3ig3k=",
-    "h1:KeA9a60dssTVEFWkAuJ2lxztHyYB9bKmUfYanW2POSo=",
-    "zh:035a6d6e6aa7f117969702873c27344ec4ddd88f676cebc1088316fb26d5c95a",
-    "zh:11f86935174d8223699cae00b3a705ded1d75a4efb6d4723d3788f5446e1eaa5",
-    "zh:16d52b5bf8eefa98cd2793122be0c5a7b41767caedbd8a08786aeefb3d0c6856",
+    "h1:L3UUGE6rygenX4aJz+L8VBJS/UC7r6t8L1NXZSSE97Y=",
+    "h1:MqvSXUPNy/kAbRa6PIirpK2A+4yrNtlzIwk934XODUU=",
+    "h1:q44THdVP073qIa9gMkrsWFCGyGXfJCLEwRNhHqmKRos=",
+    "h1:uHNOxWPMdrHYdjhMyU31yfc9h9iIxSl3yYzWQWlPbng=",
+    "zh:0cda57e87a296f24f1c085b0343a8d6759cb539a7804f874d7a04bf46ab13c48",
+    "zh:11723a9bc589c763e2ffc76e6829c968cc01cf9c71b2cfaf56f8054289f8e29d",
     "zh:1c3e89cf19118fc07d7b04257251fc9897e722c16e0a0df7b07fcd261f8c12e7",
-    "zh:2fe201c7a1c17279f7674c160861296015d9b9d120de598999d169398ce285c9",
-    "zh:37bb91dff5b751f0c86a02a12980bdb5935d2ca6cdd249d9eef7eca619f628c0",
-    "zh:7533a35300e411893a024f858e722e50107dfd7212236d396ebf2ca2b13b7bcc",
-    "zh:88a95b2cb606439ae2f60ebe63a800580e232e94bc1b02ac7d25d25be10cb511",
-    "zh:c7b138b6bc34d8a1eff91742b38bce1718d9c50c343393fdfc918bef022ed74f",
-    "zh:cab09fda45b8a9a9896aedb22f5829745b7e9a01abb8077696bccb170fb01b5f",
-    "zh:cc4a29f074f1cc25f3abd3a41444f68307f3eb08c4d5f79f60a012b632c1ea05",
-    "zh:e30e9fe8e04271431cb730a1a888b6da5afeae385e2e53ff7b4114066c1250db",
+    "zh:1e5b766bab10c45f09dab18d51ff984016b4ad39cd45a214ec7d62943bbe812a",
+    "zh:30fb02a2e75210b835673bbf7f8a7f5f0ffefb51bb7acc93724f81e8e5990743",
+    "zh:3c2436989467839a3183a62338af0f191ed701f4feaacff5a4b9f216b7f73bd5",
+    "zh:4550b15ec03bd6be78a99743a9ffb527c3651a66083bc6eee8ca39f3e991416b",
+    "zh:529b46d0d7fcb40d876e2d501c456a11afb9d6172b2def3e61a08471250b42e5",
+    "zh:5dd2732534bedbe594c0e1ed8bf43efb7fe1821ad96daa5ed6a84079337ae2d9",
+    "zh:ac2c837ef2572ec82e0d81e9e2a157a4bd2baa4198f03c58610d6394af8808bb",
+    "zh:b1c807ec370df6a2079af8891d3b83c38af73191ceb1387ba6d88b05641ce3e7",
+    "zh:edfff8820f1d618ebfb0279d78edd4c97163363a3e96caee97c3582bbb4c606d",
   ]
 }
 
