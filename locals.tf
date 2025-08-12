@@ -22,13 +22,30 @@ locals {
     }
   }
 
+  # Tracked by 'updatecli' from the following source: https://reports.jenkins.io/jenkins-infra-data-reports/azure-net.json
+  outbound_ips_trusted_ci_jenkins_io = "104.209.128.236"
+  # Tracked by 'updatecli' from the following source: https://reports.jenkins.io/jenkins-infra-data-reports/azure-net.json
+  outbound_ips_infra_ci_jenkins_io = "20.57.120.46 52.179.141.53 172.210.200.59 20.10.193.4"
+  # Tracked by 'updatecli' from the following source: https://reports.jenkins.io/jenkins-infra-data-reports/azure-net.json
+  outbound_ips_private_vpn_jenkins_io = "172.176.126.194"
+  # TODO: remove when publick8s will be changed to a "private" cluster
+  outbound_ips_publick8s_jenkins_io = [
+    "20.22.30.74",  # Outbound IPv4 of the cluster LB
+    "20.22.30.9",   # Outbound IPv4 of the cluster LB
+    "20.85.71.108", # Outbound IPv4 of the cluster LB
+    "20.7.192.189", # Outbound IP of the NAT gateway - https://github.com/jenkins-infra/azure-net/blob/7aa7fc5a8a39dd7bafee0e89c4fffe096692baa8/outputs.tf#L23-L25
+  ]
+
+  admin_public_ips = {
+    dduportal = ["89.84.210.161"],
+    smerle33  = ["82.64.5.129"],
+    mwaite    = ["162.142.59.220"],
+  }
+
   # TODO: track with updatecli
   external_services = {
-    "updates.jenkins.io"     = "52.202.51.185",
-    "s390x.jenkins.io"       = "148.100.84.76",
-    "pkg.origin.jenkins.io"  = "52.202.51.185",
-    "archives.jenkins.io"    = "46.101.121.132",
-    "private.vpn.jenkins.io" = "172.176.126.194",
+    "pkg.origin.jenkins.io" = "52.202.51.185",
+    "archives.jenkins.io"   = "46.101.121.132",
   }
 
   # Ref. https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-githubs-ip-addresses

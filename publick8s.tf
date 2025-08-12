@@ -47,15 +47,11 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
         "%s/32",
         flatten(
           concat(
-            [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value],
-            # publick8s outbound IPs (traffic routed through gateways or outbound LBs)
-            module.jenkins_infra_shared_data.outbound_ips["publick8s.jenkins.io"],
-            # trusted.ci subnet (UC agents need to execute mirrorbits scans)
-            module.jenkins_infra_shared_data.outbound_ips["trusted.ci.jenkins.io"],
-            module.jenkins_infra_shared_data.outbound_ips["infracijenkinsioagents1.jenkins.io"],
-            # infracijioagent2
-            # TODO track with updatecli or use private AKS API (Ref. https://github.com/jenkins-infra/helpdesk/issues/4617)
-            ["20.10.193.4", "172.210.200.59"],
+            # TODO: remove when publick8s will be changed to a "private" cluster
+            [for key, value in local.admin_public_ips : value],
+            # TODO: remove when publick8s will be changed to a "private" cluster
+            local.outbound_ips_publick8s_jenkins_io,
+            split(" ", local.outbound_ips_infra_ci_jenkins_io),
           )
         )
       ),
@@ -293,11 +289,6 @@ resource "azurerm_storage_account" "publick8s" {
   # Adding a network rule with `public_network_access_enabled` set to `true` (default) selects the option "Enabled from selected virtual networks and IP addresses"
   network_rules {
     default_action = "Deny"
-    ip_rules = flatten(
-      concat(
-        [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value],
-      )
-    )
     virtual_network_subnet_ids = concat(
       [
         # Required for using and populating the resource

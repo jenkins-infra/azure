@@ -16,9 +16,6 @@ resource "azurerm_storage_account" "archives" {
 
   network_rules {
     default_action = "Deny"
-    ip_rules = flatten(concat(
-      [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value],
-    ))
     virtual_network_subnet_ids = concat(
       # Required for managing the resource
       local.app_subnets["infra.ci.jenkins.io"].agents,
