@@ -1,9 +1,5 @@
 resource "local_file" "jenkins_infra_data_report" {
   content = jsonencode({
-    "public_redis" = {
-      "service_hostname" = azurerm_redis_cache.public_redis.hostname,
-      "service_port"     = azurerm_redis_cache.public_redis.port,
-    },
     "cert.ci.jenkins.io" = {
       "agents_azure_vms" = {
         "resource_group_name"         = module.cert_ci_jenkins_io_azurevm_agents.ephemeral_agents_resource_group_name,
