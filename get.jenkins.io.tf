@@ -24,8 +24,7 @@ resource "azurerm_storage_account" "get_jenkins_io" {
     default_action = "Deny"
     ip_rules = flatten(
       concat(
-        [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value],
-        module.jenkins_infra_shared_data.outbound_ips["pkg.jenkins.io"],
+        split(" ", local.external_services["pkg.origin.jenkins.io"]),
       )
     )
     virtual_network_subnet_ids = concat(

@@ -336,8 +336,8 @@ resource "azurerm_network_security_rule" "allow_out_many_from_trusted_agents_to_
 }
 # Ignore the rule as it does not detect the IP restriction to only update.jenkins.io"s host
 #trivy:ignore:azure-network-no-public-egress
-resource "azurerm_network_security_rule" "allow_outbound_ssh_from_permanent_agent_to_updatecenter" {
-  name                        = "allow-outbound-ssh-from-permanent-agent-to-updatecenter"
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_permanent_agent_to_pkg" {
+  name                        = "allow-outbound-ssh-from-permanent-agent-to-pkg"
   priority                    = 4080
   direction                   = "Outbound"
   access                      = "Allow"
@@ -345,7 +345,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_permanent_agen
   source_port_range           = "*"
   destination_port_range      = "22"
   source_address_prefix       = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
-  destination_address_prefix  = local.external_services["updates.${data.azurerm_dns_zone.jenkinsio.name}"]
+  destination_address_prefix  = local.external_services["pkg.origin.jenkins.io"]
   resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
 }

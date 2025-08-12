@@ -1,0 +1,78 @@
+name: Update external service IPs
+
+scms:
+  default:
+    kind: github
+    spec:
+      user: "{{ .github.user }}"
+      email: "{{ .github.email }}"
+      owner: "{{ .github.owner }}"
+      repository: "{{ .github.repository }}"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ .github.username }}"
+      branch: "{{ .github.branch }}"
+
+sources:
+  getTrustedCiJenkinsIo:
+    kind: json
+    spec:
+      file: https://reports.jenkins.io/jenkins-infra-data-reports/azure-net.json
+      key: .trusted\.ci\.jenkins\.io.outbound_ips
+    transformers:
+      - trimprefix: "["
+      - trimsuffix: "]"
+
+  getInfraCiJenkinsIo:
+    kind: json
+    spec:
+      file: https://reports.jenkins.io/jenkins-infra-data-reports/azure-net.json
+      key: .infra\.ci\.jenkins\.io.outbound_ips
+    transformers:
+      - trimprefix: "["
+      - trimsuffix: "]"
+
+  getPrivateVpn:
+    kind: json
+    spec:
+      file: https://reports.jenkins.io/jenkins-infra-data-reports/azure-net.json
+      key: .private\.vpn\.jenkins\.io.outbound_ips
+    transformers:
+      - trimprefix: "["
+      - trimsuffix: "]"
+
+targets:
+  setTrustedCiJenkinsIo:
+    sourceid: getTrustedCiJenkinsIo
+    name: Update trusted.ci.jenkins.io outbound IPs
+    kind: hcl
+    spec:
+      file: locals.tf
+      path: locals.outbound_ips_trusted_ci_jenkins_io
+    scmid: default
+
+  setInfraCiJenkinsIo:
+    sourceid: getInfraCiJenkinsIo
+    name: Update infra.ci.jenkins.io outbound IPs
+    kind: hcl
+    spec:
+      file: locals.tf
+      path: locals.outbound_ips_infra_ci_jenkins_io
+    scmid: default
+
+  setPrivateVpn:
+    sourceid: getPrivateVpn
+    name: Update private.vpn.jenkins.io outbound IPs
+    kind: hcl
+    spec:
+      file: locals.tf
+      path: locals.outbound_ips_private_vpn_jenkins_io
+    scmid: default
+
+actions:
+  default:
+    kind: github/pullrequest
+    scmid: default
+    title: Update the service IPs
+    spec:
+      labels:
+        - dependencies

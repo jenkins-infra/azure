@@ -18,9 +18,6 @@ resource "azurerm_storage_account" "builds_reports_jenkins_io" {
 
   network_rules {
     default_action = "Deny"
-    ip_rules = flatten(concat(
-      [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value]
-    ))
     virtual_network_subnet_ids = concat(
       [
         # Required for using the resource

@@ -94,11 +94,6 @@ resource "azurerm_storage_account_network_rules" "ldap_access" {
   storage_account_id = azurerm_storage_account.ldap_backups.id
 
   default_action = "Deny"
-  ip_rules = flatten(
-    concat(
-      [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value],
-    )
-  )
   virtual_network_subnet_ids = concat(
     [
       # Mounting share in the publick8s AKS cluster

@@ -17,11 +17,6 @@ resource "azurerm_storage_account" "javadoc_jenkins_io" {
   # Adding a network rule with `public_network_access_enabled` set to `true` (default) selects the option "Enabled from selected virtual networks and IP addresses"
   network_rules {
     default_action = "Deny"
-    ip_rules = flatten(
-      concat(
-        [for key, value in module.jenkins_infra_shared_data.admin_public_ips : value],
-      )
-    )
     virtual_network_subnet_ids = concat(
       [
         # Required for using the resource

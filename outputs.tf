@@ -107,6 +107,7 @@ resource "local_file" "jenkins_infra_data_report" {
         "ipv4" = azurerm_dns_a_record.privatek8s_private.records,
       }
     },
+    "admin_public_ips" = local.admin_public_ips,
   })
   filename = "${path.module}/jenkins-infra-data-reports/azure.json"
 }

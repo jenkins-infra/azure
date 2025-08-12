@@ -4,10 +4,6 @@ data "azuread_service_principal" "terraform_production" {
   display_name = "terraform-azure-production"
 }
 
-module "jenkins_infra_shared_data" {
-  source = "./.shared-tools/terraform/modules/jenkins-infra-shared-data"
-}
-
 # Resource groups used to store (and lock) our public IPs
 resource "azurerm_resource_group" "prod_public_ips" {
   name     = "prod-public-ips"
