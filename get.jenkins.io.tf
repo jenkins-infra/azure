@@ -3,11 +3,6 @@ resource "azurerm_resource_group" "get_jenkins_io" {
   location = var.location
   tags     = local.default_tags
 }
-import {
-  to       = kubernetes_namespace.get_jenkins_io
-  id       = "get-jenkins-io"
-  provider = kubernetes.publick8s
-}
 resource "kubernetes_namespace" "get_jenkins_io" {
   provider = kubernetes.publick8s
 
