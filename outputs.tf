@@ -55,21 +55,32 @@ resource "local_file" "jenkins_infra_data_report" {
         "user_assigned_identity"      = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins.id,
       },
     },
+    "get.jenkins.io" = {
+      "mirrorbits" = {
+        "share_uri" = "/get.jenkins.io/mirrorbits/",
+        "pvc_name"  = kubernetes_persistent_volume_claim.get_jenkins_io.metadata[0].name,
+      },
+      "httpd" = {
+        "share_uri" = "/get.jenkins.io/mirrorbits/",
+        "pvc_name"  = kubernetes_persistent_volume_claim.get_jenkins_io.metadata[0].name,
+      },
+      "geoipdata" = {
+        "share_uri" = "/get.jenkins.io/geoipdata/",
+        "pvc_name"  = kubernetes_persistent_volume_claim.get_jenkins_io.metadata[0].name,
+      }
+    },
     "updates.jenkins.io" = {
       "content" = {
-        "share_name" = azurerm_storage_share.updates_jenkins_io_data.name,
-        "share_uri"  = "/content/",
-        "pvc_name"   = kubernetes_persistent_volume_claim.updates_jenkins_io_data.metadata[0].name,
+        "share_uri" = "/updates.jenkins.io/content/",
+        "pvc_name"  = kubernetes_persistent_volume_claim.updates_jenkins_io.metadata[0].name,
       },
       "redirections" = {
-        "share_name" = azurerm_storage_share.updates_jenkins_io_data.name
-        "share_uri"  = "/redirections/",
-        "pvc_name"   = kubernetes_persistent_volume_claim.updates_jenkins_io_data.metadata[0].name,
+        "share_uri" = "/updates.jenkins.io/redirections/",
+        "pvc_name"  = kubernetes_persistent_volume_claim.updates_jenkins_io.metadata[0].name,
       },
-      "geoip_data" = {
-        "share_name" = azurerm_storage_share.geoip_data.name
-        "share_uri"  = "/",
-        "pvc_name"   = kubernetes_persistent_volume_claim.updates_jenkins_io_geoipdata.metadata[0].name,
+      "geoipdata" = {
+        "share_uri" = "/updates.jenkins.io/geoipdata/",
+        "pvc_name"  = kubernetes_persistent_volume_claim.updates_jenkins_io.metadata[0].name,
       }
     },
     "ldap.jenkins.io" = {
