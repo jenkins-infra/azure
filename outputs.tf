@@ -43,6 +43,20 @@ resource "local_file" "jenkins_infra_data_report" {
         "privatek8s" = {
           "agents_service_account" = kubernetes_service_account.privatek8s_release_ci_jenkins_io_agents.metadata[0].name,
         }
+        "persistentVolumeClaims" = {
+          "binary-core-packages" = {
+            "share_uri" = "/",
+            "pvc_name"  = kubernetes_persistent_volume_claim.privatek8s_core_packages["binary-core-packages"].metadata[0].name,
+          },
+          "website-core-packages" = {
+            "share_uri" = "/",
+            "pvc_name"  = kubernetes_persistent_volume_claim.privatek8s_core_packages["website-core-packages"].metadata[0].name,
+          }
+          "data-storage-jenkins-io" = {
+            "share_uri" = "/",
+            "pvc_name"  = kubernetes_persistent_volume_claim.privatek8s_release_ci_jenkins_io_agents_data_storage.metadata[0].name,
+          }
+        }
       }
     },
     "trusted.ci.jenkins.io" = {
