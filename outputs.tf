@@ -46,11 +46,11 @@ resource "local_file" "jenkins_infra_data_report" {
         "persistentVolumeClaims" = {
           "binary-core-packages" = {
             "share_uri" = "/",
-            "pvc_name"  = kubernetes_persistent_volume_claim.privatek8s_core_packages["binary-core-packages"].metadata[0].name,
+            "pvc_name"  = kubernetes_persistent_volume_claim.privatek8s_core_packages["binary"].metadata[0].name,
           },
           "website-core-packages" = {
             "share_uri" = "/",
-            "pvc_name"  = kubernetes_persistent_volume_claim.privatek8s_core_packages["website-core-packages"].metadata[0].name,
+            "pvc_name"  = kubernetes_persistent_volume_claim.privatek8s_core_packages["website"].metadata[0].name,
           }
           "data-storage-jenkins-io" = {
             "share_uri" = "/",
