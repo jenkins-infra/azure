@@ -29,6 +29,8 @@ resource "azurerm_storage_account" "data_storage_jenkins_io" {
       [
         # Required for using the resource
         data.azurerm_subnet.publick8s_tier.id,
+        # Allows release.ci.jenkins.io agents to access the mount
+        data.azurerm_subnet.privatek8s_release_tier.id,
       ],
       # Required for managing the resource
       local.app_subnets["infra.ci.jenkins.io"].agents,
