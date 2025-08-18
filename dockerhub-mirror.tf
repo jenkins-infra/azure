@@ -156,17 +156,30 @@ resource "azurerm_container_registry_cache_rule" "mirror_cache_rules" {
       source = "docker.io/moby/*"
       target = "moby/*"
     }
+    # Also used on AWS (ci.jenkins.io)
     "dockerhub-jenkinsciinfra-builder" = {
       source = "docker.io/jenkinsciinfra/builder"
       target = "jenkinsciinfra/builder"
     }
+    # Also used on AWS (ci.jenkins.io)
     "dockerhub-jenkinsciinfra-jau-2204" = {
       source = "docker.io/jenkinsciinfra/jenkins-agent-ubuntu-22.04"
       target = "jenkinsciinfra/jenkins-agent-ubuntu-22.04"
     }
+    # Also used on AWS (ci.jenkins.io)
     "dockerhub-jenkinsciinfra-packaging" = {
       source = "docker.io/jenkinsciinfra/packaging"
       target = "jenkinsciinfra/packaging"
+    }
+    # Used by ATH image build
+    "dockerhub-rockstorm-git-server" = {
+      source = "docker.io/rockstorm/git-server"
+      target = "rockstorm/git-server"
+    }
+    # Used by ATH image build
+    "dockerhub-testcontainers-ryuk" = {
+      source = "docker.io/testcontainers/ryuk"
+      target = "testcontainers/ryuk"
     }
   }
   name                  = "mirror-${each.key}"
