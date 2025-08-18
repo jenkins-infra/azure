@@ -29,6 +29,16 @@ locals {
       "vnet_id"   = data.azurerm_virtual_network.infra_ci_jenkins_io.id
       "rg_name"   = data.azurerm_virtual_network.infra_ci_jenkins_io.resource_group_name
     },
+    "publick8s" = {
+      "subnet_id" = data.azurerm_subnet.publick8s_tier.id,
+      "vnet_id"   = data.azurerm_virtual_network.public.id,
+      "rg_name"   = data.azurerm_resource_group.public.name,
+    },
+    "privatek8s" = {
+      "subnet_id" = data.azurerm_subnet.privatek8s_tier.id,
+      "vnet_id"   = data.azurerm_virtual_network.private.id,
+      "rg_name"   = data.azurerm_resource_group.private.name,
+    },
   }
 }
 
@@ -131,10 +141,48 @@ resource "azurerm_role_assignment" "acr_read_keyvault_secrets" {
   skip_service_principal_aad_check = true
   principal_id                     = azurerm_container_registry_credential_set.dockerhub.identity[0].principal_id
 }
-resource "azurerm_container_registry_cache_rule" "mirror_dockerhub" {
-  name                  = "mirror"
+
+resource "azurerm_container_registry_cache_rule" "mirror_cache_rules" {
+  for_each = {
+    "dockerhub-library-namespace" = {
+      source = "docker.io/library/*"
+      target = "library/*"
+    },
+    "dockerhub-jenkins-namespace" = {
+      source = "docker.io/jenkins/*"
+      target = "jenkins/*"
+    }
+    "dockerhub-moby-namespace" = {
+      source = "docker.io/moby/*"
+      target = "moby/*"
+    }
+    "dockerhub-jenkinsciinfra-builder" = {
+      source = "docker.io/jenkinsciinfra/builder"
+      target = "jenkinsciinfra/builder"
+    }
+    "dockerhub-jenkinsciinfra-jau-2204" = {
+      source = "docker.io/jenkinsciinfra/jenkins-agent-ubuntu-22.04"
+      target = "jenkinsciinfra/jenkins-agent-ubuntu-22.04"
+    }
+    "dockerhub-jenkinsciinfra-packaging" = {
+      source = "docker.io/jenkinsciinfra/packaging"
+      target = "jenkinsciinfra/packaging"
+    }
+  }
+  name                  = "mirror-${each.key}"
   container_registry_id = azurerm_container_registry.dockerhub_mirror.id
-  source_repo           = "docker.io/*"
-  target_repo           = "*"
+  source_repo           = each.value.source
+  target_repo           = each.value.target
   credential_set_id     = azurerm_container_registry_credential_set.dockerhub.id
+}
+
+#### Allow provided Principal IDs to push images to the registry
+resource "azurerm_role_assignment" "push_to_acr" {
+  for_each = var.terratest ? toset([]) : toset([
+    azurerm_user_assigned_identity.infra_ci_jenkins_io_agents.principal_id,
+  ])
+  principal_id                     = each.value
+  role_definition_name             = "AcrPush"
+  scope                            = azurerm_container_registry.dockerhub_mirror.id
+  skip_service_principal_aad_check = true
 }
