@@ -471,7 +471,6 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_internet_to_bou
 
 ## Allow access to/from ACR endpoint
 resource "azurerm_network_security_rule" "allow_out_https_from_trusted_to_acr" {
-  count                   = var.terratest ? 0 : 1
   name                    = "allow-out-https-from-vnet-to-acr"
   priority                = 4051
   direction               = "Outbound"
@@ -479,7 +478,7 @@ resource "azurerm_network_security_rule" "allow_out_https_from_trusted_to_acr" {
   protocol                = "Tcp"
   source_port_range       = "*"
   destination_port_range  = "443"
-  source_address_prefixes = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes
+  source_address_prefixes = data.azurerm_virtual_network.trusted_ci_jenkins_io.address_space
   destination_address_prefixes = distinct(
     flatten(
       [for rs in azurerm_private_endpoint.dockerhub_mirror["trustedcijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
@@ -489,7 +488,6 @@ resource "azurerm_network_security_rule" "allow_out_https_from_trusted_to_acr" {
   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_in_https_from_trusted_to_acr" {
-  count                   = var.terratest ? 0 : 1
   name                    = "allow-in-https-from-vnet-to-acr"
   priority                = 4051
   direction               = "Inbound"
@@ -497,7 +495,7 @@ resource "azurerm_network_security_rule" "allow_in_https_from_trusted_to_acr" {
   protocol                = "Tcp"
   source_port_range       = "*"
   destination_port_range  = "443"
-  source_address_prefixes = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes
+  source_address_prefixes = data.azurerm_virtual_network.trusted_ci_jenkins_io.address_space
   destination_address_prefixes = distinct(
     flatten(
       [for rs in azurerm_private_endpoint.dockerhub_mirror["trustedcijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
@@ -521,15 +519,15 @@ resource "azurerm_dns_a_record" "trusted_bounce" {
 resource "azurerm_dns_a_record" "trusted_permanent_agent" {
   name                = "agent"
   zone_name           = module.trusted_ci_jenkins_io_letsencrypt.zone_name
-  resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
-  ttl                 = 300
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
   records             = [azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address]
 }
 resource "azurerm_dns_a_record" "trusted_ci_controller" {
   name                = "@"
   zone_name           = module.trusted_ci_jenkins_io_letsencrypt.zone_name
-  resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
-  ttl                 = 300
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
   records             = [module.trusted_ci_jenkins_io.controller_private_ipv4]
 }
 
