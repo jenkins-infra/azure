@@ -40,16 +40,15 @@ locals {
       "rg_name"   = data.azurerm_resource_group.private.name,
     },
     "trustedcijenkinsio" = {
-      "subnet_id"           = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.id,
-      "vnet_id"             = data.azurerm_virtual_network.trusted_ci_jenkins_io.id,
-      "rg_name"             = data.azurerm_virtual_network.trusted_ci_jenkins_io.resource_group_name,
-      "private_dns_zone_id" = azurerm_private_dns_zone.trusted_ci_jenkins_io.id,
+      "subnet_id" = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.id,
+      "vnet_id"   = data.azurerm_virtual_network.trusted_ci_jenkins_io.id,
+      "rg_name"   = data.azurerm_virtual_network.trusted_ci_jenkins_io.resource_group_name,
     },
   }
 }
 
 resource "azurerm_private_endpoint" "dockerhub_mirror" {
-  for_each = var.terratest ? {} : local.acr_private_links
+  for_each = local.acr_private_links
 
   name = "acr-${each.key}"
 
@@ -75,8 +74,7 @@ resource "azurerm_private_endpoint" "dockerhub_mirror" {
 }
 
 resource "azurerm_private_dns_zone" "dockerhub_mirror" {
-  for_each = var.terratest ? {} : { for key, value in local.acr_private_links : key => value if !can(value["private_dns_zone_id"]) }
-
+  for_each = local.acr_private_links
   # Conventional and static name required by Azure (otherwise automatic record creation does not work)
   name = "privatelink.azurecr.io"
 
@@ -87,7 +85,7 @@ resource "azurerm_private_dns_zone" "dockerhub_mirror" {
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "dockerhub_mirror" {
-  for_each = var.terratest ? {} : { for key, value in local.acr_private_links : key => value if !can(value["private_dns_zone_id"]) }
+  for_each = local.acr_private_links
 
   name = "privatelink.azurecr.io"
   # Private DNS zone name is static: we can only have one per RG
