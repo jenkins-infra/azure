@@ -204,6 +204,7 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_controller_disk_reader" 
 
 ## Allow access to/from ACR endpoint
 resource "azurerm_network_security_rule" "allow_out_https_from_infra_ephemeral_agents_to_acr" {
+  count                  = var.terratest ? 0 : 1
   name                   = "allow-out-https-from-ephemeral-agents-to-acr"
   priority               = 4050
   direction              = "Outbound"
@@ -224,6 +225,7 @@ resource "azurerm_network_security_rule" "allow_out_https_from_infra_ephemeral_a
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_in_https_from_infra_ephemeral_agents_to_acr" {
+  count                  = var.terratest ? 0 : 1
   name                   = "allow-in-https-from-ephemeral-agents-to-acr"
   priority               = 4050
   direction              = "Inbound"
