@@ -106,6 +106,7 @@ resource "azurerm_dns_a_record" "cert_ci_jenkins_io" {
 
 ## Allow access to/from ACR endpoint
 resource "azurerm_network_security_rule" "allow_out_https_from_cert_agents_to_acr" {
+  count                   = var.terratest ? 0 : 1
   name                    = "allow-out-https-from-agents-to-acr"
   priority                = 4050
   direction               = "Outbound"
@@ -123,6 +124,7 @@ resource "azurerm_network_security_rule" "allow_out_https_from_cert_agents_to_ac
   network_security_group_name = module.cert_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_in_https_from_cert_agents_to_acr" {
+  count                   = var.terratest ? 0 : 1
   name                    = "allow-in-https-from-agents-to-acr"
   priority                = 4050
   direction               = "Inbound"

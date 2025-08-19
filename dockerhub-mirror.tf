@@ -21,13 +21,13 @@ locals {
   acr_private_links = {
     "certcijenkinsio" = {
       "subnet_id" = data.azurerm_subnet.cert_ci_jenkins_io_ephemeral_agents.id,
-      "vnet_id"   = data.azurerm_virtual_network.cert_ci_jenkins_io.id
-      "rg_name"   = data.azurerm_virtual_network.cert_ci_jenkins_io.resource_group_name
+      "vnet_id"   = data.azurerm_virtual_network.cert_ci_jenkins_io.id,
+      "rg_name"   = data.azurerm_virtual_network.cert_ci_jenkins_io.resource_group_name,
     },
     "infracijenkinsio" = {
       "subnet_id" = data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.id,
-      "vnet_id"   = data.azurerm_virtual_network.infra_ci_jenkins_io.id
-      "rg_name"   = data.azurerm_virtual_network.infra_ci_jenkins_io.resource_group_name
+      "vnet_id"   = data.azurerm_virtual_network.infra_ci_jenkins_io.id,
+      "rg_name"   = data.azurerm_virtual_network.infra_ci_jenkins_io.resource_group_name,
     },
     "publick8s" = {
       "subnet_id" = data.azurerm_subnet.publick8s_tier.id,
@@ -40,15 +40,16 @@ locals {
       "rg_name"   = data.azurerm_resource_group.private.name,
     },
     "trustedcijenkinsio" = {
-      "subnet_id" = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.id,
-      "vnet_id"   = data.azurerm_virtual_network.trusted_ci_jenkins_io.id
-      "rg_name"   = data.azurerm_virtual_network.trusted_ci_jenkins_io.resource_group_name
+      "subnet_id"           = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.id,
+      "vnet_id"             = data.azurerm_virtual_network.trusted_ci_jenkins_io.id,
+      "rg_name"             = data.azurerm_virtual_network.trusted_ci_jenkins_io.resource_group_name,
+      "private_dns_zone_id" = azurerm_private_dns_zone.trusted_ci_jenkins_io.id,
     },
   }
 }
 
 resource "azurerm_private_endpoint" "dockerhub_mirror" {
-  for_each = local.acr_private_links
+  for_each = var.terratest ? {} : local.acr_private_links
 
   name = "acr-${each.key}"
 
@@ -65,14 +66,16 @@ resource "azurerm_private_endpoint" "dockerhub_mirror" {
     is_manual_connection           = false
   }
   private_dns_zone_group {
-    name                 = "privatelink.azurecr.io"
-    private_dns_zone_ids = [azurerm_private_dns_zone.dockerhub_mirror[each.key].id]
+    name = "privatelink.azurecr.io"
+    private_dns_zone_ids = [
+      (can(each.value["private_dns_zone_id"]) ? each.value["private_dns_zone_id"] : azurerm_private_dns_zone.dockerhub_mirror[each.key].id),
+    ]
   }
   tags = local.default_tags
 }
 
 resource "azurerm_private_dns_zone" "dockerhub_mirror" {
-  for_each = local.acr_private_links
+  for_each = var.terratest ? {} : { for key, value in local.acr_private_links : key => value if !can(value["private_dns_zone_id"]) }
 
   # Conventional and static name required by Azure (otherwise automatic record creation does not work)
   name = "privatelink.azurecr.io"
@@ -84,7 +87,7 @@ resource "azurerm_private_dns_zone" "dockerhub_mirror" {
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "dockerhub_mirror" {
-  for_each = local.acr_private_links
+  for_each = var.terratest ? {} : { for key, value in local.acr_private_links : key => value if !can(value["private_dns_zone_id"]) }
 
   name = "privatelink.azurecr.io"
   # Private DNS zone name is static: we can only have one per RG
