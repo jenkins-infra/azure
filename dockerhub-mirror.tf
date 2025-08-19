@@ -49,7 +49,7 @@ locals {
 }
 
 resource "azurerm_private_endpoint" "dockerhub_mirror" {
-  for_each = local.acr_private_links
+  for_each = var.terratest ? {} : local.acr_private_links
 
   name = "acr-${each.key}"
 
