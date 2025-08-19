@@ -39,6 +39,11 @@ locals {
       "vnet_id"   = data.azurerm_virtual_network.private.id,
       "rg_name"   = data.azurerm_resource_group.private.name,
     },
+    "trustedcijenkinsio" = {
+      "subnet_id" = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.id,
+      "vnet_id"   = data.azurerm_virtual_network.trusted_ci_jenkins_io.id
+      "rg_name"   = data.azurerm_virtual_network.trusted_ci_jenkins_io.resource_group_name
+    },
   }
 }
 
