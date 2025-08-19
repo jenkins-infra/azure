@@ -129,14 +129,6 @@ module "trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer" {
   default_tags               = local.default_tags
 }
 
-resource "azurerm_private_dns_a_record" "trusted_ci_controller" {
-  name                = "@"
-  zone_name           = module.trusted_ci_jenkins_io_letsencrypt.zone_name
-  resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
-  ttl                 = 300
-  records             = [module.trusted_ci_jenkins_io.controller_private_ipv4]
-}
-
 ####################################################################################
 ## Resources for the bounce (SSH bastion) VM
 ####################################################################################
@@ -277,13 +269,6 @@ resource "azurerm_virtual_machine_data_disk_attachment" "trusted_permanent_agent
   virtual_machine_id = azurerm_linux_virtual_machine.trusted_permanent_agent.id
   lun                = "20"
   caching            = "ReadWrite"
-}
-resource "azurerm_private_dns_a_record" "trusted_permanent_agent" {
-  name                = "agent"
-  zone_name           = module.trusted_ci_jenkins_io_letsencrypt.zone_name
-  resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
-  ttl                 = 300
-  records             = [azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address]
 }
 
 ####################################################################################
@@ -532,6 +517,20 @@ resource "azurerm_dns_a_record" "trusted_bounce" {
   ttl                 = 60
   records             = [azurerm_linux_virtual_machine.trusted_bounce.private_ip_address]
   tags                = local.default_tags
+}
+resource "azurerm_dns_a_record" "trusted_permanent_agent" {
+  name                = "agent"
+  zone_name           = module.trusted_ci_jenkins_io_letsencrypt.zone_name
+  resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
+  ttl                 = 300
+  records             = [azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address]
+}
+resource "azurerm_dns_a_record" "trusted_ci_controller" {
+  name                = "@"
+  zone_name           = module.trusted_ci_jenkins_io_letsencrypt.zone_name
+  resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
+  ttl                 = 300
+  records             = [module.trusted_ci_jenkins_io.controller_private_ipv4]
 }
 
 ####################################################################################
