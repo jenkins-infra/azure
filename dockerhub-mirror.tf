@@ -75,7 +75,7 @@ resource "azurerm_private_endpoint" "dockerhub_mirror" {
 }
 
 resource "azurerm_private_dns_zone" "dockerhub_mirror" {
-  for_each = { for key, value in local.acr_private_links : key => value if !can(value["private_dns_zone_id"]) }
+  for_each = var.terratest ? {} : { for key, value in local.acr_private_links : key => value if !can(value["private_dns_zone_id"]) }
 
   # Conventional and static name required by Azure (otherwise automatic record creation does not work)
   name = "privatelink.azurecr.io"
@@ -87,7 +87,7 @@ resource "azurerm_private_dns_zone" "dockerhub_mirror" {
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "dockerhub_mirror" {
-  for_each = { for key, value in local.acr_private_links : key => value if !can(value["private_dns_zone_id"]) }
+  for_each = var.terratest ? {} : { for key, value in local.acr_private_links : key => value if !can(value["private_dns_zone_id"]) }
 
   name = "privatelink.azurecr.io"
   # Private DNS zone name is static: we can only have one per RG
