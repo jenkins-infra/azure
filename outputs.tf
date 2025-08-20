@@ -109,6 +109,17 @@ resource "local_file" "jenkins_infra_data_report" {
       },
       "namespace" = kubernetes_namespace.javadoc_jenkins_io.metadata[0].name,
     },
+    "www.jenkins.io" = {
+      "data_en" = {
+        "share_uri" = "/www.jenkins.io/en/",
+        "pvc_name"  = kubernetes_persistent_volume_claim.www_jenkins_io.metadata[0].name,
+      },
+      "data_zh" = {
+        "share_uri" = "/www.jenkins.io/zh/",
+        "pvc_name"  = kubernetes_persistent_volume_claim.www_jenkins_io.metadata[0].name,
+      },
+      "namespace" = kubernetes_namespace.www_jenkins_io.metadata[0].name,
+    },
     "publick8s" = {
       hostname           = data.azurerm_kubernetes_cluster.publick8s.fqdn,
       kubernetes_version = local.aks_clusters["publick8s"].kubernetes_version
