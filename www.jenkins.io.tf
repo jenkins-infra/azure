@@ -1,24 +1,18 @@
-## TODO uncomment to use proper naming convention
-# moved {
-#   from = azurerm_resource_group.javadoc
-#   to = azurerm_resource_group.javadoc_jenkins_io
-# }
-# resource "azurerm_resource_group" "javadoc_jenkins_io" {
-resource "azurerm_resource_group" "javadoc" {
-  name     = "javadoc-jenkins-io"
+resource "azurerm_resource_group" "www_jenkins_io" {
+  name     = "www-jenkins-io"
   location = var.location
 }
-resource "kubernetes_namespace" "javadoc_jenkins_io" {
+resource "kubernetes_namespace" "www_jenkins_io" {
   provider = kubernetes.publick8s
 
   metadata {
-    name = "javadoc-jenkins-io"
+    name = "www-jenkins-io"
   }
 }
-resource "kubernetes_persistent_volume" "javadoc_jenkins_io" {
+resource "kubernetes_persistent_volume" "www_jenkins_io" {
   provider = kubernetes.publick8s
   metadata {
-    name = kubernetes_namespace.javadoc_jenkins_io.metadata[0].name
+    name = kubernetes_namespace.www_jenkins_io.metadata[0].name
   }
   spec {
     capacity = {
@@ -38,7 +32,7 @@ resource "kubernetes_persistent_volume" "javadoc_jenkins_io" {
         driver  = "file.csi.azure.com"
         fs_type = "ext4"
         # `volumeHandle` must be unique on the cluster for this volume
-        volume_handle = kubernetes_namespace.javadoc_jenkins_io.metadata[0].name
+        volume_handle = kubernetes_namespace.www_jenkins_io.metadata[0].name
         read_only     = false
         volume_attributes = {
           protocol       = "nfs"
@@ -54,37 +48,33 @@ resource "kubernetes_persistent_volume" "javadoc_jenkins_io" {
     }
   }
 }
-resource "kubernetes_persistent_volume_claim" "javadoc_jenkins_io" {
+resource "kubernetes_persistent_volume_claim" "www_jenkins_io" {
   provider = kubernetes.publick8s
   metadata {
-    name      = kubernetes_persistent_volume.javadoc_jenkins_io.metadata[0].name
-    namespace = kubernetes_namespace.javadoc_jenkins_io.metadata[0].name
+    name      = kubernetes_persistent_volume.www_jenkins_io.metadata[0].name
+    namespace = kubernetes_namespace.www_jenkins_io.metadata[0].name
   }
   spec {
-    access_modes       = kubernetes_persistent_volume.javadoc_jenkins_io.spec[0].access_modes
-    volume_name        = kubernetes_persistent_volume.javadoc_jenkins_io.metadata[0].name
-    storage_class_name = kubernetes_persistent_volume.javadoc_jenkins_io.spec[0].storage_class_name
+    access_modes       = kubernetes_persistent_volume.www_jenkins_io.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.www_jenkins_io.metadata[0].name
+    storage_class_name = kubernetes_persistent_volume.www_jenkins_io.spec[0].storage_class_name
     resources {
       requests = {
-        storage = kubernetes_persistent_volume.javadoc_jenkins_io.spec[0].capacity.storage
+        storage = kubernetes_persistent_volume.www_jenkins_io.spec[0].capacity.storage
       }
     }
   }
 }
 
 ### TODO Remove below
-moved {
-  from = azurerm_resource_group.javadoc_jenkins_io
-  to   = azurerm_resource_group.javadocjenkinsio
-}
-resource "azurerm_resource_group" "javadocjenkinsio" {
-  name     = "javadocjenkinsio"
+resource "azurerm_resource_group" "jenkins_io" {
+  name     = "jenkinsio"
   location = var.location
 }
-resource "azurerm_storage_account" "javadoc_jenkins_io" {
-  name                              = "javadocjenkinsio"
-  resource_group_name               = azurerm_resource_group.javadocjenkinsio.name
-  location                          = azurerm_resource_group.javadocjenkinsio.location
+resource "azurerm_storage_account" "jenkins_io" {
+  name                              = "jenkinsio"
+  resource_group_name               = azurerm_resource_group.jenkins_io.name
+  location                          = azurerm_resource_group.jenkins_io.location
   account_tier                      = "Premium"
   account_kind                      = "FileStorage"
   access_tier                       = "Hot"
@@ -110,9 +100,8 @@ resource "azurerm_storage_account" "javadoc_jenkins_io" {
 
   tags = local.default_tags
 }
-
-resource "azurerm_storage_share" "javadoc_jenkins_io" {
-  name               = "javadoc-jenkins-io"
-  storage_account_id = azurerm_storage_account.javadoc_jenkins_io.id
+resource "azurerm_storage_share" "jenkins_io" {
+  name               = "jenkins-io"
+  storage_account_id = azurerm_storage_account.jenkins_io.id
   quota              = 100 # Minimum size when using a Premium storage account
 }
