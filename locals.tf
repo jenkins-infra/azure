@@ -10,15 +10,15 @@ locals {
   shared_galleries = {
     "dev" = {
       description = "Shared images built by pull requests in jenkins-infra/packer-images (consider it untrusted)."
-      images      = ["ubuntu-22.04-amd64", "ubuntu-22.04-arm64", "windows-2019-amd64", "windows-2022-amd64"]
+      images      = ["ubuntu-22.04-amd64", "ubuntu-22.04-arm64", "windows-2019-amd64", "windows-2022-amd64", "windows-2025-amd64"]
     }
     "staging" = {
       description = "Shared images built by the principal code branch in jenkins-infra/packer-images (ready to be tested)."
-      images      = ["ubuntu-22.04-amd64", "ubuntu-22.04-arm64", "windows-2019-amd64", "windows-2022-amd64"]
+      images      = ["ubuntu-22.04-amd64", "ubuntu-22.04-arm64", "windows-2019-amd64", "windows-2022-amd64", "windows-2025-amd64"]
     }
     "prod" = {
       description = "Shared images built by the releases in jenkins-infra/packer-images (⚠️ Used in production.)."
-      images      = ["ubuntu-22.04-amd64", "ubuntu-22.04-arm64", "windows-2019-amd64", "windows-2022-amd64"]
+      images      = ["ubuntu-22.04-amd64", "ubuntu-22.04-arm64", "windows-2019-amd64", "windows-2022-amd64", "windows-2025-amd64"]
     }
   }
 
