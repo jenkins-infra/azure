@@ -21,7 +21,7 @@ resource "azurerm_managed_disk" "ldap_jenkins_io_data" {
   tags         = local.default_tags
 }
 resource "kubernetes_persistent_volume" "ldap_jenkins_io_data" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.oldpublick8s
   metadata {
     name = "ldap-jenkins-io-pv"
   }
@@ -42,7 +42,7 @@ resource "kubernetes_persistent_volume" "ldap_jenkins_io_data" {
 }
 
 resource "kubernetes_persistent_volume_claim" "ldap_jenkins_io_data" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.oldpublick8s
   metadata {
     name      = "ldap-jenkins-io-data"
     namespace = "ldap"
@@ -74,7 +74,7 @@ resource "azurerm_role_definition" "ldap_jenkins_io_controller_disk_reader" {
 resource "azurerm_role_assignment" "ldap_jenkins_io_allow_azurerm" {
   scope              = azurerm_resource_group.ldap.id
   role_definition_id = azurerm_role_definition.ldap_jenkins_io_controller_disk_reader.role_definition_resource_id
-  principal_id       = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
+  principal_id       = azurerm_kubernetes_cluster.old_publick8s.identity[0].principal_id
 }
 
 ## LDAP is backed-up (at regular intervals and on stopping) by a side container into the following Azure file storage
@@ -113,7 +113,7 @@ resource "azurerm_storage_share" "ldap" {
 
 ## Kubernetes Resources (static provision of persistent volumes)
 resource "kubernetes_namespace" "ldap" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.oldpublick8s
 
   metadata {
     name = "ldap"
@@ -123,7 +123,7 @@ resource "kubernetes_namespace" "ldap" {
   }
 }
 resource "kubernetes_secret" "ldap_jenkins_io_backup" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.oldpublick8s
 
   metadata {
     name      = "ldap-backup-storage"
@@ -140,7 +140,7 @@ resource "kubernetes_secret" "ldap_jenkins_io_backup" {
 
 # Persistent Data available in read and write
 resource "kubernetes_persistent_volume" "ldap_jenkins_io_backup" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.oldpublick8s
   metadata {
     name = "ldap-jenkins-io-backup"
   }
@@ -183,7 +183,7 @@ resource "kubernetes_persistent_volume" "ldap_jenkins_io_backup" {
   }
 }
 resource "kubernetes_persistent_volume_claim" "ldap_jenkins_io_backup" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.oldpublick8s
 
   metadata {
     name      = kubernetes_persistent_volume.ldap_jenkins_io_backup.metadata[0].name

@@ -50,14 +50,14 @@ resource "azurerm_storage_share" "data_storage_jenkins_io" {
 
 ## Kubernetes Resources (static provision of persistent volumes)
 resource "kubernetes_namespace" "publick8s_data_storage_jenkins_io" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.oldpublick8s
 
   metadata {
     name = "data-storage-jenkins-io"
   }
 }
 resource "kubernetes_secret" "publick8s_data_storage_jenkins_io_storage_account" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.oldpublick8s
 
   metadata {
     name      = "data-storage-jenkins-io-storage-account"

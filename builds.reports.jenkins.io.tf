@@ -48,7 +48,7 @@ resource "azurerm_storage_share" "builds_reports_jenkins_io" {
   quota = 1
 }
 resource "kubernetes_namespace" "builds_reports_jenkins_io" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.oldpublick8s
 
   metadata {
     name = azurerm_storage_share.builds_reports_jenkins_io.name
@@ -58,7 +58,7 @@ resource "kubernetes_namespace" "builds_reports_jenkins_io" {
   }
 }
 resource "kubernetes_secret" "builds_reports_jenkins_io" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.oldpublick8s
 
   metadata {
     name      = azurerm_storage_share.builds_reports_jenkins_io.name
@@ -73,7 +73,7 @@ resource "kubernetes_secret" "builds_reports_jenkins_io" {
   type = "Opaque"
 }
 resource "kubernetes_persistent_volume" "builds_reports_jenkins_io" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.oldpublick8s
   metadata {
     name = azurerm_storage_share.builds_reports_jenkins_io.name
   }
@@ -119,7 +119,7 @@ resource "kubernetes_persistent_volume" "builds_reports_jenkins_io" {
   }
 }
 resource "kubernetes_persistent_volume_claim" "builds_reports_jenkins_io" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.oldpublick8s
   metadata {
     name      = kubernetes_persistent_volume.builds_reports_jenkins_io.metadata[0].name
     namespace = kubernetes_namespace.builds_reports_jenkins_io.metadata[0].name
