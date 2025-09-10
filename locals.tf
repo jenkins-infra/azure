@@ -82,6 +82,15 @@ locals {
       kubernetes_version = "1.31.6",
       compute_zones      = [3],
     },
+    "publick8s" = {
+      name               = "publick8s",
+      kubernetes_version = "1.32.6",
+      # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
+      pod_cidrs = [
+        "10.100.0.0/14",       # 10.100.0.1 - 10.103.255.255
+        "fd12:3456:789a::/64", # Dual stack is required to provide public IPv6 LBs
+      ],
+    },
     "compute_zones" = {
       system_pool = [1, 2], # Note: Zone 3 is not allowed for system pool.
       arm64_pool  = [2, 3],

@@ -134,14 +134,13 @@ resource "azurerm_role_assignment" "old_publick8s_public_vnet_networkcontributor
   principal_id                     = azurerm_kubernetes_cluster.old_publick8s.identity[0].principal_id
   skip_service_principal_aad_check = true
 }
-# Allow cluster to manage Azure PLS if it's in the same subnet as the the cluster itself
-data "azurerm_nat_gateway" "publick8s_outbound" {
-  resource_group_name = data.azurerm_virtual_network.public.resource_group_name
-  name                = "publick8s-outbound"
-}
 moved {
   from = azurerm_role_definition.publick8s_outbound_gateway
   to   = azurerm_role_definition.old_publick8s_outbound_gateway
+}
+data "azurerm_nat_gateway" "publick8s_outbound" {
+  resource_group_name = data.azurerm_virtual_network.public.resource_group_name
+  name                = "publick8s-outbound"
 }
 resource "azurerm_role_definition" "old_publick8s_outbound_gateway" {
   name  = "publick8s_outbount_gateway"
