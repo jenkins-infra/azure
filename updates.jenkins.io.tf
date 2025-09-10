@@ -4,14 +4,14 @@ resource "azurerm_resource_group" "updates_jenkins_io" {
   tags     = local.default_tags
 }
 resource "kubernetes_namespace" "updates_jenkins_io" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.oldpublick8s
 
   metadata {
     name = "updates-jenkins-io"
   }
 }
 resource "kubernetes_persistent_volume" "updates_jenkins_io" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.oldpublick8s
   metadata {
     name = kubernetes_namespace.updates_jenkins_io.metadata[0].name
   }
@@ -50,7 +50,7 @@ resource "kubernetes_persistent_volume" "updates_jenkins_io" {
   }
 }
 resource "kubernetes_persistent_volume_claim" "updates_jenkins_io" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.oldpublick8s
   metadata {
     name      = kubernetes_persistent_volume.updates_jenkins_io.metadata[0].name
     namespace = kubernetes_namespace.updates_jenkins_io.metadata[0].name

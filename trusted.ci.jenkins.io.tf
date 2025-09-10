@@ -34,7 +34,7 @@ module "trusted_ci_jenkins_io" {
   controller_datadisk_name      = "trusted-ci-controller-data-disk"
 
   jenkins_infra_ips = {
-    ldap_ipv4         = azurerm_public_ip.ldap_jenkins_io_ipv4.ip_address
+    ldap_ipv4         = azurerm_public_ip.old_ldap_jenkins_io_ipv4.ip_address
     puppet_ipv4       = azurerm_public_ip.puppet_jenkins_io.ip_address
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   }
@@ -546,7 +546,7 @@ resource "azurerm_private_dns_a_record" "updates_jenkins_io" {
 data "azurerm_private_link_service" "updates_jenkins_io" {
   # https://github.com/jenkins-infra/kubernetes-management/
   name                = "updates.jenkins.io"
-  resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
+  resource_group_name = azurerm_kubernetes_cluster.old_publick8s.node_resource_group
 }
 resource "azurerm_private_endpoint" "updates_jenkins_io_for_trustedci" {
   name = "${data.azurerm_private_link_service.updates_jenkins_io.name}-for-trustedci"

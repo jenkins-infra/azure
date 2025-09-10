@@ -9,14 +9,14 @@ resource "azurerm_resource_group" "javadoc" {
   location = var.location
 }
 resource "kubernetes_namespace" "javadoc_jenkins_io" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.oldpublick8s
 
   metadata {
     name = "javadoc-jenkins-io"
   }
 }
 resource "kubernetes_persistent_volume" "javadoc_jenkins_io" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.oldpublick8s
   metadata {
     name = kubernetes_namespace.javadoc_jenkins_io.metadata[0].name
   }
@@ -55,7 +55,7 @@ resource "kubernetes_persistent_volume" "javadoc_jenkins_io" {
   }
 }
 resource "kubernetes_persistent_volume_claim" "javadoc_jenkins_io" {
-  provider = kubernetes.publick8s
+  provider = kubernetes.oldpublick8s
   metadata {
     name      = kubernetes_persistent_volume.javadoc_jenkins_io.metadata[0].name
     namespace = kubernetes_namespace.javadoc_jenkins_io.metadata[0].name
