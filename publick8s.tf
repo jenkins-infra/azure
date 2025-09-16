@@ -72,10 +72,16 @@ resource "azurerm_kubernetes_cluster" "new_publick8s" {
     network_plugin      = "azure"
     network_plugin_mode = "overlay"
     network_policy      = "azure"
-    outbound_type       = "userAssignedNATGateway"
-    load_balancer_sku   = "standard"                                # Required to customize the outbound type
     pod_cidrs           = local.aks_clusters["publick8s"].pod_cidrs # Plural form: dual stack ipv4/ipv6
     ip_versions         = ["IPv4", "IPv6"]
+    outbound_type       = "loadBalancer"
+    load_balancer_sku   = "standard"
+    load_balancer_profile {
+      outbound_ports_allocated    = "2560" # Max 25 Nodes, 64000 ports total per public IP
+      idle_timeout_in_minutes     = "4"
+      managed_outbound_ip_count   = "3"
+      managed_outbound_ipv6_count = "2"
+    }
   }
 
   identity {
