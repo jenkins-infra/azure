@@ -3,6 +3,10 @@ resource "random_pet" "suffix_publick8s" {
   # You want to taint this resource in order to get a new pet
 }
 
+moved {
+  from = azurerm_kubernetes_cluster.publick8s
+  to   = azurerm_kubernetes_cluster.old_publick8s
+}
 #trivy:ignore:azure-container-logging #trivy:ignore:azure-container-limit-authorized-ips
 resource "azurerm_kubernetes_cluster" "old_publick8s" {
   name                = local.aks_clusters["old_publick8s"].name
@@ -84,6 +88,10 @@ resource "azurerm_kubernetes_cluster" "old_publick8s" {
   tags = local.default_tags
 }
 
+moved {
+  from = data.azurerm_kubernetes_cluster.publick8s
+  to   = data.azurerm_kubernetes_cluster.old_publick8s
+}
 data "azurerm_kubernetes_cluster" "old_publick8s" {
   name                = local.aks_clusters["old_publick8s"].name
   resource_group_name = azurerm_resource_group.publick8s.name
@@ -115,7 +123,10 @@ resource "azurerm_kubernetes_cluster_node_pool" "arm64small2" {
 
   tags = local.default_tags
 }
-
+moved {
+  from = azurerm_role_assignment.publick8s_public_vnet_networkcontributor
+  to   = azurerm_role_assignment.old_publick8s_public_vnet_networkcontributor
+}
 # Allow cluster to manage LBs in the publick8s-tier subnet (Public LB)
 resource "azurerm_role_assignment" "old_publick8s_public_vnet_networkcontributor" {
   scope                            = data.azurerm_virtual_network.public.id
@@ -123,9 +134,14 @@ resource "azurerm_role_assignment" "old_publick8s_public_vnet_networkcontributor
   principal_id                     = azurerm_kubernetes_cluster.old_publick8s.identity[0].principal_id
   skip_service_principal_aad_check = true
 }
+# Allow cluster to manage Azure PLS if it's in the same subnet as the the cluster itself
 data "azurerm_nat_gateway" "publick8s_outbound" {
   resource_group_name = data.azurerm_virtual_network.public.resource_group_name
   name                = "publick8s-outbound"
+}
+moved {
+  from = azurerm_role_definition.publick8s_outbound_gateway
+  to   = azurerm_role_definition.old_publick8s_outbound_gateway
 }
 resource "azurerm_role_definition" "old_publick8s_outbound_gateway" {
   name  = "publick8s_outbount_gateway"
@@ -135,14 +151,20 @@ resource "azurerm_role_definition" "old_publick8s_outbound_gateway" {
     actions = ["Microsoft.Network/natGateways/join/action"]
   }
 }
-
+moved {
+  from = azurerm_role_assignment.publick8s_nat_gateway
+  to   = azurerm_role_assignment.old_publick8s_nat_gateway
+}
 resource "azurerm_role_assignment" "old_publick8s_nat_gateway" {
   scope                            = data.azurerm_nat_gateway.publick8s_outbound.id
   role_definition_id               = azurerm_role_definition.old_publick8s_outbound_gateway.role_definition_resource_id
   principal_id                     = azurerm_kubernetes_cluster.old_publick8s.identity[0].principal_id
   skip_service_principal_aad_check = true
 }
-
+moved {
+  from = azurerm_role_assignment.publick8s_ipv4_networkcontributor
+  to   = azurerm_role_assignment.old_publick8s_ipv4_networkcontributor
+}
 # Allow cluster to manage publick8s_ipv4
 resource "azurerm_role_assignment" "old_publick8s_ipv4_networkcontributor" {
   scope                            = azurerm_public_ip.old_publick8s_ipv4.id
@@ -150,7 +172,10 @@ resource "azurerm_role_assignment" "old_publick8s_ipv4_networkcontributor" {
   principal_id                     = azurerm_kubernetes_cluster.old_publick8s.identity[0].principal_id
   skip_service_principal_aad_check = true
 }
-
+moved {
+  from = azurerm_role_assignment.ldap_jenkins_io_ipv4_networkcontributor
+  to   = azurerm_role_assignment.old_ldap_jenkins_io_ipv4_networkcontributor
+}
 # Allow cluster to manage ldap_jenkins_io_ipv4
 resource "azurerm_role_assignment" "old_ldap_jenkins_io_ipv4_networkcontributor" {
   scope                            = azurerm_public_ip.old_ldap_jenkins_io_ipv4.id
@@ -158,7 +183,10 @@ resource "azurerm_role_assignment" "old_ldap_jenkins_io_ipv4_networkcontributor"
   principal_id                     = azurerm_kubernetes_cluster.old_publick8s.identity[0].principal_id
   skip_service_principal_aad_check = true
 }
-
+moved {
+  from = azurerm_role_assignment.publick8s_ipv6_networkcontributor
+  to   = azurerm_role_assignment.old_publick8s_ipv6_networkcontributor
+}
 # Allow cluster to manage publick8s_ipv6
 resource "azurerm_role_assignment" "old_publick8s_ipv6_networkcontributor" {
   scope                            = azurerm_public_ip.old_publick8s_ipv6.id
@@ -166,7 +194,10 @@ resource "azurerm_role_assignment" "old_publick8s_ipv6_networkcontributor" {
   principal_id                     = azurerm_kubernetes_cluster.old_publick8s.identity[0].principal_id
   skip_service_principal_aad_check = true
 }
-
+moved {
+  from = azurerm_role_assignment.public_ips_networkcontributor
+  to   = azurerm_role_assignment.old_public_ips_networkcontributor
+}
 resource "azurerm_role_assignment" "old_public_ips_networkcontributor" {
   scope                            = azurerm_resource_group.prod_public_ips.id
   role_definition_name             = "Network Contributor"
@@ -248,7 +279,10 @@ resource "kubernetes_storage_class" "azurefile_csi_premium_retain_public" {
 }
 
 # Used later by the load balancer deployed on the cluster, see https://github.com/jenkins-infra/kubernetes-management/config/publick8s.yaml
-
+moved {
+  from = azurerm_public_ip.publick8s_ipv4
+  to   = azurerm_public_ip.old_publick8s_ipv4
+}
 resource "azurerm_public_ip" "old_publick8s_ipv4" {
   name                = "public-publick8s-ipv4"
   resource_group_name = azurerm_resource_group.prod_public_ips.name
@@ -258,7 +292,10 @@ resource "azurerm_public_ip" "old_publick8s_ipv4" {
   sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
   tags                = local.default_tags
 }
-
+moved {
+  from = azurerm_management_lock.publick8s_ipv4
+  to   = azurerm_management_lock.old_publick8s_ipv4
+}
 resource "azurerm_management_lock" "old_publick8s_ipv4" {
   name       = "public-publick8s-ipv4"
   scope      = azurerm_public_ip.old_publick8s_ipv4.id
@@ -268,7 +305,10 @@ resource "azurerm_management_lock" "old_publick8s_ipv4" {
 
 # The LDAP service deployed on this cluster is using TCP not HTTP/HTTPS, it needs its own load balancer
 # Setting it with this determined public IP will ease DNS setup and changes
-
+moved {
+  from = azurerm_public_ip.ldap_jenkins_io_ipv4
+  to   = azurerm_public_ip.old_ldap_jenkins_io_ipv4
+}
 resource "azurerm_public_ip" "old_ldap_jenkins_io_ipv4" {
   name                = "ldap-jenkins-io-ipv4"
   resource_group_name = azurerm_resource_group.prod_public_ips.name
@@ -278,13 +318,20 @@ resource "azurerm_public_ip" "old_ldap_jenkins_io_ipv4" {
   sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
   tags                = local.default_tags
 }
+moved {
+  from = azurerm_management_lock.ldap_jenkins_io_ipv4
+  to   = azurerm_management_lock.old_ldap_jenkins_io_ipv4
+}
 resource "azurerm_management_lock" "old_ldap_jenkins_io_ipv4" {
   name       = "ldap-jenkins-io-ipv4"
   scope      = azurerm_public_ip.old_ldap_jenkins_io_ipv4.id
   lock_level = "CanNotDelete"
   notes      = "Locked because this is a sensitive resource that should not be removed when publick8s cluster is re-created"
 }
-
+moved {
+  from = azurerm_public_ip.publick8s_ipv6
+  to   = azurerm_public_ip.old_publick8s_ipv6
+}
 resource "azurerm_public_ip" "old_publick8s_ipv6" {
   name                = "public-publick8s-ipv6"
   resource_group_name = azurerm_resource_group.prod_public_ips.name
@@ -294,12 +341,24 @@ resource "azurerm_public_ip" "old_publick8s_ipv6" {
   sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
   tags                = local.default_tags
 }
-
+moved {
+  from = azurerm_management_lock.publick8s_ipv6
+  to   = azurerm_management_lock.old_publick8s_ipv6
+}
 resource "azurerm_management_lock" "old_publick8s_ipv6" {
   name       = "public-publick8s-ipv6"
   scope      = azurerm_public_ip.old_publick8s_ipv6.id
   lock_level = "CanNotDelete"
   notes      = "Locked because this is a sensitive resource that should not be removed when publick8s cluster is re-created"
+}
+moved {
+  from = azurerm_management_lock.publick8s_ipv6
+  to   = azurerm_management_lock.old_publick8s_ipv6
+}
+
+moved {
+  from = module.publick8s_admin_sa
+  to   = module.old_publick8s_admin_sa
 }
 # Configure the jenkins-infra/kubernetes-management admin service account
 module "old_publick8s_admin_sa" {
