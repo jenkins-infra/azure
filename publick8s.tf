@@ -71,7 +71,6 @@ resource "azurerm_kubernetes_cluster" "new_publick8s" {
   network_profile {
     network_plugin      = "azure"
     network_plugin_mode = "overlay"
-    network_policy      = "azure"
     pod_cidrs           = local.aks_clusters["publick8s"].pod_cidrs # Plural form: dual stack ipv4/ipv6
     ip_versions         = ["IPv4", "IPv6"]
     outbound_type       = "loadBalancer"
