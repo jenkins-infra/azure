@@ -30,7 +30,7 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
     network_policy      = "azure"
     outbound_type       = "userAssignedNATGateway"
     load_balancer_sku   = "standard" # Required to customize the outbound type
-    pod_cidr            = local.aks_clusters["privatek8s"].pod_cidr
+    pod_cidr            = local.aks_clusters.privatek8s.pod_cidr
   }
 
   identity {
