@@ -73,10 +73,6 @@ resource "kubernetes_persistent_volume_claim" "javadoc_jenkins_io" {
 }
 
 ### TODO Remove below
-moved {
-  from = azurerm_resource_group.javadoc_jenkins_io
-  to   = azurerm_resource_group.javadocjenkinsio
-}
 resource "azurerm_resource_group" "javadocjenkinsio" {
   name     = "javadocjenkinsio"
   location = var.location

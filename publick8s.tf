@@ -47,10 +47,6 @@ resource "azurerm_dns_a_record" "private_publick8s" {
 }
 
 #trivy:ignore:azure-container-logging #trivy:ignore:azure-container-limit-authorized-ips
-moved {
-  from = azurerm_kubernetes_cluster.new_publick8s
-  to   = azurerm_kubernetes_cluster.publick8s
-}
 resource "azurerm_kubernetes_cluster" "publick8s" {
   name     = local.aks_clusters["publick8s"].name
   location = azurerm_resource_group.publick8s.location
