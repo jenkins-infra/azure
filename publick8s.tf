@@ -47,7 +47,11 @@ resource "azurerm_dns_a_record" "private_publick8s" {
 }
 
 #trivy:ignore:azure-container-logging #trivy:ignore:azure-container-limit-authorized-ips
-resource "azurerm_kubernetes_cluster" "new_publick8s" {
+moved {
+  from = azurerm_kubernetes_cluster.new_publick8s
+  to   = azurerm_kubernetes_cluster.publick8s
+}
+resource "azurerm_kubernetes_cluster" "publick8s" {
   name     = local.aks_clusters["publick8s"].name
   location = azurerm_resource_group.publick8s.location
   sku_tier = "Standard"
@@ -121,7 +125,7 @@ resource "azurerm_role_assignment" "publick8s_subnets_networkcontributor" {
   ])
   scope                            = each.key
   role_definition_name             = "Network Contributor"
-  principal_id                     = azurerm_kubernetes_cluster.new_publick8s.identity[0].principal_id
+  principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
   skip_service_principal_aad_check = true
 }
 
@@ -137,7 +141,7 @@ resource "azurerm_role_assignment" "publick8s_subnets_networkcontributor" {
 # resource "azurerm_role_assignment" "publick8s_nat_gateway" {
 #   scope                            = data.azurerm_nat_gateway.publick8s_outbound.id
 #   role_definition_id               = azurerm_role_definition.publick8s_outbound_gateway.role_definition_resource_id
-#   principal_id                     = azurerm_kubernetes_cluster.new_publick8s.identity[0].principal_id
+#   principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
 #   skip_service_principal_aad_check = true
 # }
 ## End TODO remove
@@ -175,7 +179,27 @@ resource "azurerm_role_assignment" "publick8s_ips_networkcontributor" {
 
   scope                            = azurerm_public_ip.publick8s_ips[each.key].id
   role_definition_name             = "Network Contributor"
-  principal_id                     = azurerm_kubernetes_cluster.new_publick8s.identity[0].principal_id
+  principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
   skip_service_principal_aad_check = true
 }
 ## Kubernetes Resources
+resource "kubernetes_storage_class" "publick8s_statically_provisioned" {
+  metadata {
+    name = "statically-provisioned"
+  }
+  storage_provisioner    = "disk.csi.azure.com"
+  reclaim_policy         = "Retain"
+  provider               = kubernetes.publick8s
+  allow_volume_expansion = true
+}
+
+# Configure the jenkins-infra/kubernetes-management admin service account
+module "publick8s_admin_sa" {
+  providers = {
+    kubernetes = kubernetes.publick8s
+  }
+  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
+  cluster_name               = azurerm_kubernetes_cluster.publick8s.name
+  cluster_hostname           = local.aks_clusters_outputs.publick8s.cluster_hostname
+  cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.publick8s.kube_config.0.cluster_ca_certificate
+}
