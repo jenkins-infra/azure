@@ -61,7 +61,7 @@ resource "azurerm_key_vault" "prodreleasecore" {
   enabled_for_disk_encryption     = false
   soft_delete_retention_days      = 90
   purge_protection_enabled        = false
-  enable_rbac_authorization       = false
+  rbac_authorization_enabled      = false
   enabled_for_deployment          = false
   enabled_for_template_deployment = false
   # Adding a network rule with `public_network_access_enabled` set to `true` (default) selects the option "Enabled from selected virtual networks and IP addresses"
