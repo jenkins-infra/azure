@@ -321,3 +321,610 @@ data "azurerm_public_ip" "publick8s_lb_outbound" {
   name                = element(split("/", each.key), "-1")
   resource_group_name = azurerm_kubernetes_cluster.old_publick8s.node_resource_group
 }
+
+resource "kubernetes_namespace" "oldpublick8s_builds_reports_jenkins_io" {
+  provider = kubernetes.oldpublick8s
+
+  metadata {
+    name = azurerm_storage_share.builds_reports_jenkins_io.name
+    labels = {
+      name = azurerm_storage_share.builds_reports_jenkins_io.name
+    }
+  }
+}
+resource "kubernetes_namespace" "oldpublick8s_data_storage_jenkins_io" {
+  provider = kubernetes.oldpublick8s
+
+  metadata {
+    name = "data-storage-jenkins-io"
+  }
+}
+resource "kubernetes_namespace" "oldpublick8s_get_jenkins_io" {
+  provider = kubernetes.oldpublick8s
+
+  metadata {
+    name = "get-jenkins-io"
+  }
+}
+resource "kubernetes_namespace" "oldpublick8s_javadoc_jenkins_io" {
+  provider = kubernetes.oldpublick8s
+
+  metadata {
+    name = "javadoc-jenkins-io"
+  }
+}
+resource "kubernetes_namespace" "oldpublick8s_ldap" {
+  provider = kubernetes.oldpublick8s
+
+  metadata {
+    name = "ldap"
+    labels = {
+      name = "ldap"
+    }
+  }
+}
+resource "kubernetes_namespace" "oldpublick8s_updates_jenkins_io" {
+  provider = kubernetes.oldpublick8s
+
+  metadata {
+    name = "updates-jenkins-io"
+  }
+}
+resource "kubernetes_namespace" "oldpublick8s_www_jenkins_io" {
+  provider = kubernetes.oldpublick8s
+
+  metadata {
+    name = "www-jenkins-io"
+  }
+}
+resource "kubernetes_secret" "oldpublick8s_builds_reports_jenkins_io" {
+  provider = kubernetes.oldpublick8s
+
+  metadata {
+    name      = azurerm_storage_share.builds_reports_jenkins_io.name
+    namespace = azurerm_storage_share.builds_reports_jenkins_io.name
+  }
+
+  data = {
+    azurestorageaccountname = azurerm_storage_account.builds_reports_jenkins_io.name
+    azurestorageaccountkey  = azurerm_storage_account.builds_reports_jenkins_io.primary_access_key
+  }
+
+  type = "Opaque"
+}
+resource "kubernetes_secret" "oldpublick8s_data_storage_jenkins_io_storage_account" {
+  provider = kubernetes.oldpublick8s
+
+  metadata {
+    name      = "data-storage-jenkins-io-storage-account"
+    namespace = kubernetes_namespace.oldpublick8s_data_storage_jenkins_io.metadata[0].name
+  }
+
+  data = {
+    azurestorageaccountname = azurerm_storage_account.data_storage_jenkins_io.name
+    azurestorageaccountkey  = azurerm_storage_account.data_storage_jenkins_io.primary_access_key
+  }
+
+  type = "Opaque"
+}
+resource "kubernetes_secret" "oldpublick8s_ldap_jenkins_io_backup" {
+  provider = kubernetes.oldpublick8s
+
+  metadata {
+    name      = "ldap-backup-storage"
+    namespace = kubernetes_namespace.oldpublick8s_ldap.metadata[0].name
+  }
+
+  data = {
+    azurestorageaccountname = azurerm_storage_account.ldap_backups.name
+    azurestorageaccountkey  = azurerm_storage_account.ldap_backups.primary_access_key
+  }
+
+  type = "Opaque"
+}
+resource "kubernetes_persistent_volume" "builds_reports_jenkins_io" {
+  provider = kubernetes.oldpublick8s
+  metadata {
+    name = azurerm_storage_share.builds_reports_jenkins_io.name
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_storage_share.builds_reports_jenkins_io.quota}Gi"
+    }
+    access_modes                     = ["ReadOnlyMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.statically_provisioned_publick8s.id
+    # Ensure that only the designated PVC can claim this PV (to avoid injection as PV are not namespaced)
+    claim_ref {                                                                                # To ensure no other PVCs can claim this PV
+      namespace = kubernetes_namespace.oldpublick8s_builds_reports_jenkins_io.metadata[0].name # Namespace is required even though it's in "default" namespace.
+      name      = azurerm_storage_share.builds_reports_jenkins_io.name                         # Name of your PVC (cannot be a direct reference to avoid cyclical errors)
+    }
+    mount_options = [
+      "dir_mode=0777",
+      "file_mode=0777",
+      "uid=0",
+      "gid=0",
+      "mfsymlinks",
+      "cache=strict", # Default on usual kernels but worth setting it explicitly
+      "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+      "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+    ]
+    persistent_volume_source {
+      csi {
+        driver  = "file.csi.azure.com"
+        fs_type = "ext4"
+        # `volumeHandle` must be unique on the cluster for this volume
+        volume_handle = format("%s-%s", azurerm_storage_account.builds_reports_jenkins_io.name, azurerm_storage_share.builds_reports_jenkins_io.name)
+        read_only     = true
+        volume_attributes = {
+          resourceGroup = azurerm_storage_account.builds_reports_jenkins_io.resource_group_name
+          shareName     = azurerm_storage_share.builds_reports_jenkins_io.name
+        }
+        node_stage_secret_ref {
+          name      = kubernetes_secret.oldpublick8s_builds_reports_jenkins_io.metadata[0].name
+          namespace = kubernetes_secret.oldpublick8s_builds_reports_jenkins_io.metadata[0].namespace
+        }
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "builds_reports_jenkins_io" {
+  provider = kubernetes.oldpublick8s
+  metadata {
+    name      = kubernetes_persistent_volume.builds_reports_jenkins_io.metadata[0].name
+    namespace = kubernetes_namespace.oldpublick8s_builds_reports_jenkins_io.metadata[0].name
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.builds_reports_jenkins_io.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.builds_reports_jenkins_io.metadata[0].name
+    storage_class_name = kubernetes_persistent_volume.builds_reports_jenkins_io.spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = kubernetes_persistent_volume.builds_reports_jenkins_io.spec[0].capacity.storage
+      }
+    }
+  }
+}
+
+resource "kubernetes_persistent_volume" "get_jenkins_io" {
+  provider = kubernetes.oldpublick8s
+  metadata {
+    name = kubernetes_namespace.oldpublick8s_get_jenkins_io.metadata[0].name
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_storage_share.data_storage_jenkins_io.quota}Gi"
+    }
+    access_modes                     = ["ReadOnlyMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.statically_provisioned_publick8s.id
+    mount_options = [
+      "nconnect=4", # Mandatory value (4) for Premium Azure File Share NFS 4.1. Increasing require using NetApp NFS instead ($$$)
+      "noresvport", # ref. https://linux.die.net/man/5/nfs
+      "actimeo=10", # Data is changed quite often
+      "cto",        # Ensure data consistency at the cost of slower I/O
+    ]
+    persistent_volume_source {
+      csi {
+        driver  = "file.csi.azure.com"
+        fs_type = "ext4"
+        # `volumeHandle` must be unique on the cluster for this volume
+        volume_handle = kubernetes_namespace.oldpublick8s_get_jenkins_io.metadata[0].name
+        read_only     = false
+        volume_attributes = {
+          protocol       = "nfs"
+          resourceGroup  = azurerm_storage_account.data_storage_jenkins_io.resource_group_name
+          shareName      = azurerm_storage_share.data_storage_jenkins_io.name
+          storageAccount = azurerm_storage_account.data_storage_jenkins_io.name
+        }
+        node_stage_secret_ref {
+          name      = kubernetes_secret.oldpublick8s_data_storage_jenkins_io_storage_account.metadata[0].name
+          namespace = kubernetes_secret.oldpublick8s_data_storage_jenkins_io_storage_account.metadata[0].namespace
+        }
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "get_jenkins_io" {
+  provider = kubernetes.oldpublick8s
+  metadata {
+    name      = kubernetes_persistent_volume.get_jenkins_io.metadata[0].name
+    namespace = kubernetes_namespace.oldpublick8s_get_jenkins_io.metadata[0].name
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.get_jenkins_io.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.get_jenkins_io.metadata[0].name
+    storage_class_name = kubernetes_persistent_volume.get_jenkins_io.spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = kubernetes_persistent_volume.get_jenkins_io.spec[0].capacity.storage
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume" "javadoc_jenkins_io" {
+  provider = kubernetes.oldpublick8s
+  metadata {
+    name = kubernetes_namespace.oldpublick8s_javadoc_jenkins_io.metadata[0].name
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_storage_share.data_storage_jenkins_io.quota}Gi"
+    }
+    access_modes                     = ["ReadOnlyMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.statically_provisioned_publick8s.id
+    mount_options = [
+      "nconnect=4", # Mandatory value (4) for Premium Azure File Share NFS 4.1. Increasing require using NetApp NFS instead ($$$)
+      "noresvport", # ref. https://linux.die.net/man/5/nfs
+      "actimeo=10", # Data is changed quite often
+      "cto",        # Ensure data consistency at the cost of slower I/O
+    ]
+    persistent_volume_source {
+      csi {
+        driver  = "file.csi.azure.com"
+        fs_type = "ext4"
+        # `volumeHandle` must be unique on the cluster for this volume
+        volume_handle = kubernetes_namespace.oldpublick8s_javadoc_jenkins_io.metadata[0].name
+        read_only     = false
+        volume_attributes = {
+          protocol       = "nfs"
+          resourceGroup  = azurerm_storage_account.data_storage_jenkins_io.resource_group_name
+          shareName      = azurerm_storage_share.data_storage_jenkins_io.name
+          storageAccount = azurerm_storage_account.data_storage_jenkins_io.name
+        }
+        node_stage_secret_ref {
+          name      = kubernetes_secret.oldpublick8s_data_storage_jenkins_io_storage_account.metadata[0].name
+          namespace = kubernetes_secret.oldpublick8s_data_storage_jenkins_io_storage_account.metadata[0].namespace
+        }
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "javadoc_jenkins_io" {
+  provider = kubernetes.oldpublick8s
+  metadata {
+    name      = kubernetes_persistent_volume.javadoc_jenkins_io.metadata[0].name
+    namespace = kubernetes_namespace.oldpublick8s_javadoc_jenkins_io.metadata[0].name
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.javadoc_jenkins_io.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.javadoc_jenkins_io.metadata[0].name
+    storage_class_name = kubernetes_persistent_volume.javadoc_jenkins_io.spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = kubernetes_persistent_volume.javadoc_jenkins_io.spec[0].capacity.storage
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume" "ldap_jenkins_io_data" {
+  provider = kubernetes.oldpublick8s
+  metadata {
+    name = "ldap-jenkins-io-pv"
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_managed_disk.ldap_jenkins_io_data.disk_size_gb}Gi"
+    }
+    access_modes                     = ["ReadWriteOnce"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.statically_provisionned_publick8s.id
+    persistent_volume_source {
+      csi {
+        driver        = "disk.csi.azure.com"
+        volume_handle = azurerm_managed_disk.ldap_jenkins_io_data.id
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "ldap_jenkins_io_data" {
+  provider = kubernetes.oldpublick8s
+  metadata {
+    name      = "ldap-jenkins-io-data"
+    namespace = "ldap"
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.ldap_jenkins_io_data.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.ldap_jenkins_io_data.metadata.0.name
+    storage_class_name = kubernetes_storage_class.statically_provisionned_publick8s.id
+    resources {
+      requests = {
+        storage = "${azurerm_managed_disk.ldap_jenkins_io_data.disk_size_gb}Gi"
+      }
+    }
+  }
+}
+
+# Required to allow AKS CSI driver to access the Azure disk
+resource "azurerm_role_definition" "ldap_jenkins_io_controller_disk_reader" {
+  name  = "ReadLDAPDisk"
+  scope = azurerm_resource_group.ldap.id
+
+  permissions {
+    actions = [
+      "Microsoft.Compute/disks/read",
+      "Microsoft.Compute/disks/write",
+    ]
+  }
+}
+resource "azurerm_role_assignment" "ldap_jenkins_io_allow_azurerm" {
+  scope              = azurerm_resource_group.ldap.id
+  role_definition_id = azurerm_role_definition.ldap_jenkins_io_controller_disk_reader.role_definition_resource_id
+  principal_id       = azurerm_kubernetes_cluster.old_publick8s.identity[0].principal_id
+}
+# Persistent Data available in read and write
+resource "kubernetes_persistent_volume" "ldap_jenkins_io_backup" {
+  provider = kubernetes.oldpublick8s
+  metadata {
+    name = "ldap-jenkins-io-backup"
+  }
+  spec {
+    capacity = {
+      # between 3 to 8 years of LDAP ldip backups
+      # TODO: We should purge backups older than 1 year (username, email and password data)
+      storage = "10Gi"
+    }
+    access_modes                     = ["ReadWriteMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.statically_provisioned_publick8s.id
+    mount_options = [
+      "dir_mode=0777",
+      "file_mode=0777",
+      "uid=0",
+      "gid=0",
+      "mfsymlinks",
+      "cache=strict", # Default on usual kernels but worth setting it explicitly
+      "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+      "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+    ]
+    persistent_volume_source {
+      csi {
+        driver  = "file.csi.azure.com"
+        fs_type = "ext4"
+        # `volumeHandle` must be unique on the cluster for this volume
+        volume_handle = "${azurerm_storage_share.ldap.name}-rwx"
+        read_only     = false
+        volume_attributes = {
+          resourceGroup = azurerm_storage_account.ldap_backups.resource_group_name
+          shareName     = azurerm_storage_share.ldap.name
+        }
+        node_stage_secret_ref {
+          name      = kubernetes_secret.oldpublick8s_ldap_jenkins_io_backup.metadata[0].name
+          namespace = kubernetes_secret.oldpublick8s_ldap_jenkins_io_backup.metadata[0].namespace
+        }
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "ldap_jenkins_io_backup" {
+  provider = kubernetes.oldpublick8s
+
+  metadata {
+    name      = kubernetes_persistent_volume.ldap_jenkins_io_backup.metadata[0].name
+    namespace = kubernetes_namespace.oldpublick8s_ldap.metadata[0].name
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.ldap_jenkins_io_backup.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.ldap_jenkins_io_backup.metadata[0].name
+    storage_class_name = kubernetes_persistent_volume.ldap_jenkins_io_backup.spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = kubernetes_persistent_volume.ldap_jenkins_io_backup.spec[0].capacity.storage
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume" "updates_jenkins_io" {
+  provider = kubernetes.oldpublick8s
+  metadata {
+    name = kubernetes_namespace.oldpublick8s_updates_jenkins_io.metadata[0].name
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_storage_share.data_storage_jenkins_io.quota}Gi"
+    }
+    access_modes                     = ["ReadOnlyMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.statically_provisioned_publick8s.id
+    mount_options = [
+      "nconnect=4", # Mandatory value (4) for Premium Azure File Share NFS 4.1. Increasing require using NetApp NFS instead ($$$)
+      "noresvport", # ref. https://linux.die.net/man/5/nfs
+      "actimeo=10", # Data is changed quite often
+      "cto",        # Ensure data consistency at the cost of slower I/O
+    ]
+    persistent_volume_source {
+      csi {
+        driver  = "file.csi.azure.com"
+        fs_type = "ext4"
+        # `volumeHandle` must be unique on the cluster for this volume
+        volume_handle = kubernetes_namespace.oldpublick8s_updates_jenkins_io.metadata[0].name
+        read_only     = false
+        volume_attributes = {
+          protocol       = "nfs"
+          resourceGroup  = azurerm_storage_account.data_storage_jenkins_io.resource_group_name
+          shareName      = azurerm_storage_share.data_storage_jenkins_io.name
+          storageAccount = azurerm_storage_account.data_storage_jenkins_io.name
+        }
+        node_stage_secret_ref {
+          name      = kubernetes_secret.oldpublick8s_data_storage_jenkins_io_storage_account.metadata[0].name
+          namespace = kubernetes_secret.oldpublick8s_data_storage_jenkins_io_storage_account.metadata[0].namespace
+        }
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "updates_jenkins_io" {
+  provider = kubernetes.oldpublick8s
+  metadata {
+    name      = kubernetes_persistent_volume.updates_jenkins_io.metadata[0].name
+    namespace = kubernetes_namespace.oldpublick8s_updates_jenkins_io.metadata[0].name
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.updates_jenkins_io.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.updates_jenkins_io.metadata[0].name
+    storage_class_name = kubernetes_persistent_volume.updates_jenkins_io.spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = kubernetes_persistent_volume.updates_jenkins_io.spec[0].capacity.storage
+      }
+    }
+  }
+}
+
+resource "kubernetes_persistent_volume" "jenkins_weekly_data" {
+  provider = kubernetes.oldpublick8s
+  metadata {
+    name = "jenkins-weekly-pv"
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_managed_disk.jenkins_weekly_data.disk_size_gb}Gi"
+    }
+    access_modes                     = ["ReadWriteOnce"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.statically_provisionned_publick8s.id
+    persistent_volume_source {
+      csi {
+        driver        = "disk.csi.azure.com"
+        volume_handle = azurerm_managed_disk.jenkins_weekly_data.id
+      }
+    }
+  }
+}
+
+resource "kubernetes_persistent_volume_claim" "jenkins_weekly_data" {
+  provider = kubernetes.oldpublick8s
+  metadata {
+    name      = "jenkins-weekly-data"
+    namespace = "jenkins-weekly"
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.jenkins_weekly_data.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.jenkins_weekly_data.metadata.0.name
+    storage_class_name = kubernetes_storage_class.statically_provisionned_publick8s.id
+    resources {
+      requests = {
+        storage = "${azurerm_managed_disk.jenkins_weekly_data.disk_size_gb}Gi"
+      }
+    }
+  }
+}
+
+# Required to allow AKS CSI driver to access the Azure disk
+resource "azurerm_role_definition" "weekly_ci_jenkins_io_controller_disk_reader" {
+  name  = "ReadWeeklyCIDisk"
+  scope = azurerm_resource_group.weekly_ci_controller.id
+
+  permissions {
+    actions = [
+      "Microsoft.Compute/disks/read",
+      "Microsoft.Compute/disks/write",
+    ]
+  }
+}
+resource "azurerm_role_assignment" "weekly_ci_jenkins_io_allow_azurerm" {
+  scope              = azurerm_resource_group.weekly_ci_controller.id
+  role_definition_id = azurerm_role_definition.weekly_ci_jenkins_io_controller_disk_reader.role_definition_resource_id
+  principal_id       = azurerm_kubernetes_cluster.old_publick8s.identity[0].principal_id
+}
+
+resource "kubernetes_persistent_volume" "www_jenkins_io" {
+  provider = kubernetes.oldpublick8s
+  metadata {
+    name = kubernetes_namespace.oldpublick8s_www_jenkins_io.metadata[0].name
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_storage_share.data_storage_jenkins_io.quota}Gi"
+    }
+    access_modes                     = ["ReadOnlyMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.statically_provisioned_publick8s.id
+    mount_options = [
+      "nconnect=4", # Mandatory value (4) for Premium Azure File Share NFS 4.1. Increasing require using NetApp NFS instead ($$$)
+      "noresvport", # ref. https://linux.die.net/man/5/nfs
+      "actimeo=10", # Data is changed quite often
+      "cto",        # Ensure data consistency at the cost of slower I/O
+    ]
+    persistent_volume_source {
+      csi {
+        driver  = "file.csi.azure.com"
+        fs_type = "ext4"
+        # `volumeHandle` must be unique on the cluster for this volume
+        volume_handle = kubernetes_namespace.oldpublick8s_www_jenkins_io.metadata[0].name
+        read_only     = false
+        volume_attributes = {
+          protocol       = "nfs"
+          resourceGroup  = azurerm_storage_account.data_storage_jenkins_io.resource_group_name
+          shareName      = azurerm_storage_share.data_storage_jenkins_io.name
+          storageAccount = azurerm_storage_account.data_storage_jenkins_io.name
+        }
+        node_stage_secret_ref {
+          name      = kubernetes_secret.oldpublick8s_data_storage_jenkins_io_storage_account.metadata[0].name
+          namespace = kubernetes_secret.oldpublick8s_data_storage_jenkins_io_storage_account.metadata[0].namespace
+        }
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "www_jenkins_io" {
+  provider = kubernetes.oldpublick8s
+  metadata {
+    name      = kubernetes_persistent_volume.www_jenkins_io.metadata[0].name
+    namespace = kubernetes_namespace.oldpublick8s_www_jenkins_io.metadata[0].name
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.www_jenkins_io.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.www_jenkins_io.metadata[0].name
+    storage_class_name = kubernetes_persistent_volume.www_jenkins_io.spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = kubernetes_persistent_volume.www_jenkins_io.spec[0].capacity.storage
+      }
+    }
+  }
+}
+
+
+moved {
+  from = kubernetes_secret.ldap_jenkins_io_backup
+  to   = kubernetes_secret.oldpublick8s_ldap_jenkins_io_backup
+}
+moved {
+  from = kubernetes_secret.publick8s_data_storage_jenkins_io_storage_account
+  to   = kubernetes_secret.oldpublick8s_data_storage_jenkins_io_storage_account
+}
+moved {
+  from = kubernetes_secret.builds_reports_jenkins_io
+  to   = kubernetes_secret.oldpublick8s_builds_reports_jenkins_io
+}
+
+moved {
+  from = kubernetes_namespace.www_jenkins_io
+  to   = kubernetes_namespace.oldpublick8s_www_jenkins_io
+}
+moved {
+  from = kubernetes_namespace.updates_jenkins_io
+  to   = kubernetes_namespace.oldpublick8s_updates_jenkins_io
+}
+moved {
+  from = kubernetes_namespace.ldap
+  to   = kubernetes_namespace.oldpublick8s_ldap
+}
+moved {
+  from = kubernetes_namespace.javadoc_jenkins_io
+  to   = kubernetes_namespace.oldpublick8s_javadoc_jenkins_io
+}
+moved {
+  from = kubernetes_namespace.get_jenkins_io
+  to   = kubernetes_namespace.oldpublick8s_get_jenkins_io
+}
+moved {
+  from = kubernetes_namespace.builds_reports_jenkins_io
+  to   = kubernetes_namespace.oldpublick8s_builds_reports_jenkins_io
+}
+moved {
+  from = kubernetes_namespace.publick8s_data_storage_jenkins_io
+  to   = kubernetes_namespace.oldpublick8s_data_storage_jenkins_io
+}

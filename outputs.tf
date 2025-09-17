@@ -107,7 +107,7 @@ resource "local_file" "jenkins_infra_data_report" {
         "share_uri" = "/javadoc.jenkins.io/",
         "pvc_name"  = kubernetes_persistent_volume_claim.javadoc_jenkins_io.metadata[0].name,
       },
-      "namespace" = kubernetes_namespace.javadoc_jenkins_io.metadata[0].name,
+      "namespace" = kubernetes_namespace.oldpublick8s_javadoc_jenkins_io.metadata[0].name,
     },
     "www.jenkins.io" = {
       "data_en" = {
@@ -118,7 +118,7 @@ resource "local_file" "jenkins_infra_data_report" {
         "share_uri" = "/www.jenkins.io/zh/",
         "pvc_name"  = kubernetes_persistent_volume_claim.www_jenkins_io.metadata[0].name,
       },
-      "namespace" = kubernetes_namespace.www_jenkins_io.metadata[0].name,
+      "namespace" = kubernetes_namespace.oldpublick8s_www_jenkins_io.metadata[0].name,
     },
     "publick8s" = {
       hostname           = data.azurerm_kubernetes_cluster.old_publick8s.fqdn,

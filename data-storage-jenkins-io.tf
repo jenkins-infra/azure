@@ -47,27 +47,3 @@ resource "azurerm_storage_share" "data_storage_jenkins_io" {
   quota              = 750   # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
   enabled_protocol   = "NFS" # Require a Premium Storage Account
 }
-
-## Kubernetes Resources (static provision of persistent volumes)
-resource "kubernetes_namespace" "publick8s_data_storage_jenkins_io" {
-  provider = kubernetes.oldpublick8s
-
-  metadata {
-    name = "data-storage-jenkins-io"
-  }
-}
-resource "kubernetes_secret" "publick8s_data_storage_jenkins_io_storage_account" {
-  provider = kubernetes.oldpublick8s
-
-  metadata {
-    name      = "data-storage-jenkins-io-storage-account"
-    namespace = kubernetes_namespace.publick8s_data_storage_jenkins_io.metadata[0].name
-  }
-
-  data = {
-    azurestorageaccountname = azurerm_storage_account.data_storage_jenkins_io.name
-    azurestorageaccountkey  = azurerm_storage_account.data_storage_jenkins_io.primary_access_key
-  }
-
-  type = "Opaque"
-}
