@@ -55,5 +55,3 @@ resource "azurerm_storage_share" "ldap" {
   # Unless this is a Premium Storage, we only pay for the storage we consume. Let's use existing quota.
   quota = 5120 # 5To
 }
-
-## Kubernetes Resources (static provision of persistent volumes)

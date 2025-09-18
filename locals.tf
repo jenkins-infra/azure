@@ -90,6 +90,71 @@ locals {
         "10.100.0.0/14",       # 10.100.0.1 - 10.103.255.255
         "fd12:3456:789a::/64", # Dual stack is required to provide public IPv6 LBs
       ],
+      azurefile_volumes = {
+        "get-jenkins-io"     = {},
+        "updates-jenkins-io" = {},
+        "javadoc-jenkins-io" = {},
+        "www-jenkins-io"     = {},
+        ## The service build.reports.jenkins.io is different than other Azure file as all (private) controllers may write to it
+        ## As such we do not use the "all in one" NFS unless we change/relax the threat model
+        "builds-reports-jenkins-io" = {
+          capacity = azurerm_storage_share.builds_reports_jenkins_io.quota,
+          mount_options = [
+            "dir_mode=0777",
+            "file_mode=0777",
+            "uid=0",
+            "gid=0",
+            "mfsymlinks",
+            "cache=strict", # Default on usual kernels but worth setting it explicitly
+            "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+            "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+          ],
+          volume_attributes = {
+            resourceGroup = azurerm_storage_account.builds_reports_jenkins_io.resource_group_name,
+            shareName     = azurerm_storage_share.builds_reports_jenkins_io.name,
+          },
+          secret_name         = azurerm_storage_share.builds_reports_jenkins_io.name,
+          secret_namespace    = "builds-reports-jenkins-io",
+          storage_account_key = azurerm_storage_account.builds_reports_jenkins_io.primary_access_key,
+        },
+        # LDAP needs a read/write PVC to store its backups
+        "ldap-jenkins-io-backup" = {
+          pvc_namespace = "ldap-jenkins-io",
+          # between 3 to 8 years of LDAP ldif backups
+          # TODO: We should purge backups older than 1 year (username, email and password data)
+          capacity     = "10",
+          access_modes = ["ReadWriteMany"],
+          read_only    = false,
+          mount_options = [
+            "dir_mode=0777",
+            "file_mode=0777",
+            "uid=0",
+            "gid=0",
+            "mfsymlinks",
+            "cache=strict", # Default on usual kernels but worth setting it explicitly
+            "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+            "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+          ]
+          volume_attributes = {
+            resourceGroup = azurerm_storage_account.ldap_backups.resource_group_name,
+            shareName     = azurerm_storage_share.ldap.name,
+          },
+          secret_name      = "ldap-backup-storage",
+          secret_namespace = "ldap-jenkins-io",
+        },
+      }
+      azuredisk_volumes = {
+        "ldap-jenkins-io" = {
+          disk_name  = "${azurerm_managed_disk.ldap_jenkins_io_data.name}",
+          disk_size  = "${azurerm_managed_disk.ldap_jenkins_io_data.disk_size_gb}",
+          disk_rg_id = "${azurerm_resource_group.ldap.id}",
+        }
+        "weekly-ci-jenkins-io" = {
+          disk_name  = "${azurerm_managed_disk.jenkins_weekly_data.name}",
+          disk_size  = "${azurerm_managed_disk.jenkins_weekly_data.disk_size_gb}",
+          disk_rg_id = "${azurerm_resource_group.weekly_ci_controller.id}",
+        }
+      }
     },
     "compute_zones" = {
       system_pool = [1, 2], # Note: Zone 3 is not allowed for system pool.
