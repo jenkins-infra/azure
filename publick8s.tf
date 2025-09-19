@@ -285,8 +285,10 @@ resource "kubernetes_persistent_volume" "publick8s_azurefiles" {
     storage_class_name               = kubernetes_storage_class.publick8s_statically_provisioned.id
     # Ensure that only the designated PVC can claim this PV (to avoid injection as PV are not namespaced)
     claim_ref {
-      namespace = each.key # Namespace of the PVC
-      name      = each.key # Name of your PVC (cannot be a direct reference to avoid cyclical errors)
+      # Default: PV name and NS names are the same (easier to map PVs which are NOT namespaced)
+      # But we allow using a custom PVC namespace when the key (e.?g. the PV name) differs
+      namespace = lookup(each.value, "pvc_namespace", each.key)
+      name      = each.key
     }
     mount_options = lookup(each.value, "mount_options", [
       "nconnect=4", # Mandatory value (4) for Premium Azure File Share NFS 4.1. Increasing require using NetApp NFS instead ($$$)
