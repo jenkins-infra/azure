@@ -171,9 +171,9 @@ locals {
     "privatek8s" = {
       cluster_hostname = "https://${azurerm_kubernetes_cluster.privatek8s.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
     },
-    "publick8s" = {
-      cluster_hostname = "https://${azurerm_kubernetes_cluster.publick8s.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
-    },
+    # "publick8s" = {
+    #   cluster_hostname = "https://${azurerm_kubernetes_cluster.publick8s.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
+    # },
   }
 
   end_dates = yamldecode(data.local_file.locals_yaml.content).end_dates

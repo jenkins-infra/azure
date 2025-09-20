@@ -13,13 +13,13 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.privatek8s.kube_config.0.cluster_ca_certificate)
 }
 
-provider "kubernetes" {
-  alias                  = "publick8s"
-  host                   = local.aks_clusters_outputs.publick8s.cluster_hostname
-  client_certificate     = base64decode(azurerm_kubernetes_cluster.publick8s.kube_config.0.client_certificate)
-  client_key             = base64decode(azurerm_kubernetes_cluster.publick8s.kube_config.0.client_key)
-  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.publick8s.kube_config.0.cluster_ca_certificate)
-}
+# provider "kubernetes" {
+#   alias                  = "publick8s"
+#   host                   = local.aks_clusters_outputs.publick8s.cluster_hostname
+#   client_certificate     = base64decode(azurerm_kubernetes_cluster.publick8s.kube_config.0.client_certificate)
+#   client_key             = base64decode(azurerm_kubernetes_cluster.publick8s.kube_config.0.client_key)
+#   cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.publick8s.kube_config.0.cluster_ca_certificate)
+# }
 
 provider "kubernetes" {
   alias                  = "oldpublick8s"
