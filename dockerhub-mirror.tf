@@ -29,8 +29,13 @@ locals {
       "vnet_id"   = data.azurerm_virtual_network.infra_ci_jenkins_io.id,
       "rg_name"   = data.azurerm_virtual_network.infra_ci_jenkins_io.resource_group_name,
     },
-    "publick8s" = {
+    "publick8s-old" = {
       "subnet_id" = data.azurerm_subnet.publick8s_tier.id,
+      "vnet_id"   = data.azurerm_virtual_network.public.id,
+      "rg_name"   = data.azurerm_resource_group.public.name,
+    },
+    "publick8s" = {
+      "subnet_id" = data.azurerm_subnet.publick8s.id,
       "vnet_id"   = data.azurerm_virtual_network.public.id,
       "rg_name"   = data.azurerm_resource_group.public.name,
     },

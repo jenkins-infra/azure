@@ -43,6 +43,7 @@ resource "azurerm_storage_account_network_rules" "ldap_access" {
     [
       # Mounting share in the publick8s AKS cluster
       data.azurerm_subnet.publick8s_tier.id,
+      data.azurerm_subnet.publick8s.id,
     ],
     # Required for managing the resource
     local.app_subnets["infra.ci.jenkins.io"].agents,
