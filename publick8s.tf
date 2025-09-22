@@ -212,37 +212,37 @@ resource "kubernetes_namespace" "publick8s_namespaces" {
 }
 
 # PVs (see below) need storage secret keys when using CSI Azure file (as workload identity cannot be used with AKS CSI driver)
-resource "kubernetes_secret" "publick8s_builds_reports_jenkins_io" {
+moved {
+  from = kubernetes_secret.publick8s_builds_reports_jenkins_io
+  to   = kubernetes_secret.publick8s_azurefiles["builds-reports-jenkins-io"]
+}
+moved {
+  from = kubernetes_secret.publick8s_ldap_jenkins_io_backup
+  to   = kubernetes_secret.publick8s_azurefiles["ldap-jenkins-io-backup"]
+}
+moved {
+  from = kubernetes_secret.publick8s_azurefiles_jenkins_io_storage_account
+  to   = kubernetes_secret.publick8s_azurefile_jenkins_io_storage_account
+}
+resource "kubernetes_secret" "publick8s_azurefiles" {
   provider = kubernetes.publick8s
+  for_each = toset(sort(distinct(concat(
+    [for key, value in local.aks_clusters["publick8s"].azurefile_volumes : lookup(value, "secret_name", key)],
+  ))))
 
   metadata {
-    name      = azurerm_storage_share.builds_reports_jenkins_io.name
-    namespace = kubernetes_namespace.publick8s_namespaces[azurerm_storage_share.builds_reports_jenkins_io.name].metadata[0].name
+    name      = local.aks_clusters["publick8s"].azurefile_volumes[each.key].secret_name
+    namespace = local.aks_clusters["publick8s"].azurefile_volumes[each.key].secret_namespace
   }
 
   data = {
-    azurestorageaccountname = azurerm_storage_account.builds_reports_jenkins_io.name
-    azurestorageaccountkey  = azurerm_storage_account.builds_reports_jenkins_io.primary_access_key
+    azurestorageaccountname = local.aks_clusters["publick8s"].azurefile_volumes[each.key].storage_account_name
+    azurestorageaccountkey  = local.aks_clusters["publick8s"].azurefile_volumes[each.key].storage_account_key
   }
 
   type = "Opaque"
 }
-resource "kubernetes_secret" "publick8s_ldap_jenkins_io_backup" {
-  provider = kubernetes.publick8s
-
-  metadata {
-    name      = "ldap-backup-storage"
-    namespace = kubernetes_namespace.publick8s_namespaces["ldap-jenkins-io"].metadata[0].name
-  }
-
-  data = {
-    azurestorageaccountname = azurerm_storage_account.ldap_backups.name
-    azurestorageaccountkey  = azurerm_storage_account.ldap_backups.primary_access_key
-  }
-
-  type = "Opaque"
-}
-resource "kubernetes_secret" "publick8s_azurefiles_jenkins_io_storage_account" {
+resource "kubernetes_secret" "publick8s_azurefile_jenkins_io_storage_account" {
   provider = kubernetes.publick8s
 
   metadata {
@@ -301,8 +301,8 @@ resource "kubernetes_persistent_volume" "publick8s_azurefiles" {
           storageAccount = azurerm_storage_account.data_storage_jenkins_io.name
         })
         node_stage_secret_ref {
-          name      = lookup(each.value, "secret_name", kubernetes_secret.publick8s_azurefiles_jenkins_io_storage_account.metadata[0].name)
-          namespace = lookup(each.value, "secret_namespace", kubernetes_secret.publick8s_azurefiles_jenkins_io_storage_account.metadata[0].namespace)
+          name      = lookup(each.value, "secret_name", kubernetes_secret.publick8s_azurefile_jenkins_io_storage_account.metadata[0].name)
+          namespace = lookup(each.value, "secret_namespace", kubernetes_secret.publick8s_azurefile_jenkins_io_storage_account.metadata[0].namespace)
         }
       }
     }
