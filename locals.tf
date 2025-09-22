@@ -107,8 +107,9 @@ locals {
             "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
           ],
           volume_attributes = {
-            resourceGroup = azurerm_storage_account.builds_reports_jenkins_io.resource_group_name,
-            shareName     = azurerm_storage_share.builds_reports_jenkins_io.name,
+            storageAccount = azurerm_storage_account.builds_reports_jenkins_io.name,
+            resourceGroup  = azurerm_storage_account.builds_reports_jenkins_io.resource_group_name,
+            shareName      = azurerm_storage_share.builds_reports_jenkins_io.name,
           },
           secret_name         = azurerm_storage_share.builds_reports_jenkins_io.name,
           secret_namespace    = "builds-reports-jenkins-io",
@@ -127,8 +128,9 @@ locals {
             "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
           ],
           volume_attributes = {
-            resourceGroup = azurerm_storage_account.contributors_jenkins_io.resource_group_name,
-            shareName     = azurerm_storage_share.contributors_jenkins_io.name,
+            storageAccount = azurerm_storage_account.contributors_jenkins_io.name,
+            resourceGroup  = azurerm_storage_account.contributors_jenkins_io.resource_group_name,
+            shareName      = azurerm_storage_share.contributors_jenkins_io.name,
           },
           secret_name         = azurerm_storage_share.contributors_jenkins_io.name,
           secret_namespace    = "contributors-jenkins-io",
@@ -147,8 +149,9 @@ locals {
             "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
           ],
           volume_attributes = {
-            resourceGroup = azurerm_storage_account.docs_jenkins_io.resource_group_name,
-            shareName     = azurerm_storage_share.docs_jenkins_io.name,
+            storageAccount = azurerm_storage_account.docs_jenkins_io.name,
+            resourceGroup  = azurerm_storage_account.docs_jenkins_io.resource_group_name,
+            shareName      = azurerm_storage_share.docs_jenkins_io.name,
           },
           secret_name         = azurerm_storage_share.docs_jenkins_io.name,
           secret_namespace    = "docs-jenkins-io",
@@ -167,8 +170,9 @@ locals {
             "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
           ],
           volume_attributes = {
-            resourceGroup = azurerm_storage_account.javadoc_jenkins_io.resource_group_name,
-            shareName     = azurerm_storage_share.javadoc_jenkins_io.name,
+            storageAccount = azurerm_storage_account.javadoc_jenkins_io.name,
+            resourceGroup  = azurerm_storage_account.javadoc_jenkins_io.resource_group_name,
+            shareName      = azurerm_storage_share.javadoc_jenkins_io.name,
           },
           secret_name         = azurerm_storage_share.javadoc_jenkins_io.name,
           secret_namespace    = "javadoc-jenkins-io",
@@ -193,8 +197,9 @@ locals {
             "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
           ]
           volume_attributes = {
-            resourceGroup = azurerm_storage_account.ldap_backups.resource_group_name,
-            shareName     = azurerm_storage_share.ldap.name,
+            storageAccount = azurerm_storage_account.ldap_backups.name,
+            resourceGroup  = azurerm_storage_account.ldap_backups.resource_group_name,
+            shareName      = azurerm_storage_share.ldap.name,
           },
           secret_name         = azurerm_storage_account.ldap_backups.name,
           secret_namespace    = "ldap-jenkins-io",
@@ -213,8 +218,9 @@ locals {
             "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
           ],
           volume_attributes = {
-            resourceGroup = azurerm_storage_account.plugins_jenkins_io.resource_group_name,
-            shareName     = azurerm_storage_share.plugins_jenkins_io.name,
+            storageAccount = azurerm_storage_account.plugins_jenkins_io.name,
+            resourceGroup  = azurerm_storage_account.plugins_jenkins_io.resource_group_name,
+            shareName      = azurerm_storage_share.plugins_jenkins_io.name,
           },
           secret_name         = azurerm_storage_share.plugins_jenkins_io.name,
           secret_namespace    = "plugins-jenkins-io",
@@ -233,8 +239,9 @@ locals {
             "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
           ],
           volume_attributes = {
-            resourceGroup = azurerm_storage_account.reports_jenkins_io.resource_group_name,
-            shareName     = azurerm_storage_share.reports_jenkins_io.name,
+            storageAccount = azurerm_storage_account.reports_jenkins_io.name,
+            resourceGroup  = azurerm_storage_account.reports_jenkins_io.resource_group_name,
+            shareName      = azurerm_storage_share.reports_jenkins_io.name,
           },
           secret_name         = azurerm_storage_share.reports_jenkins_io.name,
           secret_namespace    = "reports-jenkins-io",
@@ -253,8 +260,9 @@ locals {
             "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
           ],
           volume_attributes = {
-            resourceGroup = azurerm_storage_account.stats_jenkins_io.resource_group_name,
-            shareName     = azurerm_storage_share.stats_jenkins_io.name,
+            storageAccount = azurerm_storage_account.stats_jenkins_io.name,
+            resourceGroup  = azurerm_storage_account.stats_jenkins_io.resource_group_name,
+            shareName      = azurerm_storage_share.stats_jenkins_io.name,
           },
           secret_name         = azurerm_storage_share.stats_jenkins_io.name,
           secret_namespace    = "stats-jenkins-io",

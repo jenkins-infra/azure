@@ -212,18 +212,6 @@ resource "kubernetes_namespace" "publick8s_namespaces" {
 }
 
 # PVs (see below) need storage secret keys when using CSI Azure file (as workload identity cannot be used with AKS CSI driver)
-moved {
-  from = kubernetes_secret.publick8s_builds_reports_jenkins_io
-  to   = kubernetes_secret.publick8s_azurefiles["builds-reports-jenkins-io"]
-}
-moved {
-  from = kubernetes_secret.publick8s_ldap_jenkins_io_backup
-  to   = kubernetes_secret.publick8s_azurefiles["ldap-jenkins-io-backup"]
-}
-moved {
-  from = kubernetes_secret.publick8s_azurefiles_jenkins_io_storage_account
-  to   = kubernetes_secret.publick8s_azurefile_jenkins_io_storage_account
-}
 resource "kubernetes_secret" "publick8s_azurefiles" {
   provider = kubernetes.publick8s
   for_each = toset(sort(distinct(concat(
