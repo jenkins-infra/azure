@@ -93,10 +93,7 @@ locals {
       azurefile_volumes = {
         "get-jenkins-io"     = {},
         "updates-jenkins-io" = {},
-        "javadoc-jenkins-io" = {},
         "www-jenkins-io"     = {},
-        ## The service build.reports.jenkins.io is different than other Azure file as all (private) controllers may write to it
-        ## As such we do not use the "all in one" NFS unless we change/relax the threat model
         "builds-reports-jenkins-io" = {
           capacity = azurerm_storage_share.builds_reports_jenkins_io.quota,
           mount_options = [
@@ -116,6 +113,66 @@ locals {
           secret_name         = azurerm_storage_share.builds_reports_jenkins_io.name,
           secret_namespace    = "builds-reports-jenkins-io",
           storage_account_key = azurerm_storage_account.builds_reports_jenkins_io.primary_access_key,
+        },
+        "contributors-jenkins-io" = {
+          capacity = azurerm_storage_share.contributors_jenkins_io.quota,
+          mount_options = [
+            "dir_mode=0777",
+            "file_mode=0777",
+            "uid=0",
+            "gid=0",
+            "mfsymlinks",
+            "cache=strict", # Default on usual kernels but worth setting it explicitly
+            "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+            "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+          ],
+          volume_attributes = {
+            resourceGroup = azurerm_storage_account.contributors_jenkins_io.resource_group_name,
+            shareName     = azurerm_storage_share.contributors_jenkins_io.name,
+          },
+          secret_name         = azurerm_storage_share.contributors_jenkins_io.name,
+          secret_namespace    = "contributors-jenkins-io",
+          storage_account_key = azurerm_storage_account.contributors_jenkins_io.primary_access_key,
+        },
+        "docs-jenkins-io" = {
+          capacity = azurerm_storage_share.docs_jenkins_io.quota,
+          mount_options = [
+            "dir_mode=0777",
+            "file_mode=0777",
+            "uid=0",
+            "gid=0",
+            "mfsymlinks",
+            "cache=strict", # Default on usual kernels but worth setting it explicitly
+            "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+            "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+          ],
+          volume_attributes = {
+            resourceGroup = azurerm_storage_account.docs_jenkins_io.resource_group_name,
+            shareName     = azurerm_storage_share.docs_jenkins_io.name,
+          },
+          secret_name         = azurerm_storage_share.docs_jenkins_io.name,
+          secret_namespace    = "docs-jenkins-io",
+          storage_account_key = azurerm_storage_account.docs_jenkins_io.primary_access_key,
+        },
+        "javadoc-jenkins-io" = {
+          capacity = azurerm_storage_share.javadoc_jenkins_io.quota,
+          mount_options = [
+            "dir_mode=0777",
+            "file_mode=0777",
+            "uid=0",
+            "gid=0",
+            "mfsymlinks",
+            "cache=strict", # Default on usual kernels but worth setting it explicitly
+            "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+            "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+          ],
+          volume_attributes = {
+            resourceGroup = azurerm_storage_account.javadoc_jenkins_io.resource_group_name,
+            shareName     = azurerm_storage_share.javadoc_jenkins_io.name,
+          },
+          secret_name         = azurerm_storage_share.javadoc_jenkins_io.name,
+          secret_namespace    = "javadoc-jenkins-io",
+          storage_account_key = azurerm_storage_account.javadoc_jenkins_io.primary_access_key,
         },
         # LDAP needs a read/write PVC to store its backups
         "ldap-jenkins-io-backup" = {
@@ -141,6 +198,66 @@ locals {
           },
           secret_name      = "ldap-backup-storage",
           secret_namespace = "ldap-jenkins-io",
+        },
+        "plugins-jenkins-io" = {
+          capacity = azurerm_storage_share.plugins_jenkins_io.quota,
+          mount_options = [
+            "dir_mode=0777",
+            "file_mode=0777",
+            "uid=0",
+            "gid=0",
+            "mfsymlinks",
+            "cache=strict", # Default on usual kernels but worth setting it explicitly
+            "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+            "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+          ],
+          volume_attributes = {
+            resourceGroup = azurerm_storage_account.plugins_jenkins_io.resource_group_name,
+            shareName     = azurerm_storage_share.plugins_jenkins_io.name,
+          },
+          secret_name         = azurerm_storage_share.plugins_jenkins_io.name,
+          secret_namespace    = "plugins-jenkins-io",
+          storage_account_key = azurerm_storage_account.plugins_jenkins_io.primary_access_key,
+        },
+        "reports-jenkins-io" = {
+          capacity = azurerm_storage_share.stats_jenkins_io.quota,
+          mount_options = [
+            "dir_mode=0777",
+            "file_mode=0777",
+            "uid=0",
+            "gid=0",
+            "mfsymlinks",
+            "cache=strict", # Default on usual kernels but worth setting it explicitly
+            "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+            "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+          ],
+          volume_attributes = {
+            resourceGroup = azurerm_storage_account.stats_jenkins_io.resource_group_name,
+            shareName     = azurerm_storage_share.stats_jenkins_io.name,
+          },
+          secret_name         = azurerm_storage_share.stats_jenkins_io.name,
+          secret_namespace    = "reports-jenkins-io",
+          storage_account_key = azurerm_storage_account.stats_jenkins_io.primary_access_key,
+        },
+        "stats-jenkins-io" = {
+          capacity = azurerm_storage_share.stats_jenkins_io.quota,
+          mount_options = [
+            "dir_mode=0777",
+            "file_mode=0777",
+            "uid=0",
+            "gid=0",
+            "mfsymlinks",
+            "cache=strict", # Default on usual kernels but worth setting it explicitly
+            "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+            "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+          ],
+          volume_attributes = {
+            resourceGroup = azurerm_storage_account.stats_jenkins_io.resource_group_name,
+            shareName     = azurerm_storage_share.stats_jenkins_io.name,
+          },
+          secret_name         = azurerm_storage_share.stats_jenkins_io.name,
+          secret_namespace    = "stats-jenkins-io",
+          storage_account_key = azurerm_storage_account.stats_jenkins_io.primary_access_key,
         },
       }
       azuredisk_volumes = {
