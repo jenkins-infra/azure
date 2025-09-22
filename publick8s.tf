@@ -227,7 +227,7 @@ moved {
 resource "kubernetes_secret" "publick8s_azurefiles" {
   provider = kubernetes.publick8s
   for_each = toset(sort(distinct(concat(
-    [for key, value in local.aks_clusters["publick8s"].azurefile_volumes : lookup(value, "secret_name", key)],
+    [for key, value in local.aks_clusters["publick8s"].azurefile_volumes : key if can(value["secret_name"])],
   ))))
 
   metadata {
@@ -236,7 +236,8 @@ resource "kubernetes_secret" "publick8s_azurefiles" {
   }
 
   data = {
-    azurestorageaccountname = local.aks_clusters["publick8s"].azurefile_volumes[each.key].storage_account_name
+    # Convention: secret name and storage account name are the same (it is namespaced and it makes no sense to duplicate on a given NS for many PVCs: we reuse)
+    azurestorageaccountname = local.aks_clusters["publick8s"].azurefile_volumes[each.key].secret_name
     azurestorageaccountkey  = local.aks_clusters["publick8s"].azurefile_volumes[each.key].storage_account_key
   }
 
