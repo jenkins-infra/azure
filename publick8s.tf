@@ -284,10 +284,9 @@ resource "kubernetes_persistent_volume" "publick8s_azurefiles" {
         volume_handle = lookup(each.value, "volume_handle", each.key)
         read_only     = lookup(each.value, "read_only", true)
         volume_attributes = lookup(each.value, "volume_attributes", {
-          protocol       = "nfs"
-          resourceGroup  = azurerm_storage_account.data_storage_jenkins_io.resource_group_name
-          shareName      = azurerm_storage_share.data_storage_jenkins_io.name
-          storageAccount = azurerm_storage_account.data_storage_jenkins_io.name
+          protocol      = "nfs"
+          resourceGroup = azurerm_storage_account.data_storage_jenkins_io.resource_group_name
+          shareName     = azurerm_storage_share.data_storage_jenkins_io.name
         })
         node_stage_secret_ref {
           name      = lookup(each.value, "secret_name", kubernetes_secret.publick8s_azurefile_jenkins_io_storage_account.metadata[0].name)
