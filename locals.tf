@@ -196,8 +196,9 @@ locals {
             resourceGroup = azurerm_storage_account.ldap_backups.resource_group_name,
             shareName     = azurerm_storage_share.ldap.name,
           },
-          secret_name      = "ldap-backup-storage",
-          secret_namespace = "ldap-jenkins-io",
+          secret_name         = azurerm_storage_account.ldap_backups.name,
+          secret_namespace    = "ldap-jenkins-io",
+          storage_account_key = azurerm_storage_account.ldap_backups.primary_access_key,
         },
         "plugins-jenkins-io" = {
           capacity = azurerm_storage_share.plugins_jenkins_io.quota,
@@ -232,12 +233,12 @@ locals {
             "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
           ],
           volume_attributes = {
-            resourceGroup = azurerm_storage_account.stats_jenkins_io.resource_group_name,
-            shareName     = azurerm_storage_share.stats_jenkins_io.name,
+            resourceGroup = azurerm_storage_account.reports_jenkins_io.resource_group_name,
+            shareName     = azurerm_storage_share.reports_jenkins_io.name,
           },
-          secret_name         = azurerm_storage_share.stats_jenkins_io.name,
+          secret_name         = azurerm_storage_share.reports_jenkins_io.name,
           secret_namespace    = "reports-jenkins-io",
-          storage_account_key = azurerm_storage_account.stats_jenkins_io.primary_access_key,
+          storage_account_key = azurerm_storage_account.reports_jenkins_io.primary_access_key,
         },
         "stats-jenkins-io" = {
           capacity = azurerm_storage_share.stats_jenkins_io.quota,
