@@ -268,9 +268,9 @@ locals {
           disk_rg_id = "${azurerm_resource_group.ldap.id}",
         }
         "weekly-ci-jenkins-io" = {
-          disk_name  = "${azurerm_managed_disk.jenkins_weekly_data.name}",
-          disk_size  = "${azurerm_managed_disk.jenkins_weekly_data.disk_size_gb}",
-          disk_rg_id = "${azurerm_resource_group.weekly_ci_controller.id}",
+          disk_name  = "${azurerm_managed_disk.weekly_ci_jenkins_io.name}",
+          disk_size  = "${azurerm_managed_disk.weekly_ci_jenkins_io.disk_size_gb}",
+          disk_rg_id = "${azurerm_resource_group.weekly_ci_jenkins_io.id}",
         }
       }
     },
