@@ -4,11 +4,6 @@ resource "azurerm_resource_group" "ldap_jenkins_io" {
   tags     = local.default_tags
 }
 
-moved {
-  from = azurerm_managed_disk.ldap_jenkins_io_data_new
-  to   = azurerm_managed_disk.ldap_jenkins_io_data
-}
-
 resource "azurerm_managed_disk" "ldap_jenkins_io_data" {
   name                = "ldap-jenkins-io-data"
   location            = azurerm_resource_group.ldap_jenkins_io.location
@@ -55,4 +50,16 @@ resource "azurerm_storage_share" "ldap_jenkins_io_backups" {
   storage_account_id = azurerm_storage_account.ldap_jenkins_io.id
   # Unless this is a Premium Storage, we only pay for the storage we consume
   quota = 10
+}
+
+## TODO: remove resources below after migration
+resource "azurerm_managed_disk" "ldap_jenkins_io_data_orig" {
+  name                 = "ldap-jenkins-io-data-orig"
+  location             = azurerm_resource_group.ldap_jenkins_io.location
+  create_option        = "Copy"
+  source_resource_id   = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/ldap/providers/Microsoft.Compute/snapshots/ldap-jenkins-io-data-20250924"
+  resource_group_name  = azurerm_resource_group.ldap_jenkins_io.name
+  storage_account_type = "StandardSSD_ZRS"
+  disk_size_gb         = 8
+  tags                 = local.default_tags
 }

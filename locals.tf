@@ -174,8 +174,8 @@ locals {
           secret_namespace    = "javadoc-jenkins-io",
           storage_account_key = azurerm_storage_account.javadoc_jenkins_io.primary_access_key,
         },
-        # LDAP needs a read/write PVC to store its backups
-        "ldap-jenkins-io-backup" = {
+        ## TODO: remove resource after migration
+        "ldap-jenkins-io-backup-orig" = {
           pvc_namespace = "ldap-jenkins-io",
           # between 3 to 8 years of LDAP ldif backups
           # TODO: We should purge backups older than 1 year (username, email and password data)
@@ -199,6 +199,32 @@ locals {
           secret_name         = azurerm_storage_account.ldap_backups.name,
           secret_namespace    = "ldap-jenkins-io",
           storage_account_key = azurerm_storage_account.ldap_backups.primary_access_key,
+        },
+        # LDAP needs a read/write PVC to store its backups
+        "ldap-jenkins-io-backup" = {
+          pvc_namespace = "ldap-jenkins-io",
+          # between 3 to 8 years of LDAP ldif backups
+          # TODO: We should purge backups older than 1 year (username, email and password data)
+          capacity     = "10",
+          access_modes = ["ReadWriteMany"],
+          read_only    = false,
+          mount_options = [
+            "dir_mode=0777",
+            "file_mode=0777",
+            "uid=0",
+            "gid=0",
+            "mfsymlinks",
+            "cache=strict", # Default on usual kernels but worth setting it explicitly
+            "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+            "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+          ]
+          volume_attributes = {
+            resourceGroup = azurerm_storage_account.ldap_jenkins_io.resource_group_name,
+            shareName     = azurerm_storage_share.ldap_jenkins_io_backups.name,
+          },
+          secret_name         = azurerm_storage_account.ldap_jenkins_io.name,
+          secret_namespace    = "ldap-jenkins-io",
+          storage_account_key = azurerm_storage_account.ldap_jenkins_io.primary_access_key,
         },
         "plugins-jenkins-io" = {
           capacity = azurerm_storage_share.plugins_jenkins_io.quota,
@@ -271,6 +297,20 @@ locals {
           disk_id    = "${azurerm_managed_disk.weekly_ci_jenkins_io.id}",
           disk_size  = "${azurerm_managed_disk.weekly_ci_jenkins_io.disk_size_gb}",
           disk_rg_id = "${azurerm_resource_group.weekly_ci_jenkins_io.id}",
+        }
+        ## TODO: remove resource after migration
+        "ldap-jenkins-io-orig" = {
+          pvc_namespace = "ldap-jenkins-io"
+          disk_id       = "${azurerm_managed_disk.ldap_jenkins_io_data_orig.id}",
+          disk_size     = "${azurerm_managed_disk.ldap_jenkins_io_data_orig.disk_size_gb}",
+          disk_rg_id    = "${azurerm_resource_group.ldap_jenkins_io.id}",
+        }
+        ## TODO: remove resource after migration
+        "weekly-ci-jenkins-io-orig" = {
+          pvc_namespace = "weekly-ci-jenkins-io"
+          disk_id       = "${azurerm_managed_disk.weekly_ci_jenkins_io_orig.id}",
+          disk_size     = "${azurerm_managed_disk.weekly_ci_jenkins_io_orig.disk_size_gb}",
+          disk_rg_id    = "${azurerm_resource_group.ldap_jenkins_io.id}",
         }
       }
     },
