@@ -307,7 +307,8 @@ resource "kubernetes_persistent_volume" "publick8s_datadisks" {
   for_each = local.aks_clusters["publick8s"].azuredisk_volumes
 
   metadata {
-    name = each.value.disk_name
+    # Disk name is the last element from the Azure ID string
+    name = element(split("/", each.value.disk_id), "-1")
   }
   spec {
     capacity = {
@@ -319,7 +320,7 @@ resource "kubernetes_persistent_volume" "publick8s_datadisks" {
     persistent_volume_source {
       csi {
         driver        = "disk.csi.azure.com"
-        volume_handle = each.value.disk_name
+        volume_handle = each.value.disk_id
       }
     }
   }
@@ -329,7 +330,8 @@ resource "kubernetes_persistent_volume_claim" "publick8s_datadisks" {
   for_each = local.aks_clusters["publick8s"].azuredisk_volumes
 
   metadata {
-    name      = each.value.disk_name
+    # Disk name is the last element from the Azure ID string
+    name      = element(split("/", each.value.disk_id), "-1")
     namespace = each.key
   }
   spec {
