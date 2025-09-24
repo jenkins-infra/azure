@@ -263,9 +263,9 @@ locals {
       }
       azuredisk_volumes = {
         "ldap-jenkins-io" = {
-          disk_name  = "${azurerm_managed_disk.ldap_jenkins_io_data.name}",
-          disk_size  = "${azurerm_managed_disk.ldap_jenkins_io_data.disk_size_gb}",
-          disk_rg_id = "${azurerm_resource_group.ldap.id}",
+          disk_name  = "${azurerm_managed_disk.ldap_jenkins_io_data_new.name}",
+          disk_size  = "${azurerm_managed_disk.ldap_jenkins_io_data_new.disk_size_gb}",
+          disk_rg_id = "${azurerm_resource_group.ldap_jenkins_io.id}",
         }
         "weekly-ci-jenkins-io" = {
           disk_name  = "${azurerm_managed_disk.weekly_ci_jenkins_io.name}",
