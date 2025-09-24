@@ -116,23 +116,6 @@ resource "azurerm_role_assignment" "publick8s_subnets_networkcontributor" {
   skip_service_principal_aad_check = true
 }
 
-# # Allow cluster to join NAT gateway. Required to manage Azure PLS through Kubernetes Services until old subnets are associated with the NAT gateway.
-# # TODO: uncomment if needed when creating the Kubernetes Service of type PLS
-# # resource "azurerm_role_definition" "publick8s_outbound_gateway" {
-# #   name  = "publick8s_outbount_gateway"
-# #   scope = data.azurerm_nat_gateway.publick8s_outbound.id
-# #   permissions {
-# #     actions = ["Microsoft.Network/natGateways/join/action"]
-# #   }
-# # }
-# # resource "azurerm_role_assignment" "publick8s_nat_gateway" {
-# #   scope                            = data.azurerm_nat_gateway.publick8s_outbound.id
-# #   role_definition_id               = azurerm_role_definition.publick8s_outbound_gateway.role_definition_resource_id
-# #   principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
-# #   skip_service_principal_aad_check = true
-# # }
-# ## End TODO remove
-
 # Each public load balancer used by this cluster is setup with a locked public IP.
 # Using a pre-determined public IP eases DNS setup and changes, but requires cluster to have the "Network Contributor" role on the IP.
 locals {
