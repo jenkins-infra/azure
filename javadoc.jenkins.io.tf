@@ -1,8 +1,3 @@
-## TODO uncomment to use proper naming convention
-# moved {
-#   from = azurerm_resource_group.javadoc
-#   to = azurerm_resource_group.javadoc_jenkins_io
-# }
 # resource "azurerm_resource_group" "javadoc_jenkins_io" {
 resource "azurerm_resource_group" "javadoc" {
   name     = "javadoc-jenkins-io"

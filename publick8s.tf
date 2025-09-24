@@ -231,6 +231,7 @@ resource "kubernetes_secret" "publick8s_azurefile_jenkins_io_storage_account" {
 }
 
 # We assume usage of the "big" NFS data storage as default (unless the local specifies other values for edge cases)
+# Note: when deleting a PV, you have to remove the 'metadata.finalizers' key (usually when deletion is stuck)
 resource "kubernetes_persistent_volume" "publick8s_azurefiles" {
   provider = kubernetes.publick8s
   for_each = local.aks_clusters["publick8s"].azurefile_volumes
@@ -331,8 +332,10 @@ resource "kubernetes_persistent_volume_claim" "publick8s_datadisks" {
 
   metadata {
     # Disk name is the last element from the Azure ID string
-    name      = element(split("/", each.value.disk_id), "-1")
-    namespace = each.key
+    name = element(split("/", each.value.disk_id), "-1")
+    # Default: PV name and NS names are the same (easier to map PVs which are NOT namespaced)
+    # But we allow using a custom PVC namespace when the key (e.?g. the PV name) differs
+    namespace = lookup(each.value, "pvc_namespace", each.key)
   }
   spec {
     access_modes       = kubernetes_persistent_volume.publick8s_datadisks[each.key].spec[0].access_modes
