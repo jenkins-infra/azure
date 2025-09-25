@@ -220,6 +220,7 @@ locals {
           secret_namespace    = "plugins-jenkins-io",
           storage_account_key = azurerm_storage_account.plugins_jenkins_io.primary_access_key,
         },
+        # TODO: delete when migrated to the new storage file share
         "reports-jenkins-io-old" = {
           pvc_namespace = "reports-jenkins-io",
           capacity      = azurerm_storage_share.reports.quota,
