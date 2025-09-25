@@ -62,4 +62,14 @@ resource "azurerm_storage_account" "prodjenkinsreports" {
     scope = "terraform-managed"
   }
 }
+import {
+  to = azurerm_storage_share.reports
+  id = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/prod-reports/providers/Microsoft.Storage/storageAccounts/prodjenkinsreports/fileServices/default/shares/reports"
+}
+resource "azurerm_storage_share" "reports" {
+  name               = "reports"
+  storage_account_id = azurerm_storage_account.prodjenkinsreports.id
+  quota              = 102400
+}
+
 ############# End of legacy resources to be removed once migrated to the new resources below
