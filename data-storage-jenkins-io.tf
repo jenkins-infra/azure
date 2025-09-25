@@ -28,7 +28,6 @@ resource "azurerm_storage_account" "data_storage_jenkins_io" {
     virtual_network_subnet_ids = concat(
       [
         # Required for using the resource
-        data.azurerm_subnet.publick8s_tier.id,
         data.azurerm_subnet.publick8s.id,
         # Allows release.ci.jenkins.io agents to access the mount
         data.azurerm_subnet.privatek8s_release_tier.id,
