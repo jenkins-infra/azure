@@ -69,7 +69,7 @@ import {
 resource "azurerm_storage_share" "reports" {
   name               = "reports"
   storage_account_id = azurerm_storage_account.prodjenkinsreports.id
-  quota              = 102400
+  quota              = 1
 }
 
 ############# End of legacy resources to be removed once migrated to the new resources below
