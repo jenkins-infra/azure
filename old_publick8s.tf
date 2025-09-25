@@ -1,5 +1,4 @@
 ###### TODO delete legacy resources above once migration to the new `publick8s` cluster is finished
-
 # Important: the Enterprise Application "terraform-production" used by this repo pipeline needs to be able to manage this vnet
 # See the corresponding role assignment for this cluster added here (private repo):
 # https://github.com/jenkins-infra/terraform-states/blob/44521bf0a03b4ab1a99712c215d40afafcaf04d6/azure/main.tf#L75
@@ -13,6 +12,24 @@ data "azurerm_subnet" "public_vnet_data_tier" {
   name                 = "public-vnet-data-tier"
   resource_group_name  = data.azurerm_resource_group.public.name
   virtual_network_name = data.azurerm_virtual_network.public.name
+}
+
+resource "azurerm_dns_a_record" "public_old_publick8s" {
+  name                = "public.${local.aks_clusters["old_publick8s"].name}"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  records             = [azurerm_public_ip.old_publick8s_ipv4.ip_address]
+  tags                = local.default_tags
+}
+
+resource "azurerm_dns_aaaa_record" "public_old_publick8s" {
+  name                = "public.${local.aks_clusters["old_publick8s"].name}"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  records             = [azurerm_public_ip.old_publick8s_ipv6.ip_address]
+  tags                = local.default_tags
 }
 
 resource "random_pet" "suffix_publick8s" {
