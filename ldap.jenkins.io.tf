@@ -57,7 +57,7 @@ resource "azurerm_managed_disk" "ldap_jenkins_io_data_orig" {
   name                 = "ldap-jenkins-io-data-orig"
   location             = azurerm_resource_group.ldap_jenkins_io.location
   create_option        = "Copy"
-  source_resource_id   = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/ldap/providers/Microsoft.Compute/snapshots/ldap-jenkins-io-data-20250924"
+  source_resource_id   = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/ldap/providers/Microsoft.Compute/snapshots/ldap-data-2025-0925"
   resource_group_name  = azurerm_resource_group.ldap_jenkins_io.name
   storage_account_type = "StandardSSD_ZRS"
   disk_size_gb         = 8

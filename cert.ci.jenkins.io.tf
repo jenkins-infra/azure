@@ -19,9 +19,9 @@ module "cert_ci_jenkins_io" {
   default_tags                 = local.default_tags
 
   jenkins_infra_ips = {
-    ldap_ipv4         = azurerm_public_ip.old_ldap_jenkins_io_ipv4.ip_address
-    puppet_ipv4       = azurerm_public_ip.puppet_jenkins_io.ip_address
-    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
+    ldap_ipv4         = azurerm_public_ip.publick8s_ips["publick8s-ldap-ipv4"].ip_address,
+    puppet_ipv4       = azurerm_public_ip.puppet_jenkins_io.ip_address,
+    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes,
   }
 
   controller_service_principal_ids = [
