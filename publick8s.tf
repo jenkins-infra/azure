@@ -14,7 +14,7 @@ resource "azurerm_dns_a_record" "public_publick8s" {
   name                = "public.publick8s"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 300
+  ttl                 = 60
   records             = [azurerm_public_ip.old_publick8s_ipv4.ip_address] # TODO: switch to the new cluster IP
   tags                = local.default_tags
 }
@@ -23,7 +23,7 @@ resource "azurerm_dns_aaaa_record" "public_publick8s" {
   name                = "public.publick8s"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 300
+  ttl                 = 60
   records             = [azurerm_public_ip.old_publick8s_ipv6.ip_address] # TODO: switch to the new cluster IP
   tags                = local.default_tags
 }
@@ -32,7 +32,7 @@ resource "azurerm_dns_a_record" "private_publick8s" {
   name                = "private.publick8s"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 300
+  ttl                 = 60
   records             = ["10.245.1.4"] # External IP of the private-nginx ingress LoadBalancer, created by https://github.com/jenkins-infra/kubernetes-management/blob/54a0d4aa72b15f4236abcfbde00a080905bbb890/clusters/publick8s.yaml#L63-L69
   tags                = local.default_tags
 }
@@ -303,6 +303,7 @@ resource "kubernetes_persistent_volume_claim" "publick8s_azurefiles" {
   }
 }
 
+# Note: when deleting a PV, you have to remove the 'metadata.finalizers' key (usually when deletion is stuck)
 resource "kubernetes_persistent_volume" "publick8s_datadisks" {
   provider = kubernetes.publick8s
   for_each = local.aks_clusters["publick8s"].azuredisk_volumes
