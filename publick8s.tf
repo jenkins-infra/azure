@@ -370,3 +370,13 @@ resource "azurerm_role_assignment" "publick8s_datadisks" {
   role_definition_id = azurerm_role_definition.publick8s_datadisks[each.key].role_definition_resource_id
   principal_id       = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
 }
+
+# Retrieve effective outbound IPs
+data "azurerm_public_ip" "publick8s_lb_outbound" {
+  ## Disable this resource when running in terratest
+  # to avoid the error "The "for_each" set includes values derived from resource attributes that cannot be determined until apply"
+  for_each = var.terratest ? toset([]) : toset(concat(flatten(azurerm_kubernetes_cluster.publick8s.network_profile[*].load_balancer_profile[*].effective_outbound_ips)))
+
+  name                = element(split("/", each.key), "-1")
+  resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
+}
