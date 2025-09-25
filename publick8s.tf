@@ -107,8 +107,7 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
 # It is used for managing LBs of the public and private ingress controllers
 resource "azurerm_role_assignment" "publick8s_subnets_networkcontributor" {
   for_each = toset([
-    data.azurerm_subnet.publick8s.id,             # Node pool
-    data.azurerm_subnet.public_vnet_data_tier.id, # Private LB and Private endpoints
+    data.azurerm_subnet.publick8s.id, # Node pool
   ])
   scope                            = each.key
   role_definition_name             = "Network Contributor"

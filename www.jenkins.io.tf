@@ -25,7 +25,6 @@ resource "azurerm_storage_account" "jenkins_io" {
     virtual_network_subnet_ids = concat(
       [
         # Required for using the resource
-        data.azurerm_subnet.publick8s_tier.id,
         data.azurerm_subnet.publick8s.id,
       ],
       # Required for managing the resource
