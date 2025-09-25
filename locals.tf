@@ -220,8 +220,29 @@ locals {
           secret_namespace    = "plugins-jenkins-io",
           storage_account_key = azurerm_storage_account.plugins_jenkins_io.primary_access_key,
         },
+        "reports-jenkins-io-old" = {
+          pvc_namespace = "reports-jenkins-io",
+          capacity      = azurerm_storage_share.reports.quota,
+          mount_options = [
+            "dir_mode=0777",
+            "file_mode=0777",
+            "uid=0",
+            "gid=0",
+            "mfsymlinks",
+            "cache=strict", # Default on usual kernels but worth setting it explicitly
+            "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+            "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+          ],
+          volume_attributes = {
+            resourceGroup = azurerm_storage_account.prodjenkinsreports.resource_group_name,
+            shareName     = azurerm_storage_share.reports.name,
+          },
+          secret_name         = azurerm_storage_account.prodjenkinsreports.name,
+          secret_namespace    = "reports-jenkins-io",
+          storage_account_key = azurerm_storage_account.prodjenkinsreports.primary_access_key,
+        },
         "reports-jenkins-io" = {
-          capacity = azurerm_storage_share.stats_jenkins_io.quota,
+          capacity = azurerm_storage_share.reports_jenkins_io.quota,
           mount_options = [
             "dir_mode=0777",
             "file_mode=0777",
