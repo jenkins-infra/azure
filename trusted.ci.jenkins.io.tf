@@ -293,7 +293,7 @@ resource "azurerm_network_security_rule" "allow_out_from_trusted_all_to_uc" {
   source_address_prefixes = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes
   destination_address_prefixes = [
     # Update Center (mirrorbits CLI)
-    azurerm_private_endpoint.updates_jenkins_io_for_trustedci.private_service_connection[0].private_ip_address,
+    azurerm_private_endpoint.publick8s_updates_jenkins_io_for_trustedci.private_service_connection[0].private_ip_address,
   ]
   resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
@@ -397,7 +397,7 @@ resource "azurerm_network_security_rule" "allow_in_many_from_trusted_agents_to_u
   source_address_prefixes = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes
   destination_address_prefixes = [
     # Update Center (mirrorbits CLI)
-    azurerm_private_endpoint.updates_jenkins_io_for_trustedci.private_service_connection[0].private_ip_address,
+    azurerm_private_endpoint.publick8s_updates_jenkins_io_for_trustedci.private_service_connection[0].private_ip_address,
   ]
   resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
@@ -539,7 +539,7 @@ resource "azurerm_private_dns_a_record" "updates_jenkins_io" {
   zone_name           = azurerm_private_dns_zone.dockerhub_mirror["trustedcijenkinsio"].name
   resource_group_name = azurerm_private_dns_zone.dockerhub_mirror["trustedcijenkinsio"].resource_group_name
   ttl                 = 60
-  records             = [azurerm_private_endpoint.updates_jenkins_io_for_trustedci.private_service_connection[0].private_ip_address] # TODO: migrate to the new PLS
+  records             = [azurerm_private_endpoint.publick8s_updates_jenkins_io_for_trustedci.private_service_connection[0].private_ip_address]
 }
 
 ## updates.jenkins.io's mirrorbits CLI Kubernetes Service (internal LB)
@@ -560,33 +560,6 @@ resource "azurerm_private_endpoint" "publick8s_updates_jenkins_io_for_trustedci"
   private_service_connection {
     name                           = "${data.azurerm_private_link_service.publick8s_mirrorbitscli_updates_jenkins_io.name}-for-trustedci"
     private_connection_resource_id = data.azurerm_private_link_service.publick8s_mirrorbitscli_updates_jenkins_io.id
-    is_manual_connection           = false
-  }
-  private_dns_zone_group {
-    name                 = azurerm_private_dns_zone.dockerhub_mirror["trustedcijenkinsio"].name
-    private_dns_zone_ids = [azurerm_private_dns_zone.dockerhub_mirror["trustedcijenkinsio"].id]
-  }
-  tags = local.default_tags
-}
-
-# TODO: delete once service is migrated to new publick8s cluster
-data "azurerm_private_link_service" "updates_jenkins_io" {
-  # https://github.com/jenkins-infra/kubernetes-management/
-  name                = "updates.jenkins.io"
-  resource_group_name = azurerm_kubernetes_cluster.old_publick8s.node_resource_group
-}
-resource "azurerm_private_endpoint" "updates_jenkins_io_for_trustedci" {
-  name = "${data.azurerm_private_link_service.updates_jenkins_io.name}-for-trustedci"
-
-  location            = var.location
-  resource_group_name = data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.resource_group_name
-  subnet_id           = data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.id
-
-  custom_network_interface_name = "${data.azurerm_private_link_service.updates_jenkins_io.name}-for-trustedci-nic"
-
-  private_service_connection {
-    name                           = "${data.azurerm_private_link_service.updates_jenkins_io.name}-for-trustedci"
-    private_connection_resource_id = data.azurerm_private_link_service.updates_jenkins_io.id
     is_manual_connection           = false
   }
   private_dns_zone_group {
