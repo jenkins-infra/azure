@@ -293,7 +293,7 @@ resource "azurerm_network_security_rule" "allow_out_from_trusted_all_to_uc" {
   source_address_prefixes = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes
   destination_address_prefixes = [
     # Update Center (mirrorbits CLI)
-    azurerm_private_endpoint.updates_jenkins_io_for_trustedci.private_service_connection[0].private_ip_address,
+    azurerm_private_endpoint.publick8s_updates_jenkins_io_for_trustedci.private_service_connection[0].private_ip_address,
   ]
   resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
@@ -397,7 +397,7 @@ resource "azurerm_network_security_rule" "allow_in_many_from_trusted_agents_to_u
   source_address_prefixes = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes
   destination_address_prefixes = [
     # Update Center (mirrorbits CLI)
-    azurerm_private_endpoint.updates_jenkins_io_for_trustedci.private_service_connection[0].private_ip_address,
+    azurerm_private_endpoint.publick8s_updates_jenkins_io_for_trustedci.private_service_connection[0].private_ip_address,
   ]
   resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
