@@ -539,10 +539,37 @@ resource "azurerm_private_dns_a_record" "updates_jenkins_io" {
   zone_name           = azurerm_private_dns_zone.dockerhub_mirror["trustedcijenkinsio"].name
   resource_group_name = azurerm_private_dns_zone.dockerhub_mirror["trustedcijenkinsio"].resource_group_name
   ttl                 = 60
-  records             = [azurerm_private_endpoint.updates_jenkins_io_for_trustedci.private_service_connection[0].private_ip_address]
+  records             = [azurerm_private_endpoint.updates_jenkins_io_for_trustedci.private_service_connection[0].private_ip_address] # TODO: migrate to the new PLS
 }
 
 ## updates.jenkins.io's mirrorbits CLI Kubernetes Service (internal LB)
+data "azurerm_private_link_service" "publick8s_mirrorbitscli_updates_jenkins_io" {
+  # TODO: track with updatecli from https://github.com/jenkins-infra/kubernetes-management/config/publick8s_updates-jenkins-io.yaml
+  name                = "publick8s-updates.jenkins.io"
+  resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
+}
+resource "azurerm_private_endpoint" "publick8s_updates_jenkins_io_for_trustedci" {
+  name = "${data.azurerm_private_link_service.publick8s_mirrorbitscli_updates_jenkins_io.name}-for-trustedci"
+
+  location            = var.location
+  resource_group_name = data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.resource_group_name
+  subnet_id           = data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.id
+
+  custom_network_interface_name = "${data.azurerm_private_link_service.publick8s_mirrorbitscli_updates_jenkins_io.name}-for-trustedci-nic"
+
+  private_service_connection {
+    name                           = "${data.azurerm_private_link_service.publick8s_mirrorbitscli_updates_jenkins_io.name}-for-trustedci"
+    private_connection_resource_id = data.azurerm_private_link_service.publick8s_mirrorbitscli_updates_jenkins_io.id
+    is_manual_connection           = false
+  }
+  private_dns_zone_group {
+    name                 = azurerm_private_dns_zone.dockerhub_mirror["trustedcijenkinsio"].name
+    private_dns_zone_ids = [azurerm_private_dns_zone.dockerhub_mirror["trustedcijenkinsio"].id]
+  }
+  tags = local.default_tags
+}
+
+# TODO: delete once service is migrated to new publick8s cluster
 data "azurerm_private_link_service" "updates_jenkins_io" {
   # https://github.com/jenkins-infra/kubernetes-management/
   name                = "updates.jenkins.io"
