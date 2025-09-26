@@ -263,8 +263,8 @@ resource "kubernetes_persistent_volume" "publick8s_azurefiles" {
       csi {
         driver  = "file.csi.azure.com"
         fs_type = "ext4"
-        # `volumeHandle` must be unique on the cluster for this volume
-        volume_handle = lookup(each.value, "volume_handle", each.key)
+        # `volumeHandle` must be unique on the cluster for this volume and must looks like: "{resource-group-name}#{account-name}#{file-share-name}"
+        volume_handle = lookup(each.value, "volume_handle", "${azurerm_storage_account.data_storage_jenkins_io.resource_group_name}#${azurerm_storage_account.data_storage_jenkins_io.name}#${azurerm_storage_share.data_storage_jenkins_io.name}")
         read_only     = lookup(each.value, "read_only", true)
         volume_attributes = lookup(each.value, "volume_attributes", {
           protocol      = "nfs"

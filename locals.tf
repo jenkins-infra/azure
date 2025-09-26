@@ -84,6 +84,8 @@ locals {
         "www-jenkins-io"     = {},
         "builds-reports-jenkins-io" = {
           capacity = azurerm_storage_share.builds_reports_jenkins_io.quota,
+          # `volumeHandle` must be unique on the cluster for this volume and must looks like: "{resource-group-name}#{account-name}#{file-share-name}"
+          volume_handle = "${azurerm_storage_account.builds_reports_jenkins_io.resource_group_name}#${azurerm_storage_account.builds_reports_jenkins_io.name}#${azurerm_storage_share.builds_reports_jenkins_io.name}"
           mount_options = [
             "dir_mode=0777",
             "file_mode=0777",
@@ -104,6 +106,8 @@ locals {
         },
         "contributors-jenkins-io" = {
           capacity = azurerm_storage_share.contributors_jenkins_io.quota,
+          # `volumeHandle` must be unique on the cluster for this volume and must looks like: "{resource-group-name}#{account-name}#{file-share-name}"
+          volume_handle = "${azurerm_storage_account.contributors_jenkins_io.resource_group_name}#${azurerm_storage_account.contributors_jenkins_io.name}#${azurerm_storage_share.contributors_jenkins_io.name}"
           mount_options = [
             "dir_mode=0777",
             "file_mode=0777",
@@ -124,6 +128,8 @@ locals {
         },
         "docs-jenkins-io" = {
           capacity = azurerm_storage_share.docs_jenkins_io.quota,
+          # `volumeHandle` must be unique on the cluster for this volume and must looks like: "{resource-group-name}#{account-name}#{file-share-name}"
+          volume_handle = "${azurerm_storage_account.docs_jenkins_io.resource_group_name}#${azurerm_storage_account.docs_jenkins_io.name}#${azurerm_storage_share.docs_jenkins_io.name}"
           mount_options = [
             "dir_mode=0777",
             "file_mode=0777",
@@ -144,6 +150,8 @@ locals {
         },
         "javadoc-jenkins-io" = {
           capacity = azurerm_storage_share.javadoc_jenkins_io.quota,
+          # `volumeHandle` must be unique on the cluster for this volume and must looks like: "{resource-group-name}#{account-name}#{file-share-name}"
+          volume_handle = "${azurerm_storage_account.javadoc_jenkins_io.resource_group_name}#${azurerm_storage_account.javadoc_jenkins_io.name}#${azurerm_storage_share.javadoc_jenkins_io.name}"
           mount_options = [
             "dir_mode=0777",
             "file_mode=0777",
@@ -165,6 +173,8 @@ locals {
         # LDAP needs a read/write PVC to store its backups
         "ldap-jenkins-io-backup" = {
           pvc_namespace = "ldap-jenkins-io",
+          # `volumeHandle` must be unique on the cluster for this volume and must looks like: "{resource-group-name}#{account-name}#{file-share-name}"
+          volume_handle = "${azurerm_storage_account.ldap_jenkins_io.resource_group_name}#${azurerm_storage_account.ldap_jenkins_io.name}#${azurerm_storage_share.ldap_jenkins_io_backups.name}"
           # between 3 to 8 years of LDAP ldif backups
           # TODO: We should purge backups older than 1 year (username, email and password data)
           capacity     = "10",
@@ -190,6 +200,8 @@ locals {
         },
         "plugins-jenkins-io" = {
           capacity = azurerm_storage_share.plugins_jenkins_io.quota,
+          # `volumeHandle` must be unique on the cluster for this volume and must looks like: "{resource-group-name}#{account-name}#{file-share-name}"
+          volume_handle = "${azurerm_storage_account.plugins_jenkins_io.resource_group_name}#${azurerm_storage_account.plugins_jenkins_io.name}#${azurerm_storage_share.plugins_jenkins_io.name}"
           mount_options = [
             "dir_mode=0777",
             "file_mode=0777",
@@ -212,6 +224,8 @@ locals {
         "reports-jenkins-io-old" = {
           pvc_namespace = "reports-jenkins-io",
           capacity      = azurerm_storage_share.reports.quota,
+          # `volumeHandle` must be unique on the cluster for this volume and must looks like: "{resource-group-name}#{account-name}#{file-share-name}"
+          volume_handle = "${azurerm_storage_account.prodjenkinsreports.resource_group_name}#${azurerm_storage_account.prodjenkinsreports.name}#${azurerm_storage_share.reports.name}"
           mount_options = [
             "dir_mode=0777",
             "file_mode=0777",
@@ -232,6 +246,8 @@ locals {
         },
         "reports-jenkins-io" = {
           capacity = azurerm_storage_share.reports_jenkins_io.quota,
+          # `volumeHandle` must be unique on the cluster for this volume and must looks like: "{resource-group-name}#{account-name}#{file-share-name}"
+          volume_handle = "${azurerm_storage_account.reports_jenkins_io.resource_group_name}#${azurerm_storage_account.reports_jenkins_io.name}#${azurerm_storage_share.reports_jenkins_io.name}"
           mount_options = [
             "dir_mode=0777",
             "file_mode=0777",
@@ -252,6 +268,8 @@ locals {
         },
         "stats-jenkins-io" = {
           capacity = azurerm_storage_share.stats_jenkins_io.quota,
+          # `volumeHandle` must be unique on the cluster for this volume and must looks like: "{resource-group-name}#{account-name}#{file-share-name}"
+          volume_handle = "${azurerm_storage_account.stats_jenkins_io.resource_group_name}#${azurerm_storage_account.stats_jenkins_io.name}#${azurerm_storage_share.stats_jenkins_io.name}"
           mount_options = [
             "dir_mode=0777",
             "file_mode=0777",
