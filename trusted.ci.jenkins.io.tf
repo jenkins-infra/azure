@@ -103,19 +103,6 @@ resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins
   principal_id         = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins.principal_id
 }
 
-# Required to allow azcopy sync of jenkins.io File Share
-module "trustedci_jenkinsio_fileshare_serviceprincipal_writer" {
-  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
-
-  service_fqdn               = "trustedci-jenkinsio-fileshare_serviceprincipal_writer"
-  active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
-  active_directory_url       = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date = "2025-12-23T00:00:00Z"
-  file_share_id              = azurerm_storage_share.jenkins_io.id
-  storage_account_id         = azurerm_storage_account.jenkins_io.id
-  default_tags               = local.default_tags
-}
-
 # Required to allow azcopy sync of javadoc.jenkins.io File Share
 module "trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer" {
   source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
