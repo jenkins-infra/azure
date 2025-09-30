@@ -72,7 +72,7 @@ locals {
     },
     "publick8s" = {
       name               = "publick8s",
-      kubernetes_version = "1.32.6",
+      kubernetes_version = "1.32.7",
       # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
       pod_cidrs = [
         "10.100.0.0/14",       # 10.100.0.1 - 10.103.255.255
