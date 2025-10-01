@@ -60,7 +60,7 @@ locals {
   aks_clusters = {
     "infracijenkinsio_agents_2" = {
       name               = "infracijenkinsio-agents-2",
-      kubernetes_version = "1.31.6",
+      kubernetes_version = "1.32.7",
       # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
       pod_cidr = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
     },
