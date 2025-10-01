@@ -272,29 +272,6 @@ resource "azurerm_dns_a_record" "privatek8s_private" {
 ###################################################################################
 # Ressources from the Kubernetes provider
 ###################################################################################
-# Used by the release.ci Azurefile PVC mounts
-resource "kubernetes_storage_class" "privatek8s_azurefile_csi_premium_retain" {
-  provider = kubernetes.privatek8s
-  metadata {
-    name = "azurefile-csi-premium-retain"
-  }
-  storage_provisioner = "file.csi.azure.com"
-  reclaim_policy      = "Retain"
-  parameters = {
-    skuname = "Premium_LRS"
-  }
-  mount_options = [
-    "dir_mode=0777",
-    "file_mode=0777",
-    "uid=0",
-    "gid=0",
-    "mfsymlinks",
-    "cache=strict", # Default on usual kernels but worth setting it explicitly
-    "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
-    "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
-  ]
-}
-
 # Used by all the controller (for their Jenkins Home PVCs)
 resource "kubernetes_storage_class" "privatek8s_statically_provisioned" {
   provider = kubernetes.privatek8s
@@ -489,4 +466,68 @@ module "privatek8s_admin_sa" {
 output "privatek8s_admin_sa_kubeconfig" {
   sensitive = true
   value     = module.privatek8s_admin_sa.kubeconfig
+}
+
+######## Persistent Volumes used by the "packaging" job in release.ci.jenkins.io
+resource "kubernetes_persistent_volume" "privatek8s_release_ci_jenkins_io_agents_data_storage" {
+  provider = kubernetes.privatek8s
+  metadata {
+    name = "release-ci-jenkins-io-agents-data-storage"
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_storage_share.data_storage_jenkins_io.quota}Gi"
+    }
+    access_modes                     = ["ReadWriteMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.privatek8s_statically_provisioned.id
+    # Ensure that only the designated PVC can claim this PV (to avoid injection as PV are not namespaced)
+    claim_ref {
+      # NS of the PVC
+      namespace = kubernetes_namespace.privatek8s["release-ci-jenkins-io-agents"].metadata[0].name
+      name      = "data-storage-jenkins-io"
+    }
+    mount_options = [
+      "nconnect=4", # Mandatory value (4) for Premium Azure File Share NFS 4.1. Increasing require using NetApp NFS instead ($$$)
+      "noresvport", # ref. https://linux.die.net/man/5/nfs
+      "actimeo=10", # Data is changed quite often
+      "cto",        # Ensure data consistency at the cost of slower I/O
+    ]
+    persistent_volume_source {
+      csi {
+        driver  = "file.csi.azure.com"
+        fs_type = "ext4"
+        # `volumeHandle` must be unique on the cluster for this volume and must looks like: "{resource-group-name}#{account-name}#{file-share-name}"
+        volume_handle = "${azurerm_storage_account.data_storage_jenkins_io.resource_group_name}#${azurerm_storage_account.data_storage_jenkins_io.name}#${azurerm_storage_share.data_storage_jenkins_io.name}"
+        read_only     = false
+        volume_attributes = {
+          protocol       = "nfs"
+          resourceGroup  = azurerm_storage_account.data_storage_jenkins_io.resource_group_name
+          shareName      = azurerm_storage_share.data_storage_jenkins_io.name
+          storageAccount = azurerm_storage_account.data_storage_jenkins_io.name
+        }
+        node_stage_secret_ref {
+          name      = kubernetes_secret.privatek8s_data_storage_jenkins_io_storage_account.metadata[0].name
+          namespace = kubernetes_secret.privatek8s_data_storage_jenkins_io_storage_account.metadata[0].namespace
+        }
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "privatek8s_release_ci_jenkins_io_agents_data_storage" {
+  provider = kubernetes.privatek8s
+  metadata {
+    name      = "data-storage-jenkins-io"
+    namespace = kubernetes_namespace.privatek8s["release-ci-jenkins-io-agents"].metadata[0].name
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.privatek8s_release_ci_jenkins_io_agents_data_storage.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.privatek8s_release_ci_jenkins_io_agents_data_storage.metadata[0].name
+    storage_class_name = kubernetes_persistent_volume.privatek8s_release_ci_jenkins_io_agents_data_storage.spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = kubernetes_persistent_volume.privatek8s_release_ci_jenkins_io_agents_data_storage.spec[0].capacity.storage
+      }
+    }
+  }
 }
