@@ -116,6 +116,12 @@ resource "local_file" "jenkins_infra_data_report" {
       },
       "namespace" = kubernetes_namespace.publick8s_namespaces["www-jenkins-io"].metadata[0].name,
     },
+    "reports.jenkins.io" = {
+      "data" = {
+        "pvc_name" = kubernetes_persistent_volume_claim.publick8s_azurefiles["reports-jenkins-io"].metadata[0].name,
+      },
+      "namespace" = kubernetes_namespace.publick8s_namespaces["reports-jenkins-io"].metadata[0].name,
+    },
     "publick8s" = {
       hostname           = azurerm_kubernetes_cluster.publick8s.fqdn,
       kubernetes_version = local.aks_clusters["publick8s"].kubernetes_version
