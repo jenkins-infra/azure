@@ -50,6 +50,19 @@ module "infraci_statsjenkinsio_fileshare_serviceprincipal_writer" {
   default_tags               = local.default_tags
 }
 
+# Required to allow azcopy sync to the reports.jenkins.io File Share
+module "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer" {
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+
+  service_fqdn               = "infraci-reportsjenkinsio-fileshare_serviceprincipal_writer"
+  active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
+  active_directory_url       = "https://github.com/jenkins-infra/azure"
+  service_principal_end_date = "2025-12-23T00:00:00Z"
+  file_share_id              = azurerm_storage_share.reports_jenkins_io.id
+  storage_account_id         = azurerm_storage_account.reports_jenkins_io.id
+  default_tags               = local.default_tags
+}
+
 # Required to allow controller to check for subnets inside the virtual network
 resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_vnet_reader" {
   name  = "read-infra-ci-jenkins-io-vnet"
