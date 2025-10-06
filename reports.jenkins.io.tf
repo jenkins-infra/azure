@@ -6,6 +6,7 @@ resource "azurerm_resource_group" "reports_jenkins_io" {
     scope = "terraform-managed"
   }
 }
+## trusted.ci.jenkins.io and infra.ci.jenkins.io are using the Storage Account Key to read and write
 resource "azurerm_storage_account" "reports_jenkins_io" {
   name                       = "reportsjenkinsio"
   resource_group_name        = azurerm_resource_group.reports_jenkins_io.name
@@ -31,7 +32,6 @@ resource "azurerm_storage_account" "reports_jenkins_io" {
 
   tags = local.default_tags
 }
-
 resource "azurerm_storage_share" "reports_jenkins_io" {
   name               = "reports-jenkins-io"
   storage_account_id = azurerm_storage_account.reports_jenkins_io.id
@@ -60,10 +60,6 @@ resource "azurerm_storage_account" "prodjenkinsreports" {
   tags = {
     scope = "terraform-managed"
   }
-}
-import {
-  to = azurerm_storage_share.reports
-  id = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/prod-reports/providers/Microsoft.Storage/storageAccounts/prodjenkinsreports/fileServices/default/shares/reports"
 }
 resource "azurerm_storage_share" "reports" {
   name               = "reports"
