@@ -24,8 +24,10 @@ resource "azurerm_storage_account" "reports_jenkins_io" {
         # Required for using the resource
         data.azurerm_subnet.publick8s.id,
       ],
-      # Required for managing the resource
+      # Required for populating the resource from infra-reports
       local.app_subnets["infra.ci.jenkins.io"].agents,
+      # Required for populating the resource from coretaglib and RPU
+      local.app_subnets["trusted.ci.jenkins.io"].agents,
     )
     bypass = ["AzureServices"]
   }
