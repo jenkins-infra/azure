@@ -272,22 +272,6 @@ resource "azurerm_virtual_machine_data_disk_attachment" "trusted_permanent_agent
   lun                = "20"
   caching            = "ReadWrite"
 }
-resource "azurerm_managed_disk" "agent_trusted_ci_jenkins_io_data" {
-  name                 = "agent-trusted-ci-jenkins-io-data"
-  location             = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.location
-  resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents.name
-  storage_account_type = "PremiumV2_LRS"
-  create_option        = "Empty"
-  disk_size_gb         = 540 # ~ 430Gb used, we want less than 80% of usage
-
-  tags = local.default_tags
-}
-resource "azurerm_virtual_machine_data_disk_attachment" "agent_trusted_ci_jenkins_io_data" {
-  managed_disk_id    = azurerm_managed_disk.agent_trusted_ci_jenkins_io_data.id
-  virtual_machine_id = azurerm_linux_virtual_machine.trusted_permanent_agent.id
-  lun                = "30"
-  caching            = "ReadWrite"
-}
 
 ####################################################################################
 ## Network Security Group and rules
