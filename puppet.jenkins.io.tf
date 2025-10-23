@@ -110,7 +110,7 @@ resource "azurerm_linux_virtual_machine" "puppet_jenkins_io" {
   resource_group_name             = azurerm_resource_group.puppet_jenkins_io.name
   location                        = azurerm_resource_group.puppet_jenkins_io.location
   tags                            = local.default_tags
-  size                            = "Standard_D2as_v5"
+  size                            = "Standard_B2as_v2"
   admin_username                  = local.admin_username
   disable_password_authentication = true
   network_interface_ids = [
