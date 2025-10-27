@@ -15,7 +15,7 @@ module "cert_ci_jenkins_io" {
   controller_network_rg_name   = data.azurerm_resource_group.cert_ci_jenkins_io.name
   controller_subnet_name       = data.azurerm_subnet.cert_ci_jenkins_io_controller.name
   controller_data_disk_size_gb = 128
-  controller_vm_size           = "Standard_D2as_v5"
+  controller_vm_size           = "Standard_B2s"
   default_tags                 = local.default_tags
 
   jenkins_infra_ips = {
