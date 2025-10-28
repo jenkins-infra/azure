@@ -50,7 +50,10 @@ module "trusted_ci_jenkins_io" {
 
   agent_ip_prefixes = concat(
     data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes,
-    [azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address],
+    [
+      azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address,
+      azurerm_linux_virtual_machine.agent_trusted_ci_jenkins_io.private_ip_address
+    ],
   )
 }
 
@@ -276,14 +279,17 @@ resource "azurerm_network_security_rule" "allow_out_many_from_trusted_agents_to_
 # Ignore the rule as it does not detect the IP restriction to only update.jenkins.io"s host
 #trivy:ignore:azure-network-no-public-egress
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_permanent_agent_to_pkg" {
-  name                        = "allow-outbound-ssh-from-permanent-agent-to-pkg"
-  priority                    = 4080
-  direction                   = "Outbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "22"
-  source_address_prefix       = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
+  name                   = "allow-outbound-ssh-from-permanent-agent-to-pkg"
+  priority               = 4080
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "22"
+  source_address_prefixes = [
+    azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address,
+    azurerm_linux_virtual_machine.agent_trusted_ci_jenkins_io.private_ip_address,
+  ]
   destination_address_prefix  = local.external_services["pkg.origin.jenkins.io"]
   resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
@@ -310,15 +316,18 @@ resource "azurerm_network_security_rule" "allow_in_many_from_trusted_agents_to_u
 }
 
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_permanent_agent" {
-  name                        = "allow-inbound-ssh-from-controller-to-permanent-agent"
-  priority                    = 3600
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "22"
-  source_address_prefix       = module.trusted_ci_jenkins_io.controller_private_ipv4
-  destination_address_prefix  = azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address
+  name                   = "allow-inbound-ssh-from-controller-to-permanent-agent"
+  priority               = 3600
+  direction              = "Inbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "22"
+  source_address_prefix  = module.trusted_ci_jenkins_io.controller_private_ipv4
+  destination_address_prefixes = [
+    azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address,
+    azurerm_linux_virtual_machine.agent_trusted_ci_jenkins_io.private_ip_address,
+  ]
   resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
 }
@@ -367,7 +376,8 @@ resource "azurerm_dns_a_record" "trusted_permanent_agent" {
   zone_name           = module.trusted_ci_jenkins_io_letsencrypt.zone_name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
-  records             = [azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address]
+  # TODO: update
+  records = [azurerm_linux_virtual_machine.trusted_permanent_agent.private_ip_address]
 }
 resource "azurerm_dns_a_record" "trusted_ci_controller" {
   name                = "@"
