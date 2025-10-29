@@ -84,3 +84,56 @@ resource "azurerm_virtual_machine_data_disk_attachment" "agent_trusted_ci_jenkin
   lun                = "20"
   caching            = "None" # Caching not supported with "PremiumV2_LRS"
 }
+
+####################################################################################
+## Network Security Group and rules
+####################################################################################
+resource "azurerm_subnet_network_security_group_association" "trusted_ci_permanent_agent" {
+  subnet_id                 = data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.id
+  network_security_group_id = module.trusted_ci_jenkins_io.controller_nsg_id
+}
+
+# Ignore the rule as it does not detect the IP restriction to only update.jenkins.io"s host
+#trivy:ignore:azure-network-no-public-egress
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_permanent_agent_to_pkg" {
+  name                   = "allow-outbound-ssh-from-permanent-agent-to-pkg"
+  priority               = 4080
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "22"
+  source_address_prefixes = [
+    azurerm_linux_virtual_machine.agent_trusted_ci_jenkins_io.private_ip_address,
+  ]
+  destination_address_prefix  = local.external_services["pkg.origin.jenkins.io"]
+  resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
+  network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
+}
+
+resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_permanent_agent" {
+  name                   = "allow-inbound-ssh-from-controller-to-permanent-agent"
+  priority               = 3600
+  direction              = "Inbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "22"
+  source_address_prefix  = module.trusted_ci_jenkins_io.controller_private_ipv4
+  destination_address_prefixes = [
+    azurerm_linux_virtual_machine.agent_trusted_ci_jenkins_io.private_ip_address,
+  ]
+  resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
+  network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
+}
+
+####################################################################################
+## Public DNS records
+####################################################################################
+resource "azurerm_dns_a_record" "trusted_permanent_agent" {
+  name                = "agent"
+  zone_name           = module.trusted_ci_jenkins_io_letsencrypt.zone_name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  records             = [azurerm_linux_virtual_machine.agent_trusted_ci_jenkins_io.private_ip_address]
+}
