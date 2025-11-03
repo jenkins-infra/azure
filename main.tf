@@ -13,10 +13,3 @@ resource "azurerm_resource_group" "prod_public_ips" {
 
 data "azurerm_client_config" "current" {
 }
-
-removed {
-  from = azurerm_dns_cname_record.archives_jenkins_io
-  lifecycle {
-    destroy = false
-  }
-}
