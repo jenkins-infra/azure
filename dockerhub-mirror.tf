@@ -163,11 +163,6 @@ resource "azurerm_container_registry_cache_rule" "mirror_cache_rules" {
       target = "moby/*"
     }
     # Also used on AWS (ci.jenkins.io)
-    "dockerhub-jenkinsciinfra-builder" = {
-      source = "docker.io/jenkinsciinfra/builder"
-      target = "jenkinsciinfra/builder"
-    }
-    # Also used on AWS (ci.jenkins.io)
     "dockerhub-jenkinsciinfra-jau-2204" = {
       source = "docker.io/jenkinsciinfra/jenkins-agent-ubuntu-22.04"
       target = "jenkinsciinfra/jenkins-agent-ubuntu-22.04"
