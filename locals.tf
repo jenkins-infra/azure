@@ -79,9 +79,12 @@ locals {
         "fd12:3456:789a::/64", # Dual stack is required to provide public IPv6 LBs
       ],
       azurefile_volumes = {
-        "get-jenkins-io"     = {},
-        "updates-jenkins-io" = {},
-        "www-jenkins-io"     = {},
+        "get-jenkins-io"                = {},
+        "updates-jenkins-io"            = {},
+        "www-jenkins-io"                = {},
+        "staging-pkg-origin-jenkins-io" = {},
+        "staging-get-jenkins-io"        = {},
+        "pkg-origin-jenkins-io"         = {},
         "builds-reports-jenkins-io" = {
           capacity = azurerm_storage_share.builds_reports_jenkins_io.quota,
           # `volumeHandle` must be unique on the cluster for this volume and must looks like: "{resource-group-name}#{account-name}#{file-share-name}"
