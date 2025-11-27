@@ -30,7 +30,7 @@ locals {
   outbound_ips_private_vpn_jenkins_io = "52.232.183.117"
 
   admin_public_ips = {
-    dduportal = ["89.84.210.161"],
+    dduportal = ["82.67.112.167"],
     smerle33  = ["82.64.5.129"],
     mwaite    = ["162.142.59.220"],
   }
