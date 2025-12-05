@@ -30,7 +30,7 @@ locals {
   outbound_ips_private_vpn_jenkins_io = "52.232.183.117"
 
   admin_public_ips = {
-    dduportal = ["89.84.210.161"],
+    dduportal = ["82.67.112.167"],
     smerle33  = ["82.64.5.129"],
     mwaite    = ["162.142.59.220"],
   }
@@ -79,9 +79,12 @@ locals {
         "fd12:3456:789a::/64", # Dual stack is required to provide public IPv6 LBs
       ],
       azurefile_volumes = {
-        "get-jenkins-io"     = {},
-        "updates-jenkins-io" = {},
-        "www-jenkins-io"     = {},
+        "get-jenkins-io"                = {},
+        "updates-jenkins-io"            = {},
+        "www-jenkins-io"                = {},
+        "staging-pkg-origin-jenkins-io" = {},
+        "staging-get-jenkins-io"        = {},
+        "pkg-origin-jenkins-io"         = {},
         "builds-reports-jenkins-io" = {
           capacity = azurerm_storage_share.builds_reports_jenkins_io.quota,
           # `volumeHandle` must be unique on the cluster for this volume and must looks like: "{resource-group-name}#{account-name}#{file-share-name}"
