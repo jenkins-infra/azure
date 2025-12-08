@@ -62,15 +62,13 @@ locals {
       name               = "infracijenkinsio-agents-2",
       kubernetes_version = "1.32.7",
       # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
-      pod_cidr              = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
-      subnet_address_prefix = data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
+      pod_cidr = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
     },
     "privatek8s" = {
       name               = "privatek8s",
       kubernetes_version = "1.32.7",
       # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
-      pod_cidr              = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
-      subnet_address_prefix = data.azurerm_subnet.privatek8s_tier.address_prefix,
+      pod_cidr = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
     },
     "publick8s" = {
       name               = "publick8s",
@@ -80,7 +78,6 @@ locals {
         "10.100.0.0/14",       # 10.100.0.1 - 10.103.255.255
         "fd12:3456:789a::/64", # Dual stack is required to provide public IPv6 LBs
       ],
-      subnet_address_prefix = data.azurerm_subnet.publick8s.address_prefix,
       azurefile_volumes = {
         "get-jenkins-io"                = {},
         "updates-jenkins-io"            = {},
