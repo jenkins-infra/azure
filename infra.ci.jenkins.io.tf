@@ -101,25 +101,7 @@ module "infra_ci_jenkins_io_azurevm_agents" {
   }
 }
 
-# Allow infra.ci VM agents to reach packer VMs with SSH on azure
-resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_to_packer_vms" {
-  name                   = "allow-outbound-ssh-from-infraci-agents-to-packer-vms"
-  priority               = 4080
-  direction              = "Outbound"
-  access                 = "Allow"
-  protocol               = "Tcp"
-  source_port_range      = "*"
-  destination_port_range = "22"
-  source_address_prefixes = [
-    data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
-    data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
-  ]
-  destination_address_prefix  = data.azurerm_subnet.infra_ci_jenkins_io_packer_builds.address_prefix
-  resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
-  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
-}
-
-# Allow infra.ci VM agents to reach packer VMs with SSH on aws
+# Allow infra.ci ephemeral agents to reach packer VMs with SSH on aws
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_to_aws_packer" {
   name                   = "allow-outbound-ssh-from-infraci-agents-to-aws-packer"
   priority               = 4079
@@ -138,7 +120,25 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 
-# Allow infra.ci VM agents to reach packer VMs with WinRM (HTTP without TLS)
+# Allow infra.ci ephemeral agents to reach packer VMs with SSH on azure
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_to_packer_vms" {
+  name                   = "allow-outbound-ssh-from-infraci-agents-to-packer-vms"
+  priority               = 4080
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "22"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
+    data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
+  ]
+  destination_address_prefix  = data.azurerm_subnet.infra_ci_jenkins_io_packer_builds.address_prefix
+  resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+}
+
+# Allow infra.ci ephemeral agents to reach packer VMs with WinRM (HTTP without TLS)
 resource "azurerm_network_security_rule" "allow_outbound_winrm_http_from_infraci_agents_to_packer_vms" {
   name                   = "allow-outbound-winrm-http-from-infraci-agents-to-packer-vms"
   priority               = 4081
@@ -156,7 +156,8 @@ resource "azurerm_network_security_rule" "allow_outbound_winrm_http_from_infraci
   resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
-# Allow infra.ci VM agents to reach packer VMs with WinRM (HTTPS)
+
+# Allow infra.ci ephemeral agents to reach packer VMs with WinRM (HTTPS)
 resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infraci_agents_to_packer_vms" {
   name                   = "allow-outbound-winrm-https-from-infraci-agents-to-packer-vms"
   priority               = 4082
@@ -293,6 +294,7 @@ resource "azurerm_managed_disk" "infra_ci_jenkins_io_data" {
   disk_size_gb         = 64
   tags                 = local.default_tags
 }
+
 # Required to allow AKS CSI driver to access the Azure disk
 resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_disk_reader" {
   name  = "ReadInfraCIDisk"
