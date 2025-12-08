@@ -197,7 +197,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_epheme
 }
 
 # Allow infra.ci VM agents to reach databases hosted on Azure with SSH on azure
-resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_ephemeral_agents_to_aks_clusters" {
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_ephemeral_agents_to_azure_dbs" {
   for_each = {
     "mysql-public-db"    = data.azurerm_subnet.public_db_vnet_mysql_tier.address_prefix
     "postgres-public-db" = data.azurerm_subnet.public_db_vnet_postgres_tier.address_prefix
