@@ -291,11 +291,6 @@ locals {
     }
   }
 
-  aks_clusters_only = {
-    for k, v in local.aks_clusters : k => v
-    if k != "compute_zones"
-  }
-
   # These cluster_hostname cannot be on the 'local.aks_cluster' to avoid cyclic dependencies (when expanding the map)
   aks_clusters_outputs = {
     "infracijenkinsio_agents_2" = {
@@ -349,9 +344,4 @@ locals {
   infra_ci_jenkins_io_fqdn                        = "infra.ci.jenkins.io"
   infra_ci_jenkins_io_service_short_name          = trimprefix(trimprefix(local.infra_ci_jenkins_io_fqdn, "jenkins.io"), ".")
   infra_ci_jenkins_io_service_short_stripped_name = replace(local.infra_ci_jenkins_io_service_short_name, ".", "-")
-
-  azure_dbs_subnet_address_prefixes = {
-    "mysql-public-db"    = data.azurerm_subnet.public_db_vnet_mysql_tier.address_prefix
-    "postgres-public-db" = data.azurerm_subnet.public_db_vnet_postgres_tier.address_prefix
-  }
 }

@@ -175,11 +175,19 @@ resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infrac
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 
+variable aks_clusters_subnet_address_prefixes {
+  default = {
+    "infracijenkinsio_agents_2" = data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix
+    "privatek8s"                = data.azurerm_subnet.privatek8s_tier.address_prefix
+    "publick8s"                 = data.azurerm_subnet.publick8s.address_prefix
+  }
+}
+
 # Allow infra.ci VM agents to reach AKS clusters with SSH on azure
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_ephemeral_agents_to_aks_clusters" {
-  for_each                = local.aks_clusters_only
+  for_each = var.aks_clusters_subnet_address_prefixes
   name                    = "allow-outbound-ssh-from-infraci-agents-to-${each.key}"
-  priority                = 4083 + index(keys(local.aks_clusters_only), each.key) # 3 AKS clusters
+  priority                = 4083 + index(keys(var.aks_clusters_subnet_address_prefixes), each.key) # 3 AKS clusters
   direction               = "Outbound"
   access                  = "Allow"
   protocol                = "Tcp"
@@ -187,16 +195,23 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_epheme
   destination_port_range  = "443"
   source_address_prefixes = [data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix]
   # TODO: restrict to required resources only
-  destination_address_prefixes = [local.aks_clusters_only[each.key].subnet_address_prefix]
+  destination_address_prefixes = [each.value]
   resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 
+variable azure_dbs_subnet_address_prefixes {
+  default = {
+    "mysql-public-db"    = data.azurerm_subnet.public_db_vnet_mysql_tier.address_prefix
+    "postgres-public-db" = data.azurerm_subnet.public_db_vnet_postgres_tier.address_prefix
+  }
+}
+
 # Allow infra.ci VM agents to reach databases hosted on Azure with SSH on azure
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_ephemeral_agents_to_azure_dbs" {
-  for_each                     = local.azure_dbs_subnet_address_prefixes
+  for_each                     = var.azure_dbs_subnet_address_prefixes
   name                         = "allow-outbound-ssh-from-infraci-agents-to-${each.key}"
-  priority                     = 4086 + index(keys(local.azure_dbs_subnet_address_prefixes), each.key)
+  priority                     = 4086 + index(keys(var.azure_dbs_subnet_address_prefixes), each.key)
   direction                    = "Outbound"
   access                       = "Allow"
   protocol                     = "Tcp"
