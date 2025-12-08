@@ -187,7 +187,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_epheme
   destination_port_range  = "443"
   source_address_prefixes = [data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix]
   # TODO: restrict to required resources only
-  destination_address_prefixes = local.aks_clusters[each.key].subnet_address_prefix
+  destination_address_prefixes = [local.aks_clusters[each.key].subnet_address_prefix]
   resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
