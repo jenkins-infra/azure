@@ -234,7 +234,10 @@ resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephe
     data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
   ]
   # TODO: restrict to required resources only
-  destination_address_prefixes = [data.azurerm_subnet.publick8s.address_prefix]
+  # publick8s is a dual-stack cluster, filtering on IPv4 only
+  destination_address_prefixes = [
+    for ip in split(" ", data.azurerm_subnet.publick8s.address_prefixes) : ip if can(cidrnetmask(ip))
+  ]
   resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
