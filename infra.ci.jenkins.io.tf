@@ -176,46 +176,101 @@ resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infrac
 }
 
 locals {
-  aks_clusters_subnet_address_prefixes = {
-    "infracijenkinsio_agents_2" = data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix
-    "privatek8s"                = data.azurerm_subnet.privatek8s_tier.address_prefix
-    "publick8s"                 = data.azurerm_subnet.publick8s.address_prefix
-  }
   azure_dbs_subnet_address_prefixes = {
     "mysql-public-db"    = data.azurerm_subnet.public_db_vnet_mysql_tier.address_prefix
     "postgres-public-db" = data.azurerm_subnet.public_db_vnet_postgres_tier.address_prefix
   }
 }
 
-# Allow infra.ci VM agents to reach AKS clusters with SSH on azure
-resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_ephemeral_agents_to_aks_clusters" {
-  for_each                = local.aks_clusters_subnet_address_prefixes
-  name                    = "allow-outbound-ssh-from-infraci-agents-to-${each.key}"
-  priority                = 4083 + index(keys(local.aks_clusters_subnet_address_prefixes), each.key) # 3 AKS clusters
+# Allow infra.ci VM agents to reach infracijenkinsio_agents_2 cluster with SSH on azure
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_ephemeral_agents_to_infracijenkinsio_agents_2" {
+  name                    = "allow-outbound-ssh-from-infraci-agents-to-infracijenkinsio_agents_2"
+  priority                = 4084
   direction               = "Outbound"
   access                  = "Allow"
   protocol                = "Tcp"
   source_port_range       = "*"
   destination_port_range  = "443"
-  source_address_prefixes = [data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix]
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
+    data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
+  ]
   # TODO: restrict to required resources only
-  destination_address_prefixes = [each.value]
+  destination_address_prefixes = [data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix]
   resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 
-# Allow infra.ci VM agents to reach databases hosted on Azure with SSH on azure
-resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_ephemeral_agents_to_azure_dbs" {
-  for_each                     = local.azure_dbs_subnet_address_prefixes
-  name                         = "allow-outbound-ssh-from-infraci-agents-to-${each.key}"
-  priority                     = 4086 + index(keys(local.azure_dbs_subnet_address_prefixes), each.key)
+# Allow infra.ci VM agents to reach privatek8s cluster with SSH on azure
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_ephemeral_agents_to_privatek8s" {
+  name                    = "allow-outbound-ssh-from-infraci-agents-to-privatek8s"
+  priority                = 4085
+  direction               = "Outbound"
+  access                  = "Allow"
+  protocol                = "Tcp"
+  source_port_range       = "*"
+  destination_port_range  = "443"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
+    data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
+  ]
+  # TODO: restrict to required resources only
+  destination_address_prefixes = [data.azurerm_subnet.privatek8s_tier.address_prefix]
+  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+}
+
+# Allow infra.ci VM agents to reach publick8s cluster with SSH on azure
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_ephemeral_agents_to_publick8s" {
+  name                    = "allow-outbound-ssh-from-infraci-agents-to-publick8s"
+  priority                = 4086
+  direction               = "Outbound"
+  access                  = "Allow"
+  protocol                = "Tcp"
+  source_port_range       = "*"
+  destination_port_range  = "443"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
+    data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
+  ]
+  # TODO: restrict to required resources only
+  destination_address_prefixes = [data.azurerm_subnet.publick8s.address_prefix]
+  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+}
+
+# Allow infra.ci VM agents to reach mysql-public-db hosted on Azure with SSH on azure
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_ephemeral_agents_to_mysql_public_db" {
+  name                         = "allow-outbound-ssh-from-infraci-agents-to-mysql-public-db"
+  priority                     = 4087
   direction                    = "Outbound"
   access                       = "Allow"
   protocol                     = "Tcp"
   source_port_range            = "*"
-  destination_port_range       = "443"
-  source_address_prefixes      = [data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix]
-  destination_address_prefixes = [each.value]
+  destination_port_range       = "3306"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
+    data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
+  ]
+  destination_address_prefixes = data.azurerm_subnet.public_db_vnet_mysql_tier.address_prefix
+  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+}
+
+# Allow infra.ci VM agents to reach postgres-public-db hosted on Azure with SSH on azure
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_ephemeral_agents_to_postgres_public_db" {
+  name                         = "allow-outbound-ssh-from-infraci-agents-to-postgres-public-db"
+  priority                     = 4088
+  direction                    = "Outbound"
+  access                       = "Allow"
+  protocol                     = "Tcp"
+  source_port_range            = "*"
+  destination_port_range       = "5432"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
+    data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
+  ]
+  destination_address_prefixes = data.azurerm_subnet.public_db_vnet_postgres_tier.address_prefix
   resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
