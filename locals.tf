@@ -291,6 +291,11 @@ locals {
     }
   }
 
+  aks_clusters_only = {
+    for k, v in local.aks_clusters : k => v
+    if k != "compute_zones"
+  }
+
   # These cluster_hostname cannot be on the 'local.aks_cluster' to avoid cyclic dependencies (when expanding the map)
   aks_clusters_outputs = {
     "infracijenkinsio_agents_2" = {
