@@ -252,7 +252,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_epheme
     data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
     data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
   ]
-  destination_address_prefixes = data.azurerm_subnet.public_db_vnet_mysql_tier.address_prefix
+  destination_address_prefixes = [data.azurerm_subnet.public_db_vnet_mysql_tier.address_prefix]
   resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
@@ -270,7 +270,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_epheme
     data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
     data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
   ]
-  destination_address_prefixes = data.azurerm_subnet.public_db_vnet_postgres_tier.address_prefix
+  destination_address_prefixes = [data.azurerm_subnet.public_db_vnet_postgres_tier.address_prefix]
   resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
