@@ -101,25 +101,7 @@ module "infra_ci_jenkins_io_azurevm_agents" {
   }
 }
 
-# Allow infra.ci VM agents to reach packer VMs with SSH on azure
-resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_to_packer_vms" {
-  name                   = "allow-outbound-ssh-from-infraci-agents-to-packer-vms"
-  priority               = 4080
-  direction              = "Outbound"
-  access                 = "Allow"
-  protocol               = "Tcp"
-  source_port_range      = "*"
-  destination_port_range = "22"
-  source_address_prefixes = [
-    data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
-    data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
-  ]
-  destination_address_prefix  = data.azurerm_subnet.infra_ci_jenkins_io_packer_builds.address_prefix
-  resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
-  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
-}
-
-# Allow infra.ci VM agents to reach packer VMs with SSH on aws
+# Allow infra.ci ephemeral agents to reach packer VMs with SSH on aws
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_to_aws_packer" {
   name                   = "allow-outbound-ssh-from-infraci-agents-to-aws-packer"
   priority               = 4079
@@ -138,7 +120,25 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 
-# Allow infra.ci VM agents to reach packer VMs with WinRM (HTTP without TLS)
+# Allow infra.ci ephemeral agents to reach packer VMs with SSH on azure
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_to_packer_vms" {
+  name                   = "allow-outbound-ssh-from-infraci-agents-to-packer-vms"
+  priority               = 4080
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "22"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
+    data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
+  ]
+  destination_address_prefix  = data.azurerm_subnet.infra_ci_jenkins_io_packer_builds.address_prefix
+  resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+}
+
+# Allow infra.ci ephemeral agents to reach packer VMs with WinRM (HTTP without TLS)
 resource "azurerm_network_security_rule" "allow_outbound_winrm_http_from_infraci_agents_to_packer_vms" {
   name                   = "allow-outbound-winrm-http-from-infraci-agents-to-packer-vms"
   priority               = 4081
@@ -156,7 +156,8 @@ resource "azurerm_network_security_rule" "allow_outbound_winrm_http_from_infraci
   resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
-# Allow infra.ci VM agents to reach packer VMs with WinRM (HTTPS)
+
+# Allow infra.ci ephemeral agents to reach packer VMs with WinRM (HTTPS)
 resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infraci_agents_to_packer_vms" {
   name                   = "allow-outbound-winrm-https-from-infraci-agents-to-packer-vms"
   priority               = 4082
@@ -173,6 +174,102 @@ resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infrac
   destination_address_prefix  = "*"
   resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+}
+
+# Allow infra.ci ephemeral agents to reach infracijenkinsio_agents_2 cluster
+resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_to_infracijenkinsio_agents_2" {
+  name                    = "allow-outbound-https-from-infraci-agents-to-infracijenkinsio_agents-2"
+  priority                = 4084
+  direction               = "Outbound"
+  access                  = "Allow"
+  protocol                = "Tcp"
+  source_port_range       = "*"
+  destination_port_range  = "443"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
+    data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
+  ]
+  # TODO: restrict to required resources only
+  destination_address_prefixes = [data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix]
+  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+}
+
+# Allow infra.ci ephemeral agents to reach privatek8s cluster
+resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_to_privatek8s" {
+  name                    = "allow-outbound-https-from-infraci-agents-to-privatek8s"
+  priority                = 4085
+  direction               = "Outbound"
+  access                  = "Allow"
+  protocol                = "Tcp"
+  source_port_range       = "*"
+  destination_port_range  = "443"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
+    data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
+  ]
+  # TODO: restrict to required resources only
+  destination_address_prefixes = [data.azurerm_subnet.privatek8s_tier.address_prefix]
+  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+}
+
+# Allow infra.ci ephemeral agents to reach publick8s cluster
+resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_to_publick8s" {
+  name                    = "allow-outbound-https-from-infraci-agents-to-publick8s"
+  priority                = 4086
+  direction               = "Outbound"
+  access                  = "Allow"
+  protocol                = "Tcp"
+  source_port_range       = "*"
+  destination_port_range  = "443"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
+    data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
+  ]
+  # TODO: restrict to required resources only
+  # publick8s is a dual-stack cluster, filtering on IPv4 only
+  destination_address_prefixes = [
+    for ip in data.azurerm_subnet.publick8s.address_prefixes : ip if can(cidrnetmask(ip))
+  ]
+  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+}
+
+# Allow infra.ci ephemeral agents to reach mysql-public-db hosted on Azure
+resource "azurerm_network_security_rule" "allow_outbound_mysql_from_infraci_ephemeral_agents_to_mysql_public_db" {
+  name                         = "allow-outbound-mysql-from-infraci-agents-to-mysql-public-db"
+  priority                     = 4087
+  direction                    = "Outbound"
+  access                       = "Allow"
+  protocol                     = "Tcp"
+  source_port_range            = "*"
+  destination_port_range       = "3306"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
+    data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
+  ]
+  destination_address_prefixes = [data.azurerm_subnet.public_db_vnet_mysql_tier.address_prefix]
+  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+}
+
+# Allow infra.ci ephemeral agents to reach postgres-public-db hosted on Azure
+resource "azurerm_network_security_rule" "allow_outbound_postgres_from_infraci_ephemeral_agents_to_postgres_public_db" {
+  name                         = "allow-outbound-postgres-from-infraci-agents-to-postgres-public-db"
+  priority                     = 4088
+  direction                    = "Outbound"
+  access                       = "Allow"
+  protocol                     = "Tcp"
+  source_port_range            = "*"
+  destination_port_range       = "5432"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
+    data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
+  ]
+  destination_address_prefixes = [data.azurerm_subnet.public_db_vnet_postgres_tier.address_prefix]
+  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 
 # Required to allow azcopy sync of plugins.jenkins.io File Share
@@ -197,6 +294,7 @@ resource "azurerm_managed_disk" "infra_ci_jenkins_io_data" {
   disk_size_gb         = 64
   tags                 = local.default_tags
 }
+
 # Required to allow AKS CSI driver to access the Azure disk
 resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_disk_reader" {
   name  = "ReadInfraCIDisk"
