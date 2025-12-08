@@ -80,7 +80,7 @@ locals {
         "10.100.0.0/14",       # 10.100.0.1 - 10.103.255.255
         "fd12:3456:789a::/64", # Dual stack is required to provide public IPv6 LBs
       ],
-      subnet_address_prefix = data.azurerm_subnet.publick8s.address_prefix[0],
+      subnet_address_prefix = data.azurerm_subnet.publick8s.address_prefix,
       azurefile_volumes = {
         "get-jenkins-io"                = {},
         "updates-jenkins-io"            = {},
