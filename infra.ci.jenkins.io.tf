@@ -175,13 +175,6 @@ resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infrac
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 
-locals {
-  azure_dbs_subnet_address_prefixes = {
-    "mysql-public-db"    = data.azurerm_subnet.public_db_vnet_mysql_tier.address_prefix
-    "postgres-public-db" = data.azurerm_subnet.public_db_vnet_postgres_tier.address_prefix
-  }
-}
-
 # Allow infra.ci VM agents to reach infracijenkinsio_agents_2 cluster with SSH on azure
 resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_to_infracijenkinsio_agents_2" {
   name                    = "allow-outbound-https-from-infraci-agents-to-infracijenkinsio_agents_2"
