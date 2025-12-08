@@ -177,11 +177,7 @@ resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infrac
 
 # Allow infra.ci VM agents to reach AKS clusters with SSH on azure
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_ephemeral_agents_to_aks_clusters" {
-  for_each = {
-    "infracijenkinsio_agents_2" = data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix
-    "privatek8s"                = data.azurerm_subnet.privatek8s_tier.address_prefix
-    "publick8s"                 = data.azurerm_subnet.publick8s.address_prefix
-  }
+  for_each                = local.aks_clusters
   name                    = "allow-outbound-ssh-from-infraci-agents-to-${each.key}"
   priority                = 4083 + index(keys(local.aks_clusters), each.key) # 3 AKS clusters
   direction               = "Outbound"
@@ -191,7 +187,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_epheme
   destination_port_range  = "443"
   source_address_prefixes = [data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix]
   # TODO: restrict to required resources only
-  destination_address_prefixes = [each.value]
+  destination_address_prefixes = local.aks_clusters[each.key].subnet_address_prefix
   resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
