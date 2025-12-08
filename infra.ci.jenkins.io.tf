@@ -175,7 +175,7 @@ resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infrac
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 
-# Allow infra.ci VM agents to reach infracijenkinsio_agents_2 cluster with SSH on azure
+# Allow infra.ci ephemeral agents to reach infracijenkinsio_agents_2 cluster with SSH on azure
 resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_to_infracijenkinsio_agents_2" {
   name                    = "allow-outbound-https-from-infraci-agents-to-infracijenkinsio_agents_2"
   priority                = 4084
@@ -194,7 +194,7 @@ resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephe
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 
-# Allow infra.ci VM agents to reach privatek8s cluster with SSH on azure
+# Allow infra.ci ephemeral agents to reach privatek8s cluster with SSH on azure
 resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_to_privatek8s" {
   name                    = "allow-outbound-https-from-infraci-agents-to-privatek8s"
   priority                = 4085
@@ -213,7 +213,7 @@ resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephe
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 
-# Allow infra.ci VM agents to reach publick8s cluster with SSH on azure
+# Allow infra.ci ephemeral agents to reach publick8s cluster with SSH on azure
 resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_to_publick8s" {
   name                    = "allow-outbound-https-from-infraci-agents-to-publick8s"
   priority                = 4086
@@ -235,7 +235,7 @@ resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephe
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 
-# Allow infra.ci VM agents to reach mysql-public-db hosted on Azure with SSH on azure
+# Allow infra.ci ephemeral agents to reach mysql-public-db hosted on Azure with SSH on azure
 resource "azurerm_network_security_rule" "allow_outbound_mysql_from_infraci_ephemeral_agents_to_mysql_public_db" {
   name                         = "allow-outbound-mysql-from-infraci-agents-to-mysql-public-db"
   priority                     = 4087
@@ -253,7 +253,7 @@ resource "azurerm_network_security_rule" "allow_outbound_mysql_from_infraci_ephe
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 
-# Allow infra.ci VM agents to reach postgres-public-db hosted on Azure with SSH on azure
+# Allow infra.ci ephemeral agents to reach postgres-public-db hosted on Azure with SSH on azure
 resource "azurerm_network_security_rule" "allow_outbound_postgres_from_infraci_ephemeral_agents_to_postgres_public_db" {
   name                         = "allow-outbound-postgres-from-infraci-agents-to-postgres-public-db"
   priority                     = 4088
