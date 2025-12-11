@@ -213,7 +213,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_releasepool_w2022" {
   os_disk_size_gb      = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
   orchestrator_version = local.aks_clusters["privatek8s"].kubernetes_version
   os_type              = "Windows"
-  # TODO: switch to w2022
   os_sku                = "Windows2022"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
   auto_scaling_enabled  = true
