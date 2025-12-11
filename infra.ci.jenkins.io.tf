@@ -178,13 +178,13 @@ resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infrac
 
 # Allow infra.ci ephemeral agents to reach infracijenkinsio_agents_2 cluster
 resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_to_infracijenkinsio_agents_2" {
-  name                    = "allow-outbound-https-from-infraci-agents-to-infracijenkinsio_agents-2"
-  priority                = 4084
-  direction               = "Outbound"
-  access                  = "Allow"
-  protocol                = "Tcp"
-  source_port_range       = "*"
-  destination_port_range  = "443"
+  name                   = "allow-outbound-https-from-infraci-agents-to-infracijenkinsio_agents-2"
+  priority               = 4084
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "443"
   source_address_prefixes = [
     data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
     data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
@@ -197,13 +197,13 @@ resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephe
 
 # Allow infra.ci ephemeral agents to reach privatek8s cluster
 resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_to_privatek8s" {
-  name                    = "allow-outbound-https-from-infraci-agents-to-privatek8s"
-  priority                = 4085
-  direction               = "Outbound"
-  access                  = "Allow"
-  protocol                = "Tcp"
-  source_port_range       = "*"
-  destination_port_range  = "443"
+  name                   = "allow-outbound-https-from-infraci-agents-to-privatek8s"
+  priority               = 4085
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "443"
   source_address_prefixes = [
     data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
     data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
@@ -216,13 +216,13 @@ resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephe
 
 # Allow infra.ci ephemeral agents to reach publick8s cluster
 resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_to_publick8s" {
-  name                    = "allow-outbound-https-from-infraci-agents-to-publick8s"
-  priority                = 4086
-  direction               = "Outbound"
-  access                  = "Allow"
-  protocol                = "Tcp"
-  source_port_range       = "*"
-  destination_port_range  = "443"
+  name                   = "allow-outbound-https-from-infraci-agents-to-publick8s"
+  priority               = 4086
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "443"
   source_address_prefixes = [
     data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
     data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
@@ -232,19 +232,19 @@ resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephe
   destination_address_prefixes = [
     for ip in data.azurerm_subnet.publick8s.address_prefixes : ip if can(cidrnetmask(ip))
   ]
-  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
-  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+  resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 
 # Allow infra.ci ephemeral agents to reach mysql-public-db hosted on Azure
 resource "azurerm_network_security_rule" "allow_outbound_mysql_from_infraci_ephemeral_agents_to_mysql_public_db" {
-  name                         = "allow-outbound-mysql-from-infraci-agents-to-mysql-public-db"
-  priority                     = 4087
-  direction                    = "Outbound"
-  access                       = "Allow"
-  protocol                     = "Tcp"
-  source_port_range            = "*"
-  destination_port_range       = "3306"
+  name                   = "allow-outbound-mysql-from-infraci-agents-to-mysql-public-db"
+  priority               = 4087
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "3306"
   source_address_prefixes = [
     data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
     data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
@@ -256,13 +256,13 @@ resource "azurerm_network_security_rule" "allow_outbound_mysql_from_infraci_ephe
 
 # Allow infra.ci ephemeral agents to reach postgres-public-db hosted on Azure
 resource "azurerm_network_security_rule" "allow_outbound_postgres_from_infraci_ephemeral_agents_to_postgres_public_db" {
-  name                         = "allow-outbound-postgres-from-infraci-agents-to-postgres-public-db"
-  priority                     = 4088
-  direction                    = "Outbound"
-  access                       = "Allow"
-  protocol                     = "Tcp"
-  source_port_range            = "*"
-  destination_port_range       = "5432"
+  name                   = "allow-outbound-postgres-from-infraci-agents-to-postgres-public-db"
+  priority               = 4088
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "5432"
   source_address_prefixes = [
     data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
     data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
