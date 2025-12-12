@@ -31,5 +31,4 @@ terraform(
     ),
   ],
   publishReports: ['jenkins-infra-data-reports/azure.json'],
-  agentLabel: 'linux-arm64'
 )
