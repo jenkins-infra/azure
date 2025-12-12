@@ -171,38 +171,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_releasepool" {
   tags = local.default_tags
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_releasepool_w2019" {
-
-  # TODO: switch to w2022
-  name    = "w2019"
-  vm_size = "Standard_D4ads_v5" # 4 vCPU 16 GiB RAM
-  upgrade_settings {
-    max_surge = "10%"
-  }
-  os_disk_type         = "Ephemeral"
-  os_disk_size_gb      = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
-  orchestrator_version = local.aks_clusters["privatek8s"].kubernetes_version
-  os_type              = "Windows"
-  # TODO: switch to w2022
-  os_sku                = "Windows2019"
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s.id
-  auto_scaling_enabled  = true
-  min_count             = 0
-  max_count             = 3
-  zones                 = [1, 2]
-  vnet_subnet_id        = data.azurerm_subnet.privatek8s_release_tier.id
-  node_taints = [
-    "os=windows:NoSchedule",
-    "jenkins=release.ci.jenkins.io:NoSchedule",
-  ]
-
-  lifecycle {
-    ignore_changes = [node_count]
-  }
-
-  tags = local.default_tags
-}
-
 resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_releasepool_w2022" {
   name    = "w2022"
   vm_size = "Standard_D4ads_v5" # 4 vCPU 16 GiB RAM
