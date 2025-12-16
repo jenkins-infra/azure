@@ -33,7 +33,7 @@ end_dates:
         > ⚠️ Merging this PR will prevent the "javadoc.jenkins.io" deployment job to succeed and update the javadoc.jenkins.io website.
         > You'll have to update the top-level credential `trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer` on trusted.ci.jenkins.io UI.
         >
-        > This credential value can be retrieved in the Terraform state from `module.trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer.azuread_application.fileshare_serviceprincipal_writer`.
+        > This credential value can be retrieved in the Terraform state from `module.trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer.azuread_application_password.fileshare_serviceprincipal_writer`.
 updatecli_end_dates:
   infra.ci.jenkins.io:
     custom_hcl_key: resource.azuread_application_password.updatecli_infra_ci_jenkins_io.end_date
