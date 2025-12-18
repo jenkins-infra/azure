@@ -105,6 +105,29 @@ resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins
   principal_id         = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins.principal_id
 }
 
+# Custom role required to allow returning the Service SAS token of javadocjenkinsio storage account
+resource "azurerm_role_definition" "javadoc_jenkins_io_list_service_sas_action" {
+  name        = "javadocjenkinsio-list-service-sas-action-role"
+  scope       = azurerm_storage_account.javadoc_jenkins_io.id
+  description = "Custome role to allow returning the Service SAS token for javadocjenkinsio storage account."
+
+  permissions {
+    actions     = ["Microsoft.Storage/storageAccounts/listServiceSas/action"]
+    not_actions = []
+  }
+
+  assignable_scopes = [
+    azurerm_storage_account.javadoc_jenkins_io.id
+  ]
+}
+
+resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins_javadoc_jenkins_io_list_service_sas_action" {
+  scope = azurerm_storage_account.javadoc_jenkins_io.id
+  # Allow writing
+  role_definition_id = azurerm_role_definition.javadoc_jenkins_io_list_service_sas_action
+  principal_id       = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins.principal_id
+}
+
 resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins_write_javadoc_share" {
   scope = azurerm_storage_account.javadoc_jenkins_io.id
   # Allow writing
