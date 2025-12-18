@@ -109,7 +109,7 @@ resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins
 resource "azurerm_role_definition" "javadoc_jenkins_io_list_service_sas_action" {
   name        = "javadocjenkinsio-list-service-sas-action-role"
   scope       = azurerm_storage_account.javadoc_jenkins_io.id
-  description = "Custome role to allow returning the Service SAS token for javadocjenkinsio storage account."
+  description = "Custom role to allow returning the Service SAS token for javadocjenkinsio storage account."
 
   permissions {
     actions     = ["Microsoft.Storage/storageAccounts/listServiceSas/action"]
