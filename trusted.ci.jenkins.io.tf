@@ -124,7 +124,7 @@ resource "azurerm_role_definition" "javadoc_jenkins_io_list_service_sas_action" 
 resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins_javadoc_jenkins_io_list_service_sas_action" {
   scope = azurerm_storage_account.javadoc_jenkins_io.id
   # Allow writing
-  role_definition_id = azurerm_role_definition.javadoc_jenkins_io_list_service_sas_action
+  role_definition_id = azurerm_role_definition.javadoc_jenkins_io_list_service_sas_action.id
   principal_id       = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins.principal_id
 }
 
