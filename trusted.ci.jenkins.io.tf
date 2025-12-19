@@ -120,7 +120,7 @@ module "trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer" {
   service_fqdn               = "trustedci-javadocjenkinsio-fileshare_serviceprincipal_writer"
   active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url       = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date = "2025-12-23T00:00:00Z"
+  service_principal_end_date = "2026-03-19T00:00:00Z"
   file_share_id              = azurerm_storage_share.javadoc_jenkins_io.id
   storage_account_id         = azurerm_storage_account.javadoc_jenkins_io.id
   default_tags               = local.default_tags
