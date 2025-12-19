@@ -24,16 +24,6 @@ end_dates:
       end_date: "2026-02-15T00:00:00Z"
       service: "stats.jenkins.io"
       secret: "STATS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
-  trusted_ci_jenkins_io:
-    trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer:
-      service: "javadoc.jenkins.io"
-      doc_how_to_get_credential: |
-        > [!IMPORTANT]
-        >
-        > ⚠️ Merging this PR will prevent the "javadoc.jenkins.io" deployment job to succeed and update the javadoc.jenkins.io website.
-        > You'll have to update the top-level credential `trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer` on trusted.ci.jenkins.io UI.
-        >
-        > This credential value can be retrieved in the Terraform state from `module.trustedci_javadocjenkinsio_fileshare_serviceprincipal_writer.azuread_application_password.fileshare_serviceprincipal_writer`.
 updatecli_end_dates:
   infra.ci.jenkins.io:
     custom_hcl_key: resource.azuread_application_password.updatecli_infra_ci_jenkins_io.end_date
