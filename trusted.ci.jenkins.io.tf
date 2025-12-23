@@ -104,6 +104,12 @@ resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins
   role_definition_name = "Storage File Data Privileged Contributor"
   principal_id         = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins.principal_id
 }
+resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins_write_reports_share" {
+  scope = azurerm_storage_account.reports_jenkins_io.id
+  # Allow writing
+  role_definition_name = "Storage File Data Privileged Contributor"
+  principal_id         = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins.principal_id
+}
 
 resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins_write_javadoc_share" {
   scope = azurerm_storage_account.javadoc_jenkins_io.id
