@@ -112,20 +112,6 @@ resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins
   principal_id         = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins.principal_id
 }
 
-## TODO: move to credential-less
-# Required to allow azcopy sync to the reports.jenkins.io File Share
-module "trustedci_reportsjenkinsio_fileshare_serviceprincipal_writer" {
-  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
-
-  service_fqdn               = "trustedci-reportsjenkinsio-fileshare_serviceprincipal_writer"
-  active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
-  active_directory_url       = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date = "2025-12-23T00:00:00Z"
-  file_share_id              = azurerm_storage_share.reports_jenkins_io.id
-  storage_account_id         = azurerm_storage_account.reports_jenkins_io.id
-  default_tags               = local.default_tags
-}
-
 ####################################################################################
 ## Network Security Group and rules
 ####################################################################################
