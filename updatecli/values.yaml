@@ -24,6 +24,10 @@ end_dates:
       end_date: "2026-02-15T00:00:00Z"
       service: "stats.jenkins.io"
       secret: "STATS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
+    infraci_reportsjenkinsio_fileshare_serviceprincipal_writer:
+      end_date: "2026-03-19T00:00:00Z"
+      service: "reports.jenkins.io"
+      secret: "REPORTS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
 updatecli_end_dates:
   infra.ci.jenkins.io:
     custom_hcl_key: resource.azuread_application_password.updatecli_infra_ci_jenkins_io.end_date
