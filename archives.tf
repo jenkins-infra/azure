@@ -27,7 +27,7 @@ resource "azurerm_storage_account" "archives" {
 }
 
 ## Archived items
-# Container for the logs archive (2019 -> 2025) of the legacy `updates.jenkins.io` service which used to be in the 'pkg' CloudBees AWS VM
+# Container for the logs archive (2019 -> 2025) of the legacy `updates.jenkins.io` service which used to be in the 'pkg.origin' CloudBees AWS VM
 resource "azurerm_storage_container" "legacy_updatesjio_logs" {
   name                  = "legacy-updatesjio-logs"
   storage_account_id    = azurerm_storage_account.archives.id

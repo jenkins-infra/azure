@@ -37,8 +37,7 @@ locals {
 
   # TODO: track with updatecli
   external_services = {
-    "pkg.origin.jenkins.io" = "52.202.51.185",
-    "archives.jenkins.io"   = "46.101.121.132",
+    "archives.jenkins.io" = "46.101.121.132",
   }
 
   # Ref. https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-githubs-ip-addresses
