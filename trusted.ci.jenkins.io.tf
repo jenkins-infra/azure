@@ -140,21 +140,6 @@ resource "azurerm_network_security_rule" "allow_out_from_trusted_all_to_uc" {
   resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
-resource "azurerm_network_security_rule" "allow_out_many_from_trusted_agents_to_pkg" {
-  name              = "allow-out-many-from-agents-to-pkg"
-  priority          = 4055
-  direction         = "Outbound"
-  access            = "Allow"
-  protocol          = "Tcp"
-  source_port_range = "*"
-  destination_port_ranges = [
-    "22", # SSH (for rsync)
-  ]
-  source_address_prefixes     = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes
-  destination_address_prefix  = local.external_services["pkg.origin.jenkins.io"]
-  resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
-  network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
-}
 resource "azurerm_network_security_rule" "allow_out_many_from_trusted_agents_to_archive" {
   name              = "allow-out-many-from-agents-to-archive"
   priority          = 4060
