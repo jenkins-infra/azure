@@ -22,9 +22,9 @@ resource "azurerm_storage_account" "archives" {
     )
     ip_rules = [
       # Temporary CloudBees AWS pkg-archive used to archive old pkg.origin data - https://github.com/jenkins-infra/helpdesk/issues/3705
-      "54.167.8.15/32", 
+      "54.167.8.15",
     ]
-    bypass   = ["AzureServices"]
+    bypass = ["AzureServices"]
   }
 
   tags = local.default_tags
@@ -58,5 +58,15 @@ resource "azurerm_storage_container" "uplink_db_pre_20250521" {
   container_access_type = "private"
   metadata = merge(local.default_tags, {
     helpdesk = "https://github.com/jenkins-infra/helpdesk/issues/3249"
+  })
+}
+
+# Container for archiving the old data from the former pkg.origin.jenkins.io/updates.jenkins-ci.org VM
+resource "azurerm_storage_container" "pkg-archive" {
+  name                  = "pkg-archive-20251221"
+  storage_account_id    = azurerm_storage_account.archives.id
+  container_access_type = "private"
+  metadata = merge(local.default_tags, {
+    helpdesk = "https://github.com/jenkins-infra/helpdesk/issues/3705"
   })
 }
