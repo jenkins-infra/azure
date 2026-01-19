@@ -22,7 +22,7 @@ resource "azurerm_storage_account" "archives" {
     )
     ip_rules = [
       # Temporary CloudBees AWS pkg-archive used to archive old pkg.origin data - https://github.com/jenkins-infra/helpdesk/issues/3705
-      "54.167.8.15",
+      "3.87.245.209",
     ]
     bypass = ["AzureServices"]
   }
