@@ -103,6 +103,13 @@ resource "azurerm_dns_a_record" "cert_ci_jenkins_io" {
   ttl                 = 60
   records             = [module.cert_ci_jenkins_io.controller_private_ipv4]
 }
+resource "azurerm_dns_a_record" "assets_cert_ci_jenkins_io" {
+  name                = "assets"
+  zone_name           = module.cert_ci_jenkins_io_letsencrypt.zone_name
+  resource_group_name = module.cert_ci_jenkins_io_letsencrypt.zone_rg_name
+  ttl                 = 60
+  records             = [module.cert_ci_jenkins_io.controller_private_ipv4]
+}
 
 ## Allow access to/from ACR endpoint
 resource "azurerm_network_security_rule" "allow_out_https_from_cert_agents_to_acr" {

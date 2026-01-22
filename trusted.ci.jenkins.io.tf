@@ -221,6 +221,13 @@ resource "azurerm_dns_a_record" "trusted_ci_controller" {
   ttl                 = 60
   records             = [module.trusted_ci_jenkins_io.controller_private_ipv4]
 }
+resource "azurerm_dns_a_record" "assets_trusted_ci_controller" {
+  name                = "assets"
+  zone_name           = module.trusted_ci_jenkins_io_letsencrypt.zone_name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  records             = [module.trusted_ci_jenkins_io.controller_private_ipv4]
+}
 
 ####################################################################################
 ## Private network resources (endpoint, DNS, etc.)
