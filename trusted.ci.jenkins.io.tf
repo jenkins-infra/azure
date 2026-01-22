@@ -2,7 +2,7 @@
 ## Resources for the Controller VM
 ####################################################################################
 module "trusted_ci_jenkins_io_letsencrypt" {
-  source = "./.shared-tools/terraform/modules/azure-letsencrypt-dns"
+  source = "./modules/azure-letsencrypt-dns"
 
   default_tags     = local.default_tags
   zone_name        = "trusted.ci.jenkins.io"
