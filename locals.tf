@@ -85,6 +85,28 @@ locals {
         "staging-pkg-origin-jenkins-io" = {},
         "staging-get-jenkins-io"        = {},
         "pkg-origin-jenkins-io"         = {},
+        "alpha-docs-jenkins-io" = {
+          capacity = azurerm_storage_share.docs_jenkins_io.quota,
+          # `volumeHandle` must be unique on the cluster for this volume and must looks like: "{resource-group-name}#{account-name}#{file-share-name}"
+          volume_handle = "${azurerm_storage_account.docs_jenkins_io.resource_group_name}#${azurerm_storage_account.docs_jenkins_io.name}#${azurerm_storage_share.docs_jenkins_io.name}"
+          mount_options = [
+            "dir_mode=0777",
+            "file_mode=0777",
+            "uid=0",
+            "gid=0",
+            "mfsymlinks",
+            "cache=strict", # Default on usual kernels but worth setting it explicitly
+            "nosharesock",  # Use new TCP connection for each CIFS mount (need more memory but avoid lost packets to create mount timeouts)
+            "nobrl",        # disable sending byte range lock requests to the server and for applications which have challenges with posix locks
+          ],
+          volume_attributes = {
+            resourceGroup = azurerm_storage_account.docs_jenkins_io.resource_group_name,
+            shareName     = azurerm_storage_share.docs_jenkins_io.name,
+          },
+          secret_name         = azurerm_storage_account.docs_jenkins_io.name,
+          secret_namespace    = "alpha-docs-jenkins-io",
+          storage_account_key = azurerm_storage_account.docs_jenkins_io.primary_access_key,
+        },
         "builds-reports-jenkins-io" = {
           capacity = azurerm_storage_share.builds_reports_jenkins_io.quota,
           # `volumeHandle` must be unique on the cluster for this volume and must looks like: "{resource-group-name}#{account-name}#{file-share-name}"
