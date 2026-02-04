@@ -92,8 +92,8 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     os_disk_size_gb      = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
     orchestrator_version = local.aks_clusters["publick8s"].kubernetes_version
     auto_scaling_enabled = true
-    min_count            = 8
-    max_count            = 8
+    min_count            = 3
+    max_count            = 5
     vnet_subnet_id       = data.azurerm_subnet.publick8s.id
     tags                 = local.default_tags
     zones                = [1, 2, 3]
