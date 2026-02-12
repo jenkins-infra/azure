@@ -17,7 +17,7 @@ end_dates:
       service: "docs.jenkins.io"
       secret: "DOCS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
     infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer:
-      end_date: "2026-02-15T00:00:00Z"
+      end_date: "2026-05-13T00:00:00Z"
       service: "plugins.jenkins.io"
       secret: "INFRACI_PLUGINSJENKINSIO_FILESHARE_SERVICE_PRINCIPAL_WRITER_PASSWORD"
     infraci_statsjenkinsio_fileshare_serviceprincipal_writer:
