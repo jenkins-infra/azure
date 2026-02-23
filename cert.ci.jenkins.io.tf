@@ -32,7 +32,6 @@ module "cert_ci_jenkins_io" {
   ]
 
   agent_ip_prefixes = concat(
-    ### TODO: remove as part of jenkins-infra/helpdesk-5004
     data.azurerm_subnet.cert_ci_jenkins_io_ephemeral_agents.address_prefixes,
     data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.address_prefixes,
   )
@@ -161,7 +160,6 @@ module "cert_ci_jenkins_io_letsencrypt" {
   principal_id     = module.cert_ci_jenkins_io.controller_service_principal_id
 }
 
-### TODO: remove resources above as part of jenkins-infra/helpdesk-5004
 resource "azurerm_user_assigned_identity" "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   provider            = azurerm.jenkins-sponsored
   location            = azurerm_resource_group.cert_ci_jenkins_io_controller_jenkins_sponsored.location
