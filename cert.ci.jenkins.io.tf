@@ -216,7 +216,8 @@ module "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   controller_ips                   = compact([module.cert_ci_jenkins_io.controller_public_ipv4])
   controller_service_principal_id  = module.cert_ci_jenkins_io.controller_service_principal_id
   default_tags                     = local.default_tags
-  storage_account_name             = "certciagentssub" # Max 24 chars
+  storage_account_name             = "certciagentssponsored" # Max 24 chars
+  custom_resourcegroup_name        = "cert-ci-jenkins-io-sponsored-ephemeral-agents"
 
   jenkins_infra_ips = {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
