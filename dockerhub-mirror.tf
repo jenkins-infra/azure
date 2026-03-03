@@ -120,18 +120,18 @@ resource "azurerm_private_endpoint" "dockerhub_mirror" {
   tags = local.default_tags
 }
 
-resource "azurerm_private_dns_zone" "dockerhub_mirror_sponsored" {
-  provider = azurerm.jenkins-sponsored
-  for_each = local.acr_sponsored_private_links
+# resource "azurerm_private_dns_zone" "dockerhub_mirror_sponsored" {
+#   provider = azurerm.jenkins-sponsored
+#   for_each = local.acr_sponsored_private_links
 
-  # Conventional and static name required by Azure (otherwise automatic record creation does not work)
-  name = "privatelink.azurecr.io"
+#   # Conventional and static name required by Azure (otherwise automatic record creation does not work)
+#   name = "privatelink.azurecr.io"
 
-  # Private DNS zone name is static: we can only have one per RG
-  resource_group_name = each.value.rg_name
+#   # Private DNS zone name is static: we can only have one per RG
+#   resource_group_name = each.value.rg_name
 
-  tags = local.default_tags
-}
+#   tags = local.default_tags
+# }
 
 resource "azurerm_private_dns_zone" "dockerhub_mirror" {
   for_each = local.acr_private_links
@@ -144,19 +144,19 @@ resource "azurerm_private_dns_zone" "dockerhub_mirror" {
   tags = local.default_tags
 }
 
-resource "azurerm_private_dns_zone_virtual_network_link" "dockerhub_mirror_sponsored" {
-  provider = azurerm.jenkins-sponsored
-  for_each = local.acr_sponsored_private_links
+# resource "azurerm_private_dns_zone_virtual_network_link" "dockerhub_mirror_sponsored" {
+#   provider = azurerm.jenkins-sponsored
+#   for_each = local.acr_sponsored_private_links
 
-  name = "privatelink.azurecr.io"
-  # Private DNS zone name is static: we can only have one per RG
-  resource_group_name   = each.value.rg_name
-  private_dns_zone_name = azurerm_private_dns_zone.dockerhub_mirror_sponsored[each.key].name
-  virtual_network_id    = each.value.vnet_id
+#   name = "privatelink.azurecr.io"
+#   # Private DNS zone name is static: we can only have one per RG
+#   resource_group_name   = each.value.rg_name
+#   private_dns_zone_name = azurerm_private_dns_zone.dockerhub_mirror_sponsored[each.key].name
+#   virtual_network_id    = each.value.vnet_id
 
-  registration_enabled = true
-  tags                 = local.default_tags
-}
+#   registration_enabled = true
+#   tags                 = local.default_tags
+# }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "dockerhub_mirror" {
   for_each = local.acr_private_links
