@@ -54,13 +54,15 @@ locals {
     },
   }
 
-  acr_sponsored_private_links = {
-    "certcijenkinsiosponsored" = {
-      "subnet_id" = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.id,
-      "vnet_id"   = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.id,
-      "rg_name"   = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.resource_group_name,
-    },
-  }
+  ## Commenting out to remove this resource so cert_ci_jenkins_io_sponsored could be moved to Sweden Central
+  ## Ref: https://github.com/jenkins-infra/helpdesk/issues/5004#issuecomment-3992305794
+  # acr_sponsored_private_links = {
+  #   "certcijenkinsiosponsored" = {
+  #     "subnet_id" = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.id,
+  #     "vnet_id"   = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.id,
+  #     "rg_name"   = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.resource_group_name,
+  #   },
+  # }
 }
 
 resource "azurerm_private_endpoint" "dockerhub_mirror_sponsored" {
