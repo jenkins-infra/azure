@@ -65,32 +65,34 @@ locals {
   # }
 }
 
-resource "azurerm_private_endpoint" "dockerhub_mirror_sponsored" {
-  provider = azurerm.jenkins-sponsored
-  for_each = local.acr_sponsored_private_links
+## Commenting out to remove this resource so cert_ci_jenkins_io_sponsored could be moved to Sweden Central
+## Ref: https://github.com/jenkins-infra/helpdesk/issues/5004#issuecomment-3992305794
+# resource "azurerm_private_endpoint" "dockerhub_mirror_sponsored" {
+#   provider = azurerm.jenkins-sponsored
+#   for_each = local.acr_sponsored_private_links
 
-  name = "acr-${each.key}"
+#   name = "acr-${each.key}"
 
-  location            = azurerm_resource_group.dockerhub_mirror_sponsored.location
-  resource_group_name = azurerm_resource_group.dockerhub_mirror_sponsored.name
-  subnet_id           = each.value.subnet_id
+#   location            = azurerm_resource_group.dockerhub_mirror_sponsored.location
+#   resource_group_name = azurerm_resource_group.dockerhub_mirror_sponsored.name
+#   subnet_id           = each.value.subnet_id
 
-  custom_network_interface_name = "acr-${each.key}-nic"
+#   custom_network_interface_name = "acr-${each.key}-nic"
 
-  private_service_connection {
-    name                           = "acr-${each.key}"
-    private_connection_resource_id = azurerm_container_registry.dockerhub_mirror.id
-    subresource_names              = ["registry"]
-    is_manual_connection           = false
-  }
-  private_dns_zone_group {
-    name = "privatelink.azurecr.io"
-    private_dns_zone_ids = [
-      (can(each.value["private_dns_zone_id"]) ? each.value["private_dns_zone_id"] : azurerm_private_dns_zone.dockerhub_mirror_sponsored[each.key].id),
-    ]
-  }
-  tags = local.default_tags
-}
+#   private_service_connection {
+#     name                           = "acr-${each.key}"
+#     private_connection_resource_id = azurerm_container_registry.dockerhub_mirror.id
+#     subresource_names              = ["registry"]
+#     is_manual_connection           = false
+#   }
+#   private_dns_zone_group {
+#     name = "privatelink.azurecr.io"
+#     private_dns_zone_ids = [
+#       (can(each.value["private_dns_zone_id"]) ? each.value["private_dns_zone_id"] : azurerm_private_dns_zone.dockerhub_mirror_sponsored[each.key].id),
+#     ]
+#   }
+#   tags = local.default_tags
+# }
 
 resource "azurerm_private_endpoint" "dockerhub_mirror" {
   for_each = local.acr_private_links
