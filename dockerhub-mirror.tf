@@ -18,6 +18,9 @@ resource "azurerm_container_registry" "dockerhub_mirror" {
   public_network_access_enabled = false # private links are used to reach the registry
   anonymous_pull_enabled        = true  # Requires "Standard" or "Premium" sku. Docker Engine cannot use auth. for pull trough cache - ref. https://github.com/moby/moby/issues/30880
   data_endpoint_enabled         = true  # Required for endpoint private link. Requires "Premium" sku.
+  georeplications {
+    location = var.cert_ci_location
+  }
 
   tags = local.default_tags
 }
