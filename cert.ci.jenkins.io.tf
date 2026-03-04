@@ -164,7 +164,7 @@ module "cert_ci_jenkins_io_letsencrypt" {
 resource "azurerm_resource_group" "cert_ci_jenkins_io_controller_jenkins_sponsored" {
   provider = azurerm.jenkins-sponsored
   name     = module.cert_ci_jenkins_io.controller_resourcegroup_name # Same name on both subscriptions
-  location = var.cert_ci_location
+  location = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.location
   tags     = local.default_tags
 }
 resource "azurerm_user_assigned_identity" "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
