@@ -174,7 +174,7 @@ resource "azurerm_user_assigned_identity" "cert_ci_jenkins_io_azurevm_agents_jen
   resource_group_name = azurerm_resource_group.cert_ci_jenkins_io_controller_jenkins_sponsored.name
 }
 # The Controller identity must be able to operate this identity to assign it to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
-resource "azurerm_role_assignment" "cert_ci_jenkins_io_operate_agent_identity" {
+resource "azurerm_role_assignment" "cert_ci_jenkins_io_operate_agent_identity_jenkins_sponsored" {
   provider             = azurerm.jenkins-sponsored
   scope                = azurerm_user_assigned_identity.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.id
   role_definition_name = "Managed Identity Operator"
@@ -196,7 +196,7 @@ resource "azurerm_role_definition" "cert_ci_jenkins_io_controller_vnet_sponsored
     actions = ["Microsoft.Network/virtualNetworks/read"]
   }
 }
-resource "azurerm_role_assignment" "cert_controller_vnet_reader" {
+resource "azurerm_role_assignment" "cert_controller_vnet_jenkins_sponsored_reader" {
   provider           = azurerm.jenkins-sponsored
   scope              = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.id
   role_definition_id = azurerm_role_definition.cert_ci_jenkins_io_controller_vnet_sponsored_reader.role_definition_resource_id
