@@ -160,6 +160,7 @@ module "cert_ci_jenkins_io_letsencrypt" {
   principal_id     = module.cert_ci_jenkins_io.controller_service_principal_id
 }
 
+## Jenkins Sponsored
 resource "azurerm_resource_group" "cert_ci_jenkins_io_controller_jenkins_sponsored" {
   provider = azurerm.jenkins-sponsored
   name     = module.cert_ci_jenkins_io.controller_resourcegroup_name # Same name on both subscriptions
