@@ -77,7 +77,7 @@ resource "azurerm_role_assignment" "cert_ci_jenkins_io_azurevm_agents_jenkins_wr
 resource "azurerm_role_definition" "cert_ci_jenkins_io_vnet_reader" {
   name  = "read-cert-ci-jenkins-io-vnet"
   scope = data.azurerm_virtual_network.cert_ci_jenkins_io.id
-  assignable_scopes = [data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.id]
+  assignable_scopes = [data.azurerm_virtual_network.cert_ci_jenkins_io.id, data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.id]
 
   permissions {
     actions = ["Microsoft.Network/virtualNetworks/read"]
