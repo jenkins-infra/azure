@@ -33,6 +33,7 @@ module "cert_ci_jenkins_io" {
 
   agent_ip_prefixes = concat(
     data.azurerm_subnet.cert_ci_jenkins_io_ephemeral_agents.address_prefixes,
+    data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.address_prefixes,
   )
 }
 
@@ -157,4 +158,68 @@ module "cert_ci_jenkins_io_letsencrypt" {
   dns_rg_name      = data.azurerm_resource_group.proddns_jenkinsio.name
   parent_zone_name = data.azurerm_dns_zone.jenkinsio.name
   principal_id     = module.cert_ci_jenkins_io.controller_service_principal_id
+}
+
+## Jenkins Sponsored
+resource "azurerm_resource_group" "cert_ci_jenkins_io_controller_jenkins_sponsored" {
+  provider = azurerm.jenkins-sponsored
+  name     = module.cert_ci_jenkins_io.controller_resourcegroup_name # Same name on both subscriptions
+  location = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.location
+  tags     = local.default_tags
+}
+resource "azurerm_user_assigned_identity" "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
+  provider            = azurerm.jenkins-sponsored
+  location            = azurerm_resource_group.cert_ci_jenkins_io_controller_jenkins_sponsored.location
+  name                = "cert-ci-jenkins-io-agents-sponsored"
+  resource_group_name = azurerm_resource_group.cert_ci_jenkins_io_controller_jenkins_sponsored.name
+}
+# The Controller identity must be able to operate this identity to assign it to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
+resource "azurerm_role_assignment" "cert_ci_jenkins_io_operate_agent_identity_jenkins_sponsored" {
+  provider             = azurerm.jenkins-sponsored
+  scope                = azurerm_user_assigned_identity.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.id
+  role_definition_name = "Managed Identity Operator"
+  principal_id         = module.cert_ci_jenkins_io.controller_service_principal_id
+}
+resource "azurerm_role_assignment" "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored_write_buildsreports_share" {
+  provider = azurerm.jenkins-sponsored
+  scope    = azurerm_storage_account.builds_reports_jenkins_io.id
+  # Allow writing
+  role_definition_name = "Storage File Data Privileged Contributor"
+  principal_id         = azurerm_user_assigned_identity.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
+}
+resource "azurerm_role_definition" "cert_ci_jenkins_io_controller_vnet_sponsored_reader" {
+  provider = azurerm.jenkins-sponsored
+  name     = "Read-cert-ci-jenkins-io-sponsored-VNET"
+  scope    = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.id
+
+  permissions {
+    actions = ["Microsoft.Network/virtualNetworks/read"]
+  }
+}
+resource "azurerm_role_assignment" "cert_controller_vnet_jenkins_sponsored_reader" {
+  provider           = azurerm.jenkins-sponsored
+  scope              = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.id
+  role_definition_id = azurerm_role_definition.cert_ci_jenkins_io_controller_vnet_sponsored_reader.role_definition_resource_id
+  principal_id       = module.cert_ci_jenkins_io.controller_service_principal_id
+}
+module "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
+  providers = {
+    azurerm = azurerm.jenkins-sponsored
+  }
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-azurevm-agents"
+
+  service_fqdn                     = module.cert_ci_jenkins_io.service_fqdn
+  service_short_stripped_name      = module.cert_ci_jenkins_io.service_short_stripped_name
+  ephemeral_agents_network_rg_name = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.resource_group_name
+  ephemeral_agents_network_name    = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.virtual_network_name
+  ephemeral_agents_subnet_name     = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.name
+  controller_rg_name               = azurerm_resource_group.cert_ci_jenkins_io_controller_jenkins_sponsored.name
+  controller_ips                   = compact([module.cert_ci_jenkins_io.controller_public_ipv4])
+  controller_service_principal_id  = module.cert_ci_jenkins_io.controller_service_principal_id
+  default_tags                     = local.default_tags
+  storage_account_name             = "certciagentssub" # Max 24 chars
+
+  jenkins_infra_ips = {
+    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
+  }
 }
