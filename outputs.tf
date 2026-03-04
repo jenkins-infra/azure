@@ -9,6 +9,14 @@ resource "local_file" "jenkins_infra_data_report" {
         "storage_account_name"        = module.cert_ci_jenkins_io_azurevm_agents.ephemeral_agents_storage_account_name,
         "user_assigned_identity"      = azurerm_user_assigned_identity.cert_ci_jenkins_io_jenkins_agents.id,
       },
+      "agents_azure_vms_jenkins_sponsored" = {
+        "resource_group_name"         = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_resource_group_name,
+        "network_resource_group_name" = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_network_rg_name,
+        "virtual_network_name"        = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_network_name,
+        "sub_network_name"            = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_subnet_name,
+        "storage_account_name"        = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_storage_account_name,
+        "user_assigned_identity"      = azurerm_user_assigned_identity.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.id,
+      },
     },
     "infra.ci.jenkins.io" = {
       "controller_namespace"       = kubernetes_namespace.privatek8s["infra-ci-jenkins-io"].metadata[0].name,
