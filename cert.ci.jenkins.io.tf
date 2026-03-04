@@ -160,6 +160,12 @@ module "cert_ci_jenkins_io_letsencrypt" {
   principal_id     = module.cert_ci_jenkins_io.controller_service_principal_id
 }
 
+resource "azurerm_resource_group" "cert_ci_jenkins_io_controller_jenkins_sponsored" {
+  provider = azurerm.jenkins-sponsored
+  name     = module.cert_ci_jenkins_io.controller_resourcegroup_name # Same name on both subscriptions
+  location = var.cert_ci_location
+  tags     = local.default_tags
+}
 resource "azurerm_user_assigned_identity" "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   provider            = azurerm.jenkins-sponsored
   location            = azurerm_resource_group.cert_ci_jenkins_io_controller_jenkins_sponsored.location
@@ -179,12 +185,6 @@ resource "azurerm_role_assignment" "cert_ci_jenkins_io_azurevm_agents_jenkins_sp
   # Allow writing
   role_definition_name = "Storage File Data Privileged Contributor"
   principal_id         = azurerm_user_assigned_identity.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
-}
-resource "azurerm_resource_group" "cert_ci_jenkins_io_controller_jenkins_sponsored" {
-  provider = azurerm.jenkins-sponsored
-  name     = module.cert_ci_jenkins_io.controller_resourcegroup_name # Same name on both subscriptions
-  location = var.location
-  tags     = local.default_tags
 }
 resource "azurerm_role_definition" "cert_ci_jenkins_io_controller_vnet_sponsored_reader" {
   provider = azurerm.jenkins-sponsored
