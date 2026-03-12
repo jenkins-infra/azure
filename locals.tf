@@ -349,6 +349,8 @@ locals {
         data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.id,
         # VM agents (CDF subscription)
         data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.id,
+        # VM agents (Jenkins Sponsored subscription)
+        data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.id,
       ],
     },
   }
