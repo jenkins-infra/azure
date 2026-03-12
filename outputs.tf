@@ -181,11 +181,3 @@ output "infraci_statsjenkinsio_fileshare_serviceprincipal_writer_application_cli
   sensitive = true
   value     = module.infraci_statsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
-
-output "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
-  value = module.infraci_reportsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
-}
-output "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
-  sensitive = true
-  value     = module.infraci_reportsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
-}
