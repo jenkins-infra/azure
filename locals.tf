@@ -23,7 +23,7 @@ locals {
   }
 
   # Tracked by 'updatecli' from the following source: https://reports.jenkins.io/jenkins-infra-data-reports/azure-net.json
-  outbound_ips_trusted_ci_jenkins_io = "104.209.128.236 172.177.80.8"
+  outbound_ips_trusted_ci_jenkins_io = "104.209.128.236 20.110.255.213"
   # Tracked by 'updatecli' from the following source: https://reports.jenkins.io/jenkins-infra-data-reports/azure-net.json
   outbound_ips_infra_ci_jenkins_io = "20.57.120.46 52.179.141.53 172.210.200.59 20.10.193.4"
   # Tracked by 'updatecli' from the following source: https://reports.jenkins.io/jenkins-infra-data-reports/azure-net.json
