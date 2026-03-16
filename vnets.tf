@@ -24,6 +24,10 @@ data "azurerm_resource_group" "cert_ci_jenkins_io_sponsored" {
 data "azurerm_resource_group" "trusted_ci_jenkins_io" {
   name = "trusted-ci-jenkins-io"
 }
+data "azurerm_resource_group" "trusted_ci_jenkins_io_sponsored" {
+  provider = azurerm.jenkins-sponsored
+  name     = "trusted-ci-jenkins-io-sponsored"
+}
 
 ################################################################################
 ## Virtual Networks
@@ -58,6 +62,11 @@ data "azurerm_virtual_network" "cert_ci_jenkins_io_sponsored" {
 data "azurerm_virtual_network" "trusted_ci_jenkins_io" {
   name                = "trusted-ci-jenkins-io-vnet"
   resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
+}
+data "azurerm_virtual_network" "trusted_ci_jenkins_io_sponsored" {
+  provider            = azurerm.jenkins-sponsored
+  name                = "${data.azurerm_resource_group.trusted_ci_jenkins_io_sponsored.name}-vnet"
+  resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io_sponsored.name
 }
 
 ################################################################################
@@ -104,6 +113,12 @@ data "azurerm_subnet" "trusted_ci_jenkins_io_ephemeral_agents" {
   name                 = "${data.azurerm_virtual_network.trusted_ci_jenkins_io.name}-ephemeral-agents"
   resource_group_name  = data.azurerm_resource_group.trusted_ci_jenkins_io.name
   virtual_network_name = data.azurerm_virtual_network.trusted_ci_jenkins_io.name
+}
+data "azurerm_subnet" "trusted_ci_jenkins_io_sponsored_ephemeral_agents" {
+  provider             = azurerm.jenkins-sponsored
+  name                 = "${data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.name}-ephemeral-agents"
+  virtual_network_name = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.name
+  resource_group_name  = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.resource_group_name
 }
 data "azurerm_subnet" "infra_ci_jenkins_io_packer_builds" {
   name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io.name}-packer-builds"
