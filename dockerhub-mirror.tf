@@ -39,11 +39,6 @@ locals {
       "vnet_id"   = data.azurerm_virtual_network.trusted_ci_jenkins_io.id,
       "rg_name"   = data.azurerm_virtual_network.trusted_ci_jenkins_io.resource_group_name,
     },
-    "trustedcijenkinsiosponsored" = {
-      "subnet_id" = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.id,
-      "vnet_id"   = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.id,
-      "rg_name"   = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.resource_group_name,
-    },
   }
 }
 
@@ -96,6 +91,41 @@ resource "azurerm_private_dns_zone_virtual_network_link" "dockerhub_mirror" {
   registration_enabled = true
   tags                 = local.default_tags
 }
+
+# resource "azurerm_network_security_rule" "allow_out_https_from_trusted_jenkins_sponsored_to_acr" {
+#   name                    = "allow-out-https-from-jenkins-sponsored-vnet-to-acr"
+#   priority                = 4061
+#   direction               = "Outbound"
+#   access                  = "Allow"
+#   protocol                = "Tcp"
+#   source_port_range       = "*"
+#   destination_port_range  = "443"
+#   source_address_prefixes = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.address_space
+#   destination_address_prefixes = distinct(
+#     flatten(
+#       [for rs in azurerm_private_endpoint.dockerhub_mirror["trustedcijenkinsiosponsored"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
+#     )
+#   )
+#   resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+#   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+# }
+# resource "azurerm_network_security_rule" "allow_in_https_from_trusted_jenkins_sponsored_to_acr" {
+#   name                    = "allow-in-https-from-jenkins-sponsored-vnet-to-acr"
+#   priority                = 4061
+#   direction               = "Inbound"
+#   access                  = "Allow"
+#   protocol                = "Tcp"
+#   source_port_range       = "*"
+#   destination_port_range  = "443"
+#   source_address_prefixes = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.address_space
+#   destination_address_prefixes = distinct(
+#     flatten(
+#       [for rs in azurerm_private_endpoint.dockerhub_mirror["trustedcijenkinsiosponsored"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
+#     )
+#   )
+#   resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+#   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+# }
 
 ## TODO: factorize and simplify RBAC policy with other keyvaults
 #trivy:ignore:avd-azu-0016
