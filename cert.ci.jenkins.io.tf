@@ -146,3 +146,25 @@ module "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   }
 }
+
+# Allow access to the private Azure Container Registry through an Azure Endpoint NIC
+module "certcijenkinsiosponsored_acr_pe" {
+  source = "./modules/azure-container-registry-private-links"
+
+  providers = {
+    azurerm     = azurerm.jenkins-sponsored
+    azurerm.acr = azurerm
+  }
+
+  name = "certcijenkinsiosponsored"
+
+  acr_name     = azurerm_container_registry.dockerhub_mirror.name
+  acr_location = azurerm_container_registry.dockerhub_mirror.location
+  acr_rg_name  = azurerm_container_registry.dockerhub_mirror.resource_group_name
+
+  subnet_name  = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.name
+  vnet_name    = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.name
+  vnet_rg_name = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.resource_group_name
+
+  default_tags = local.default_tags
+}
