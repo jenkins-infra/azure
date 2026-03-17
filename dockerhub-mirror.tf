@@ -17,115 +17,54 @@ resource "azurerm_container_registry" "dockerhub_mirror" {
   tags = local.default_tags
 }
 
-locals {
-  acr_private_links = {
-    "infracijenkinsio" = {
-      "subnet_id" = data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.id,
-      "vnet_id"   = data.azurerm_virtual_network.infra_ci_jenkins_io.id,
-      "rg_name"   = data.azurerm_virtual_network.infra_ci_jenkins_io.resource_group_name,
-    },
-    "publick8s" = {
-      "subnet_id" = data.azurerm_subnet.publick8s.id,
-      "vnet_id"   = data.azurerm_virtual_network.public.id,
-      "rg_name"   = data.azurerm_resource_group.public.name,
-    },
-    "privatek8s" = {
-      "subnet_id" = data.azurerm_subnet.privatek8s_tier.id,
-      "vnet_id"   = data.azurerm_virtual_network.private.id,
-      "rg_name"   = data.azurerm_resource_group.private.name,
-    },
-    "trustedcijenkinsio" = {
-      "subnet_id" = data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.id,
-      "vnet_id"   = data.azurerm_virtual_network.trusted_ci_jenkins_io.id,
-      "rg_name"   = data.azurerm_virtual_network.trusted_ci_jenkins_io.resource_group_name,
-    },
-  }
+moved {
+  from = azurerm_private_dns_zone.dockerhub_mirror["publick8s"]
+  to   = module.publick8s_acr_pe.azurerm_private_dns_zone.dockerhub_mirror
 }
-
-resource "azurerm_private_endpoint" "dockerhub_mirror" {
-  for_each = local.acr_private_links
-
-  name = "acr-${each.key}"
-
-  location            = azurerm_resource_group.dockerhub_mirror.location
-  resource_group_name = azurerm_resource_group.dockerhub_mirror.name
-  subnet_id           = each.value.subnet_id
-
-  custom_network_interface_name = "acr-${each.key}-nic"
-
-  private_service_connection {
-    name                           = "acr-${each.key}"
-    private_connection_resource_id = azurerm_container_registry.dockerhub_mirror.id
-    subresource_names              = ["registry"]
-    is_manual_connection           = false
-  }
-  private_dns_zone_group {
-    name = "privatelink.azurecr.io"
-    private_dns_zone_ids = [
-      (can(each.value["private_dns_zone_id"]) ? each.value["private_dns_zone_id"] : azurerm_private_dns_zone.dockerhub_mirror[each.key].id),
-    ]
-  }
-  tags = local.default_tags
+moved {
+  from = azurerm_private_dns_zone_virtual_network_link.dockerhub_mirror["publick8s"]
+  to   = module.publick8s_acr_pe.azurerm_private_dns_zone_virtual_network_link.dockerhub_mirror
 }
-
-resource "azurerm_private_dns_zone" "dockerhub_mirror" {
-  for_each = local.acr_private_links
-  # Conventional and static name required by Azure (otherwise automatic record creation does not work)
-  name = "privatelink.azurecr.io"
-
-  # Private DNS zone name is static: we can only have one per RG
-  resource_group_name = each.value.rg_name
-
-  tags = local.default_tags
+moved {
+  from = azurerm_private_endpoint.dockerhub_mirror["publick8s"]
+  to   = module.publick8s_acr_pe.azurerm_private_endpoint.dockerhub_mirror
 }
-
-resource "azurerm_private_dns_zone_virtual_network_link" "dockerhub_mirror" {
-  for_each = local.acr_private_links
-
-  name = "privatelink.azurecr.io"
-  # Private DNS zone name is static: we can only have one per RG
-  resource_group_name   = each.value.rg_name
-  private_dns_zone_name = azurerm_private_dns_zone.dockerhub_mirror[each.key].name
-  virtual_network_id    = each.value.vnet_id
-
-  registration_enabled = true
-  tags                 = local.default_tags
+moved {
+  from = azurerm_private_dns_zone.dockerhub_mirror["privatek8s"]
+  to   = module.privatek8s_acr_pe.azurerm_private_dns_zone.dockerhub_mirror
 }
-
-# resource "azurerm_network_security_rule" "allow_out_https_from_trusted_jenkins_sponsored_to_acr" {
-#   name                    = "allow-out-https-from-jenkins-sponsored-vnet-to-acr"
-#   priority                = 4061
-#   direction               = "Outbound"
-#   access                  = "Allow"
-#   protocol                = "Tcp"
-#   source_port_range       = "*"
-#   destination_port_range  = "443"
-#   source_address_prefixes = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.address_space
-#   destination_address_prefixes = distinct(
-#     flatten(
-#       [for rs in azurerm_private_endpoint.dockerhub_mirror["trustedcijenkinsiosponsored"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
-#     )
-#   )
-#   resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
-#   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
-# }
-# resource "azurerm_network_security_rule" "allow_in_https_from_trusted_jenkins_sponsored_to_acr" {
-#   name                    = "allow-in-https-from-jenkins-sponsored-vnet-to-acr"
-#   priority                = 4061
-#   direction               = "Inbound"
-#   access                  = "Allow"
-#   protocol                = "Tcp"
-#   source_port_range       = "*"
-#   destination_port_range  = "443"
-#   source_address_prefixes = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.address_space
-#   destination_address_prefixes = distinct(
-#     flatten(
-#       [for rs in azurerm_private_endpoint.dockerhub_mirror["trustedcijenkinsiosponsored"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
-#     )
-#   )
-#   resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
-#   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
-# }
+moved {
+  from = azurerm_private_dns_zone_virtual_network_link.dockerhub_mirror["privatek8s"]
+  to   = module.privatek8s_acr_pe.azurerm_private_dns_zone_virtual_network_link.dockerhub_mirror
+}
+moved {
+  from = azurerm_private_endpoint.dockerhub_mirror["privatek8s"]
+  to   = module.privatek8s_acr_pe.azurerm_private_endpoint.dockerhub_mirror
+}
+moved {
+  from = azurerm_private_dns_zone.dockerhub_mirror["trustedcijenkinsio"]
+  to   = module.trustedcijenkinsio_acr_pe.azurerm_private_dns_zone.dockerhub_mirror
+}
+moved {
+  from = azurerm_private_dns_zone_virtual_network_link.dockerhub_mirror["trustedcijenkinsio"]
+  to   = module.trustedcijenkinsio_acr_pe.azurerm_private_dns_zone_virtual_network_link.dockerhub_mirror
+}
+moved {
+  from = azurerm_private_endpoint.dockerhub_mirror["trustedcijenkinsio"]
+  to   = module.trustedcijenkinsio_acr_pe.azurerm_private_endpoint.dockerhub_mirror
+}
+moved {
+  from = azurerm_private_dns_zone.dockerhub_mirror["infracijenkinsio"]
+  to   = module.infracijenkinsio_acr_pe.azurerm_private_dns_zone.dockerhub_mirror
+}
+moved {
+  from = azurerm_private_dns_zone_virtual_network_link.dockerhub_mirror["infracijenkinsio"]
+  to   = module.infracijenkinsio_acr_pe.azurerm_private_dns_zone_virtual_network_link.dockerhub_mirror
+}
+moved {
+  from = azurerm_private_endpoint.dockerhub_mirror["infracijenkinsio"]
+  to   = module.infracijenkinsio_acr_pe.azurerm_private_endpoint.dockerhub_mirror
+}
 
 ## TODO: factorize and simplify RBAC policy with other keyvaults
 #trivy:ignore:avd-azu-0016

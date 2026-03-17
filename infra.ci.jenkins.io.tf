@@ -101,6 +101,28 @@ module "infra_ci_jenkins_io_azurevm_agents" {
   }
 }
 
+# Allow access to the private Azure Container Registry through an Azure Endpoint NIC
+module "infracijenkinsio_acr_pe" {
+  source = "./modules/azure-container-registry-private-links"
+
+  providers = {
+    azurerm     = azurerm
+    azurerm.acr = azurerm
+  }
+
+  name = "infracijenkinsio"
+
+  acr_name     = azurerm_container_registry.dockerhub_mirror.name
+  acr_location = azurerm_container_registry.dockerhub_mirror.location
+  acr_rg_name  = azurerm_container_registry.dockerhub_mirror.resource_group_name
+
+  subnet_name  = data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.name
+  vnet_name    = data.azurerm_virtual_network.infra_ci_jenkins_io.name
+  vnet_rg_name = data.azurerm_virtual_network.infra_ci_jenkins_io.resource_group_name
+
+  default_tags = local.default_tags
+}
+
 # Allow infra.ci ephemeral agents to reach packer VMs with SSH on aws
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_to_aws_packer" {
   name                   = "allow-outbound-ssh-from-infraci-agents-to-aws-packer"
@@ -327,13 +349,9 @@ resource "azurerm_network_security_rule" "allow_out_https_from_infra_ephemeral_a
     data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
     data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
   ]
-  destination_address_prefixes = distinct(
-    flatten(
-      [for rs in azurerm_private_endpoint.dockerhub_mirror["infracijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
-    )
-  )
-  resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
-  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+  destination_address_prefixes = split(",", module.infracijenkinsio_acr_pe.private_endpoint_nic_ip_addresses)
+  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_in_https_from_infra_ephemeral_agents_to_acr" {
   count                  = var.terratest ? 0 : 1
@@ -348,13 +366,9 @@ resource "azurerm_network_security_rule" "allow_in_https_from_infra_ephemeral_ag
     data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.address_prefix,
     data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix,
   ]
-  destination_address_prefixes = distinct(
-    flatten(
-      [for rs in azurerm_private_endpoint.dockerhub_mirror["infracijenkinsio"].private_dns_zone_configs.*.record_sets : rs.*.ip_addresses]
-    )
-  )
-  resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
-  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
+  destination_address_prefixes = split(",", module.infracijenkinsio_acr_pe.private_endpoint_nic_ip_addresses)
+  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 
 ## Identity assigned to agents workloads (allowing them to reach resources without any Azure credential)
