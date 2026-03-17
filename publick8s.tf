@@ -379,3 +379,25 @@ data "azurerm_public_ip" "publick8s_lb_outbound" {
   name                = element(split("/", each.key), "-1")
   resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
 }
+
+# Allow access to the private Azure Container Registry through an Azure Endpoint NIC
+module "publick8s_acr_pe" {
+  source = "./modules/azure-container-registry-private-links"
+
+  providers = {
+    azurerm     = azurerm
+    azurerm.acr = azurerm
+  }
+
+  name = "publick8s"
+
+  acr_name     = azurerm_container_registry.dockerhub_mirror.name
+  acr_location = azurerm_container_registry.dockerhub_mirror.location
+  acr_rg_name  = azurerm_container_registry.dockerhub_mirror.resource_group_name
+
+  subnet_name  = data.azurerm_subnet.publick8s.name
+  vnet_name    = data.azurerm_virtual_network.public.name
+  vnet_rg_name = data.azurerm_virtual_network.public.resource_group_name
+
+  default_tags = local.default_tags
+}

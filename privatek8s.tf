@@ -529,3 +529,25 @@ resource "kubernetes_persistent_volume_claim" "privatek8s_release_ci_jenkins_io_
     }
   }
 }
+
+# Allow access to the private Azure Container Registry through an Azure Endpoint NIC
+module "privatek8s_acr_pe" {
+  source = "./modules/azure-container-registry-private-links"
+
+  providers = {
+    azurerm     = azurerm
+    azurerm.acr = azurerm
+  }
+
+  name = "privatek8s"
+
+  acr_name     = azurerm_container_registry.dockerhub_mirror.name
+  acr_location = azurerm_container_registry.dockerhub_mirror.location
+  acr_rg_name  = azurerm_container_registry.dockerhub_mirror.resource_group_name
+
+  subnet_name  = data.azurerm_subnet.privatek8s_tier.name
+  vnet_name    = data.azurerm_virtual_network.private.name
+  vnet_rg_name = data.azurerm_virtual_network.private.resource_group_name
+
+  default_tags = local.default_tags
+}
