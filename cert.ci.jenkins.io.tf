@@ -168,3 +168,31 @@ module "certcijenkinsiosponsored_acr_pe" {
 
   default_tags = local.default_tags
 }
+
+## Allow access to/from ACR endpoint
+resource "azurerm_network_security_rule" "allow_out_https_from_cert_vnet_to_acr" {
+  name                         = "allow-out-https-from-vnet-to-acr"
+  priority                     = 4051
+  direction                    = "Outbound"
+  access                       = "Allow"
+  protocol                     = "Tcp"
+  source_port_range            = "*"
+  destination_port_range       = "443"
+  source_address_prefixes      = data.azurerm_virtual_network.cert_ci_jenkins_io.address_space
+  destination_address_prefixes = split(",", module.certcijenkinsiosponsored_acr_pe.private_endpoint_nic_ip_addresses)
+  resource_group_name          = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+}
+resource "azurerm_network_security_rule" "allow_in_https_from_cert_vnet_to_acr" {
+  name                         = "allow-in-https-from-vnet-to-acr"
+  priority                     = 4051
+  direction                    = "Inbound"
+  access                       = "Allow"
+  protocol                     = "Tcp"
+  source_port_range            = "*"
+  destination_port_range       = "443"
+  source_address_prefixes      = data.azurerm_virtual_network.cert_ci_jenkins_io.address_space
+  destination_address_prefixes = split(",", module.certcijenkinsiosponsored_acr_pe.private_endpoint_nic_ip_addresses)
+  resource_group_name          = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+}
