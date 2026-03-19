@@ -600,7 +600,7 @@ resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infrac
 # Allow infra.ci sponsored ephemeral agents to reach infracijenkinsio_agents_2 cluster
 resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_jenkins_sponsored_to_infracijenkinsio_agents_2" {
   provider               = azurerm.jenkins-sponsored
-  name                   = "allow-outbound-https-from-infraci-agents-jenkins-sponsored-to-infracijenkinsio_agents-2"
+  name                   = "allow-outbound-https-from-infraci-agents-sponsored-to-infracijenkinsio_agents-2"
   priority               = 4084
   direction              = "Outbound"
   access                 = "Allow"
@@ -678,7 +678,7 @@ resource "azurerm_network_security_rule" "allow_outbound_mysql_from_infraci_ephe
 # Allow infra.ci sponsored ephemeral agents to reach postgres-public-db hosted on Azure
 resource "azurerm_network_security_rule" "allow_outbound_postgres_from_infraci_ephemeral_agents_jenkins_sponsored_to_postgres_public_db" {
   provider               = azurerm.jenkins-sponsored
-  name                   = "allow-outbound-postgres-from-infraci-agents-jenkins-sponsored-to-postgres-public-db"
+  name                   = "allow-outbound-postgres-from-infraci-agents-sponsored-to-postgres-public-db"
   priority               = 4088
   direction              = "Outbound"
   access                 = "Allow"
