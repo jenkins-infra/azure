@@ -470,14 +470,14 @@ resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_agents_jenkins_sp
 }
 # The Controller identity must be able to operate this identity to assign it to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_operate_agents_identity_jenkins_sponsored" {
-  provider            = azurerm.jenkins-sponsored
+  provider             = azurerm.jenkins-sponsored
   scope                = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents.id
   role_definition_name = "Managed Identity Operator"
   principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller_jenkins_sponsored.principal_id
 }
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_agents_jenkins_sponsored_write_buildsreports_share" {
-  provider            = azurerm.jenkins-sponsored
-  scope = azurerm_storage_account.builds_reports_jenkins_io.id
+  provider = azurerm.jenkins-sponsored
+  scope    = azurerm_storage_account.builds_reports_jenkins_io.id
   # Allow writing
   role_definition_name = "Storage File Data Privileged Contributor"
   principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents_jenkins_sponsored.principal_id
