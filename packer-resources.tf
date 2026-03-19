@@ -147,6 +147,7 @@ resource "azurerm_shared_image_gallery" "packer_images_sponsored" {
 
   for_each = local.shared_galleries
 
+  # Note: dashes are not allowed ("name can only contain alphanumeric, full stops and underscores") unlike our usual naming convention
   name                = "${each.key}_packer_images"
   resource_group_name = azurerm_resource_group.packer_images_sponsored[each.key].name
   location            = azurerm_resource_group.packer_images_sponsored[each.key].location
