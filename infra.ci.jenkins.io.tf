@@ -484,14 +484,16 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_agents_jenkins_sponsored
 
 # Required to allow controller to check for subnets inside the virtual network
 resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_vnet_sponsored_reader" {
-  name  = "read-infra-ci-jenkins-io-vnet"
-  scope = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.id
+  provider = azurerm.jenkins-sponsored
+  name     = "read-infra-ci-jenkins-io-vnet"
+  scope    = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.id
 
   permissions {
     actions = ["Microsoft.Network/virtualNetworks/read"]
   }
 }
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_controller_vnet_sponsored_reader" {
+  provider           = azurerm.jenkins-sponsored
   scope              = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.id
   role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_vnet_sponsored_reader.role_definition_resource_id
   principal_id       = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id
@@ -522,6 +524,7 @@ module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
 
 # Allow infra.ci sponsored ephemeral agents to reach packer VMs with SSH on aws
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_jenkins_sponsored_to_aws_packer" {
+  provider               = azurerm.jenkins-sponsored
   name                   = "allow-outbound-ssh-from-infraci-agents-jenkins-sponsored-to-aws-packer"
   priority               = 4079
   direction              = "Outbound"
@@ -540,6 +543,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents
 
 # Allow infra.ci sponsored ephemeral agents to reach packer VMs with SSH on azure
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_jenkins_sponsored_to_packer_vms" {
+  provider               = azurerm.jenkins-sponsored
   name                   = "allow-outbound-ssh-from-infraci-agents-jenkins-sponsored-to-packer-vms"
   priority               = 4080
   direction              = "Outbound"
@@ -557,6 +561,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents
 
 # Allow infra.ci sponsored ephemeral agents to reach packer VMs with WinRM (HTTP without TLS)
 resource "azurerm_network_security_rule" "allow_outbound_winrm_http_from_infraci_agents_jenkins_sponsored_to_packer_vms" {
+  provider               = azurerm.jenkins-sponsored
   name                   = "allow-outbound-winrm-http-from-infraci-agents-jenkins-sponsored-to-packer-vms"
   priority               = 4081
   direction              = "Outbound"
@@ -575,6 +580,7 @@ resource "azurerm_network_security_rule" "allow_outbound_winrm_http_from_infraci
 
 # Allow infra.ci sponsored ephemeral agents to reach packer VMs with WinRM (HTTPS)
 resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infraci_agents_jenkins_sponsored_to_packer_vms" {
+  provider               = azurerm.jenkins-sponsored
   name                   = "allow-outbound-winrm-https-from-infraci-agents-jenkins-sponsored-to-packer-vms"
   priority               = 4082
   direction              = "Outbound"
@@ -593,6 +599,7 @@ resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infrac
 
 # Allow infra.ci sponsored ephemeral agents to reach infracijenkinsio_agents_2 cluster
 resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_jenkins_sponsored_to_infracijenkinsio_agents_2" {
+  provider               = azurerm.jenkins-sponsored
   name                   = "allow-outbound-https-from-infraci-agents-jenkins-sponsored-to-infracijenkinsio_agents-2"
   priority               = 4084
   direction              = "Outbound"
@@ -611,6 +618,7 @@ resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephe
 
 # Allow infra.ci sponsored ephemeral agents to reach privatek8s cluster
 resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_jenkins_sponsored_to_privatek8s" {
+  provider               = azurerm.jenkins-sponsored
   name                   = "allow-outbound-https-from-infraci-agents-jenkins-sponsored-to-privatek8s"
   priority               = 4085
   direction              = "Outbound"
@@ -629,6 +637,7 @@ resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephe
 
 # Allow infra.ci sponsored ephemeral agents to reach publick8s cluster
 resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_jenkins_sponsored_to_publick8s" {
+  provider               = azurerm.jenkins-sponsored
   name                   = "allow-outbound-https-from-infraci-agents-jenkins-sponsored-to-publick8s"
   priority               = 4086
   direction              = "Outbound"
@@ -650,6 +659,7 @@ resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephe
 
 # Allow infra.ci sponsored ephemeral agents to reach mysql-public-db hosted on Azure
 resource "azurerm_network_security_rule" "allow_outbound_mysql_from_infraci_ephemeral_agents_jenkins_sponsored_to_mysql_public_db" {
+  provider               = azurerm.jenkins-sponsored
   name                   = "allow-outbound-mysql-from-infraci-agents-jenkins-sponsored-to-mysql-public-db"
   priority               = 4087
   direction              = "Outbound"
@@ -667,6 +677,7 @@ resource "azurerm_network_security_rule" "allow_outbound_mysql_from_infraci_ephe
 
 # Allow infra.ci sponsored ephemeral agents to reach postgres-public-db hosted on Azure
 resource "azurerm_network_security_rule" "allow_outbound_postgres_from_infraci_ephemeral_agents_jenkins_sponsored_to_postgres_public_db" {
+  provider               = azurerm.jenkins-sponsored
   name                   = "allow-outbound-postgres-from-infraci-agents-jenkins-sponsored-to-postgres-public-db"
   priority               = 4088
   direction              = "Outbound"
@@ -684,6 +695,7 @@ resource "azurerm_network_security_rule" "allow_outbound_postgres_from_infraci_e
 
 ## Allow access to/from ACR endpoint
 resource "azurerm_network_security_rule" "allow_out_https_from_infra_ephemeral_agents_jenkins_sponsored_to_acr" {
+  provider               = azurerm.jenkins-sponsored
   count                  = var.terratest ? 0 : 1
   name                   = "allow-out-https-from-ephemeral-agents-jenkins-sponsored-to-acr"
   priority               = 4050
@@ -700,6 +712,7 @@ resource "azurerm_network_security_rule" "allow_out_https_from_infra_ephemeral_a
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_in_https_from_infra_ephemeral_agents_jenkins_sponsored_to_acr" {
+  provider               = azurerm.jenkins-sponsored
   count                  = var.terratest ? 0 : 1
   name                   = "allow-in-https-from-ephemeral-agents-jenkins-sponsored-to-acr"
   priority               = 4050
