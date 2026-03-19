@@ -14,6 +14,10 @@ data "azurerm_resource_group" "private" {
 data "azurerm_resource_group" "infra_ci_jenkins_io" {
   name = "infra-ci-jenkins-io"
 }
+data "azurerm_resource_group" "infra_ci_jenkins_io_sponsored" {
+  provider = azurerm.jenkins-sponsored
+  name     = "infra-ci-jenkins-io-sponsored"
+}
 data "azurerm_resource_group" "cert_ci_jenkins_io" {
   name = "cert-ci-jenkins-io"
 }
@@ -50,6 +54,11 @@ data "azurerm_virtual_network" "infra_ci_jenkins_io" {
   name                = "${data.azurerm_resource_group.infra_ci_jenkins_io.name}-vnet"
   resource_group_name = data.azurerm_resource_group.infra_ci_jenkins_io.name
 }
+data "azurerm_virtual_network" "infra_ci_jenkins_io_sponsored" {
+  provider            = azurerm.jenkins-sponsored
+  name                = "${data.azurerm_resource_group.infra_ci_jenkins_io_sponsored.name}-vnet"
+  resource_group_name = data.azurerm_resource_group.infra_ci_jenkins_io_sponsored.name
+}
 data "azurerm_virtual_network" "cert_ci_jenkins_io" {
   name                = "${data.azurerm_resource_group.cert_ci_jenkins_io.name}-vnet"
   resource_group_name = data.azurerm_resource_group.cert_ci_jenkins_io.name
@@ -82,6 +91,12 @@ data "azurerm_subnet" "infra_ci_jenkins_io_ephemeral_agents" {
   name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io.name}-ephemeral-agents"
   virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io.name
   resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io.resource_group_name
+}
+data "azurerm_subnet" "infra_ci_jenkins_io_sponsored_ephemeral_agents" {
+  provider             = azurerm.jenkins-sponsored
+  name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.name}-ephemeral-agents"
+  virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.name
+  resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.resource_group_name
 }
 data "azurerm_subnet" "infracijenkinsio_agents_2" {
   name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io.name}-kubernetes-agents"

@@ -451,6 +451,307 @@ resource "azurerm_role_assignment" "updatecli_infra_ci_jenkins_io_allow_images_l
   principal_id       = azuread_service_principal.updatecli_infra_ci_jenkins_io.object_id
 }
 
+## Jenkins Sponsored
+# This resource group hosts resources used for agents only managed by terraform or administrators
+# such as NSG for agents subnet (we don't want azure-vm-agents jenkins plugin to access this RG)
+resource "azurerm_resource_group" "infra_ci_jenkins_io_controller_jenkins_sponsored" {
+  provider = azurerm.jenkins-sponsored
+  name     = "infra-ci-jenkins-io-controller" # Same name on both subscriptions
+  location = var.location
+  tags     = local.default_tags
+}
+## Identity assigned to agents workloads (allowing them to reach resources without any Azure credential)
+resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_agents_jenkins_sponsored" {
+  provider            = azurerm.jenkins-sponsored
+  location            = var.location
+  name                = "infra-ci-jenkins-io-agents"
+  resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsored.name
+}
+# The Controller identity must be able to operate this identity to assign it to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
+resource "azurerm_role_assignment" "infra_ci_jenkins_io_operate_agents_identity_jenkins_sponsored" {
+  provider             = azurerm.jenkins-sponsored
+  scope                = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents_jenkins_sponsored.id
+  role_definition_name = "Managed Identity Operator"
+  principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id
+}
+resource "azurerm_role_assignment" "infra_ci_jenkins_io_agents_jenkins_sponsored_write_buildsreports_share" {
+  provider = azurerm.jenkins-sponsored
+  scope    = azurerm_storage_account.builds_reports_jenkins_io.id
+  # Allow writing
+  role_definition_name = "Storage File Data Privileged Contributor"
+  principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents_jenkins_sponsored.principal_id
+}
+
+# Required to allow controller to check for subnets inside the virtual network
+resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_vnet_sponsored_reader" {
+  provider = azurerm.jenkins-sponsored
+  name     = "read-infra-ci-jenkins-io-vnet"
+  scope    = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.id
+
+  permissions {
+    actions = ["Microsoft.Network/virtualNetworks/read"]
+  }
+}
+resource "azurerm_role_assignment" "infra_ci_jenkins_io_controller_vnet_sponsored_reader" {
+  provider           = azurerm.jenkins-sponsored
+  scope              = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.id
+  role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_vnet_sponsored_reader.role_definition_resource_id
+  principal_id       = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id
+}
+
+module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
+  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-azurevm-agents"
+
+  providers = {
+    azurerm = azurerm.jenkins-sponsored
+  }
+
+  service_fqdn                     = local.infra_ci_jenkins_io_fqdn
+  service_short_stripped_name      = local.infra_ci_jenkins_io_service_short_stripped_name
+  ephemeral_agents_network_rg_name = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.resource_group_name
+  ephemeral_agents_network_name    = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.virtual_network_name
+  ephemeral_agents_subnet_name     = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.name
+  controller_rg_name               = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsored.name
+  controller_ips                   = data.azurerm_subnet.privatek8s_infra_ci_controller_tier.address_prefixes # Pod IPs: controller IP may change in the pods IP subnet
+  controller_service_principal_id  = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id
+
+  default_tags = local.default_tags
+
+  jenkins_infra_ips = {
+    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
+  }
+}
+
+# Allow infra.ci sponsored ephemeral agents to reach packer VMs with SSH on aws
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_jenkins_sponsored_to_aws_packer" {
+  provider               = azurerm.jenkins-sponsored
+  name                   = "allow-outbound-ssh-from-infraci-agents-jenkins-sponsored-to-aws-packer"
+  priority               = 4079
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "22"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
+  ]
+  # Allow all destinations as we cannot know the AWS EC2 public IPs of instance in advance
+  destination_address_prefix  = "*"
+  resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
+  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+}
+
+# Allow infra.ci sponsored ephemeral agents to reach packer VMs with SSH on azure
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_jenkins_sponsored_to_packer_vms" {
+  provider               = azurerm.jenkins-sponsored
+  name                   = "allow-outbound-ssh-from-infraci-agents-jenkins-sponsored-to-packer-vms"
+  priority               = 4080
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "22"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
+  ]
+  destination_address_prefix  = data.azurerm_subnet.infra_ci_jenkins_io_packer_builds.address_prefix
+  resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
+  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+}
+
+# Allow infra.ci sponsored ephemeral agents to reach packer VMs with WinRM (HTTP without TLS)
+resource "azurerm_network_security_rule" "allow_outbound_winrm_http_from_infraci_agents_jenkins_sponsored_to_packer_vms" {
+  provider               = azurerm.jenkins-sponsored
+  name                   = "allow-outbound-winrm-http-from-infraci-agents-jenkins-sponsored-to-packer-vms"
+  priority               = 4081
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "5985"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
+  ]
+  # Allow all destinations as we cannot know the AWS EC2 public IPs of instance in advance
+  destination_address_prefix  = "*"
+  resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
+  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+}
+
+# Allow infra.ci sponsored ephemeral agents to reach packer VMs with WinRM (HTTPS)
+resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infraci_agents_jenkins_sponsored_to_packer_vms" {
+  provider               = azurerm.jenkins-sponsored
+  name                   = "allow-outbound-winrm-https-from-infraci-agents-jenkins-sponsored-to-packer-vms"
+  priority               = 4082
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "5986"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
+  ]
+  # Allow all destinations as we cannot know the AWS EC2 public IPs of instance in advance
+  destination_address_prefix  = "*"
+  resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
+  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+}
+
+# Allow infra.ci sponsored ephemeral agents to reach infracijenkinsio_agents_2 cluster
+resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_jenkins_sponsored_to_infracijenkinsio_agents_2" {
+  provider               = azurerm.jenkins-sponsored
+  name                   = "allow-outbound-https-from-infraci-agents-jenkins-sponsored-to-infracijenkinsio_agents-2"
+  priority               = 4084
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "443"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
+  ]
+  # TODO: restrict to required resources only
+  destination_address_prefixes = [data.azurerm_subnet.infracijenkinsio_agents_2.address_prefix]
+  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+}
+
+# Allow infra.ci sponsored ephemeral agents to reach privatek8s cluster
+resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_jenkins_sponsored_to_privatek8s" {
+  provider               = azurerm.jenkins-sponsored
+  name                   = "allow-outbound-https-from-infraci-agents-jenkins-sponsored-to-privatek8s"
+  priority               = 4085
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "443"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
+  ]
+  # TODO: restrict to required resources only
+  destination_address_prefixes = [data.azurerm_subnet.privatek8s_tier.address_prefix]
+  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+}
+
+# Allow infra.ci sponsored ephemeral agents to reach publick8s cluster
+resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_jenkins_sponsored_to_publick8s" {
+  provider               = azurerm.jenkins-sponsored
+  name                   = "allow-outbound-https-from-infraci-agents-jenkins-sponsored-to-publick8s"
+  priority               = 4086
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "443"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
+  ]
+  # TODO: restrict to required resources only
+  # publick8s is a dual-stack cluster, filtering on IPv4 only
+  destination_address_prefixes = [
+    for ip in data.azurerm_subnet.publick8s.address_prefixes : ip if can(cidrnetmask(ip))
+  ]
+  resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
+  network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+}
+
+# Allow infra.ci sponsored ephemeral agents to reach mysql-public-db hosted on Azure
+resource "azurerm_network_security_rule" "allow_outbound_mysql_from_infraci_ephemeral_agents_jenkins_sponsored_to_mysql_public_db" {
+  provider               = azurerm.jenkins-sponsored
+  name                   = "allow-outbound-mysql-from-infraci-agents-jenkins-sponsored-to-mysql-public-db"
+  priority               = 4087
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "3306"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
+  ]
+  destination_address_prefixes = [data.azurerm_subnet.public_db_vnet_mysql_tier.address_prefix]
+  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+}
+
+# Allow infra.ci sponsored ephemeral agents to reach postgres-public-db hosted on Azure
+resource "azurerm_network_security_rule" "allow_outbound_postgres_from_infraci_ephemeral_agents_jenkins_sponsored_to_postgres_public_db" {
+  provider               = azurerm.jenkins-sponsored
+  name                   = "allow-outbound-postgres-from-infraci-agents-jenkins-sponsored-to-postgres-public-db"
+  priority               = 4088
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "5432"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
+  ]
+  destination_address_prefixes = [data.azurerm_subnet.public_db_vnet_postgres_tier.address_prefix]
+  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+}
+
+# Allow access to the private Azure Container Registry through an Azure Endpoint NIC
+module "infracijenkinsio_sponsored_acr_pe" {
+  source = "./modules/azure-container-registry-private-links"
+
+  providers = {
+    azurerm     = azurerm.jenkins-sponsored
+    azurerm.acr = azurerm
+  }
+
+  name = "infracijenkinsiosponso"
+
+  acr_name     = azurerm_container_registry.dockerhub_mirror.name
+  acr_location = azurerm_container_registry.dockerhub_mirror.location
+  acr_rg_name  = azurerm_container_registry.dockerhub_mirror.resource_group_name
+
+  subnet_name  = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.name
+  vnet_name    = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.name
+  vnet_rg_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.resource_group_name
+
+  default_tags = local.default_tags
+}
+
+## Allow access to/from ACR endpoint
+resource "azurerm_network_security_rule" "allow_out_https_from_infra_ephemeral_agents_jenkins_sponsored_to_acr" {
+  provider               = azurerm.jenkins-sponsored
+  count                  = var.terratest ? 0 : 1
+  name                   = "allow-out-https-from-ephemeral-agents-jenkins-sponsored-to-acr"
+  priority               = 4050
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "443"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
+  ]
+  destination_address_prefixes = split(",", module.infracijenkinsio_sponsored_acr_pe.private_endpoint_nic_ip_addresses)
+  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+}
+resource "azurerm_network_security_rule" "allow_in_https_from_infra_ephemeral_agents_jenkins_sponsored_to_acr" {
+  provider               = azurerm.jenkins-sponsored
+  count                  = var.terratest ? 0 : 1
+  name                   = "allow-in-https-from-ephemeral-agents-jenkins-sponsored-to-acr"
+  priority               = 4050
+  direction              = "Inbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "443"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
+  ]
+  destination_address_prefixes = split(",", module.infracijenkinsio_sponsored_acr_pe.private_endpoint_nic_ip_addresses)
+  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+}
+
+## Vault
 resource "azurerm_key_vault" "infra_ci_jenkins_io_vault" {
   tenant_id           = data.azurerm_client_config.current.tenant_id
   name                = "prodjenkinsinfra"
