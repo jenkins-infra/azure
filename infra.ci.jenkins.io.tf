@@ -485,7 +485,7 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_agents_jenkins_sponsored
 # Required to allow controller to check for subnets inside the virtual network
 resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_vnet_sponsored_reader" {
   provider = azurerm.jenkins-sponsored
-  name     = "read-infra-ci-jenkins-io-vnet"
+  name     = "read-infra-ci-jenkins-io-vnet-sponsored"
   scope    = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.id
 
   permissions {
