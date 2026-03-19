@@ -693,6 +693,28 @@ resource "azurerm_network_security_rule" "allow_outbound_postgres_from_infraci_e
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
 }
 
+# Allow access to the private Azure Container Registry through an Azure Endpoint NIC
+module "infracijenkinsio_sponsored_acr_pe" {
+  source = "./modules/azure-container-registry-private-links"
+
+  providers = {
+    azurerm     = azurerm.jenkins-sponsored
+    azurerm.acr = azurerm
+  }
+
+  name = "infracijenkinsiosponso"
+
+  acr_name     = azurerm_container_registry.dockerhub_mirror.name
+  acr_location = azurerm_container_registry.dockerhub_mirror.location
+  acr_rg_name  = azurerm_container_registry.dockerhub_mirror.resource_group_name
+
+  subnet_name  = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.name
+  vnet_name    = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.name
+  vnet_rg_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.resource_group_name
+
+  default_tags = local.default_tags
+}
+
 ## Allow access to/from ACR endpoint
 resource "azurerm_network_security_rule" "allow_out_https_from_infra_ephemeral_agents_jenkins_sponsored_to_acr" {
   provider               = azurerm.jenkins-sponsored
@@ -707,7 +729,7 @@ resource "azurerm_network_security_rule" "allow_out_https_from_infra_ephemeral_a
   source_address_prefixes = [
     data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
   ]
-  destination_address_prefixes = split(",", module.infracijenkinsio_acr_pe.private_endpoint_nic_ip_addresses)
+  destination_address_prefixes = split(",", module.infracijenkinsio_sponsored_acr_pe.private_endpoint_nic_ip_addresses)
   resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
 }
@@ -724,7 +746,7 @@ resource "azurerm_network_security_rule" "allow_in_https_from_infra_ephemeral_ag
   source_address_prefixes = [
     data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
   ]
-  destination_address_prefixes = split(",", module.infracijenkinsio_acr_pe.private_endpoint_nic_ip_addresses)
+  destination_address_prefixes = split(",", module.infracijenkinsio_sponsored_acr_pe.private_endpoint_nic_ip_addresses)
   resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
 }
