@@ -510,7 +510,7 @@ module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   ephemeral_agents_network_rg_name = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.resource_group_name
   ephemeral_agents_network_name    = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.virtual_network_name
   ephemeral_agents_subnet_name     = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.name
-  controller_rg_name               = azurerm_resource_group.infra_ci_jenkins_io_controller.name
+  controller_rg_name               = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsored.name
   controller_ips                   = data.azurerm_subnet.privatek8s_infra_ci_controller_tier.address_prefixes # Pod IPs: controller IP may change in the pods IP subnet
   controller_service_principal_id  = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id
 
