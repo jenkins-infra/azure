@@ -454,13 +454,6 @@ resource "azurerm_resource_group" "infra_ci_jenkins_io_controller_jenkins_sponso
   location = var.location
   tags     = local.default_tags
 }
-# Allow controller to manage agents without requiring credentials (requires on the VM User Assign Identity)
-resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_controller_jenkins_sponsored" {
-  provider            = azurerm.jenkins-sponsored
-  location            = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsored.location
-  name                = "infracijenkinsiocontroller-sponsored"
-  resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsored.name
-}
 ## Identity assigned to agents workloads (allowing them to reach resources without any Azure credential)
 resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_agents_jenkins_sponsored" {
   provider            = azurerm.jenkins-sponsored
