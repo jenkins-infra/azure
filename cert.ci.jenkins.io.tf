@@ -29,6 +29,7 @@ module "cert_ci_jenkins_io" {
   ]
   controller_packer_rg_ids = [
     azurerm_resource_group.packer_images_cdf["prod"].id,
+    azurerm_resource_group.packer_images_sponsored["prod"].id,
   ]
 
   agent_ip_prefixes = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.address_prefixes

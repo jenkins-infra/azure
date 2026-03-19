@@ -46,6 +46,7 @@ module "trusted_ci_jenkins_io" {
   ]
   controller_packer_rg_ids = [
     azurerm_resource_group.packer_images_cdf["prod"].id,
+    azurerm_resource_group.packer_images_sponsored["prod"].id,
   ]
 
   agent_ip_prefixes = concat(
