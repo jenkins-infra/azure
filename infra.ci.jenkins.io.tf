@@ -485,7 +485,7 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_agents_jenkins_sponsored
 # Required to allow controller to check for subnets inside the virtual network
 resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_vnet_sponsored_reader" {
   provider = azurerm.jenkins-sponsored
-  name     = "read-infra-ci-jenkins-io-vnet"
+  name     = "read-infra-ci-jenkins-io-vnet-sponsored"
   scope    = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.id
 
   permissions {
@@ -514,6 +514,7 @@ module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   controller_rg_name               = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsored.name
   controller_ips                   = data.azurerm_subnet.privatek8s_infra_ci_controller_tier.address_prefixes # Pod IPs: controller IP may change in the pods IP subnet
   controller_service_principal_id  = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id
+  storage_account_name             = "infraciagentssponso" # Max 24 chars
 
   default_tags = local.default_tags
 
@@ -600,7 +601,7 @@ resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infrac
 # Allow infra.ci sponsored ephemeral agents to reach infracijenkinsio_agents_2 cluster
 resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_jenkins_sponsored_to_infracijenkinsio_agents_2" {
   provider               = azurerm.jenkins-sponsored
-  name                   = "allow-outbound-https-from-infraci-agents-jenkins-sponsored-to-infracijenkinsio_agents-2"
+  name                   = "allow-outbound-https-from-infraci-agents-sponsored-to-infracijenkinsio_agents-2"
   priority               = 4084
   direction              = "Outbound"
   access                 = "Allow"
@@ -678,7 +679,7 @@ resource "azurerm_network_security_rule" "allow_outbound_mysql_from_infraci_ephe
 # Allow infra.ci sponsored ephemeral agents to reach postgres-public-db hosted on Azure
 resource "azurerm_network_security_rule" "allow_outbound_postgres_from_infraci_ephemeral_agents_jenkins_sponsored_to_postgres_public_db" {
   provider               = azurerm.jenkins-sponsored
-  name                   = "allow-outbound-postgres-from-infraci-agents-jenkins-sponsored-to-postgres-public-db"
+  name                   = "allow-outbound-postgres-from-infraci-agents-sponsored-to-postgres-public-db"
   priority               = 4088
   direction              = "Outbound"
   access                 = "Allow"
