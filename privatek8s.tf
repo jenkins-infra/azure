@@ -408,9 +408,7 @@ resource "azurerm_federated_identity_credential" "privatek8s_infra_ci_jenkins_io
   audience  = ["api://AzureADTokenExchange"]
   issuer    = azurerm_kubernetes_cluster.privatek8s.oidc_issuer_url
   parent_id = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.id
-  # RG must be the same for both the UAID and the federated ID (otherwise you get HTTP/404 during the "apply" phase)
-  resource_group_name = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.resource_group_name
-  subject             = "system:serviceaccount:${kubernetes_namespace.privatek8s["infra-ci-jenkins-io"].metadata[0].name}:${kubernetes_service_account.privatek8s_infra_ci_jenkins_io_controller.metadata[0].name}"
+  subject   = "system:serviceaccount:${kubernetes_namespace.privatek8s["infra-ci-jenkins-io"].metadata[0].name}:${kubernetes_service_account.privatek8s_infra_ci_jenkins_io_controller.metadata[0].name}"
 }
 ## End of infra.ci
 
@@ -440,13 +438,11 @@ resource "kubernetes_service_account" "privatek8s_release_ci_jenkins_io_agents" 
   }
 }
 resource "azurerm_federated_identity_credential" "privatek8s_release_ci_jenkins_io_agents" {
-  name     = "privatek8s-${kubernetes_service_account.privatek8s_release_ci_jenkins_io_agents.metadata[0].name}"
-  audience = ["api://AzureADTokenExchange"]
-  issuer   = azurerm_kubernetes_cluster.privatek8s.oidc_issuer_url
-  # RG must be the same for both the UAID and the federated ID (otherwise you get HTTP/404 during the "apply" phase)
-  parent_id           = azurerm_user_assigned_identity.release_ci_jenkins_io_agents.id
-  resource_group_name = azurerm_user_assigned_identity.release_ci_jenkins_io_agents.resource_group_name
-  subject             = "system:serviceaccount:${kubernetes_namespace.privatek8s["release-ci-jenkins-io-agents"].metadata[0].name}:${kubernetes_service_account.privatek8s_release_ci_jenkins_io_agents.metadata[0].name}"
+  name      = "privatek8s-${kubernetes_service_account.privatek8s_release_ci_jenkins_io_agents.metadata[0].name}"
+  audience  = ["api://AzureADTokenExchange"]
+  issuer    = azurerm_kubernetes_cluster.privatek8s.oidc_issuer_url
+  parent_id = azurerm_user_assigned_identity.release_ci_jenkins_io_agents.id
+  subject   = "system:serviceaccount:${kubernetes_namespace.privatek8s["release-ci-jenkins-io-agents"].metadata[0].name}:${kubernetes_service_account.privatek8s_release_ci_jenkins_io_agents.metadata[0].name}"
 }
 ## End of release.ci.jenkins.io agents
 ### End of  Workload Identity Resources
