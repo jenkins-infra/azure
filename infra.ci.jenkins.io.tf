@@ -473,7 +473,7 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_operate_agents_identity_
   provider             = azurerm.jenkins-sponsored
   scope                = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents_jenkins_sponsored.id
   role_definition_name = "Managed Identity Operator"
-  principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller_jenkins_sponsored.principal_id
+  principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id
 }
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_agents_jenkins_sponsored_write_buildsreports_share" {
   provider = azurerm.jenkins-sponsored
