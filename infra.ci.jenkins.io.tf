@@ -77,11 +77,6 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_controller_vnet_reader" 
   role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_vnet_reader.role_definition_resource_id
   principal_id       = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id
 }
-resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_packer" {
-  scope                = azurerm_resource_group.packer_images_cdf["prod"].id
-  role_definition_name = "Reader"
-  principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id
-}
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_packer_sponsored" {
   scope                = azurerm_resource_group.packer_images_sponsored["prod"].id
   role_definition_name = "Reader"
