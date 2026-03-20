@@ -385,3 +385,57 @@ resource "azurerm_private_endpoint" "publick8s_updates_jenkins_io_for_trustedci"
   }
   tags = local.default_tags
 }
+
+# Allow access to the private Azure Container Registry through an Azure Endpoint NIC
+module "trustedcijenkinsiosponsored_acr_pe" {
+  source = "./modules/azure-container-registry-private-links"
+
+  providers = {
+    azurerm     = azurerm.jenkins-sponsored
+    azurerm.acr = azurerm
+  }
+
+  name = "trustedcijenkinsiosponsored"
+
+  acr_name     = azurerm_container_registry.dockerhub_mirror.name
+  acr_location = azurerm_container_registry.dockerhub_mirror.location
+  acr_rg_name  = azurerm_container_registry.dockerhub_mirror.resource_group_name
+
+  subnet_name  = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.name
+  vnet_name    = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.name
+  vnet_rg_name = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.resource_group_name
+
+  default_tags = local.default_tags
+}
+
+## Allow access to/from ACR endpoint
+resource "azurerm_network_security_rule" "allow_out_https_from_trusted_vnet_to_acr" {
+  provider = azurerm.jenkins-sponsored
+
+  name                         = "allow-out-https-from-vnet-to-acr"
+  priority                     = 4051
+  direction                    = "Outbound"
+  access                       = "Allow"
+  protocol                     = "Tcp"
+  source_port_range            = "*"
+  destination_port_range       = "443"
+  source_address_prefixes      = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.address_space
+  destination_address_prefixes = split(",", module.trustedcijenkinsiosponsored_acr_pe.private_endpoint_nic_ip_addresses)
+  resource_group_name          = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+}
+resource "azurerm_network_security_rule" "allow_in_https_from_trusted_vnet_to_acr" {
+  provider = azurerm.jenkins-sponsored
+
+  name                         = "allow-in-https-from-vnet-to-acr"
+  priority                     = 4051
+  direction                    = "Inbound"
+  access                       = "Allow"
+  protocol                     = "Tcp"
+  source_port_range            = "*"
+  destination_port_range       = "443"
+  source_address_prefixes      = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.address_space
+  destination_address_prefixes = split(",", module.trustedcijenkinsiosponsored_acr_pe.private_endpoint_nic_ip_addresses)
+  resource_group_name          = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+}
