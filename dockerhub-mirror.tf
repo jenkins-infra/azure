@@ -163,7 +163,8 @@ resource "azurerm_container_registry_cache_rule" "mirror_cache_rules" {
 resource "azurerm_role_assignment" "push_to_acr" {
   for_each = var.terratest ? toset([]) : toset([
     azurerm_user_assigned_identity.infra_ci_jenkins_io_agents.principal_id,
-    azurerm_user_assigned_identity.infra_ci_jenkins_io_agents_jenkins_sponsored.principal_id,
+    # TODO: restore after https://github.com/jenkins-infra/azure/pull/1354 merge
+    # azurerm_user_assigned_identity.infra_ci_jenkins_io_agents_jenkins_sponsored.principal_id,
   ])
   principal_id                     = each.value
   role_definition_name             = "AcrPush"
