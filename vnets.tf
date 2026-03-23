@@ -87,11 +87,6 @@ data "azurerm_subnet" "private_vnet_data_tier" {
   virtual_network_name = data.azurerm_virtual_network.private.name
   resource_group_name  = data.azurerm_resource_group.private.name
 }
-data "azurerm_subnet" "infra_ci_jenkins_io_ephemeral_agents" {
-  name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io.name}-ephemeral-agents"
-  virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io.name
-  resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io.resource_group_name
-}
 data "azurerm_subnet" "infra_ci_jenkins_io_sponsored_ephemeral_agents" {
   provider             = azurerm.jenkins-sponsored
   name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.name}-ephemeral-agents"
