@@ -326,7 +326,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents
   source_address_prefixes = [
     data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
   ]
-  destination_address_prefix  = data.azurerm_subnet.infra_ci_jenkins_io_packer_builds.address_prefix
+  destination_address_prefix  = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_packer_builds.address_prefix
   resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
 }
