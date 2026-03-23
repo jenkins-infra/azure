@@ -58,6 +58,12 @@ locals {
   admin_username = "jenkins-infra-team"
 
   aks_clusters = {
+    "infracijenkinsio_agents_1" = {
+      name               = "infracijenkinsio-agents-1",
+      kubernetes_version = "1.33.5",
+      # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
+      pod_cidr = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
+    },
     "infracijenkinsio_agents_2" = {
       name               = "infracijenkinsio-agents-2",
       kubernetes_version = "1.33.5",
@@ -312,6 +318,9 @@ locals {
 
   # These cluster_hostname cannot be on the 'local.aks_cluster' to avoid cyclic dependencies (when expanding the map)
   aks_clusters_outputs = {
+    "infracijenkinsio_agents_1" = {
+      cluster_hostname = "https://${azurerm_kubernetes_cluster.infracijenkinsio_agents_1.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
+    },
     "infracijenkinsio_agents_2" = {
       cluster_hostname = "https://${azurerm_kubernetes_cluster.infracijenkinsio_agents_2.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
     },
@@ -338,6 +347,8 @@ locals {
       "agents" = [
         # VM agents (Jenkins Sponsored subscription)
         data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.id,
+        # Container agents (Jenkins Sponsored subscription)
+        data.azurerm_subnet.infra_ci_jenkins_io_sponsored_kubernetes_agents.id,
         # Container agents (CDF subscription)
         data.azurerm_subnet.infracijenkinsio_agents_2.id,
       ],
