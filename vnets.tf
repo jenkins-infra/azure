@@ -93,6 +93,12 @@ data "azurerm_subnet" "infra_ci_jenkins_io_sponsored_ephemeral_agents" {
   virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.name
   resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.resource_group_name
 }
+data "azurerm_subnet" "infra_ci_jenkins_io_sponsored_packer_builds" {
+  provider             = azurerm.jenkins-sponsored
+  name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.name}-packer-builds"
+  virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.name
+  resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.resource_group_name
+}
 data "azurerm_subnet" "infracijenkinsio_agents_2" {
   name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io.name}-kubernetes-agents"
   resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io.resource_group_name
