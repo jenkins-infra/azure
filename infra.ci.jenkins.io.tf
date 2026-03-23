@@ -124,6 +124,7 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_controller_disk_reader" 
   principal_id       = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
 }
 
+# TODO: cleanup the 3 resources below on infraci.jenkins.io-agents-2 cleanup (using the same UAID)
 ## Identity assigned to agents workloads (allowing them to reach resources without any Azure credential)
 resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_agents" {
   location            = var.location
