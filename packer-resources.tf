@@ -76,7 +76,7 @@ resource "azurerm_resource_group" "packer_builds_sponsored" {
   for_each = local.shared_galleries
 
   name     = "${each.key}-packer-builds"
-  location = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.location # Location of the packer subnet in infra.ci
+  location = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.location # Packer refuses to create VM in a different location than the NICs. It's a strong link let's Terraform be aware of it.
 }
 
 # Allow packer Service Principal to manage AzureRM resources inside the packer resource groups
