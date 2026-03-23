@@ -459,7 +459,7 @@ resource "azurerm_resource_group" "infra_ci_jenkins_io_controller_jenkins_sponso
 resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_agents_jenkins_sponsored" {
   provider            = azurerm.jenkins-sponsored
   location            = var.location
-  name                = "infra-ci-jenkins-io-agents"
+  name                = "infra-ci-jenkins-io-sponsored-agents"
   resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsored.name
 }
 # The Controller identity must be able to operate this identity to assign it to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
