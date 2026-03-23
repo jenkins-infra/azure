@@ -136,11 +136,6 @@ data "azurerm_subnet" "trusted_ci_jenkins_io_sponsored_ephemeral_agents" {
   virtual_network_name = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.name
   resource_group_name  = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.resource_group_name
 }
-data "azurerm_subnet" "infra_ci_jenkins_io_packer_builds" {
-  name                 = "${data.azurerm_virtual_network.infra_ci_jenkins_io.name}-packer-builds"
-  virtual_network_name = data.azurerm_virtual_network.infra_ci_jenkins_io.name
-  resource_group_name  = data.azurerm_virtual_network.infra_ci_jenkins_io.resource_group_name
-}
 data "azurerm_subnet" "privatek8s_tier" {
   name                 = "privatek8s-tier"
   resource_group_name  = data.azurerm_resource_group.private.name
