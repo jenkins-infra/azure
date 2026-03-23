@@ -144,6 +144,7 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_agents_write_buildsrepor
   principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents.principal_id
 }
 
+# TODO: use a "commons" subnet
 # Allow access to the private Azure Container Registry through an Azure Endpoint NIC
 module "infracijenkinsio_acr_pe" {
   source = "./modules/azure-container-registry-private-links"
