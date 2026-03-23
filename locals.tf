@@ -336,8 +336,6 @@ locals {
     "infra.ci.jenkins.io" = {
       "controller" = [data.azurerm_subnet.privatek8s_infra_ci_controller_tier.id],
       "agents" = [
-        # VM agents (CDF subscription)
-        data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.id,
         # VM agents (Jenkins Sponsored subscription)
         data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.id,
         # Container agents (CDF subscription)
