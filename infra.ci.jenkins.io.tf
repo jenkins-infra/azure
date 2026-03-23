@@ -159,7 +159,7 @@ module "infracijenkinsio_acr_pe" {
   acr_location = azurerm_container_registry.dockerhub_mirror.location
   acr_rg_name  = azurerm_container_registry.dockerhub_mirror.resource_group_name
 
-  subnet_name  = data.azurerm_subnet.infra_ci_jenkins_io_ephemeral_agents.name
+  subnet_name  = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_kubernetes_agents.name
   vnet_name    = data.azurerm_virtual_network.infra_ci_jenkins_io.name
   vnet_rg_name = data.azurerm_virtual_network.infra_ci_jenkins_io.resource_group_name
 
