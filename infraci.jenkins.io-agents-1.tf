@@ -106,7 +106,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracijenkinsio_agents_1_linux
   vm_size               = "Standard_D16pds_v6" # https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv6-series?tabs=sizebasic 	16vcpu 	64Go 440ssd
   os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb      = 430 # Expecting an ephemeral OS disk. Specified size must be less than the instance local storage size. Ref. https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv6-series?tabs=sizestoragelocal
+  os_disk_size_gb       = 430 # Expecting an ephemeral OS disk. Specified size must be less than the instance local storage size. Ref. https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv6-series?tabs=sizestoragelocal
   priority              = "Regular" # No spot quota in Jenkins Subscription
   eviction_policy       = "Delete"  # Ref note on priority https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool
   orchestrator_version  = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
