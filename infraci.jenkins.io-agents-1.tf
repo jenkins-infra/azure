@@ -105,7 +105,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracijenkinsio_agents_1_linux
   vm_size               = "Standard_D16pds_v6" # https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv6-series?tabs=sizebasic 	16vcpu 	64Go 440ssd
   os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 430 # Expecting an ephemeral OS disk. Specified size must be less than the instance local storage size. Ref. https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv6-series?tabs=sizestoragelocal
+  os_disk_size_gb       = 430       # Expecting an ephemeral OS disk. Specified size must be less than the instance local storage size. Ref. https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv6-series?tabs=sizestoragelocal
   priority              = "Regular" # No spot quota in Jenkins Subscription
   orchestrator_version  = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.id
@@ -154,13 +154,13 @@ resource "kubernetes_service_account" "infracijenkinsio_agents_1_infra_ci_jenkin
   }
 }
 resource "azurerm_federated_identity_credential" "infracijenkinsio_agents_1_infra_ci_jenkins_io_agents" {
-  provider            = azurerm.jenkins-sponsored
-  name                = "infracijenkinsio-agents-2-${kubernetes_service_account.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}"
-  audience            = ["api://AzureADTokenExchange"]
-  issuer              = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.oidc_issuer_url
-  user_assigned_identity_id           = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents.id
-  subject             = "system:serviceaccount:${kubernetes_namespace.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}:${kubernetes_service_account.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}"
-  resource_group_name = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.resource_group_name
+  provider                  = azurerm.jenkins-sponsored
+  name                      = "infracijenkinsio-agents-2-${kubernetes_service_account.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}"
+  audience                  = ["api://AzureADTokenExchange"]
+  issuer                    = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.oidc_issuer_url
+  user_assigned_identity_id = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents.id
+  subject                   = "system:serviceaccount:${kubernetes_namespace.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}:${kubernetes_service_account.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}"
+  resource_group_name       = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.resource_group_name
 }
 
 #Configure the jenkins-infra/kubernetes-management admin service account
