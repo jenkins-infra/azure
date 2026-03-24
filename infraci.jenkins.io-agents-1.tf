@@ -160,7 +160,6 @@ resource "azurerm_federated_identity_credential" "infracijenkinsio_agents_1_infr
   issuer                    = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.oidc_issuer_url
   user_assigned_identity_id = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents.id
   subject                   = "system:serviceaccount:${kubernetes_namespace.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}:${kubernetes_service_account.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}"
-  resource_group_name       = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.resource_group_name
 }
 
 #Configure the jenkins-infra/kubernetes-management admin service account
