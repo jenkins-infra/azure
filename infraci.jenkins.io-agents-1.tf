@@ -149,7 +149,7 @@ resource "kubernetes_service_account" "infracijenkinsio_agents_1_infra_ci_jenkin
     namespace = kubernetes_namespace.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name
 
     annotations = {
-      "azure.workload.identity/client-id" = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents.client_id
+      "azure.workload.identity/client-id" = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents_jenkins_sponsored.client_id
     }
   }
 }
