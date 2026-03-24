@@ -49,7 +49,7 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
     }
     os_sku               = "AzureLinux"
     os_disk_type         = "Ephemeral"
-    os_disk_size_gb      = 75 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/dasv5-dadsv5-series#dadsv5-series (depends on the instance size)
+    os_disk_size_gb      = 100 # Expecting an ephemeral OS disk. Specified size must be less than the instance local storage size. Ref. https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv6-series?tabs=sizestoragelocal
     orchestrator_version = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
     kubelet_disk_type    = "OS"
     auto_scaling_enabled = true
@@ -71,7 +71,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracijenkinsio_agents_1_linux
   vm_size               = "Standard_D8ads_v7" # https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dasv7-series?tabs=sizebasic 8vcpu 	32Go
   os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 300 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dasv7-series (depends on the instance size)
+  os_disk_size_gb       = 430 # Expecting an ephemeral OS disk. Specified size must be less than the instance local storage size. Ref. https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dadsv7-series?tabs=sizestoragelocal
   priority              = "Regular"
   eviction_policy       = "Delete" # Ref note on priority https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool
   orchestrator_version  = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
@@ -106,7 +106,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracijenkinsio_agents_1_linux
   vm_size               = "Standard_D16pds_v6" # https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv6-series?tabs=sizebasic 	16vcpu 	64Go 440ssd
   os_sku                = "AzureLinux"
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 440       # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv5-series?tabs=sizebasic (depends on the instance size)
+  os_disk_size_gb      = 430 # Expecting an ephemeral OS disk. Specified size must be less than the instance local storage size. Ref. https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dpdsv6-series?tabs=sizestoragelocal
   priority              = "Regular" # No spot quota in Jenkins Subscription
   eviction_policy       = "Delete"  # Ref note on priority https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool
   orchestrator_version  = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
