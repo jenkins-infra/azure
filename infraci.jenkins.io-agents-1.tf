@@ -81,6 +81,10 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracijenkinsio_agents_1_linux
   zones                 = local.aks_clusters.compute_zones_sponsored.amd64_pool
   vnet_subnet_id        = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_kubernetes_agents.id
 
+  upgrade_settings {
+    max_surge = "10%"
+  }
+
   node_labels = {
     "jenkins"                               = "infra.ci.jenkins.io"
     "role"                                  = "jenkins-agents"
@@ -114,6 +118,10 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracijenkinsio_agents_1_linux
   max_count             = 20
   zones                 = local.aks_clusters.compute_zones_sponsored.arm64_pool
   vnet_subnet_id        = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_kubernetes_agents.id
+
+  upgrade_settings {
+    max_surge = "10%"
+  }
 
   node_labels = {
     "jenkins"                               = "infra.ci.jenkins.io"
