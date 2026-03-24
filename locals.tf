@@ -314,6 +314,11 @@ locals {
       arm64_pool  = [2, 3],
       amd64_pool  = [1, 2],
     }
+    "compute_zones_sponsored" = {
+      system_pool = [1, 2], # Note: Zone 3 is not allowed for system pool.
+      arm64_pool  = [1, 2],
+      amd64_pool  = [2],
+    }
   }
 
   # These cluster_hostname cannot be on the 'local.aks_cluster' to avoid cyclic dependencies (when expanding the map)
