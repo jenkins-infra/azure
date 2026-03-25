@@ -17,55 +17,6 @@ resource "azurerm_container_registry" "dockerhub_mirror" {
   tags = local.default_tags
 }
 
-moved {
-  from = azurerm_private_dns_zone.dockerhub_mirror["publick8s"]
-  to   = module.publick8s_acr_pe.azurerm_private_dns_zone.dockerhub_mirror
-}
-moved {
-  from = azurerm_private_dns_zone_virtual_network_link.dockerhub_mirror["publick8s"]
-  to   = module.publick8s_acr_pe.azurerm_private_dns_zone_virtual_network_link.dockerhub_mirror
-}
-moved {
-  from = azurerm_private_endpoint.dockerhub_mirror["publick8s"]
-  to   = module.publick8s_acr_pe.azurerm_private_endpoint.dockerhub_mirror
-}
-moved {
-  from = azurerm_private_dns_zone.dockerhub_mirror["privatek8s"]
-  to   = module.privatek8s_acr_pe.azurerm_private_dns_zone.dockerhub_mirror
-}
-moved {
-  from = azurerm_private_dns_zone_virtual_network_link.dockerhub_mirror["privatek8s"]
-  to   = module.privatek8s_acr_pe.azurerm_private_dns_zone_virtual_network_link.dockerhub_mirror
-}
-moved {
-  from = azurerm_private_endpoint.dockerhub_mirror["privatek8s"]
-  to   = module.privatek8s_acr_pe.azurerm_private_endpoint.dockerhub_mirror
-}
-moved {
-  from = azurerm_private_dns_zone.dockerhub_mirror["trustedcijenkinsio"]
-  to   = module.trustedcijenkinsio_acr_pe.azurerm_private_dns_zone.dockerhub_mirror
-}
-moved {
-  from = azurerm_private_dns_zone_virtual_network_link.dockerhub_mirror["trustedcijenkinsio"]
-  to   = module.trustedcijenkinsio_acr_pe.azurerm_private_dns_zone_virtual_network_link.dockerhub_mirror
-}
-moved {
-  from = azurerm_private_endpoint.dockerhub_mirror["trustedcijenkinsio"]
-  to   = module.trustedcijenkinsio_acr_pe.azurerm_private_endpoint.dockerhub_mirror
-}
-moved {
-  from = azurerm_private_dns_zone.dockerhub_mirror["infracijenkinsio"]
-  to   = module.infracijenkinsio_acr_pe.azurerm_private_dns_zone.dockerhub_mirror
-}
-moved {
-  from = azurerm_private_dns_zone_virtual_network_link.dockerhub_mirror["infracijenkinsio"]
-  to   = module.infracijenkinsio_acr_pe.azurerm_private_dns_zone_virtual_network_link.dockerhub_mirror
-}
-moved {
-  from = azurerm_private_endpoint.dockerhub_mirror["infracijenkinsio"]
-  to   = module.infracijenkinsio_acr_pe.azurerm_private_endpoint.dockerhub_mirror
-}
-
 ## TODO: factorize and simplify RBAC policy with other keyvaults
 #trivy:ignore:avd-azu-0016
 resource "azurerm_key_vault" "dockerhub_mirror" {
