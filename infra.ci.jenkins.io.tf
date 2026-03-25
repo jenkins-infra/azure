@@ -223,6 +223,14 @@ resource "azurerm_role_assignment" "updatecli_infra_ci_jenkins_io_allow_images_l
 }
 
 ## Jenkins Sponsored
+# This resource group hosts resources used for agents only managed by terraform or administrators such as UAID, PE or NSG
+resource "azurerm_resource_group" "infra_ci_jenkins_io_sponsored_commons" {
+  provider = azurerm.jenkins-sponsored
+  name     = "infra-ci-jenkins-io-sponsored-commons"
+  location = var.location
+  tags     = local.default_tags
+}
+
 # This resource group hosts resources used for agents only managed by terraform or administrators
 # such as NSG for agents subnet (we don't want azure-vm-agents jenkins plugin to access this RG)
 resource "azurerm_resource_group" "infra_ci_jenkins_io_controller_jenkins_sponsored" {
@@ -236,7 +244,7 @@ resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_agents_jenkins_sp
   provider            = azurerm.jenkins-sponsored
   location            = var.location
   name                = "infra-ci-jenkins-io-sponsored-agents"
-  resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsored.name
+  resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_sponsored_commons.name
 }
 # The Controller identity must be able to operate this identity to assign it to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_operate_agents_identity_jenkins_sponsored" {
@@ -480,7 +488,7 @@ module "infracijenkinsio_sponsored_acr_pe" {
   acr_location = azurerm_container_registry.dockerhub_mirror.location
   acr_rg_name  = azurerm_container_registry.dockerhub_mirror.resource_group_name
 
-  subnet_name  = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.name
+  subnet_name  = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_commons.name
   vnet_name    = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.name
   vnet_rg_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.resource_group_name
 
