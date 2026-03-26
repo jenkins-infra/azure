@@ -150,7 +150,7 @@ module "infracijenkinsio_acr_pe" {
   source = "./modules/azure-container-registry-private-links"
 
   providers = {
-    azurerm     = azurerm
+    azurerm     = azurerm.jenkins-sponsored
     azurerm.acr = azurerm
   }
 
