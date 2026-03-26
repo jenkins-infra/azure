@@ -117,7 +117,7 @@ moved {
   to   = azurerm_role_assignment.push_to_acr[0]
 }
 resource "azurerm_role_assignment" "push_to_acr" {
-  count = var.terratest ? 0 : 1
+  count                            = var.terratest ? 0 : 1
   principal_id                     = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents_jenkins_sponsored.principal_id
   role_definition_name             = "AcrPush"
   scope                            = azurerm_container_registry.dockerhub_mirror.id
