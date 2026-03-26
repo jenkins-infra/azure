@@ -8,7 +8,7 @@ resource "azurerm_resource_group" "infra_ci_jenkins_io_controller" {
 resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_controller" {
   location            = azurerm_resource_group.infra_ci_jenkins_io_controller.location
   name                = "infracijenkinsiocontroller"
-  resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_controller.name
+  resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_sponsored_commons.name
 }
 
 # Required to allow azcopy sync of contributors.jenkins.io File Share
