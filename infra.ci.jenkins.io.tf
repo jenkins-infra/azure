@@ -292,6 +292,10 @@ module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   jenkins_infra_ips = {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   }
+
+  depends_on = [
+    azurerm_role_assignment.infra_ci_jenkins_io_operate_agents_identity_jenkins_sponsored
+  ]
 }
 
 # Allow infra.ci sponsored ephemeral agents to reach packer VMs with SSH on aws
