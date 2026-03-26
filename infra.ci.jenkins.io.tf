@@ -8,7 +8,7 @@ resource "azurerm_resource_group" "infra_ci_jenkins_io_controller" {
 resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_controller" {
   location            = azurerm_resource_group.infra_ci_jenkins_io_controller.location
   name                = "infracijenkinsiocontroller"
-  resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_controller.name
+  resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_sponsored_commons.name
 }
 
 # Required to allow azcopy sync of contributors.jenkins.io File Share
@@ -231,14 +231,6 @@ resource "azurerm_resource_group" "infra_ci_jenkins_io_sponsored_commons" {
   tags     = local.default_tags
 }
 
-# This resource group hosts resources used for agents only managed by terraform or administrators
-# such as NSG for agents subnet (we don't want azure-vm-agents jenkins plugin to access this RG)
-resource "azurerm_resource_group" "infra_ci_jenkins_io_controller_jenkins_sponsored" {
-  provider = azurerm.jenkins-sponsored
-  name     = "infra-ci-jenkins-io-controller" # Same name on both subscriptions
-  location = var.location
-  tags     = local.default_tags
-}
 ## Identity assigned to agents workloads (allowing them to reach resources without any Azure credential)
 resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_agents_jenkins_sponsored" {
   provider            = azurerm.jenkins-sponsored
@@ -290,7 +282,7 @@ module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   ephemeral_agents_network_rg_name = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.resource_group_name
   ephemeral_agents_network_name    = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.virtual_network_name
   ephemeral_agents_subnet_name     = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.name
-  controller_rg_name               = azurerm_resource_group.infra_ci_jenkins_io_controller_jenkins_sponsored.name
+  controller_rg_name               = azurerm_resource_group.infra_ci_jenkins_io_sponsored_commons.name
   controller_ips                   = data.azurerm_subnet.privatek8s_infra_ci_controller_tier.address_prefixes # Pod IPs: controller IP may change in the pods IP subnet
   controller_service_principal_id  = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id
   storage_account_name             = "infraciagentssponso" # Max 24 chars
@@ -300,6 +292,10 @@ module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   jenkins_infra_ips = {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   }
+
+  depends_on = [
+    azurerm_role_assignment.infra_ci_jenkins_io_operate_agents_identity_jenkins_sponsored
+  ]
 }
 
 # Allow infra.ci sponsored ephemeral agents to reach packer VMs with SSH on aws
