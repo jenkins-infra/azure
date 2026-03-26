@@ -6,6 +6,7 @@ resource "azurerm_resource_group" "infra_ci_jenkins_io_controller" {
   tags     = local.default_tags
 }
 resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_controller" {
+  provider            = azurerm.jenkins-sponsored
   location            = azurerm_resource_group.infra_ci_jenkins_io_controller.location
   name                = "infracijenkinsiocontroller"
   resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_sponsored_commons.name
