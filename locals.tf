@@ -64,12 +64,6 @@ locals {
       # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
       pod_cidr = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
     },
-    "infracijenkinsio_agents_2" = {
-      name               = "infracijenkinsio-agents-2",
-      kubernetes_version = "1.33.5",
-      # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
-      pod_cidr = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
-    },
     "privatek8s" = {
       name               = "privatek8s",
       kubernetes_version = "1.33.5",
@@ -325,9 +319,6 @@ locals {
   aks_clusters_outputs = {
     "infracijenkinsio_agents_1" = {
       cluster_hostname = "https://${azurerm_kubernetes_cluster.infracijenkinsio_agents_1.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
-    },
-    "infracijenkinsio_agents_2" = {
-      cluster_hostname = "https://${azurerm_kubernetes_cluster.infracijenkinsio_agents_2.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
     },
     "privatek8s" = {
       cluster_hostname = "https://${azurerm_kubernetes_cluster.privatek8s.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
