@@ -150,7 +150,7 @@ module "infracijenkinsio_acr_pe" {
   source = "./modules/azure-container-registry-private-links"
 
   providers = {
-    azurerm     = azurerm
+    azurerm     = azurerm.jenkins-sponsored
     azurerm.acr = azurerm
   }
 
@@ -160,9 +160,9 @@ module "infracijenkinsio_acr_pe" {
   acr_location = azurerm_container_registry.dockerhub_mirror.location
   acr_rg_name  = azurerm_container_registry.dockerhub_mirror.resource_group_name
 
-  subnet_name  = data.azurerm_subnet.infracijenkinsio_agents_2.name
-  vnet_name    = data.azurerm_virtual_network.infra_ci_jenkins_io.name
-  vnet_rg_name = data.azurerm_virtual_network.infra_ci_jenkins_io.resource_group_name
+  subnet_name  = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_commons.name
+  vnet_name    = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.name
+  vnet_rg_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.resource_group_name
 
   default_tags = local.default_tags
 }
