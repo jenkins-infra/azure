@@ -4,7 +4,6 @@ resource "azurerm_resource_group" "infracijenkinsio_agents_2" {
   tags     = local.default_tags
 }
 
-#trivy:ignore:avd-azu-0040 # No need to enable oms_agent for Azure monitoring as we already have datadog
 resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_2" {
   name     = local.aks_clusters["infracijenkinsio_agents_2"].name
   sku_tier = "Standard"
@@ -17,7 +16,6 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_2" {
   location                            = azurerm_resource_group.infracijenkinsio_agents_2.location
   resource_group_name                 = azurerm_resource_group.infracijenkinsio_agents_2.name
   kubernetes_version                  = local.aks_clusters["infracijenkinsio_agents_2"].kubernetes_version
-  # default value but made explicit to please trivy
   role_based_access_control_enabled = true
   oidc_issuer_enabled               = true
   workload_identity_enabled         = true

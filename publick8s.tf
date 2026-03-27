@@ -37,7 +37,6 @@ resource "azurerm_dns_a_record" "private_publick8s" {
   tags                = local.default_tags
 }
 
-#trivy:ignore:azure-container-logging #trivy:ignore:azure-container-limit-authorized-ips
 resource "azurerm_kubernetes_cluster" "publick8s" {
   name     = local.aks_clusters["publick8s"].name
   location = azurerm_resource_group.publick8s.location
@@ -51,8 +50,6 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   resource_group_name = azurerm_resource_group.publick8s.name
   kubernetes_version  = local.aks_clusters["publick8s"].kubernetes_version
   dns_prefix          = local.aks_clusters["publick8s"].name
-
-  # default value but made explicit to please trivy
   role_based_access_control_enabled = true
   oidc_issuer_enabled               = true
   workload_identity_enabled         = true

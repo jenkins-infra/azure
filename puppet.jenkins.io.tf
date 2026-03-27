@@ -42,7 +42,6 @@ data "azurerm_network_security_group" "private_dmz" {
   resource_group_name = data.azurerm_resource_group.private.name
 }
 ## Inbound Rules (different set of priorities than Outbound rules) ##
-#trivy:ignore:azure-network-no-public-ingress
 resource "azurerm_network_security_rule" "allow_inbound_webhooks_from_github_to_puppet" {
   name              = "allow-inbound-webhooks-from-github-to-puppet"
   priority          = 3999
@@ -75,7 +74,6 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_admins_to_puppe
   resource_group_name         = data.azurerm_resource_group.private.name
   network_security_group_name = data.azurerm_network_security_group.private_dmz.name
 }
-#trivy:ignore:azure-network-no-public-ingress
 resource "azurerm_network_security_rule" "allow_inbound_puppet_from_vms" {
   name                        = "allow-inbound-puppet-from-vms"
   priority                    = 4001
@@ -91,7 +89,6 @@ resource "azurerm_network_security_rule" "allow_inbound_puppet_from_vms" {
 }
 ## Outbound Rules (different set of priorities than Inbound rules) ##
 ## Do not tag internet egress as a security issue (we want puppet master to access to internet)
-#trivy:ignore:avd-azu-0051
 resource "azurerm_network_security_rule" "allow_outbound_http_from_puppet_to_internet" {
   name                        = "allow-outbound-http-from-puppet-to-internet"
   priority                    = 4002

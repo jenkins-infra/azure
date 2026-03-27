@@ -18,7 +18,6 @@ resource "azurerm_container_registry" "dockerhub_mirror" {
 }
 
 ## TODO: factorize and simplify RBAC policy with other keyvaults
-#trivy:ignore:avd-azu-0016
 resource "azurerm_key_vault" "dockerhub_mirror" {
   name                = "dockerhubmirror"
   location            = azurerm_resource_group.dockerhub_mirror.location

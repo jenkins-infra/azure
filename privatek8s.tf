@@ -4,7 +4,6 @@ resource "azurerm_resource_group" "privatek8s" {
   tags     = local.default_tags
 }
 
-#trivy:ignore:azure-container-logging #trivy:ignore:azure-container-limit-authorized-ips
 resource "azurerm_kubernetes_cluster" "privatek8s" {
   name     = local.aks_clusters["privatek8s"].name
   sku_tier = "Standard"
@@ -17,7 +16,6 @@ resource "azurerm_kubernetes_cluster" "privatek8s" {
   location                            = azurerm_resource_group.privatek8s.location
   resource_group_name                 = azurerm_resource_group.privatek8s.name
   kubernetes_version                  = local.aks_clusters["privatek8s"].kubernetes_version
-  # default value but made explicit to please trivy
   role_based_access_control_enabled = true
   oidc_issuer_enabled               = true
   workload_identity_enabled         = true
