@@ -42,5 +42,4 @@ variable "private_dns_zone_id" {
   type        = string
   default     = ""
   description = "(optional) ID of the Private DNS Zone to use"
-
 }

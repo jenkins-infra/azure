@@ -144,29 +144,6 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_agents_write_buildsrepor
   principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents.principal_id
 }
 
-# TODO: use a "commons" subnet
-# Allow access to the private Azure Container Registry through an Azure Endpoint NIC
-module "infracijenkinsio_acr_pe" {
-  source = "./modules/azure-container-registry-private-links"
-
-  providers = {
-    azurerm     = azurerm.jenkins-sponsored
-    azurerm.acr = azurerm
-  }
-
-  name = "infracijenkinsio"
-
-  acr_name     = azurerm_container_registry.dockerhub_mirror.name
-  acr_location = azurerm_container_registry.dockerhub_mirror.location
-  acr_rg_name  = azurerm_container_registry.dockerhub_mirror.resource_group_name
-
-  subnet_name  = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_commons.name
-  vnet_name    = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.name
-  vnet_rg_name = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.resource_group_name
-
-  default_tags = local.default_tags
-}
-
 # Azure SP for updatecli with minimum rights
 resource "azurerm_resource_group" "updatecli_infra_ci_jenkins_io" {
   name     = "updatecli-infra-ci-jenkins-io"
