@@ -63,20 +63,6 @@ module "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer" {
   default_tags               = local.default_tags
 }
 
-# Required to allow controller to check for subnets inside the virtual network
-resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_vnet_reader" {
-  name  = "read-infra-ci-jenkins-io-vnet"
-  scope = data.azurerm_virtual_network.infra_ci_jenkins_io.id
-
-  permissions {
-    actions = ["Microsoft.Network/virtualNetworks/read"]
-  }
-}
-resource "azurerm_role_assignment" "infra_ci_jenkins_io_controller_vnet_reader" {
-  scope              = data.azurerm_virtual_network.infra_ci_jenkins_io.id
-  role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_vnet_reader.role_definition_resource_id
-  principal_id       = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id
-}
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_packer_sponsored" {
   scope                = azurerm_resource_group.packer_images_sponsored["prod"].id
   role_definition_name = "Reader"
