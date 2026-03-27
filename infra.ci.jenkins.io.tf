@@ -208,14 +208,6 @@ resource "azurerm_resource_group" "infra_ci_jenkins_io_sponsored_commons" {
   tags     = local.default_tags
 }
 
-# This resource group hosts resources used for agents only managed by terraform or administrators
-# such as NSG for agents subnet (we don't want azure-vm-agents jenkins plugin to access this RG)
-resource "azurerm_resource_group" "infra_ci_jenkins_io_controller_jenkins_sponsored" {
-  provider = azurerm.jenkins-sponsored
-  name     = "infra-ci-jenkins-io-controller" # Same name on both subscriptions
-  location = var.location
-  tags     = local.default_tags
-}
 ## Identity assigned to agents workloads (allowing them to reach resources without any Azure credential)
 resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_agents_jenkins_sponsored" {
   provider            = azurerm.jenkins-sponsored
