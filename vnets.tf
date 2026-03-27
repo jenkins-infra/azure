@@ -50,10 +50,6 @@ data "azurerm_virtual_network" "public_db" {
   name                = "${data.azurerm_resource_group.public.name}-db-vnet"
   resource_group_name = data.azurerm_resource_group.public.name
 }
-data "azurerm_virtual_network" "infra_ci_jenkins_io" {
-  name                = "${data.azurerm_resource_group.infra_ci_jenkins_io.name}-vnet"
-  resource_group_name = data.azurerm_resource_group.infra_ci_jenkins_io.name
-}
 data "azurerm_virtual_network" "infra_ci_jenkins_io_sponsored" {
   provider            = azurerm.jenkins-sponsored
   name                = "${data.azurerm_resource_group.infra_ci_jenkins_io_sponsored.name}-vnet"
