@@ -22,13 +22,6 @@ locals {
     }
   }
 
-  # Tracked by 'updatecli' from the following source: https://reports.jenkins.io/jenkins-infra-data-reports/azure-net.json
-  outbound_ips_trusted_ci_jenkins_io = "104.209.128.236 20.110.255.213"
-  # Tracked by 'updatecli' from the following source: https://reports.jenkins.io/jenkins-infra-data-reports/azure-net.json
-  outbound_ips_infra_ci_jenkins_io = "20.57.120.46 52.179.141.53 20.97.161.208 52.251.34.201"
-  # Tracked by 'updatecli' from the following source: https://reports.jenkins.io/jenkins-infra-data-reports/azure-net.json
-  outbound_ips_private_vpn_jenkins_io = "52.232.183.117"
-
   admin_public_ips = {
     dduportal = ["82.67.112.167"],
     smerle33  = ["86.207.165.174"],
