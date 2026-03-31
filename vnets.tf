@@ -11,9 +11,6 @@ data "azurerm_resource_group" "public" {
 data "azurerm_resource_group" "private" {
   name = "private"
 }
-data "azurerm_resource_group" "infra_ci_jenkins_io" {
-  name = "infra-ci-jenkins-io"
-}
 data "azurerm_resource_group" "infra_ci_jenkins_io_sponsored" {
   provider = azurerm.jenkins-sponsored
   name     = "infra-ci-jenkins-io-sponsored"
