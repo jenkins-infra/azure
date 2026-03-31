@@ -47,9 +47,9 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
   private_cluster_enabled             = true
   private_cluster_public_fqdn_enabled = true
 
-  resource_group_name = azurerm_resource_group.publick8s.name
-  kubernetes_version  = local.aks_clusters["publick8s"].kubernetes_version
-  dns_prefix          = local.aks_clusters["publick8s"].name
+  resource_group_name               = azurerm_resource_group.publick8s.name
+  kubernetes_version                = local.aks_clusters["publick8s"].kubernetes_version
+  dns_prefix                        = local.aks_clusters["publick8s"].name
   role_based_access_control_enabled = true
   oidc_issuer_enabled               = true
   workload_identity_enabled         = true
