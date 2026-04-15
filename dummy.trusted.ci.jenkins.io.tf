@@ -84,10 +84,6 @@ resource "azurerm_virtual_machine_data_disk_attachment" "dummy_trusted_ci_jenkin
 ####################################################################################
 ## Network Security Group and rules
 ####################################################################################
-resource "azurerm_subnet_network_security_group_association" "trusted_ci_dummy_agent" {
-  subnet_id                 = data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.id
-  network_security_group_id = module.trusted_ci_jenkins_io.controller_nsg_id
-}
 
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_dummy_agent" {
   name                   = "allow-inbound-ssh-from-controller-to-dummy-agent"
