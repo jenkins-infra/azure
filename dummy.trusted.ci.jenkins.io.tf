@@ -87,7 +87,7 @@ resource "azurerm_virtual_machine_data_disk_attachment" "dummy_trusted_ci_jenkin
 
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_dummy_agent" {
   name                   = "allow-inbound-ssh-from-controller-to-dummy-agent"
-  priority               = 3600
+  priority               = 3601
   direction              = "Inbound"
   access                 = "Allow"
   protocol               = "Tcp"
