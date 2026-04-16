@@ -17,16 +17,27 @@ data "azurerm_subnet" "ephemeral_agents" {
 ####################################################################################
 ## Network Security Group and rules
 ####################################################################################
-### Ephemeral Agents
+moved {
+  from = azurerm_network_security_group.ephemeral_agents
+  to   = azurerm_network_security_group.ephemeral_agents[0]
+}
 resource "azurerm_network_security_group" "ephemeral_agents" {
+  count = var.use_vnet_common_nsg ? 0 : 1
+
   name                = "${var.service_fqdn}-ephemeralagents"
   location            = data.azurerm_resource_group.ephemeral_agents_vnet.location
-  resource_group_name = var.controller_rg_name
+  resource_group_name = var.nsg_rg_name
   tags                = var.default_tags
+}
+data "azurerm_network_security_group" "vnet_common_nsg" {
+  count = var.use_vnet_common_nsg ? 1 : 0
+
+  name                = data.azurerm_virtual_network.ephemeral_agents.name
+  resource_group_name = data.azurerm_resource_group.ephemeral_agents_vnet.name
 }
 resource "azurerm_subnet_network_security_group_association" "ephemeral_agents" {
   subnet_id                 = data.azurerm_subnet.ephemeral_agents.id
-  network_security_group_id = azurerm_network_security_group.ephemeral_agents.id
+  network_security_group_id = var.use_vnet_common_nsg ? data.azurerm_network_security_group.vnet_common_nsg[0].id : azurerm_network_security_group.ephemeral_agents[0].id
 }
 ## Outbound Rules (different set of priorities than Inbound rules) ##
 resource "azurerm_network_security_rule" "allow_outbound_hkp_udp_from_ephemeral_agents_subnet_to_internet" {
@@ -41,8 +52,8 @@ resource "azurerm_network_security_rule" "allow_outbound_hkp_udp_from_ephemeral_
     "11371", # HKP (OpenPGP KeyServer) - https://github.com/jenkins-infra/helpdesk/issues/3664
   ]
   destination_address_prefixes = local.external_service_ips["gpg_keyserver"]
-  resource_group_name          = var.controller_rg_name
-  network_security_group_name  = azurerm_network_security_group.ephemeral_agents.name
+  resource_group_name          = local.nsg_rg_name
+  network_security_group_name  = local.nsg_name
 }
 resource "azurerm_network_security_rule" "allow_outbound_hkp_tcp_from_ephemeral_agents_subnet_to_internet" {
   name                    = "allow-outbound-hkp-tcp-from-${var.service_short_stripped_name}_ephemeral_agents-to-internet"
@@ -56,8 +67,8 @@ resource "azurerm_network_security_rule" "allow_outbound_hkp_tcp_from_ephemeral_
     "11371", # HKP (OpenPGP KeyServer) - https://github.com/jenkins-infra/helpdesk/issues/3664
   ]
   destination_address_prefixes = local.external_service_ips["gpg_keyserver"]
-  resource_group_name          = var.controller_rg_name
-  network_security_group_name  = azurerm_network_security_group.ephemeral_agents.name
+  resource_group_name          = local.nsg_rg_name
+  network_security_group_name  = local.nsg_name
 }
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_ephemeral_agents_to_internet" {
   name                    = "allow-outbound-ssh-from-${var.service_short_stripped_name}_ephemeral_agents-to-internet"
@@ -73,8 +84,8 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_ephemeral_agen
     for ip in split(" ", local.github_destination_address_prefixes) : ip
     if can(cidrnetmask(ip))
   ]
-  resource_group_name         = var.controller_rg_name
-  network_security_group_name = azurerm_network_security_group.ephemeral_agents.name
+  resource_group_name         = local.nsg_rg_name
+  network_security_group_name = local.nsg_name
 }
 resource "azurerm_network_security_rule" "allow_outbound_jenkins_from_ephemeral_agents_to_controller" {
   name                    = "allow-outbound-jenkins-from-${var.service_short_stripped_name}-agents"
@@ -90,8 +101,8 @@ resource "azurerm_network_security_rule" "allow_outbound_jenkins_from_ephemeral_
     "50000", # Direct TCP Inbound protocol
   ]
   destination_address_prefixes = compact(var.controller_ips)
-  resource_group_name          = var.controller_rg_name
-  network_security_group_name  = azurerm_network_security_group.ephemeral_agents.name
+  resource_group_name          = local.nsg_rg_name
+  network_security_group_name  = local.nsg_name
 }
 resource "azurerm_network_security_rule" "allow_outbound_http_from_ephemeral_agents_to_internet" {
   name                    = "allow-outbound-http-from-${var.service_short_stripped_name}_ephemeral_agents-to-internet"
@@ -106,8 +117,8 @@ resource "azurerm_network_security_rule" "allow_outbound_http_from_ephemeral_age
     "443", # HTTPS
   ]
   destination_address_prefix  = "Internet"
-  resource_group_name         = var.controller_rg_name
-  network_security_group_name = azurerm_network_security_group.ephemeral_agents.name
+  resource_group_name         = local.nsg_rg_name
+  network_security_group_name = local.nsg_name
 }
 resource "azurerm_network_security_rule" "deny_all_outbound_from_ephemeral_agents_to_internet" {
   name                        = "deny-all-outbound-from-${var.service_short_stripped_name}_ephemeral_agents-to-internet"
@@ -119,8 +130,8 @@ resource "azurerm_network_security_rule" "deny_all_outbound_from_ephemeral_agent
   destination_port_range      = "*"
   source_address_prefixes     = data.azurerm_subnet.ephemeral_agents.address_prefixes
   destination_address_prefix  = "Internet"
-  resource_group_name         = var.controller_rg_name
-  network_security_group_name = azurerm_network_security_group.ephemeral_agents.name
+  resource_group_name         = local.nsg_rg_name
+  network_security_group_name = local.nsg_name
 }
 # This rule overrides an Azure-Default rule. its priority must be < 65000.
 resource "azurerm_network_security_rule" "deny_all_outbound_from_ephemeral_agents_to_vnet" {
@@ -133,8 +144,8 @@ resource "azurerm_network_security_rule" "deny_all_outbound_from_ephemeral_agent
   destination_port_range      = "*"
   source_address_prefixes     = data.azurerm_subnet.ephemeral_agents.address_prefixes
   destination_address_prefix  = "VirtualNetwork"
-  resource_group_name         = var.controller_rg_name
-  network_security_group_name = azurerm_network_security_group.ephemeral_agents.name
+  resource_group_name         = local.nsg_rg_name
+  network_security_group_name = local.nsg_name
 }
 
 ## Inbound Rules (different set of priorities than Outbound rules) ##
@@ -148,8 +159,8 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_privatevpn_to_e
   destination_port_range      = "22"
   source_address_prefixes     = var.jenkins_infra_ips.privatevpn_subnet
   destination_address_prefix  = "VirtualNetwork"
-  resource_group_name         = var.controller_rg_name
-  network_security_group_name = azurerm_network_security_group.ephemeral_agents.name
+  resource_group_name         = local.nsg_rg_name
+  network_security_group_name = local.nsg_name
 }
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_ephemeral_agents" {
   name                         = "allow-inbound-ssh-from-${var.service_short_stripped_name}-controller-to-ephemeral-agents"
@@ -161,8 +172,8 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_e
   source_address_prefixes      = var.controller_ips
   destination_port_range       = "22" # SSH
   destination_address_prefixes = data.azurerm_subnet.ephemeral_agents.address_prefixes
-  resource_group_name          = var.controller_rg_name
-  network_security_group_name  = azurerm_network_security_group.ephemeral_agents.name
+  resource_group_name          = local.nsg_rg_name
+  network_security_group_name  = local.nsg_name
 }
 # This rule overrides an Azure-Default rule. its priority must be < 65000
 resource "azurerm_network_security_rule" "deny_all_inbound_from_vnet_to_ephemeral_agents" {
@@ -175,8 +186,8 @@ resource "azurerm_network_security_rule" "deny_all_inbound_from_vnet_to_ephemera
   destination_port_range       = "*"
   source_address_prefix        = "*"
   destination_address_prefixes = data.azurerm_subnet.ephemeral_agents.address_prefixes
-  resource_group_name          = var.controller_rg_name
-  network_security_group_name  = azurerm_network_security_group.ephemeral_agents.name
+  resource_group_name          = local.nsg_rg_name
+  network_security_group_name  = local.nsg_name
 }
 
 ####################################################################################

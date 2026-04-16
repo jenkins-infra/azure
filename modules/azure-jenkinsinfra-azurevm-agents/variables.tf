@@ -15,9 +15,10 @@ variable "ephemeral_agents_network_rg_name" {
   type = string
 }
 
-# Required for NSG (can't be on the vnet RGs neither on agent RGs both for permissions reasons)
-variable "controller_rg_name" {
-  type = string
+variable "nsg_rg_name" {
+  type        = string
+  description = "Name of the Resource Group where to create the Network Security Group (unneeded if var.use_vnet_common_nsg is true)."
+  default     = ""
 }
 
 variable "ephemeral_agents_subnet_name" {
@@ -58,4 +59,10 @@ variable "additional_identities" {
   type        = list(string)
   description = "A list of Azure identity IDs, in addition to controller_service_principal_id, which can manage Azure VM agents."
   default     = []
+}
+
+variable "use_vnet_common_nsg" {
+  type        = bool
+  description = "Should we use the Network Security Group ('NSG') located in the same Resource Group as the provided Virtual Network and with the same name (convention)?"
+  default     = false
 }

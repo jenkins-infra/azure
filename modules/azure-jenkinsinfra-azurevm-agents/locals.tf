@@ -9,4 +9,7 @@ locals {
       "162.213.33.8", "162.213.33.9", # keyserver.ubuntu.com
     ]
   }
+
+  nsg_name    = var.use_vnet_common_nsg ? data.azurerm_network_security_group.vnet_common_nsg[0].name : azurerm_network_security_group.ephemeral_agents[0].name
+  nsg_rg_name = var.use_vnet_common_nsg ? data.azurerm_network_security_group.vnet_common_nsg[0].resource_group_name : azurerm_network_security_group.ephemeral_agents[0].resource_group_name
 }
