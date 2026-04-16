@@ -185,6 +185,15 @@ resource "azurerm_role_assignment" "trusted_controller_vnet_jenkins_sponsored_re
   role_definition_id = azurerm_role_definition.trusted_ci_jenkins_io_controller_vnet_sponsored_reader.role_definition_resource_id
   principal_id       = module.trusted_ci_jenkins_io.controller_service_principal_id
 }
+
+# Managed in jenkins-infra/azure-net with vnet and subnets
+data "azurerm_network_security_group" "trusted_ci_jenkins_io_sponsored_vnet" {
+  provider = azurerm.jenkins-sponsored
+
+  name                = "trusted-ci-jenkins-io-sponsored-vnet"
+  resource_group_name = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.resource_group_name
+}
+
 module "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   providers = {
     azurerm = azurerm.jenkins-sponsored
