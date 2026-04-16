@@ -1,6 +1,13 @@
 ####################################################################################
 ## Resources for the permanent agent VM
 ####################################################################################
+resource "azurerm_resource_group" "permanent_agents_trusted_ci_jenkins_io_sponsored" {
+  provider = azurerm.jenkins-sponsored
+  name     = "trusted-ci-jenkins-io-permanent-agents"
+  location = var.location
+  tags     = local.default_tags
+}
+
 resource "azurerm_resource_group" "permanent_agents_trusted_ci_jenkins_io" {
   name     = "permanent-agents-trusted-ci-jenkins-io"
   location = var.location
