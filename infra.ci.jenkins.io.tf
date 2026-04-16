@@ -234,7 +234,7 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_controller_vnet_sponsore
 }
 
 module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
-  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-azurevm-agents"
+  source = "./modules/azure-jenkinsinfra-azurevm-agents"
 
   providers = {
     azurerm = azurerm.jenkins-sponsored
