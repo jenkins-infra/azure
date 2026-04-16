@@ -3,11 +3,11 @@
 ####################################################################################
 import {
   to = azurerm_network_interface.dummy_trusted_ci_jenkins_io
-  id = "dummy-trusted-ci-jenkins-io"
+  id = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/permanent-agents-trusted-ci-jenkins-io/providers/Microsoft.Network/networkInterfaces/dummy-trusted-ci-jenkins-io"
 }
 import {
   to = azurerm_linux_virtual_machine.dummy_trusted_ci_jenkins_io
-  id = "dummy.trusted.ci.jenkins.io"
+  id = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/permanent-agents-trusted-ci-jenkins-io/providers/Microsoft.Compute/virtualMachines/dummy.trusted.ci.jenkins.io"
 }
 # No import for dummy_trusted_ci_jenkins_io_data, moved to new sponsored RG
 # It will be recreated
@@ -18,11 +18,14 @@ import {
 
 import {
   to = azurerm_network_security_rule.allow_inbound_ssh_from_controller_to_dummy_agent
-  id = "allow-inbound-ssh-from-controller-to-dummy-agent"
+  id = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/PERMANENT-AGENTS-TRUSTED-CI-JENKINS-IO/providers/Microsoft.Compute/disks/dummy.trusted.ci.jenkins.io_OsDisk_1_bdad993e4ab740868c4cc84802f1f74e"
 }
+# FTR, we shouldn't have removed this resource from state as not in the permament agent RG
 import {
   to = azurerm_dns_a_record.trusted_dummy_agent
-  id = "dummy"
+  # DNS zone resource id from Portal JSON view:
+  #     /subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/proddns_jenkinsio/providers/Microsoft.Network/dnszones/trusted.ci.jenkins.io
+  id = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/proddns_jenkinsio/providers/Microsoft.Network/dnsZones/trusted.ci.jenkins.io/A/dummy"
 }
 
 resource "azurerm_network_interface" "dummy_trusted_ci_jenkins_io" {
