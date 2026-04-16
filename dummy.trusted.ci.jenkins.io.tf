@@ -18,7 +18,9 @@ import {
 
 import {
   to = azurerm_network_security_rule.allow_inbound_ssh_from_controller_to_dummy_agent
-  id = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/PERMANENT-AGENTS-TRUSTED-CI-JENKINS-IO/providers/Microsoft.Compute/disks/dummy.trusted.ci.jenkins.io_OsDisk_1_bdad993e4ab740868c4cc84802f1f74e"
+  # NSG resource id from Portal JSON view:
+  #     /subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/jenkinsinfra-trusted-ci-controller/providers/Microsoft.Network/networkSecurityGroups/controller.trusted.ci.jenkins.io
+  id = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/jenkinsinfra-trusted-ci-controller/providers/Microsoft.Network/networkSecurityGroups/controller.trusted.ci.jenkins.io/securityRules/allow-inbound-ssh-from-controller-to-dummy-agent"
 }
 # FTR, we shouldn't have removed this resource from state as not in the permament agent RG
 import {
