@@ -1,6 +1,30 @@
 ####################################################################################
 ## Resources for the permanent agent VM
 ####################################################################################
+import {
+  to = azurerm_network_interface.dummy_trusted_ci_jenkins_io
+  id = "dummy-trusted-ci-jenkins-io"
+}
+import {
+  to = azurerm_linux_virtual_machine.dummy_trusted_ci_jenkins_io
+  id = "dummy.trusted.ci.jenkins.io"
+}
+# No import for dummy_trusted_ci_jenkins_io_data, moved to new sponsored RG
+# It will be recreated
+
+# No import for azurerm_virtual_machine_data_disk_attachment.dummy_trusted_ci_jenkins_io_data:
+# - No Azure ID in the original terraform to be referenced to
+# - Attachment to be created from scratch as related to a disk that will be recreated anyway cf comment above
+
+import {
+  to = azurerm_network_security_rule.allow_inbound_ssh_from_controller_to_dummy_agent
+  id = "allow-inbound-ssh-from-controller-to-dummy-agent"
+}
+import {
+  to = azurerm_dns_a_record.trusted_dummy_agent
+  id = "dummy"
+}
+
 resource "azurerm_network_interface" "dummy_trusted_ci_jenkins_io" {
   name                = "dummy-trusted-ci-jenkins-io"
   location            = azurerm_resource_group.permanent_agents_trusted_ci_jenkins_io.location
