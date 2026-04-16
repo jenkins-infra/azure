@@ -58,7 +58,7 @@ module "trusted_ci_jenkins_io" {
 }
 
 module "trusted_ci_jenkins_io_azurevm_agents" {
-  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-azurevm-agents"
+  source = "./modules/azure-jenkinsinfra-azurevm-agents"
 
   service_fqdn                     = module.trusted_ci_jenkins_io.service_fqdn
   service_short_stripped_name      = module.trusted_ci_jenkins_io.service_short_stripped_name
@@ -198,7 +198,7 @@ module "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   providers = {
     azurerm = azurerm.jenkins-sponsored
   }
-  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-azurevm-agents"
+  source = "./modules/azure-jenkinsinfra-azurevm-agents"
 
   service_fqdn                     = module.trusted_ci_jenkins_io.service_fqdn
   service_short_stripped_name      = module.trusted_ci_jenkins_io.service_short_stripped_name
