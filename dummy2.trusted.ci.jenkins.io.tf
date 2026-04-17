@@ -10,7 +10,7 @@ resource "azurerm_network_interface" "dummy2_trusted_ci_jenkins_io" {
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.id
+    subnet_id                     = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_permanent_agents.id
     private_ip_address_allocation = "Dynamic"
   }
 }
