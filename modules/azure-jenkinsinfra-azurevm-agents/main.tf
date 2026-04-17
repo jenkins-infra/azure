@@ -32,6 +32,8 @@ data "azurerm_network_security_group" "vnet_common_nsg" {
   resource_group_name = data.azurerm_resource_group.ephemeral_agents_vnet.name
 }
 resource "azurerm_subnet_network_security_group_association" "ephemeral_agents" {
+  count = var.use_vnet_common_nsg ? 0 : 1
+
   subnet_id                 = data.azurerm_subnet.ephemeral_agents.id
   network_security_group_id = var.use_vnet_common_nsg ? data.azurerm_network_security_group.vnet_common_nsg[0].id : azurerm_network_security_group.ephemeral_agents[0].id
 }
