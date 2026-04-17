@@ -17,10 +17,6 @@ data "azurerm_subnet" "ephemeral_agents" {
 ####################################################################################
 ## Network Security Group and rules
 ####################################################################################
-moved {
-  from = azurerm_network_security_group.ephemeral_agents
-  to   = azurerm_network_security_group.ephemeral_agents[0]
-}
 resource "azurerm_network_security_group" "ephemeral_agents" {
   count = var.use_vnet_common_nsg ? 0 : 1
 

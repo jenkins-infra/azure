@@ -110,11 +110,6 @@ resource "azurerm_container_registry_cache_rule" "mirror_cache_rules" {
 }
 
 #### Allow provided Principal IDs to push images to the registry
-# id obtained with `terraform state list | grep push_to_acr`
-moved {
-  from = azurerm_role_assignment.push_to_acr["4b7d8dbc-c30d-43ca-8112-fd8be2cca3b0"]
-  to   = azurerm_role_assignment.push_to_acr[0]
-}
 resource "azurerm_role_assignment" "push_to_acr" {
   count                            = var.terratest ? 0 : 1
   principal_id                     = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents_jenkins_sponsored.principal_id
