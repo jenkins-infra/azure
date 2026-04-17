@@ -254,6 +254,8 @@ resource "azurerm_network_security_rule" "allow_out_many_from_trusted_agents_to_
   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
 }
 resource "azurerm_network_security_rule" "allow_out_many_from_trusted_agents_jenkins_sponsored_to_archive" {
+  provider = azurerm.jenkins-sponsored
+
   name              = "allow-out-many-from-agents-jenkins-sponsored-to-archive"
   priority          = 4070
   direction         = "Outbound"
