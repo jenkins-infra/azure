@@ -57,6 +57,19 @@ module "trusted_ci_jenkins_io" {
   )
 }
 
+####################################################################################
+## Private network resources (endpoint, DNS, etc.)
+####################################################################################
+resource "azurerm_resource_group" "trusted_ci_jenkins_io_sponsored_commons" {
+  provider = azurerm.jenkins-sponsored
+  name     = "trusted-ci-jenkins-io-sponsored-commons"
+  location = var.location
+  tags     = local.default_tags
+}
+
+####################################################################################
+## Agents resources in the CDF subscription
+####################################################################################
 module "trusted_ci_jenkins_io_azurevm_agents" {
   source = "./modules/azure-jenkinsinfra-azurevm-agents"
 
