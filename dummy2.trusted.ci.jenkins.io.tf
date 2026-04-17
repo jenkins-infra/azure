@@ -76,7 +76,7 @@ resource "azurerm_managed_disk" "dummy_trusted_ci_jenkins_io_data_moved" {
   location             = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents_jenkins_sponsored.location
   resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents_jenkins_sponsored.name
   zone                 = 2  # forcing the new data disk zone instead of azurerm_linux_virtual_machine.dummy2_trusted_ci_jenkins_io.zone
-  storage_account_type = "PremiumV2_LRS"
+  storage_account_type = "PremiumV2_ZRS"
   create_option        = "Empty"
   disk_size_gb         = "580"
   tags = local.default_tags
