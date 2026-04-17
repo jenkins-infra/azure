@@ -69,10 +69,10 @@ resource "azurerm_linux_virtual_machine" "dummy2_trusted_ci_jenkins_io" {
 # data disk from dummy, moved in the new RG
 import {
   to = azurerm_managed_disk.dummy_trusted_ci_jenkins_io_data_moved
-  id = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/permanent-agents-trusted-ci-jenkins-io/providers/Microsoft.Compute/disks/dummy-trusted-ci-jenkins-io-data"
+  id = "/subscriptions/1e7d5219-acbc-4495-8629-bdbb22e9b3ed/resourceGroups/trusted-ci-jenkins-io-sponsored-permanent-agents/providers/Microsoft.Compute/disks/dummy-trusted-ci-jenkins-io-data"
 }
 resource "azurerm_managed_disk" "dummy_trusted_ci_jenkins_io_data_moved" {
-  name                 = "dummy2-trusted-ci-jenkins-io-data"
+  name                 = "dummy-trusted-ci-jenkins-io-data"
   location             = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents_jenkins_sponsored.location
   resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents_jenkins_sponsored.name
   zone                 = azurerm_linux_virtual_machine.dummy2_trusted_ci_jenkins_io.zone
