@@ -65,27 +65,26 @@ resource "azurerm_linux_virtual_machine" "dummy2_trusted_ci_jenkins_io" {
     ]
   }
 }
-# There is already the data disk from dummy, moved in the new RG
-# resource "azurerm_managed_disk" "dummy2_trusted_ci_jenkins_io_data" {
-#   name                 = "dummy2-trusted-ci-jenkins-io-data"
-#   location             = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents_jenkins_sponsored.location
-#   resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents_jenkins_sponsored.name
-#   zone                 = azurerm_linux_virtual_machine.dummy2_trusted_ci_jenkins_io.zone
-#   storage_account_type = "PremiumV2_LRS"
-#   create_option        = "Empty"
-#   disk_size_gb         = "580"
 
-data "azurerm_managed_disk" "dummy_trusted_ci_jenkins_io_data_moved" {
-  provider             = azurerm.jenkins-sponsored
-  name                 = "dummy-trusted-ci-jenkins-io-data"
+# data disk from dummy, moved in the new RG
+import {
+  to = azurerm_managed_disk.dummy_trusted_ci_jenkins_io_data_moved
+  id = "/subscriptions/dff2ec18-6a8e-405c-8e45-b7df7465acf0/resourceGroups/permanent-agents-trusted-ci-jenkins-io/providers/Microsoft.Compute/disks/dummy-trusted-ci-jenkins-io-data"
+}
+resource "azurerm_managed_disk" "dummy_trusted_ci_jenkins_io_data_moved" {
+  name                 = "dummy2-trusted-ci-jenkins-io-data"
+  location             = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents_jenkins_sponsored.location
   resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents_jenkins_sponsored.name
+  zone                 = azurerm_linux_virtual_machine.dummy2_trusted_ci_jenkins_io.zone
+  storage_account_type = "PremiumV2_LRS"
+  create_option        = "Empty"
+  disk_size_gb         = "580"
+  tags = local.default_tags
 }
 
-#   tags = local.default_tags
-# }
 resource "azurerm_virtual_machine_data_disk_attachment" "dummy2_trusted_ci_jenkins_io_data" {
   provider           = azurerm.jenkins-sponsored
-  managed_disk_id    = data.azurerm_managed_disk.dummy_trusted_ci_jenkins_io_data_moved.id
+  managed_disk_id    = azurerm_managed_disk.dummy_trusted_ci_jenkins_io_data_moved.id
   virtual_machine_id = azurerm_linux_virtual_machine.dummy2_trusted_ci_jenkins_io.id
   lun                = "20"
   caching            = "None" # Caching not supported with "PremiumV2_LRS"
