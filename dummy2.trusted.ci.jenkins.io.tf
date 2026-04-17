@@ -35,11 +35,11 @@ resource "azurerm_linux_virtual_machine" "dummy2_trusted_ci_jenkins_io" {
 
   user_data = base64encode(
     templatefile("./.shared-tools/terraform/cloudinit.tftpl", {
-      hostname       = "dummy2.trusted.ci.jenkins.io",
+      hostname       = "dummy.trusted.ci.jenkins.io",
       admin_username = local.admin_username,
       }
   ))
-  computer_name = "dummy2.trusted.ci.jenkins.io"
+  computer_name = "dummy.trusted.ci.jenkins.io"
 
   # Encrypt all disks (ephemeral, temp dirs and data volumes) - https://learn.microsoft.com/en-us/azure/virtual-machines/disks-enable-host-based-encryption-portal?tabs=azure-powershell
   encryption_at_host_enabled = true
