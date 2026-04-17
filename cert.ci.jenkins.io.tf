@@ -136,7 +136,7 @@ module "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   ephemeral_agents_network_rg_name = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.resource_group_name
   ephemeral_agents_network_name    = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.virtual_network_name
   ephemeral_agents_subnet_name     = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.name
-  controller_rg_name               = azurerm_resource_group.cert_ci_jenkins_io_controller_jenkins_sponsored.name
+  nsg_rg_name                      = azurerm_resource_group.cert_ci_jenkins_io_controller_jenkins_sponsored.name
   controller_ips                   = compact([module.cert_ci_jenkins_io.controller_public_ipv4])
   controller_service_principal_id  = module.cert_ci_jenkins_io.controller_service_principal_id
   default_tags                     = local.default_tags
