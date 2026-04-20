@@ -82,13 +82,14 @@ resource "azurerm_managed_disk" "dummy_trusted_ci_jenkins_io_data_moved" {
   tags = local.default_tags
 }
 
-resource "azurerm_virtual_machine_data_disk_attachment" "dummy2_trusted_ci_jenkins_io_data" {
-  provider           = azurerm.jenkins-sponsored
-  managed_disk_id    = azurerm_managed_disk.dummy_trusted_ci_jenkins_io_data_moved.id
-  virtual_machine_id = azurerm_linux_virtual_machine.dummy2_trusted_ci_jenkins_io.id
-  lun                = "20"
-  caching            = "None" # Caching not supported with "PremiumV2_LRS"
-}
+## Commented out as it fails due to zone mismatch between VM and disk
+#resource "azurerm_virtual_machine_data_disk_attachment" "dummy2_trusted_ci_jenkins_io_data" {
+#  provider           = azurerm.jenkins-sponsored
+#  managed_disk_id    = azurerm_managed_disk.dummy_trusted_ci_jenkins_io_data_moved.id
+#  virtual_machine_id = azurerm_linux_virtual_machine.dummy2_trusted_ci_jenkins_io.id
+#  lun                = "20"
+#  caching            = "None" # Caching not supported with "PremiumV2_LRS"
+#}
 
 # No NSG
 
