@@ -131,6 +131,37 @@ data "azurerm_private_link_service" "publick8s_mirrorbitscli_updates_jenkins_io"
   name                = "publick8s-updates.jenkins.io"
   resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
 }
+resource "azurerm_private_endpoint" "publick8s_updates_jenkins_io_for_trustedci_sponsored" {
+  provider = azurerm.jenkins-sponsored
+
+  name = "${data.azurerm_private_link_service.publick8s_mirrorbitscli_updates_jenkins_io.name}-for-trustedci-sponsored"
+
+  location            = var.location
+  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_sponsored_commons.name
+  subnet_id           = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_commons.id
+
+  custom_network_interface_name = "${data.azurerm_private_link_service.publick8s_mirrorbitscli_updates_jenkins_io.name}-for-trustedci-sponsored"
+
+  private_service_connection {
+    name                           = "${data.azurerm_private_link_service.publick8s_mirrorbitscli_updates_jenkins_io.name}-for-trustedci-sponsored"
+    private_connection_resource_id = data.azurerm_private_link_service.publick8s_mirrorbitscli_updates_jenkins_io.id
+    is_manual_connection           = false
+  }
+  private_dns_zone_group {
+    name                 = module.trustedcijenkinsiosponsored_acr_pe.private_dns_zone_name
+    private_dns_zone_ids = [module.trustedcijenkinsiosponsored_acr_pe.private_dns_zone_id]
+  }
+  tags = local.default_tags
+}
+resource "azurerm_private_dns_a_record" "updates_jenkins_io_sponsored" {
+  provider = azurerm.jenkins-sponsored
+
+  name                = "updates.jenkins.io"                                            # Expected full record name: updates.jenkins.io.privatelink.azurecr.io
+  zone_name           = module.trustedcijenkinsiosponsored_acr_pe.private_dns_zone_name # This existing zone already associated to the vnet
+  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_sponsored_commons.name
+  ttl                 = 60
+  records             = [azurerm_private_endpoint.publick8s_updates_jenkins_io_for_trustedci_sponsored.private_service_connection[0].private_ip_address]
+}
 
 ####################################################################################
 ## Agents resources in the CDF subscription
