@@ -73,6 +73,27 @@ data "azurerm_network_security_group" "trusted_ci_jenkins_io_sponsored_vnet" {
   name                = "trusted-ci-jenkins-io-sponsored-vnet"
   resource_group_name = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.resource_group_name
 }
+# Allow agents to access archives.jenkins.io for rsync-over-SSH
+resource "azurerm_network_security_rule" "allow_out_many_from_trusted_agents_sponsored_to_archives_jenkins_io" {
+  provider = azurerm.jenkins-sponsored
+
+  name              = "allow-out-many-from-agents-sponsored-to-archives-jenkins-io"
+  priority          = 4071
+  direction         = "Outbound"
+  access            = "Allow"
+  protocol          = "Tcp"
+  source_port_range = "*"
+  destination_port_ranges = [
+    "22", # SSH (for rsync)
+  ]
+  source_address_prefixes = concat(
+    data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.address_prefixes,
+    data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_permanent_agents.address_prefixes,
+  )
+  destination_address_prefix  = local.external_services["archives.jenkins.io"]
+  resource_group_name         = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
+  network_security_group_name = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
+}
 # Allow access to the private Azure Container Registry through an Azure Private Endpoint NIC
 module "trustedcijenkinsiosponsored_acr_pe" {
   source = "./modules/azure-container-registry-private-links"
@@ -395,23 +416,6 @@ resource "azurerm_network_security_rule" "allow_out_many_from_trusted_agents_to_
   destination_address_prefix  = local.external_services["archives.jenkins.io"]
   resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_rg_name
   network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents.ephemeral_agents_nsg_name
-}
-resource "azurerm_network_security_rule" "allow_out_many_from_trusted_agents_jenkins_sponsored_to_archive" {
-  provider = azurerm.jenkins-sponsored
-
-  name              = "allow-out-many-from-agents-jenkins-sponsored-to-archive"
-  priority          = 4070
-  direction         = "Outbound"
-  access            = "Allow"
-  protocol          = "Tcp"
-  source_port_range = "*"
-  destination_port_ranges = [
-    "22", # SSH (for rsync)
-  ]
-  source_address_prefixes     = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.address_prefixes
-  destination_address_prefix  = local.external_services["archives.jenkins.io"]
-  resource_group_name         = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
-  network_security_group_name = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
 }
 ## Inbound Rules (different set of priorities than Outbound rules) ##
 resource "azurerm_network_security_rule" "allow_in_many_from_trusted_agents_to_uc" {
