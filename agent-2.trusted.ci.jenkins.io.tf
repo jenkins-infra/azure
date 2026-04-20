@@ -7,16 +7,11 @@ resource "azurerm_resource_group" "trusted_ci_jenkins_io_permanent_agents_jenkin
   location = var.location
   tags     = local.default_tags
 }
-
-resource "azurerm_resource_group" "permanent_agents_trusted_ci_jenkins_io" {
-  name     = "permanent-agents-trusted-ci-jenkins-io"
-  location = var.location
-  tags     = local.default_tags
-}
-resource "azurerm_network_interface" "agent_trusted_ci_jenkins_io" {
-  name                = "agent-trusted-ci-jenkins-io"
-  location            = azurerm_resource_group.permanent_agents_trusted_ci_jenkins_io.location
-  resource_group_name = azurerm_resource_group.permanent_agents_trusted_ci_jenkins_io.name
+resource "azurerm_network_interface" "agent_2_trusted_ci_jenkins_io_jenkins_sponsored" {
+  provider            = azurerm.jenkins-sponsored
+  name                = "agent-2-trusted-ci-jenkins-io"
+  location            = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents_jenkins_sponsored.location
+  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents_jenkins_sponsored.name
   tags                = local.default_tags
 
   ip_configuration {
@@ -25,17 +20,18 @@ resource "azurerm_network_interface" "agent_trusted_ci_jenkins_io" {
     private_ip_address_allocation = "Dynamic"
   }
 }
-resource "azurerm_linux_virtual_machine" "agent_trusted_ci_jenkins_io" {
-  name                            = "agent.trusted.ci.jenkins.io"
-  resource_group_name             = azurerm_resource_group.permanent_agents_trusted_ci_jenkins_io.name
-  location                        = azurerm_resource_group.permanent_agents_trusted_ci_jenkins_io.location
+resource "azurerm_linux_virtual_machine" "agent_2_trusted_ci_jenkins_io_jenkins_sponsored" {
+  provider                        = azurerm.jenkins-sponsored
+  name                            = "agent-2.trusted.ci.jenkins.io"
+  resource_group_name             = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents_jenkins_sponsored.name
+  location                        = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents_jenkins_sponsored.location
   tags                            = local.default_tags
   size                            = "Standard_B2s"
   admin_username                  = local.admin_username
   zone                            = "1" # We need a zonale deployment to attach a Premium_SSD_v2 data disk
   disable_password_authentication = true
   network_interface_ids = [
-    azurerm_network_interface.agent_trusted_ci_jenkins_io.id,
+    azurerm_network_interface.agent_2_trusted_ci_jenkins_io_jenkins_sponsored.id,
   ]
 
   admin_ssh_key {
@@ -45,11 +41,11 @@ resource "azurerm_linux_virtual_machine" "agent_trusted_ci_jenkins_io" {
 
   user_data = base64encode(
     templatefile("./.shared-tools/terraform/cloudinit.tftpl", {
-      hostname       = "agent.trusted.ci.jenkins.io",
+      hostname       = "agent-2.trusted.ci.jenkins.io",
       admin_username = local.admin_username,
       }
   ))
-  computer_name = "agent.trusted.ci.jenkins.io"
+  computer_name = "agent-2.trusted.ci.jenkins.io"
 
   # Encrypt all disks (ephemeral, temp dirs and data volumes) - https://learn.microsoft.com/en-us/azure/virtual-machines/disks-enable-host-based-encryption-portal?tabs=azure-powershell
   encryption_at_host_enabled = true
@@ -75,20 +71,22 @@ resource "azurerm_linux_virtual_machine" "agent_trusted_ci_jenkins_io" {
     ]
   }
 }
-resource "azurerm_managed_disk" "agent_trusted_ci_jenkins_io_data" {
-  name                 = "agent-trusted-ci-jenkins-io-data"
-  location             = azurerm_resource_group.permanent_agents_trusted_ci_jenkins_io.location
-  resource_group_name  = azurerm_resource_group.permanent_agents_trusted_ci_jenkins_io.name
-  zone                 = azurerm_linux_virtual_machine.agent_trusted_ci_jenkins_io.zone
+resource "azurerm_managed_disk" "agent_2_trusted_ci_jenkins_io_data_jenkins_sponsored" {
+  provider             = azurerm.jenkins-sponsored
+  name                 = "agent-2-trusted-ci-jenkins-io-data"
+  location             = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents_jenkins_sponsored.location
+  resource_group_name  = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents_jenkins_sponsored.name
+  zone                 = azurerm_linux_virtual_machine.agent_2_trusted_ci_jenkins_io_jenkins_sponsored.zone
   storage_account_type = "PremiumV2_LRS"
   create_option        = "Empty"
   disk_size_gb         = "580"
 
   tags = local.default_tags
 }
-resource "azurerm_virtual_machine_data_disk_attachment" "agent_trusted_ci_jenkins_io_data" {
-  managed_disk_id    = azurerm_managed_disk.agent_trusted_ci_jenkins_io_data.id
-  virtual_machine_id = azurerm_linux_virtual_machine.agent_trusted_ci_jenkins_io.id
+resource "azurerm_virtual_machine_data_disk_attachment" "agent_2_trusted_ci_jenkins_io_data_jenkins_sponsored" {
+  provider           = azurerm.jenkins-sponsored
+  managed_disk_id    = azurerm_managed_disk.agent_2_trusted_ci_jenkins_io_data_jenkins_sponsored.id
+  virtual_machine_id = azurerm_linux_virtual_machine.agent_2_trusted_ci_jenkins_io_jenkins_sponsored.id
   lun                = "20"
   caching            = "None" # Caching not supported with "PremiumV2_LRS"
 }
@@ -96,13 +94,15 @@ resource "azurerm_virtual_machine_data_disk_attachment" "agent_trusted_ci_jenkin
 ####################################################################################
 ## Network Security Group and rules
 ####################################################################################
-resource "azurerm_subnet_network_security_group_association" "trusted_ci_permanent_agent" {
-  subnet_id                 = data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.id
+resource "azurerm_subnet_network_security_group_association" "trusted_ci_permanent_agent_2_jenkins_sponsored" {
+  provider                  = azurerm.jenkins-sponsored
+  subnet_id                 = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_permanent_agents.id
   network_security_group_id = module.trusted_ci_jenkins_io.controller_nsg_id
 }
 
-resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_permanent_agent" {
-  name                   = "allow-inbound-ssh-from-controller-to-permanent-agent"
+resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_permanent_agent_2_jenkins_sponsored" {
+  provider               = azurerm.jenkins-sponsored
+  name                   = "allow-inbound-ssh-from-controller-to-permanent-agent-2"
   priority               = 3600
   direction              = "Inbound"
   access                 = "Allow"
@@ -111,7 +111,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_p
   destination_port_range = "22"
   source_address_prefix  = module.trusted_ci_jenkins_io.controller_private_ipv4
   destination_address_prefixes = [
-    azurerm_linux_virtual_machine.agent_trusted_ci_jenkins_io.private_ip_address,
+    azurerm_linux_virtual_machine.agent_2_trusted_ci_jenkins_io_jenkins_sponsored.private_ip_address,
   ]
   resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
   network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
@@ -120,10 +120,10 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_p
 ####################################################################################
 ## Public DNS records
 ####################################################################################
-resource "azurerm_dns_a_record" "trusted_permanent_agent" {
-  name                = "agent"
+resource "azurerm_dns_a_record" "trusted_permanent_agent_2" {
+  name                = "agent-2"
   zone_name           = module.trusted_ci_jenkins_io_letsencrypt.zone_name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
-  records             = [azurerm_linux_virtual_machine.agent_trusted_ci_jenkins_io.private_ip_address]
+  records             = [azurerm_linux_virtual_machine.agent_2_trusted_ci_jenkins_io_jenkins_sponsored.private_ip_address]
 }
