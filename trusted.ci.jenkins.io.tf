@@ -1,5 +1,5 @@
 ####################################################################################
-## Resources for the Controller VM
+## Resources for the Controller VM in the CDF subscription
 ####################################################################################
 module "trusted_ci_jenkins_io_letsencrypt" {
   source = "./modules/azure-letsencrypt-dns"
@@ -58,7 +58,7 @@ module "trusted_ci_jenkins_io" {
 }
 
 ####################################################################################
-## Common resources (endpoint, DNS, etc.)
+## Common resources (endpoint, DNS, etc.) in the sponsored subscription
 ####################################################################################
 resource "azurerm_resource_group" "trusted_ci_jenkins_io_sponsored_commons" {
   provider = azurerm.jenkins-sponsored
@@ -225,6 +225,96 @@ resource "azurerm_network_security_rule" "allow_out_from_trusted_agents_sponsore
   resource_group_name         = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
   network_security_group_name = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
 }
+# Resource for the agent "UAID" (User Assigned IDentity) allowing credential-less access to other Azure resources from agent VMs
+resource "azurerm_user_assigned_identity" "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
+  provider = azurerm.jenkins-sponsored
+
+  location            = azurerm_resource_group.trusted_ci_jenkins_io_controller_jenkins_sponsored.location
+  name                = "trusted-ci-jenkins-io-agents-sponsored"
+  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller_jenkins_sponsored.name
+}
+# The controller UAID need permissions to assign the agent UAID (distinct from controller's) to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
+resource "azurerm_role_assignment" "trusted_ci_jenkins_io_operate_agent_identity_jenkins_sponsored" {
+  provider = azurerm.jenkins-sponsored
+
+  scope                = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.id
+  role_definition_name = "Managed Identity Operator"
+  principal_id         = module.trusted_ci_jenkins_io.controller_service_principal_id
+}
+####################################################################################
+## Agents resources in the sponsored subscription
+####################################################################################
+module "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
+  providers = {
+    azurerm = azurerm.jenkins-sponsored
+  }
+  source = "./modules/azure-jenkinsinfra-azurevm-agents"
+
+  service_fqdn                     = module.trusted_ci_jenkins_io.service_fqdn
+  service_short_stripped_name      = module.trusted_ci_jenkins_io.service_short_stripped_name
+  ephemeral_agents_network_rg_name = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.resource_group_name
+  ephemeral_agents_network_name    = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.virtual_network_name
+  ephemeral_agents_subnet_name     = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.name
+  use_vnet_common_nsg              = true
+  controller_ips                   = compact([module.trusted_ci_jenkins_io.controller_public_ipv4])
+  controller_service_principal_id  = module.trusted_ci_jenkins_io.controller_service_principal_id
+  default_tags                     = local.default_tags
+  storage_account_name             = "trustedciagentssponso" # Max 24 chars
+
+  jenkins_infra_ips = {
+    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
+  }
+}
+resource "azurerm_resource_group" "trusted_ci_jenkins_io_controller_jenkins_sponsored" {
+  provider = azurerm.jenkins-sponsored
+  name     = module.trusted_ci_jenkins_io.controller_resourcegroup_name # Same name on both subscriptions
+  location = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.location
+  tags     = local.default_tags
+}
+
+resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored_write_reports_share" {
+  provider = azurerm.jenkins-sponsored
+  scope    = azurerm_storage_account.reports_jenkins_io.id
+  # Allow writing
+  role_definition_name = "Storage File Data Privileged Contributor"
+  principal_id         = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
+}
+resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored_write_buildsreports_share" {
+  provider = azurerm.jenkins-sponsored
+  scope    = azurerm_storage_account.builds_reports_jenkins_io.id
+  # Allow writing
+  role_definition_name = "Storage File Data Privileged Contributor"
+  principal_id         = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
+}
+resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored_write_data_storage_share" {
+  provider = azurerm.jenkins-sponsored
+  scope    = azurerm_storage_account.data_storage_jenkins_io.id
+  # Allow writing
+  role_definition_name = "Storage File Data Privileged Contributor"
+  principal_id         = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
+}
+resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored_write_javadoc_share" {
+  scope = azurerm_storage_account.javadoc_jenkins_io.id
+  # Allow writing
+  role_definition_name = "Storage File Data Privileged Contributor"
+  principal_id         = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
+}
+
+resource "azurerm_role_definition" "trusted_ci_jenkins_io_controller_vnet_sponsored_reader" {
+  provider = azurerm.jenkins-sponsored
+  name     = "Read-trusted-ci-jenkins-io-sponsored-VNET"
+  scope    = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.id
+
+  permissions {
+    actions = ["Microsoft.Network/virtualNetworks/read"]
+  }
+}
+resource "azurerm_role_assignment" "trusted_controller_vnet_jenkins_sponsored_reader" {
+  provider           = azurerm.jenkins-sponsored
+  scope              = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.id
+  role_definition_id = azurerm_role_definition.trusted_ci_jenkins_io_controller_vnet_sponsored_reader.role_definition_resource_id
+  principal_id       = module.trusted_ci_jenkins_io.controller_service_principal_id
+}
 
 ####################################################################################
 ## Agents resources in the CDF subscription
@@ -291,97 +381,8 @@ resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins
   principal_id         = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins.principal_id
 }
 
-## Jenkins Sponsored
-resource "azurerm_resource_group" "trusted_ci_jenkins_io_controller_jenkins_sponsored" {
-  provider = azurerm.jenkins-sponsored
-  name     = module.trusted_ci_jenkins_io.controller_resourcegroup_name # Same name on both subscriptions
-  location = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.location
-  tags     = local.default_tags
-}
-
-# Allow controller to manage agents without requiring credentials (requires on the VM User Assign Identity)
-resource "azurerm_user_assigned_identity" "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
-  provider            = azurerm.jenkins-sponsored
-  location            = azurerm_resource_group.trusted_ci_jenkins_io_controller_jenkins_sponsored.location
-  name                = "trusted-ci-jenkins-io-agents-sponsored"
-  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller_jenkins_sponsored.name
-}
-
-# The Controller identity must be able to operate this identity to assign it to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
-resource "azurerm_role_assignment" "trusted_ci_jenkins_io_operate_agent_identity_jenkins_sponsored" {
-  provider             = azurerm.jenkins-sponsored
-  scope                = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.id
-  role_definition_name = "Managed Identity Operator"
-  principal_id         = module.trusted_ci_jenkins_io.controller_service_principal_id
-}
-resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored_write_reports_share" {
-  provider = azurerm.jenkins-sponsored
-  scope    = azurerm_storage_account.reports_jenkins_io.id
-  # Allow writing
-  role_definition_name = "Storage File Data Privileged Contributor"
-  principal_id         = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
-}
-resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored_write_buildsreports_share" {
-  provider = azurerm.jenkins-sponsored
-  scope    = azurerm_storage_account.builds_reports_jenkins_io.id
-  # Allow writing
-  role_definition_name = "Storage File Data Privileged Contributor"
-  principal_id         = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
-}
-resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored_write_data_storage_share" {
-  provider = azurerm.jenkins-sponsored
-  scope    = azurerm_storage_account.data_storage_jenkins_io.id
-  # Allow writing
-  role_definition_name = "Storage File Data Privileged Contributor"
-  principal_id         = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
-}
-resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored_write_javadoc_share" {
-  scope = azurerm_storage_account.javadoc_jenkins_io.id
-  # Allow writing
-  role_definition_name = "Storage File Data Privileged Contributor"
-  principal_id         = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
-}
-
-resource "azurerm_role_definition" "trusted_ci_jenkins_io_controller_vnet_sponsored_reader" {
-  provider = azurerm.jenkins-sponsored
-  name     = "Read-trusted-ci-jenkins-io-sponsored-VNET"
-  scope    = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.id
-
-  permissions {
-    actions = ["Microsoft.Network/virtualNetworks/read"]
-  }
-}
-resource "azurerm_role_assignment" "trusted_controller_vnet_jenkins_sponsored_reader" {
-  provider           = azurerm.jenkins-sponsored
-  scope              = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.id
-  role_definition_id = azurerm_role_definition.trusted_ci_jenkins_io_controller_vnet_sponsored_reader.role_definition_resource_id
-  principal_id       = module.trusted_ci_jenkins_io.controller_service_principal_id
-}
-
-module "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
-  providers = {
-    azurerm = azurerm.jenkins-sponsored
-  }
-  source = "./modules/azure-jenkinsinfra-azurevm-agents"
-
-  service_fqdn                     = module.trusted_ci_jenkins_io.service_fqdn
-  service_short_stripped_name      = module.trusted_ci_jenkins_io.service_short_stripped_name
-  ephemeral_agents_network_rg_name = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.resource_group_name
-  ephemeral_agents_network_name    = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.virtual_network_name
-  ephemeral_agents_subnet_name     = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.name
-  use_vnet_common_nsg              = true
-  controller_ips                   = compact([module.trusted_ci_jenkins_io.controller_public_ipv4])
-  controller_service_principal_id  = module.trusted_ci_jenkins_io.controller_service_principal_id
-  default_tags                     = local.default_tags
-  storage_account_name             = "trustedciagentssponso" # Max 24 chars
-
-  jenkins_infra_ips = {
-    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
-  }
-}
-
 ####################################################################################
-## Network Security Group and rules
+## Network Security Group and rules in the CDF subscription
 ####################################################################################
 ## Outbound Rules (different set of priorities than Inbound rules) ##
 resource "azurerm_network_security_rule" "allow_out_from_trusted_all_to_uc" {
@@ -488,7 +489,7 @@ resource "azurerm_network_security_rule" "allow_in_https_from_trusted_to_acr" {
 }
 
 ####################################################################################
-## Public DNS records
+## Public DNS records in the CDF subscription
 ####################################################################################
 resource "azurerm_dns_a_record" "trusted_ci_controller" {
   name                = "@"
@@ -506,7 +507,7 @@ resource "azurerm_dns_a_record" "assets_trusted_ci_controller" {
 }
 
 ####################################################################################
-## Private network resources (endpoint, DNS, etc.)
+## Private network resources (endpoint, DNS, etc.) in the CDF subscription
 ####################################################################################
 resource "azurerm_private_dns_a_record" "updates_jenkins_io" {
   name                = "updates.jenkins.io" # Full expected record name: updates.jenkins.io.privatelink.azurecr.io
