@@ -229,9 +229,9 @@ resource "azurerm_network_security_rule" "allow_out_from_trusted_agents_sponsore
 resource "azurerm_user_assigned_identity" "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   provider = azurerm.jenkins-sponsored
 
-  location            = azurerm_resource_group.trusted_ci_jenkins_io_controller_jenkins_sponsored.location
+  location            = azurerm_resource_group.trusted_ci_jenkins_io_sponsored_commons.location
   name                = "trusted-ci-jenkins-io-agents-sponsored"
-  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_controller_jenkins_sponsored.name
+  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_sponsored_commons.name
 }
 # The controller UAID need permissions to assign the agent UAID (distinct from controller's) to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
 resource "azurerm_role_assignment" "trusted_ci_jenkins_io_operate_agent_identity_jenkins_sponsored" {
@@ -265,13 +265,6 @@ module "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   }
 }
-resource "azurerm_resource_group" "trusted_ci_jenkins_io_controller_jenkins_sponsored" {
-  provider = azurerm.jenkins-sponsored
-  name     = module.trusted_ci_jenkins_io.controller_resourcegroup_name # Same name on both subscriptions
-  location = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.location
-  tags     = local.default_tags
-}
-
 resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored_write_reports_share" {
   provider = azurerm.jenkins-sponsored
   scope    = azurerm_storage_account.reports_jenkins_io.id
