@@ -94,7 +94,7 @@ module "trustedcijenkinsiosponsored_acr_pe" {
 
   default_tags = local.default_tags
 }
-## Allow access to/from ACR endpoint
+## Allow access to/from Private Endpoint
 resource "azurerm_network_security_rule" "allow_out_https_from_trusted_sponsored_vnet_to_acr" {
   provider = azurerm.jenkins-sponsored
 
@@ -162,6 +162,47 @@ resource "azurerm_private_dns_a_record" "updates_jenkins_io_sponsored" {
   resource_group_name = module.trustedcijenkinsiosponsored_acr_pe.private_dns_zone_resource_group_name
   ttl                 = 60
   records             = [azurerm_private_endpoint.publick8s_updates_jenkins_io_for_trustedci_sponsored.private_service_connection[0].private_ip_address]
+}
+## Allow access to/from UC Private Endpoint
+resource "azurerm_network_security_rule" "allow_in_many_from_trusted_agents_sponsored_to_uc" {
+  provider = azurerm.jenkins-sponsored
+
+  name              = "allow-in-many-from-trusted-agents-sponsored-to-uc"
+  priority          = 4054
+  direction         = "Inbound"
+  access            = "Allow"
+  protocol          = "Tcp"
+  source_port_range = "*"
+  destination_port_ranges = [
+    "3390", # mirrorbits CLI (content)
+  ]
+  source_address_prefixes = concat(
+    data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.address_prefixes,
+    data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_permanent_agents.address_prefixes,
+  )
+  destination_address_prefix  = azurerm_private_endpoint.publick8s_updates_jenkins_io_for_trustedci_sponsored.private_service_connection[0].private_ip_address
+  resource_group_name         = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
+  network_security_group_name = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
+}
+resource "azurerm_network_security_rule" "allow_out_from_trusted_agents_sponsored_to_uc" {
+  provider = azurerm.jenkins-sponsored
+
+  name              = "allow-out-from-trusted-agents-sponsored-to-uc"
+  priority          = 4054
+  direction         = "Outbound"
+  access            = "Allow"
+  protocol          = "Tcp"
+  source_port_range = "*"
+  destination_port_ranges = [
+    "3390", # mirrorbits CLI (content)
+  ]
+  source_address_prefixes = concat(
+    data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.address_prefixes,
+    data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_permanent_agents.address_prefixes,
+  )
+  destination_address_prefix  = azurerm_private_endpoint.publick8s_updates_jenkins_io_for_trustedci_sponsored.private_service_connection[0].private_ip_address
+  resource_group_name         = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
+  network_security_group_name = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
 }
 
 ####################################################################################
