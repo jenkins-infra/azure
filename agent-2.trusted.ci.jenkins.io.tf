@@ -26,7 +26,7 @@ resource "azurerm_linux_virtual_machine" "agent_2_trusted_ci_jenkins_io_jenkins_
   resource_group_name             = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents_jenkins_sponsored.name
   location                        = azurerm_resource_group.trusted_ci_jenkins_io_permanent_agents_jenkins_sponsored.location
   tags                            = local.default_tags
-  size                            = "Standard_B2s"
+  size                            = "Standard_D2s_v3" # 2 vCPU 8Go RAM
   admin_username                  = local.admin_username
   zone                            = "1" # We need a zonale deployment to attach a Premium_SSD_v2 data disk
   disable_password_authentication = true
