@@ -28,6 +28,7 @@ resource "azurerm_linux_virtual_machine" "agent_2_trusted_ci_jenkins_io_jenkins_
   tags                            = local.default_tags
   size                            = "Standard_D2as_v7"
   admin_username                  = local.admin_username
+  zone                            = "1" # We need a zonale deployment to attach a Premium_SSD_v2 data disk
   disable_password_authentication = true
   network_interface_ids = [
     azurerm_network_interface.agent_2_trusted_ci_jenkins_io_jenkins_sponsored.id,
