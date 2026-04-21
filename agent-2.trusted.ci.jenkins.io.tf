@@ -108,8 +108,8 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_p
   destination_address_prefixes = [
     azurerm_linux_virtual_machine.agent_2_trusted_ci_jenkins_io_jenkins_sponsored.private_ip_address,
   ]
-  resource_group_name         = module.trusted_ci_jenkins_io.controller_resourcegroup_name
-  network_security_group_name = module.trusted_ci_jenkins_io.controller_nsg_name
+  resource_group_name         = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
+  network_security_group_name = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
 }
 
 ####################################################################################
