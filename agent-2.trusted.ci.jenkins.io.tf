@@ -94,11 +94,6 @@ resource "azurerm_virtual_machine_data_disk_attachment" "agent_2_trusted_ci_jenk
 ####################################################################################
 ## Network Security Group and rules
 ####################################################################################
-resource "azurerm_subnet_network_security_group_association" "trusted_ci_permanent_agent_2_jenkins_sponsored" {
-  provider                  = azurerm.jenkins-sponsored
-  subnet_id                 = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_permanent_agents.id
-  network_security_group_id = module.trusted_ci_jenkins_io.controller_nsg_id
-}
 
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_permanent_agent_2_jenkins_sponsored" {
   provider               = azurerm.jenkins-sponsored
