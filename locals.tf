@@ -345,6 +345,7 @@ locals {
       "agents" = [
         # Permanent agents (Update Center generation)
         data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.id,
+        data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_permanent_agents.id,
         # VM agents (CDF subscription)
         data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.id,
         # VM agents (Jenkins Sponsored subscription)
