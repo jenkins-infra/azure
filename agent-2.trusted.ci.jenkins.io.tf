@@ -16,7 +16,7 @@ resource "azurerm_network_interface" "agent_2_trusted_ci_jenkins_io_jenkins_spon
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = data.azurerm_subnet.trusted_ci_jenkins_io_permanent_agents.id
+    subnet_id                     = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_permanent_agents.id
     private_ip_address_allocation = "Dynamic"
   }
 }
