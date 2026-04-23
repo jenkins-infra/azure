@@ -352,6 +352,13 @@ locals {
         data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.id,
       ],
     },
+    "cert.ci.jenkins.io" = {
+      "controller" = [data.azurerm_subnet.cert_ci_jenkins_io_controller.id],
+      "agents" = [
+        # VM agents (Jenkins Sponsored subscription)
+        data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.id,
+      ],
+    },
   }
 
   infra_ci_jenkins_io_fqdn                        = "infra.ci.jenkins.io"

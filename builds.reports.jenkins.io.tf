@@ -29,6 +29,8 @@ resource "azurerm_storage_account" "builds_reports_jenkins_io" {
       local.app_subnets["release.ci.jenkins.io"].agents,
       # Required for populating the resource
       local.app_subnets["trusted.ci.jenkins.io"].agents,
+      # Required for populating the resource
+      local.app_subnets["cert.ci.jenkins.io"].agents,
     )
     bypass = ["AzureServices"]
   }
