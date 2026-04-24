@@ -66,7 +66,6 @@ resource "azurerm_linux_virtual_machine" "agent_2_trusted_ci_jenkins_io_jenkins_
   identity {
     type = "UserAssigned"
     identity_ids = [
-      azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins.id,
       azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.id,
     ]
   }
