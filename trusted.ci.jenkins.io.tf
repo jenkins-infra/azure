@@ -52,9 +52,6 @@ module "trusted_ci_jenkins_io" {
     data.azurerm_subnet.trusted_ci_jenkins_io_ephemeral_agents.address_prefixes,
     data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.address_prefixes,
     data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_permanent_agents.address_prefixes,
-    [
-      azurerm_linux_virtual_machine.agent_trusted_ci_jenkins_io.private_ip_address
-    ],
   )
 }
 
