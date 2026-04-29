@@ -184,14 +184,24 @@ resource "azurerm_virtual_machine_data_disk_attachment" "controller_data" {
 ####################################################################################
 ### Controller
 resource "azurerm_network_security_group" "controller" {
+  count = var.use_vnet_common_nsg ? 0 : 1
+
   name                = local.controller_fqdn
   location            = var.location
   resource_group_name = azurerm_resource_group.controller.name
   tags                = var.default_tags
 }
 resource "azurerm_subnet_network_security_group_association" "controller" {
+  count = var.use_vnet_common_nsg ? 0 : 1
+
   subnet_id                 = data.azurerm_subnet.controller.id
-  network_security_group_id = azurerm_network_security_group.controller.id
+  network_security_group_id = azurerm_network_security_group.controller[0].id
+}
+data "azurerm_network_security_group" "vnet_common_nsg" {
+  count = var.use_vnet_common_nsg ? 1 : 0
+
+  name                = data.azurerm_virtual_network.controller.name
+  resource_group_name = data.azurerm_virtual_network.controller.resource_group_name
 }
 
 ## Outbound Rules (different set of priorities than Inbound rules) ##
@@ -206,7 +216,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_controller_to_
   destination_port_range       = "22" # SSH
   destination_address_prefixes = var.agent_ip_prefixes
   resource_group_name          = azurerm_resource_group.controller.name
-  network_security_group_name  = azurerm_network_security_group.controller.name
+  network_security_group_name  = local.nsg_name
 }
 # Ignore the rule as it does not detect the IP restriction to only ldap.jenkins.io"s host
 resource "azurerm_network_security_rule" "allow_outbound_ldap_from_controller_to_jenkinsldap" {
@@ -220,7 +230,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ldap_from_controller_to
   destination_port_range      = "636" # LDAP over TLS
   destination_address_prefix  = var.jenkins_infra_ips.ldap_ipv4
   resource_group_name         = azurerm_resource_group.controller.name
-  network_security_group_name = azurerm_network_security_group.controller.name
+  network_security_group_name = local.nsg_name
 }
 # Ignore the rule as it does not detect the IP restriction to only puppet.jenkins.io"s host
 resource "azurerm_network_security_rule" "allow_outbound_puppet_from_controller_to_puppetmaster" {
@@ -234,7 +244,7 @@ resource "azurerm_network_security_rule" "allow_outbound_puppet_from_controller_
   destination_port_range      = "8140" # Puppet over TLS
   destination_address_prefix  = var.jenkins_infra_ips.puppet_ipv4
   resource_group_name         = azurerm_resource_group.controller.name
-  network_security_group_name = azurerm_network_security_group.controller.name
+  network_security_group_name = local.nsg_name
 }
 resource "azurerm_network_security_rule" "allow_outbound_http_from_controller_to_internet" {
   name                        = "allow-outbound-http-from-${local.service_short_stripped_name}-controller-to-internet"
@@ -247,7 +257,7 @@ resource "azurerm_network_security_rule" "allow_outbound_http_from_controller_to
   destination_port_ranges     = ["80", "443"]
   destination_address_prefix  = "Internet"
   resource_group_name         = azurerm_resource_group.controller.name
-  network_security_group_name = azurerm_network_security_group.controller.name
+  network_security_group_name = local.nsg_name
 }
 # This rule overrides an Azure-Default rule. its priority must be < 65000.
 resource "azurerm_network_security_rule" "deny_all_outbound_from_controller_subnet" {
@@ -261,7 +271,7 @@ resource "azurerm_network_security_rule" "deny_all_outbound_from_controller_subn
   source_address_prefix       = azurerm_linux_virtual_machine.controller.private_ip_address
   destination_address_prefix  = "*"
   resource_group_name         = azurerm_resource_group.controller.name
-  network_security_group_name = azurerm_network_security_group.controller.name
+  network_security_group_name = local.nsg_name
 }
 
 ## Inbound Rules (different set of priorities than Outbound rules) ##
@@ -274,7 +284,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_privatevpn_to_c
   source_port_range           = "*"
   destination_port_range      = "22"
   resource_group_name         = azurerm_resource_group.controller.name
-  network_security_group_name = azurerm_network_security_group.controller.name
+  network_security_group_name = local.nsg_name
   source_address_prefixes     = var.jenkins_infra_ips.privatevpn_subnet
   destination_address_prefixes = compact([
     azurerm_linux_virtual_machine.controller.private_ip_address,
@@ -302,7 +312,7 @@ resource "azurerm_network_security_rule" "allow_inbound_jenkins_to_controller" {
     var.is_public ? azurerm_public_ip.controller[0].ip_address : "",
   ]))
   resource_group_name         = azurerm_resource_group.controller.name
-  network_security_group_name = azurerm_network_security_group.controller.name
+  network_security_group_name = local.nsg_name
 }
 resource "azurerm_network_security_rule" "allow_inbound_http6_to_controller" {
   count                 = var.is_public && var.enable_public_ipv6 ? 1 : 0
@@ -324,7 +334,7 @@ resource "azurerm_network_security_rule" "allow_inbound_http6_to_controller" {
     azurerm_public_ip.controller_ipv6[0].ip_address,
   ]))
   resource_group_name         = azurerm_resource_group.controller.name
-  network_security_group_name = azurerm_network_security_group.controller.name
+  network_security_group_name = local.nsg_name
 }
 
 # This rule overrides an Azure-Default rule. its priority must be < 65000
@@ -343,7 +353,7 @@ resource "azurerm_network_security_rule" "deny_all_inbound_to_controller" {
     var.is_public ? azurerm_public_ip.controller[0].ip_address : "",
   ])
   resource_group_name         = azurerm_resource_group.controller.name
-  network_security_group_name = azurerm_network_security_group.controller.name
+  network_security_group_name = local.nsg_name
 }
 
 ####################################################################################
