@@ -1,5 +1,5 @@
 module "cert_ci_jenkins_io" {
-  source = "./.shared-tools/terraform/modules/azure-jenkinsinfra-controller"
+  source = "./modules/azure-jenkinsinfra-controller"
 
   providers = {
     azurerm     = azurerm
