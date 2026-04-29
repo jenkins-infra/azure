@@ -133,3 +133,9 @@ variable "enable_public_ipv6" {
   type    = bool
   default = false
 }
+
+variable "use_vnet_common_nsg" {
+  type        = bool
+  description = "Should we use the Network Security Group ('NSG') located in the same Resource Group as the provided Virtual Network and with the same name (convention)?"
+  default     = false
+}

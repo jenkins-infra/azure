@@ -5,4 +5,6 @@ locals {
   service_stripped_name       = replace(var.service_fqdn, ".", "-")
   controller_fqdn             = var.controller_fqdn == "" ? "controller.${var.service_fqdn}" : var.controller_fqdn
   controller_principal_id     = var.controller_service_principal_end_date == "" ? data.azurerm_virtual_machine.controller.identity[0].principal_id : azuread_service_principal.controller[0].object_id
+  nsg_name                    = var.use_vnet_common_nsg ? data.azurerm_network_security_group.vnet_common_nsg[0].name : azurerm_network_security_group.controller[0].name
+  nsg_rg_name                 = var.use_vnet_common_nsg ? data.azurerm_network_security_group.vnet_common_nsg[0].resource_group_name : azurerm_network_security_group.controller[0].resource_group_name
 }

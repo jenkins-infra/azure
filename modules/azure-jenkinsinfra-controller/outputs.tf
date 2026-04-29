@@ -27,11 +27,11 @@ output "service_fqdn" {
 }
 
 output "controller_nsg_name" {
-  value = azurerm_network_security_group.controller.name
+  value = local.nsg_name
 }
 
-output "controller_nsg_id" {
-  value = azurerm_network_security_group.controller.id
+output "controller_nsg_rg_name" {
+  value = local.nsg_rg_name
 }
 
 output "service_short_name" {
