@@ -50,6 +50,11 @@ variable "service_custom_name" {
   description = "Custom Service Display Name"
   default     = ""
 }
+variable "controller_fqdn" {
+  type        = string
+  description = "Provides a custom controller VM FQDN instead of the default 'controller.var.service_fqdn'."
+  default     = ""
+}
 variable "is_public" {
   type    = bool
   default = false
