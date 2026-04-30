@@ -361,7 +361,7 @@ resource "azurerm_network_security_rule" "deny_all_inbound_to_controller" {
 ####################################################################################
 resource "azuread_application" "controller" {
   count        = var.controller_service_principal_end_date == "" ? 0 : 1
-  display_name = local.service_custom_name
+  display_name = local.controller_fqdn
   owners       = var.controller_service_principal_ids
   tags         = [for key, value in var.default_tags : "${key}:${value}"]
   required_resource_access {
@@ -396,7 +396,7 @@ resource "azurerm_role_assignment" "controller_read_packer_prod_images" {
   depends_on           = [azurerm_linux_virtual_machine.controller]
 }
 resource "azurerm_role_definition" "controller_vnet_reader" {
-  name  = "Read-${local.service_custom_name}-VNET"
+  name  = "Read-${local.controller_fqdn}-VNET"
   scope = data.azurerm_virtual_network.controller.id
 
   permissions {
