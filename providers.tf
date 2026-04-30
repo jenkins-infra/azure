@@ -47,15 +47,3 @@ provider "postgresql" {
   password  = random_password.public_db_pgsql_admin_password.result
   superuser = false
 }
-
-provider "mysql" {
-  /**
-  Reaching this DB requires:
-  - VPN access (with proper routing)
-  - The following line added in your `/etc/hosts` as there are no public DNS: `10.253.1.4     public-db-mysql.mysql.database.azure.com`
-  **/
-  endpoint = "${azurerm_mysql_flexible_server.public_db_mysql.fqdn}:3306"
-  username = local.public_db_mysql_admin_login
-  password = random_password.public_db_mysql_admin_password.result
-  tls      = true # Mandatory for Azure MySQL Flexible instances
-}

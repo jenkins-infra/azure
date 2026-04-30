@@ -373,24 +373,6 @@ resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephe
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
 }
 
-# Allow infra.ci sponsored ephemeral agents to reach mysql-public-db hosted on Azure
-resource "azurerm_network_security_rule" "allow_outbound_mysql_from_infraci_ephemeral_agents_jenkins_sponsored_to_mysql_public_db" {
-  provider               = azurerm.jenkins-sponsored
-  name                   = "allow-outbound-mysql-from-infraci-agents-jenkins-sponsored-to-mysql-public-db"
-  priority               = 4087
-  direction              = "Outbound"
-  access                 = "Allow"
-  protocol               = "Tcp"
-  source_port_range      = "*"
-  destination_port_range = "3306"
-  source_address_prefixes = [
-    data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
-  ]
-  destination_address_prefixes = [data.azurerm_subnet.public_db_vnet_mysql_tier.address_prefix]
-  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
-  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
-}
-
 # Allow infra.ci sponsored ephemeral agents to reach postgres-public-db hosted on Azure
 resource "azurerm_network_security_rule" "allow_outbound_postgres_from_infraci_ephemeral_agents_jenkins_sponsored_to_postgres_public_db" {
   provider               = azurerm.jenkins-sponsored
