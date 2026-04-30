@@ -55,6 +55,50 @@ module "trusted_ci_jenkins_io" {
 }
 
 ####################################################################################
+## Resources for the Controller VM in the sponsored subscription
+####################################################################################
+module "trusted_ci_jenkins_io_sponsored" {
+  source = "./modules/azure-jenkinsinfra-controller"
+
+  providers = {
+    azurerm     = azurerm.jenkins-sponsored
+    azurerm.dns = azurerm
+    azuread     = azuread
+  }
+
+  service_fqdn                 = "trusted.ci.jenkins.io"
+  controller_fqdn              = "controller-sponsored.trusted.ci.jenkins.io"
+  use_vnet_common_nsg          = true
+  location                     = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.location
+  admin_username               = local.admin_username
+  admin_ssh_publickey          = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK6XtcUbbXwtvcTfjVv6vbowaKO2kIbhsQkGV6MQwMFe jenkins-infra-team@controller-sponsored.trusted.ci.jenkins.io"
+  controller_network_name      = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.name
+  controller_network_rg_name   = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.resource_group_name
+  controller_subnet_name       = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_controller.name
+  controller_data_disk_size_gb = 128
+  controller_vm_size           = "Standard_D2as_v6"
+  default_tags                 = local.default_tags
+
+  jenkins_infra_ips = {
+    ldap_ipv4         = azurerm_public_ip.publick8s_ips["publick8s-ldap-ipv4"].ip_address,
+    puppet_ipv4       = azurerm_public_ip.puppet_jenkins_io.ip_address,
+    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes,
+  }
+
+  controller_service_principal_ids = [
+    data.azuread_service_principal.terraform_production.object_id,
+  ]
+  controller_packer_rg_ids = [
+    azurerm_resource_group.packer_images_sponsored["prod"].id,
+  ]
+
+  agent_ip_prefixes = concat(
+    data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.address_prefixes,
+    data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_permanent_agents.address_prefixes,
+  )
+}
+
+####################################################################################
 ## Common resources (endpoint, DNS, etc.) in the sponsored subscription
 ####################################################################################
 resource "azurerm_resource_group" "trusted_ci_jenkins_io_sponsored_commons" {
