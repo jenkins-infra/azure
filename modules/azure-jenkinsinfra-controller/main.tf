@@ -215,7 +215,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_controller_to_
   source_address_prefix        = azurerm_linux_virtual_machine.controller.private_ip_address
   destination_port_range       = "22" # SSH
   destination_address_prefixes = var.agent_ip_prefixes
-  resource_group_name          = azurerm_resource_group.controller.name
+  resource_group_name          = local.nsg_rg_name
   network_security_group_name  = local.nsg_name
 }
 # Ignore the rule as it does not detect the IP restriction to only ldap.jenkins.io"s host
@@ -229,7 +229,7 @@ resource "azurerm_network_security_rule" "allow_outbound_ldap_from_controller_to
   source_address_prefix       = azurerm_linux_virtual_machine.controller.private_ip_address
   destination_port_range      = "636" # LDAP over TLS
   destination_address_prefix  = var.jenkins_infra_ips.ldap_ipv4
-  resource_group_name         = azurerm_resource_group.controller.name
+  resource_group_name         = local.nsg_rg_name
   network_security_group_name = local.nsg_name
 }
 # Ignore the rule as it does not detect the IP restriction to only puppet.jenkins.io"s host
@@ -243,7 +243,7 @@ resource "azurerm_network_security_rule" "allow_outbound_puppet_from_controller_
   source_address_prefix       = azurerm_linux_virtual_machine.controller.private_ip_address
   destination_port_range      = "8140" # Puppet over TLS
   destination_address_prefix  = var.jenkins_infra_ips.puppet_ipv4
-  resource_group_name         = azurerm_resource_group.controller.name
+  resource_group_name         = local.nsg_rg_name
   network_security_group_name = local.nsg_name
 }
 resource "azurerm_network_security_rule" "allow_outbound_http_from_controller_to_internet" {
@@ -256,7 +256,7 @@ resource "azurerm_network_security_rule" "allow_outbound_http_from_controller_to
   source_address_prefix       = azurerm_linux_virtual_machine.controller.private_ip_address
   destination_port_ranges     = ["80", "443"]
   destination_address_prefix  = "Internet"
-  resource_group_name         = azurerm_resource_group.controller.name
+  resource_group_name         = local.nsg_rg_name
   network_security_group_name = local.nsg_name
 }
 # This rule overrides an Azure-Default rule. its priority must be < 65000.
@@ -270,7 +270,7 @@ resource "azurerm_network_security_rule" "deny_all_outbound_from_controller_subn
   destination_port_range      = "*"
   source_address_prefix       = azurerm_linux_virtual_machine.controller.private_ip_address
   destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.controller.name
+  resource_group_name         = local.nsg_rg_name
   network_security_group_name = local.nsg_name
 }
 
@@ -283,7 +283,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_privatevpn_to_c
   protocol                    = "Tcp"
   source_port_range           = "*"
   destination_port_range      = "22"
-  resource_group_name         = azurerm_resource_group.controller.name
+  resource_group_name         = local.nsg_rg_name
   network_security_group_name = local.nsg_name
   source_address_prefixes     = var.jenkins_infra_ips.privatevpn_subnet
   destination_address_prefixes = compact([
@@ -311,7 +311,7 @@ resource "azurerm_network_security_rule" "allow_inbound_jenkins_to_controller" {
     ],
     var.is_public ? azurerm_public_ip.controller[0].ip_address : "",
   ]))
-  resource_group_name         = azurerm_resource_group.controller.name
+  resource_group_name         = local.nsg_rg_name
   network_security_group_name = local.nsg_name
 }
 resource "azurerm_network_security_rule" "allow_inbound_http6_to_controller" {
@@ -333,7 +333,7 @@ resource "azurerm_network_security_rule" "allow_inbound_http6_to_controller" {
     ],
     azurerm_public_ip.controller_ipv6[0].ip_address,
   ]))
-  resource_group_name         = azurerm_resource_group.controller.name
+  resource_group_name         = local.nsg_rg_name
   network_security_group_name = local.nsg_name
 }
 
@@ -352,7 +352,7 @@ resource "azurerm_network_security_rule" "deny_all_inbound_to_controller" {
     azurerm_linux_virtual_machine.controller.private_ip_address,
     var.is_public ? azurerm_public_ip.controller[0].ip_address : "",
   ])
-  resource_group_name         = azurerm_resource_group.controller.name
+  resource_group_name         = local.nsg_rg_name
   network_security_group_name = local.nsg_name
 }
 
