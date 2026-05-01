@@ -45,11 +45,6 @@ variable "controller_service_principal_end_date" {
 }
 
 ### Optionals variables
-variable "service_custom_name" {
-  type        = string
-  description = "Custom Service Display Name"
-  default     = ""
-}
 variable "controller_fqdn" {
   type        = string
   description = "Provides a custom controller VM FQDN instead of the default 'controller.var.service_fqdn'."
