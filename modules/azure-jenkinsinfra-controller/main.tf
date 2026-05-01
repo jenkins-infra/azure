@@ -182,18 +182,15 @@ resource "azurerm_virtual_machine_data_disk_attachment" "controller_data" {
 ####################################################################################
 ## Network Security Group and rules
 ####################################################################################
-### Controller
 resource "azurerm_network_security_group" "controller" {
-  count = var.use_vnet_common_nsg ? 0 : 1
-
+  count               = var.use_vnet_common_nsg ? 0 : 1
   name                = local.controller_fqdn
   location            = var.location
   resource_group_name = azurerm_resource_group.controller.name
   tags                = var.default_tags
 }
 resource "azurerm_subnet_network_security_group_association" "controller" {
-  count = var.use_vnet_common_nsg ? 0 : 1
-
+  count                     = var.use_vnet_common_nsg ? 0 : 1
   subnet_id                 = data.azurerm_subnet.controller.id
   network_security_group_id = azurerm_network_security_group.controller[0].id
 }
@@ -204,10 +201,19 @@ data "azurerm_network_security_group" "vnet_common_nsg" {
   resource_group_name = data.azurerm_virtual_network.controller.resource_group_name
 }
 
+locals {
+  nsg_rule_name_discriminator = var.use_vnet_common_nsg ? replace(local.controller_fqdn, ".jenkins.io", ".jio") : "${local.service_short_stripped_name}-controller"
+  controller_inbound_ipv4_list = compact(flatten([
+    [for ip in azurerm_linux_virtual_machine.controller.private_ip_addresses :
+      ip if can(cidrnetmask("${ip}/32"))
+    ],
+    var.is_public ? azurerm_public_ip.controller[0].ip_address : "",
+  ]))
+}
 ## Outbound Rules (different set of priorities than Inbound rules) ##
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_controller_to_agents" {
-  name                         = "allow-outbound-ssh-from-${local.service_short_stripped_name}-controller-to-agents"
-  priority                     = 4085
+  name                         = "allow-outbound-ssh-from-${local.nsg_rule_name_discriminator}-to-agents"
+  priority                     = var.use_vnet_common_nsg ? var.nsg_outbound_rules_offset : 4085
   direction                    = "Outbound"
   access                       = "Allow"
   protocol                     = "Tcp"
@@ -220,8 +226,8 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_controller_to_
 }
 # Ignore the rule as it does not detect the IP restriction to only ldap.jenkins.io"s host
 resource "azurerm_network_security_rule" "allow_outbound_ldap_from_controller_to_jenkinsldap" {
-  name                        = "allow-outbound-ldap-from-${local.service_short_stripped_name}-controller-to-jenkinsldap"
-  priority                    = 4086
+  name                        = "allow-outbound-ldap-from-${local.nsg_rule_name_discriminator}-to-jenkinsldap"
+  priority                    = var.use_vnet_common_nsg ? var.nsg_outbound_rules_offset + 1 : 4086
   direction                   = "Outbound"
   access                      = "Allow"
   protocol                    = "Tcp"
@@ -234,8 +240,8 @@ resource "azurerm_network_security_rule" "allow_outbound_ldap_from_controller_to
 }
 # Ignore the rule as it does not detect the IP restriction to only puppet.jenkins.io"s host
 resource "azurerm_network_security_rule" "allow_outbound_puppet_from_controller_to_puppetmaster" {
-  name                        = "allow-outbound-puppet-from-${local.service_short_stripped_name}-controller-to-puppetmaster"
-  priority                    = 4087
+  name                        = "allow-outbound-puppet-from-${local.nsg_rule_name_discriminator}-to-puppetmaster"
+  priority                    = var.use_vnet_common_nsg ? var.nsg_outbound_rules_offset + 2 : 4087
   direction                   = "Outbound"
   access                      = "Allow"
   protocol                    = "Tcp"
@@ -247,8 +253,8 @@ resource "azurerm_network_security_rule" "allow_outbound_puppet_from_controller_
   network_security_group_name = local.nsg_name
 }
 resource "azurerm_network_security_rule" "allow_outbound_http_from_controller_to_internet" {
-  name                        = "allow-outbound-http-from-${local.service_short_stripped_name}-controller-to-internet"
-  priority                    = 4089
+  name                        = "allow-outbound-http-from-${local.nsg_rule_name_discriminator}-to-internet"
+  priority                    = var.use_vnet_common_nsg ? var.nsg_outbound_rules_offset + 3 : 4089
   direction                   = "Outbound"
   access                      = "Allow"
   protocol                    = "Tcp"
@@ -259,9 +265,12 @@ resource "azurerm_network_security_rule" "allow_outbound_http_from_controller_to
   resource_group_name         = local.nsg_rg_name
   network_security_group_name = local.nsg_name
 }
-# This rule overrides an Azure-Default rule. its priority must be < 65000.
+
+# Managed NSG only
 resource "azurerm_network_security_rule" "deny_all_outbound_from_controller_subnet" {
-  name                        = "deny-all-outbound-from-${local.service_short_stripped_name}-controller"
+  count = var.use_vnet_common_nsg ? 0 : 1
+  name  = "deny-all-outbound-from-${local.nsg_rule_name_discriminator}"
+  # This rule overrides an Azure-Default rule. its priority must be < 65000.
   priority                    = 4096 # Maximum value allowed by the provider
   direction                   = "Outbound"
   access                      = "Deny"
@@ -276,24 +285,77 @@ resource "azurerm_network_security_rule" "deny_all_outbound_from_controller_subn
 
 ## Inbound Rules (different set of priorities than Outbound rules) ##
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_privatevpn_to_controller" {
-  name                        = "allow-inbound-ssh-from-privatevpn-to-${local.service_short_stripped_name}-controller"
-  priority                    = 4085
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "22"
-  resource_group_name         = local.nsg_rg_name
-  network_security_group_name = local.nsg_name
-  source_address_prefixes     = var.jenkins_infra_ips.privatevpn_subnet
-  destination_address_prefixes = compact([
-    azurerm_linux_virtual_machine.controller.private_ip_address,
-    var.is_public ? azurerm_public_ip.controller[0].ip_address : "",
-  ])
+  name                         = "allow-inbound-ssh-from-privatevpn-to-${local.nsg_rule_name_discriminator}"
+  priority                     = var.use_vnet_common_nsg ? var.nsg_inbound_rules_offset : 4085
+  direction                    = "Inbound"
+  access                       = "Allow"
+  protocol                     = "Tcp"
+  source_port_range            = "*"
+  destination_port_range       = "22"
+  resource_group_name          = local.nsg_rg_name
+  network_security_group_name  = local.nsg_name
+  source_address_prefixes      = var.jenkins_infra_ips.privatevpn_subnet
+  destination_address_prefixes = local.controller_inbound_ipv4_list
+}
+# VNet "common" NSG only
+resource "azurerm_network_security_rule" "allow_inbound_agents_to_controller" {
+  count                   = var.use_vnet_common_nsg ? 1 : 0
+  name                    = "allow-inbound-jenkins-to-${local.nsg_rule_name_discriminator}"
+  priority                = var.nsg_inbound_rules_offset + 1
+  direction               = "Inbound"
+  access                  = "Allow"
+  protocol                = "Tcp"
+  source_port_range       = "*"
+  source_address_prefixes = var.agent_ip_prefixes
+  destination_port_ranges = [
+    "80",    # HTTP (for redirections to HTTPS)
+    "443",   # HTTPS
+    "50000", # Direct TCP Inbound protocol
+  ]
+  destination_address_prefixes = local.controller_inbound_ipv4_list
+  resource_group_name          = local.nsg_rg_name
+  network_security_group_name  = local.nsg_name
+}
+resource "azurerm_network_security_rule" "allow_public_inbound_http4_to_controller" {
+  count                 = var.is_public && var.use_vnet_common_nsg ? 1 : 0
+  name                  = "allow-public-inbound-http4-to-${local.nsg_rule_name_discriminator}"
+  priority              = var.nsg_inbound_rules_offset + 2
+  direction             = "Inbound"
+  access                = "Allow"
+  protocol              = "Tcp"
+  source_port_range     = "*"
+  source_address_prefix = "*"
+  destination_port_ranges = [
+    "80",  # HTTP (for redirections to HTTPS)
+    "443", # HTTPS
+  ]
+  destination_address_prefixes = local.controller_inbound_ipv4_list
+  resource_group_name          = local.nsg_rg_name
+  network_security_group_name  = local.nsg_name
 }
 
+resource "azurerm_network_security_rule" "allow_public_inbound_http6_to_controller" {
+  count                 = var.is_public && var.enable_public_ipv6 ? 1 : 0
+  name                  = "allow-public-inbound-http6-to-${local.nsg_rule_name_discriminator}"
+  priority              = var.nsg_inbound_rules_offset + 2
+  direction             = "Inbound"
+  access                = "Allow"
+  protocol              = "Tcp"
+  source_port_range     = "*"
+  source_address_prefix = "*"
+  destination_port_ranges = [
+    "80",  # HTTP (for redirections to HTTPS)
+    "443", # HTTPS
+  ]
+  destination_address_prefixes = local.controller_inbound_ipv4_list
+  resource_group_name          = local.nsg_rg_name
+  network_security_group_name  = local.nsg_name
+}
+
+# Managed NSG only
 resource "azurerm_network_security_rule" "allow_inbound_jenkins_to_controller" {
-  name                  = "allow-inbound-jenkins-to-${local.service_short_stripped_name}-controller"
+  count                 = var.use_vnet_common_nsg ? 0 : 1
+  name                  = "allow-inbound-jenkins-to-${local.nsg_rule_name_discriminator}"
   priority              = 4080
   direction             = "Inbound"
   access                = "Allow"
@@ -305,55 +367,27 @@ resource "azurerm_network_security_rule" "allow_inbound_jenkins_to_controller" {
     "443",   # HTTPS
     "50000", # Direct TCP Inbound protocol
   ]
-  destination_address_prefixes = compact(flatten([
-    [for ip in azurerm_linux_virtual_machine.controller.private_ip_addresses :
-      ip if can(cidrnetmask("${ip}/32"))
-    ],
-    var.is_public ? azurerm_public_ip.controller[0].ip_address : "",
-  ]))
-  resource_group_name         = local.nsg_rg_name
-  network_security_group_name = local.nsg_name
+  destination_address_prefixes = local.controller_inbound_ipv4_list
+  resource_group_name          = local.nsg_rg_name
+  network_security_group_name  = local.nsg_name
 }
-resource "azurerm_network_security_rule" "allow_inbound_http6_to_controller" {
-  count                 = var.is_public && var.enable_public_ipv6 ? 1 : 0
-  name                  = "allow-inbound-http6-to-${local.service_short_stripped_name}-controller"
-  priority              = 4081
-  direction             = "Inbound"
-  access                = "Allow"
-  protocol              = "Tcp"
-  source_port_range     = "*"
-  source_address_prefix = var.is_public ? "*" : "VirtualNetwork"
-  destination_port_ranges = [
-    "80",  # HTTP (for redirections to HTTPS)
-    "443", # HTTPS
-  ]
-  destination_address_prefixes = compact(flatten([
-    [for ip in azurerm_linux_virtual_machine.controller.private_ip_addresses :
-      ip if !can(cidrnetmask("${ip}/32"))
-    ],
-    azurerm_public_ip.controller_ipv6[0].ip_address,
-  ]))
-  resource_group_name         = local.nsg_rg_name
-  network_security_group_name = local.nsg_name
-}
+# Managed NSG only
 
-# This rule overrides an Azure-Default rule. its priority must be < 65000
-# Please note that Azure NSG default to "deny all inbound from Internet"
 resource "azurerm_network_security_rule" "deny_all_inbound_to_controller" {
-  name                   = "deny-all-inbound-to-${local.service_short_stripped_name}-controller"
-  priority               = 4090 # Maximum value allowed by the Azure Terraform Provider is 4096
-  direction              = "Inbound"
-  access                 = "Deny"
-  protocol               = "*"
-  source_port_range      = "*"
-  destination_port_range = "*"
-  source_address_prefix  = "*"
-  destination_address_prefixes = compact([
-    azurerm_linux_virtual_machine.controller.private_ip_address,
-    var.is_public ? azurerm_public_ip.controller[0].ip_address : "",
-  ])
-  resource_group_name         = local.nsg_rg_name
-  network_security_group_name = local.nsg_name
+  count = var.use_vnet_common_nsg ? 0 : 1
+  name  = "deny-all-inbound-to-${local.nsg_rule_name_discriminator}"
+  # This rule overrides an Azure-Default rule. its priority must be < 65000
+  # Please note that Azure NSG default to "deny all inbound from Internet"
+  priority                     = 4090 # Maximum value allowed by the Azure Terraform Provider is 4096
+  direction                    = "Inbound"
+  access                       = "Deny"
+  protocol                     = "*"
+  source_port_range            = "*"
+  destination_port_range       = "*"
+  source_address_prefix        = "*"
+  destination_address_prefixes = local.controller_inbound_ipv4_list
+  resource_group_name          = local.nsg_rg_name
+  network_security_group_name  = local.nsg_name
 }
 
 ####################################################################################
