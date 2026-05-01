@@ -134,3 +134,15 @@ variable "use_vnet_common_nsg" {
   description = "Should we use the Network Security Group ('NSG') located in the same Resource Group as the provided Virtual Network and with the same name (convention)?"
   default     = false
 }
+
+variable "nsg_outbound_rules_offset" {
+  type        = number
+  default     = 4000
+  description = "Offset of the NSG outbound rules priority (e.g. value of the first rule then increment of 1 per rule). Default to 4000."
+}
+
+variable "nsg_inbound_rules_offset" {
+  type        = number
+  default     = 4000
+  description = "Offset of the NSG inbound rules priority (e.g. value of the first rule then increment of 1 per rule). Default to 4000."
+}
