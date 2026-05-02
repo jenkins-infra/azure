@@ -8,7 +8,10 @@ module "trusted_ci_jenkins_io_letsencrypt" {
   zone_name        = "trusted.ci.jenkins.io"
   dns_rg_name      = data.azurerm_resource_group.proddns_jenkinsio.name
   parent_zone_name = data.azurerm_dns_zone.jenkinsio.name
-  principal_id     = module.trusted_ci_jenkins_io.controller_service_principal_id
+  principal_ids = [
+    module.trusted_ci_jenkins_io.controller_service_principal_id,
+    module.trusted_ci_jenkins_io_sponsored.controller_service_principal_id,
+  ]
 }
 module "trusted_ci_jenkins_io" {
   source = "./modules/azure-jenkinsinfra-controller"
