@@ -19,17 +19,20 @@ resource "azurerm_dns_ns_record" "custom_zone_parent_records" {
 ## Permissions assigned to the VM System Identity to allow renewal: only allow reading the dnszone and only allow managing the ACME TXT record
 ## Ref. https://go-acme.github.io/lego/dns/azuredns/index.html#azure-managed-identity-with-azure-workload
 resource "azurerm_role_assignment" "custom_zone_read" {
+  count                = length(var.principal_ids)
   scope                = azurerm_dns_zone.custom_zone.id
   role_definition_name = "Reader"
-  principal_id         = var.principal_id
+  principal_id         = var.principal_ids[count.index]
 }
 resource "azurerm_role_assignment" "custom_zone_manage_acme_assets_txt_record" {
+  count                = length(var.principal_ids)
   scope                = "${azurerm_dns_zone.custom_zone.id}/TXT/_acme-challenge.assets"
   role_definition_name = "DNS Zone Contributor"
-  principal_id         = var.principal_id
+  principal_id         = var.principal_ids[count.index]
 }
 resource "azurerm_role_assignment" "custom_zone_manage_acme_txt_record" {
+  count                = length(var.principal_ids)
   scope                = "${azurerm_dns_zone.custom_zone.id}/TXT/_acme-challenge"
   role_definition_name = "DNS Zone Contributor"
-  principal_id         = var.principal_id
+  principal_id         = var.principal_ids[count.index]
 }

@@ -8,9 +8,9 @@ variable "zone_name" {
   description = "Name of the DNS zone handling the Let's Encrypt renewal"
 }
 
-variable "principal_id" {
-  type        = string
-  description = "ID of the Identity used to manage DNS records for Let's Encrypt (usually the Service Principal ID)"
+variable "principal_ids" {
+  type        = list(string)
+  description = "List of the Principal IDs (Identities) used to manage DNS records for Let's Encrypt (usually the Service Principal ID)"
 }
 
 variable "dns_rg_name" {
