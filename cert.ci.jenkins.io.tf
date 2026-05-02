@@ -1,3 +1,15 @@
+####################################################################################
+## Resources for the Controller VM in the CDF subscription
+####################################################################################
+module "cert_ci_jenkins_io_letsencrypt" {
+  source = "./modules/azure-letsencrypt-dns"
+
+  default_tags     = local.default_tags
+  zone_name        = "cert.ci.jenkins.io"
+  dns_rg_name      = data.azurerm_resource_group.proddns_jenkinsio.name
+  parent_zone_name = data.azurerm_dns_zone.jenkinsio.name
+  principal_id     = module.cert_ci_jenkins_io.controller_service_principal_id
+}
 module "cert_ci_jenkins_io" {
   source = "./modules/azure-jenkinsinfra-controller"
 
@@ -36,6 +48,9 @@ module "cert_ci_jenkins_io" {
   agent_ip_prefixes = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.address_prefixes
 }
 
+####################################################################################
+## Agents resources in the CDF subscription
+####################################################################################
 # Required to allow controller to check for subnets inside the virtual network
 resource "azurerm_role_definition" "cert_ci_jenkins_io_vnet_reader" {
   name  = "read-cert-ci-jenkins-io-vnet"
@@ -51,36 +66,30 @@ resource "azurerm_role_assignment" "cert_ci_jenkins_io_controller_vnet_reader" {
   principal_id       = module.cert_ci_jenkins_io.controller_service_principal_id
 }
 
-
 ####################################################################################
-## Public DNS records in the CDF subscription
+## Agents resources in the sponsored subscription
 ####################################################################################
-resource "azurerm_dns_a_record" "cert_ci_jenkins_io" {
-  name                = "@" # Child zone: no CNAME possible!
-  zone_name           = module.cert_ci_jenkins_io_letsencrypt.zone_name
-  resource_group_name = module.cert_ci_jenkins_io_letsencrypt.zone_rg_name
-  ttl                 = 60
-  records             = [module.cert_ci_jenkins_io.controller_private_ipv4]
-}
-resource "azurerm_dns_a_record" "assets_cert_ci_jenkins_io" {
-  name                = "assets"
-  zone_name           = module.cert_ci_jenkins_io_letsencrypt.zone_name
-  resource_group_name = module.cert_ci_jenkins_io_letsencrypt.zone_rg_name
-  ttl                 = 60
-  records             = [module.cert_ci_jenkins_io.controller_private_ipv4]
-}
+module "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
+  providers = {
+    azurerm = azurerm.jenkins-sponsored
+  }
+  source = "./modules/azure-jenkinsinfra-azurevm-agents"
 
-module "cert_ci_jenkins_io_letsencrypt" {
-  source = "./modules/azure-letsencrypt-dns"
+  service_fqdn                     = module.cert_ci_jenkins_io.service_fqdn
+  service_short_stripped_name      = module.cert_ci_jenkins_io.service_short_stripped_name
+  ephemeral_agents_network_rg_name = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.resource_group_name
+  ephemeral_agents_network_name    = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.virtual_network_name
+  ephemeral_agents_subnet_name     = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.name
+  nsg_rg_name                      = azurerm_resource_group.cert_ci_jenkins_io_controller_jenkins_sponsored.name
+  controller_ips                   = compact([module.cert_ci_jenkins_io.controller_public_ipv4])
+  controller_service_principal_id  = module.cert_ci_jenkins_io.controller_service_principal_id
+  default_tags                     = local.default_tags
+  storage_account_name             = "certciagentssub" # Max 24 chars
 
-  default_tags     = local.default_tags
-  zone_name        = "cert.ci.jenkins.io"
-  dns_rg_name      = data.azurerm_resource_group.proddns_jenkinsio.name
-  parent_zone_name = data.azurerm_dns_zone.jenkinsio.name
-  principal_id     = module.cert_ci_jenkins_io.controller_service_principal_id
+  jenkins_infra_ips = {
+    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
+  }
 }
-
-## Jenkins Sponsored
 resource "azurerm_resource_group" "cert_ci_jenkins_io_controller_jenkins_sponsored" {
   provider = azurerm.jenkins-sponsored
   name     = module.cert_ci_jenkins_io.controller_resourcegroup_name # Same name on both subscriptions
@@ -122,28 +131,6 @@ resource "azurerm_role_assignment" "cert_controller_vnet_jenkins_sponsored_reade
   role_definition_id = azurerm_role_definition.cert_ci_jenkins_io_controller_vnet_sponsored_reader.role_definition_resource_id
   principal_id       = module.cert_ci_jenkins_io.controller_service_principal_id
 }
-module "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
-  providers = {
-    azurerm = azurerm.jenkins-sponsored
-  }
-  source = "./modules/azure-jenkinsinfra-azurevm-agents"
-
-  service_fqdn                     = module.cert_ci_jenkins_io.service_fqdn
-  service_short_stripped_name      = module.cert_ci_jenkins_io.service_short_stripped_name
-  ephemeral_agents_network_rg_name = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.resource_group_name
-  ephemeral_agents_network_name    = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.virtual_network_name
-  ephemeral_agents_subnet_name     = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.name
-  nsg_rg_name                      = azurerm_resource_group.cert_ci_jenkins_io_controller_jenkins_sponsored.name
-  controller_ips                   = compact([module.cert_ci_jenkins_io.controller_public_ipv4])
-  controller_service_principal_id  = module.cert_ci_jenkins_io.controller_service_principal_id
-  default_tags                     = local.default_tags
-  storage_account_name             = "certciagentssub" # Max 24 chars
-
-  jenkins_infra_ips = {
-    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
-  }
-}
-
 # Allow access to the private Azure Container Registry through an Azure Endpoint NIC
 module "certcijenkinsiosponsored_acr_pe" {
   source = "./modules/azure-container-registry-private-links"
@@ -165,7 +152,6 @@ module "certcijenkinsiosponsored_acr_pe" {
 
   default_tags = local.default_tags
 }
-
 ## Allow access to/from ACR endpoint
 resource "azurerm_network_security_rule" "allow_out_https_from_cert_vnet_to_acr" {
   provider = azurerm.jenkins-sponsored
@@ -196,4 +182,22 @@ resource "azurerm_network_security_rule" "allow_in_https_from_cert_vnet_to_acr" 
   destination_address_prefixes = split(",", module.certcijenkinsiosponsored_acr_pe.private_endpoint_nic_ip_addresses)
   resource_group_name          = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
   network_security_group_name  = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+}
+
+####################################################################################
+## Public DNS records in the CDF subscription
+####################################################################################
+resource "azurerm_dns_a_record" "cert_ci_jenkins_io" {
+  name                = "@" # Child zone: no CNAME possible!
+  zone_name           = module.cert_ci_jenkins_io_letsencrypt.zone_name
+  resource_group_name = module.cert_ci_jenkins_io_letsencrypt.zone_rg_name
+  ttl                 = 60
+  records             = [module.cert_ci_jenkins_io.controller_private_ipv4]
+}
+resource "azurerm_dns_a_record" "assets_cert_ci_jenkins_io" {
+  name                = "assets"
+  zone_name           = module.cert_ci_jenkins_io_letsencrypt.zone_name
+  resource_group_name = module.cert_ci_jenkins_io_letsencrypt.zone_rg_name
+  ttl                 = 60
+  records             = [module.cert_ci_jenkins_io.controller_private_ipv4]
 }
