@@ -17,6 +17,8 @@ module "cert_ci_jenkins_io" {
   controller_data_disk_size_gb = 128
   controller_vm_size           = "Standard_B2s"
   default_tags                 = local.default_tags
+  dns_zone_name                = module.cert_ci_jenkins_io_letsencrypt.zone_name
+  dns_resourcegroup_name       = module.cert_ci_jenkins_io_letsencrypt.zone_rg_name
 
   jenkins_infra_ips = {
     ldap_ipv4         = azurerm_public_ip.publick8s_ips["publick8s-ldap-ipv4"].ip_address,
