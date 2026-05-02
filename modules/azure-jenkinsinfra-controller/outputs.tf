@@ -14,12 +14,8 @@ output "controller_private_ipv4" {
   value = azurerm_linux_virtual_machine.controller.private_ip_address
 }
 
-output "controller_public_fqdn" {
-  value = length(azurerm_dns_a_record.controller) == 1 ? azurerm_dns_a_record.controller[0].fqdn : var.service_fqdn
-}
-
-output "controller_private_fqdn" {
-  value = length(azurerm_dns_a_record.private_controller) == 1 ? azurerm_dns_a_record.private_controller[0].fqdn : var.service_fqdn
+output "controller_fqdn" {
+  value = local.controller_fqdn
 }
 
 output "service_fqdn" {
