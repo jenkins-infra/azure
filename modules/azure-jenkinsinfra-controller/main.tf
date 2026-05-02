@@ -56,7 +56,7 @@ resource "azurerm_management_lock" "controller_publicipv6" {
   notes      = "Locked because this is a sensitive resource that should not be removed"
 }
 data "azurerm_dns_zone" "controller" {
-  count               = var.is_public && var.dns_zone_name != "" ? 1 : 0
+  count               = var.dns_zone_name != "" ? 1 : 0
   provider            = azurerm.dns
   name                = var.dns_zone_name
   resource_group_name = var.dns_resourcegroup_name
@@ -64,22 +64,14 @@ data "azurerm_dns_zone" "controller" {
 resource "azurerm_dns_a_record" "controller" {
   count               = length(data.azurerm_dns_zone.controller)
   provider            = azurerm.dns
-  name                = trimsuffix(trimsuffix(local.controller_fqdn, var.dns_zone), ".")
-  zone_name           = var.dns_zone_name
-  resource_group_name = var.dns_resourcegroup_name
+  name                = trimsuffix(trimsuffix(local.controller_fqdn, data.azurerm_dns_zone.controller[0].name), ".")
+  zone_name           = data.azurerm_dns_zone.controller[0].name
+  resource_group_name = data.azurerm_dns_zone.controller[0].resource_group_name
   ttl                 = 60
-  records             = [azurerm_public_ip.controller[0].ip_address]
-  tags                = var.default_tags
-}
-resource "azurerm_dns_a_record" "private_controller" {
-  count               = length(data.azurerm_dns_zone.controller)
-  provider            = azurerm.dns
-  name                = "private.${azurerm_dns_a_record.controller[0].name}"
-  zone_name           = var.dns_zone_name
-  resource_group_name = var.dns_resourcegroup_name
-  ttl                 = 60
-  records             = [azurerm_network_interface.controller.private_ip_address]
-  tags                = var.default_tags
+  records = [
+    var.is_public ? azurerm_public_ip.controller[0].ip_address : azurerm_network_interface.controller.private_ip_address,
+  ]
+  tags = var.default_tags
 }
 resource "azurerm_network_interface" "controller" {
   name                = local.controller_fqdn
@@ -201,15 +193,6 @@ data "azurerm_network_security_group" "vnet_common_nsg" {
   resource_group_name = data.azurerm_virtual_network.controller.resource_group_name
 }
 
-locals {
-  nsg_rule_name_discriminator = var.use_vnet_common_nsg ? replace(local.controller_fqdn, ".jenkins.io", ".jio") : "${local.service_short_stripped_name}-controller"
-  controller_inbound_ipv4_list = compact(flatten([
-    [for ip in azurerm_linux_virtual_machine.controller.private_ip_addresses :
-      ip if can(cidrnetmask("${ip}/32"))
-    ],
-    var.is_public ? azurerm_public_ip.controller[0].ip_address : "",
-  ]))
-}
 ## Outbound Rules (different set of priorities than Inbound rules) ##
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_controller_to_agents" {
   name                         = "allow-outbound-ssh-from-${local.nsg_rule_name_discriminator}-to-agents"
