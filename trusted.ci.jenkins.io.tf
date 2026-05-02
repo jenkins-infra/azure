@@ -359,7 +359,7 @@ resource "azurerm_role_assignment" "trusted_controller_vnet_jenkins_sponsored_re
 ## Public DNS records in the CDF subscription
 ####################################################################################
 resource "azurerm_dns_a_record" "trusted_ci_controller" {
-  name                = "@"
+  name                = "@" # Child zone: no CNAME possible!
   zone_name           = module.trusted_ci_jenkins_io_letsencrypt.zone_name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60

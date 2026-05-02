@@ -52,14 +52,9 @@ resource "azurerm_role_assignment" "cert_ci_jenkins_io_controller_vnet_reader" {
 }
 
 
-## Service DNS records
-resource "azurerm_dns_a_record" "cert_ci_jenkins_io_controller" {
-  name                = "controller"
-  zone_name           = module.cert_ci_jenkins_io_letsencrypt.zone_name
-  resource_group_name = module.cert_ci_jenkins_io_letsencrypt.zone_rg_name
-  ttl                 = 60
-  records             = [module.cert_ci_jenkins_io.controller_private_ipv4]
-}
+####################################################################################
+## Public DNS records in the CDF subscription
+####################################################################################
 resource "azurerm_dns_a_record" "cert_ci_jenkins_io" {
   name                = "@" # Child zone: no CNAME possible!
   zone_name           = module.cert_ci_jenkins_io_letsencrypt.zone_name
