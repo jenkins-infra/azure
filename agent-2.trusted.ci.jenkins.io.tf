@@ -93,7 +93,6 @@ resource "azurerm_virtual_machine_data_disk_attachment" "agent_2_trusted_ci_jenk
 ####################################################################################
 ## Network Security Group and rules
 ####################################################################################
-
 resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_permanent_agent_2_jenkins_sponsored" {
   provider               = azurerm.jenkins-sponsored
   name                   = "allow-inbound-ssh-from-controller-to-permanent-agent-2"
@@ -103,7 +102,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_p
   protocol               = "Tcp"
   source_port_range      = "*"
   destination_port_range = "22"
-  source_address_prefix  = module.trusted_ci_jenkins_io.controller_private_ipv4
+  source_address_prefix  = module.trusted_ci_jenkins_io_sponsored.controller_private_ipv4
   destination_address_prefixes = [
     azurerm_linux_virtual_machine.agent_2_trusted_ci_jenkins_io_jenkins_sponsored.private_ip_address,
   ]
