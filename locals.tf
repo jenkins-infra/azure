@@ -340,7 +340,7 @@ locals {
       ],
     },
     "trusted.ci.jenkins.io" = {
-      "controller" = [data.azurerm_subnet.trusted_ci_jenkins_io_controller.id],
+      "controller" = [data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_controller.id],
       "agents" = [
         # Permanent agents (Update Center generation)
         data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_permanent_agents.id,

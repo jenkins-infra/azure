@@ -288,7 +288,7 @@ resource "azurerm_role_assignment" "trusted_ci_jenkins_io_operate_agent_identity
 
   scope                = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.id
   role_definition_name = "Managed Identity Operator"
-  principal_id         = module.trusted_ci_jenkins_io.controller_service_principal_id
+  principal_id         = module.trusted_ci_jenkins_io_sponsored.controller_service_principal_id
 }
 ####################################################################################
 ## Agents resources in the sponsored subscription
@@ -299,14 +299,14 @@ module "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   }
   source = "./modules/azure-jenkinsinfra-azurevm-agents"
 
-  service_fqdn                     = module.trusted_ci_jenkins_io.service_fqdn
-  service_short_stripped_name      = module.trusted_ci_jenkins_io.service_short_stripped_name
+  service_fqdn                     = module.trusted_ci_jenkins_io_letsencrypt.zone_name
+  service_short_stripped_name      = module.trusted_ci_jenkins_io_sponsored.service_short_stripped_name
   ephemeral_agents_network_rg_name = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.resource_group_name
   ephemeral_agents_network_name    = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.virtual_network_name
   ephemeral_agents_subnet_name     = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.name
   use_vnet_common_nsg              = true
-  controller_ips                   = compact([module.trusted_ci_jenkins_io.controller_public_ipv4])
-  controller_service_principal_id  = module.trusted_ci_jenkins_io.controller_service_principal_id
+  controller_ips                   = compact([module.trusted_ci_jenkins_io_sponsored.controller_public_ipv4])
+  controller_service_principal_id  = module.trusted_ci_jenkins_io_sponsored.controller_service_principal_id
   default_tags                     = local.default_tags
   storage_account_name             = "trustedciagentssponso" # Max 24 chars
 
@@ -355,7 +355,7 @@ resource "azurerm_role_assignment" "trusted_controller_vnet_jenkins_sponsored_re
   provider           = azurerm.jenkins-sponsored
   scope              = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.id
   role_definition_id = azurerm_role_definition.trusted_ci_jenkins_io_controller_vnet_sponsored_reader.role_definition_resource_id
-  principal_id       = module.trusted_ci_jenkins_io.controller_service_principal_id
+  principal_id       = module.trusted_ci_jenkins_io_sponsored.controller_service_principal_id
 }
 
 ####################################################################################
@@ -366,12 +366,12 @@ resource "azurerm_dns_a_record" "trusted_ci_controller" {
   zone_name           = module.trusted_ci_jenkins_io_letsencrypt.zone_name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
-  records             = [module.trusted_ci_jenkins_io.controller_private_ipv4]
+  records             = [module.trusted_ci_jenkins_io_sponsored.controller_private_ipv4]
 }
 resource "azurerm_dns_a_record" "assets_trusted_ci_controller" {
   name                = "assets"
   zone_name           = module.trusted_ci_jenkins_io_letsencrypt.zone_name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
-  records             = [module.trusted_ci_jenkins_io.controller_private_ipv4]
+  records             = [module.trusted_ci_jenkins_io_sponsored.controller_private_ipv4]
 }
