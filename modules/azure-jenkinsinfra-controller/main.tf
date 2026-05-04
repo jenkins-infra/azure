@@ -325,6 +325,24 @@ resource "azurerm_network_security_rule" "allow_public_inbound_http4_to_controll
   resource_group_name          = local.nsg_rg_name
   network_security_group_name  = local.nsg_name
 }
+resource "azurerm_network_security_rule" "allow_private_inbound_http4_to_controller" {
+  count             = var.use_vnet_common_nsg ? 1 : 0
+  name              = "allow-private-inbound-http4-to-${local.nsg_rule_name_discriminator}"
+  priority          = var.nsg_inbound_rules_offset + 3
+  direction         = "Inbound"
+  access            = "Allow"
+  protocol          = "Tcp"
+  source_port_range = "*"
+  # Private inbound only comes from VPN subnet
+  source_address_prefixes = var.jenkins_infra_ips.privatevpn_subnet
+  destination_port_ranges = [
+    "80",  # HTTP (for redirections to HTTPS)
+    "443", # HTTPS
+  ]
+  destination_address_prefixes = local.controller_inbound_ipv4_list
+  resource_group_name          = local.nsg_rg_name
+  network_security_group_name  = local.nsg_name
+}
 
 resource "azurerm_network_security_rule" "allow_public_inbound_http6_to_controller" {
   count                 = var.is_public && var.enable_public_ipv6 ? 1 : 0
