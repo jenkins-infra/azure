@@ -119,6 +119,7 @@ resource "azurerm_network_security_rule" "allow_outbound_http_from_ephemeral_age
   network_security_group_name = local.nsg_name
 }
 resource "azurerm_network_security_rule" "deny_all_outbound_from_ephemeral_agents_to_internet" {
+  count                       = var.use_vnet_common_nsg ? 0 : 1
   name                        = "deny-all-outbound-from-${var.service_short_stripped_name}_ephemeral_agents-to-internet"
   priority                    = 4095
   direction                   = "Outbound"
@@ -133,6 +134,7 @@ resource "azurerm_network_security_rule" "deny_all_outbound_from_ephemeral_agent
 }
 # This rule overrides an Azure-Default rule. its priority must be < 65000.
 resource "azurerm_network_security_rule" "deny_all_outbound_from_ephemeral_agents_to_vnet" {
+  count                       = var.use_vnet_common_nsg ? 0 : 1
   name                        = "deny-all-outbound-from-${var.service_short_stripped_name}_ephemeral_agents-to-vnet"
   priority                    = 4096 # Maximum value allowed by Azure API
   direction                   = "Outbound"
@@ -175,6 +177,7 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_e
 }
 # This rule overrides an Azure-Default rule. its priority must be < 65000
 resource "azurerm_network_security_rule" "deny_all_inbound_from_vnet_to_ephemeral_agents" {
+  count                        = var.use_vnet_common_nsg ? 0 : 1
   name                         = "deny-all-inbound-from-vnet-to-${var.service_short_stripped_name}_ephemeral_agents"
   priority                     = 4096 # Maximum value allowed by the Azure Terraform Provider
   direction                    = "Inbound"
