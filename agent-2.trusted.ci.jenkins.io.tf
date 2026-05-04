@@ -118,7 +118,82 @@ resource "azurerm_network_security_rule" "allow_inbound_ssh_from_controller_to_p
   resource_group_name         = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
   network_security_group_name = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
 }
-
+## Outbound Rules (different set of priorities than Inbound rules) ##
+resource "azurerm_network_security_rule" "allow_outbound_http4_from_permanent_agent_2_jenkins_sponsored_to_internet" {
+  provider          = azurerm.jenkins-sponsored
+  name              = "allow-outbound-http4-from-permanent-agent-2-to-internet"
+  priority          = 3600
+  direction         = "Outbound"
+  access            = "Allow"
+  protocol          = "Tcp"
+  source_port_range = "*"
+  destination_port_ranges = [
+    "80",
+    "443",
+  ]
+  source_address_prefixes = [
+    azurerm_linux_virtual_machine.agent_2_trusted_ci_jenkins_io_jenkins_sponsored.private_ip_address,
+  ]
+  destination_address_prefix  = "Internet"
+  resource_group_name         = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
+  network_security_group_name = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
+}
+resource "azurerm_network_security_rule" "allow_outbound_hkp_udp_from_permanent_agent_2_to_ubuntu_keyserver" {
+  provider          = azurerm.jenkins-sponsored
+  name              = "allow-outbound-hkp-udp-from-permanent-agent-2-to-ubuntu-keyserver"
+  priority          = 3601
+  direction         = "Outbound"
+  access            = "Allow"
+  protocol          = "Udp"
+  source_port_range = "*"
+  source_address_prefixes = [
+    azurerm_linux_virtual_machine.agent_2_trusted_ci_jenkins_io_jenkins_sponsored.private_ip_address,
+  ]
+  destination_port_ranges = [
+    "11371", # HKP (OpenPGP KeyServer) - https://github.com/jenkins-infra/helpdesk/issues/3664
+  ]
+  destination_address_prefixes = local.gpg_keyserver_ips["keyserver.ubuntu.com"]
+  resource_group_name          = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
+  network_security_group_name  = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
+}
+resource "azurerm_network_security_rule" "allow_outbound_hkp_tcp_from_permanent_agent_2_to_ubuntu_keyserver" {
+  provider          = azurerm.jenkins-sponsored
+  name              = "allow-outbound-hkp-tcp-from-permanent-agent-2-to-ubuntu-keyserver"
+  priority          = 3602
+  direction         = "Outbound"
+  access            = "Allow"
+  protocol          = "Tcp"
+  source_port_range = "*"
+  source_address_prefixes = [
+    azurerm_linux_virtual_machine.agent_2_trusted_ci_jenkins_io_jenkins_sponsored.private_ip_address,
+  ]
+  destination_port_ranges = [
+    "11371", # HKP (OpenPGP KeyServer) - https://github.com/jenkins-infra/helpdesk/issues/3664
+  ]
+  destination_address_prefixes = local.gpg_keyserver_ips["keyserver.ubuntu.com"]
+  resource_group_name          = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
+  network_security_group_name  = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
+}
+resource "azurerm_network_security_rule" "allow_outbound_ssh_from_permanent_agent_2_to_github" {
+  provider          = azurerm.jenkins-sponsored
+  name              = "allow-outbound-ssh-from-permanent-agent-2-to-github"
+  priority          = 3603
+  direction         = "Outbound"
+  access            = "Allow"
+  protocol          = "Tcp"
+  source_port_range = "*"
+  source_address_prefixes = [
+    azurerm_linux_virtual_machine.agent_2_trusted_ci_jenkins_io_jenkins_sponsored.private_ip_address,
+  ]
+  destination_port_range = "22"
+  #Filter only for ipv4 ips
+  destination_address_prefixes = [
+    for ip in split(" ", local.github_ips.scm) : ip
+    if can(cidrnetmask(ip))
+  ]
+  resource_group_name         = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
+  network_security_group_name = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
+}
 ####################################################################################
 ## Public DNS records
 ####################################################################################
