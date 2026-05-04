@@ -194,6 +194,27 @@ resource "azurerm_network_security_rule" "allow_outbound_ssh_from_permanent_agen
   resource_group_name         = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
   network_security_group_name = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
 }
+# TODO switch to a private endpoint to restrict NSG rules
+resource "azurerm_network_security_rule" "allow_outbound_nfs_from_permanent_agent_2" {
+  provider          = azurerm.jenkins-sponsored
+  name              = "allow-outbound-nfs-from-permanent-agent-2"
+  priority          = 3604
+  direction         = "Outbound"
+  access            = "Allow"
+  protocol          = "Tcp"
+  source_port_range = "*"
+  source_address_prefixes = [
+    azurerm_linux_virtual_machine.agent_2_trusted_ci_jenkins_io_jenkins_sponsored.private_ip_address,
+  ]
+  destination_port_ranges = [
+    "111",  # rpcbind
+    "2048", # NFS v3
+    "2049", # NFSv4.1
+  ]
+  destination_address_prefix  = "*"
+  resource_group_name         = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
+  network_security_group_name = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
+}
 ####################################################################################
 ## Public DNS records
 ####################################################################################
