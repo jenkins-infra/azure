@@ -163,6 +163,15 @@ resource "azurerm_linux_virtual_machine" "controller" {
     sku       = strcontains(var.controller_vm_size, "p") ? "22_04-lts-arm64" : "minimal-22_04-lts-gen2"
     version   = "latest"
   }
+
+  lifecycle {
+    ignore_changes = [
+      # Ignoring user_data in case we make changes to the tpl file (which could lead to destroying VMs inadvertently).
+      user_data,
+      # We don't want to re-create VMs when a new image is specified
+      source_image_reference,
+    ]
+  }
 }
 resource "azurerm_virtual_machine_data_disk_attachment" "controller_data" {
   managed_disk_id    = azurerm_managed_disk.controller_data.id

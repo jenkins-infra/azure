@@ -69,6 +69,15 @@ resource "azurerm_linux_virtual_machine" "agent_2_trusted_ci_jenkins_io_jenkins_
       azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.id,
     ]
   }
+
+  lifecycle {
+    ignore_changes = [
+      # Ignoring user_data in case we make changes to the tpl file (which could lead to destroying VMs inadvertently).
+      user_data,
+      # We don't want to re-create VMs when a new image is specified
+      source_image_reference,
+    ]
+  }
 }
 resource "azurerm_managed_disk" "agent_2_trusted_ci_jenkins_io_data_jenkins_sponsored" {
   provider             = azurerm.jenkins-sponsored
