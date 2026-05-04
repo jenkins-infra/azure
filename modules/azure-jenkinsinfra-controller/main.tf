@@ -101,7 +101,7 @@ resource "azurerm_network_interface" "controller" {
   }
 }
 resource "azurerm_managed_disk" "controller_data" {
-  name                 = var.controller_datadisk_name == "" ? "${local.controller_fqdn}-data" : var.controller_datadisk_name
+  name                 = "${local.controller_fqdn}-data"
   location             = azurerm_resource_group.controller.location
   resource_group_name  = azurerm_resource_group.controller.name
   storage_account_type = var.controller_data_disk_type
@@ -152,7 +152,7 @@ resource "azurerm_linux_virtual_machine" "controller" {
 
   os_disk {
     caching              = "ReadWrite"
-    storage_account_type = var.controller_os_disk_type
+    storage_account_type = "StandardSSD_LRS"
     disk_size_gb         = var.controller_os_disk_size_gb
   }
 
@@ -390,7 +390,7 @@ resource "azuread_application" "controller" {
     }
   }
   web {
-    homepage_url = var.controller_active_directory_url
+    homepage_url = "https://github.com/jenkins-infra/azure"
   }
 }
 resource "azuread_service_principal" "controller" {

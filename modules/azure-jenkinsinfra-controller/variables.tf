@@ -60,11 +60,6 @@ variable "dns_zone_name" {
   default = ""
 }
 
-variable "dns_zone" {
-  type    = string
-  default = "jenkins.io"
-}
-
 variable "dns_resourcegroup_name" {
   type    = string
   default = ""
@@ -85,11 +80,6 @@ variable "controller_os_disk_size_gb" {
   default = 32 # Minimal size for Ubuntu 22.04 official image
 }
 
-variable "controller_os_disk_type" {
-  type    = string
-  default = "StandardSSD_LRS"
-}
-
 variable "jenkins_infra_ips" {
   type = object({
     ldap_ipv4         = string
@@ -98,17 +88,11 @@ variable "jenkins_infra_ips" {
   })
 }
 
-variable "controller_active_directory_url" {
-  type    = string
-  default = "https://github.com/jenkins-infra/azure"
-}
-
 variable "controller_packer_rg_ids" {
   type    = list(string)
   default = []
 }
 
-## TODO: backward compatibility variables to be removed (implies renaming resources)
 variable "controller_resourcegroup_name" {
   type    = string
   default = ""
