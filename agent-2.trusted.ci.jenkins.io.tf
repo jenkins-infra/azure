@@ -215,6 +215,21 @@ resource "azurerm_network_security_rule" "allow_outbound_nfs_from_permanent_agen
   resource_group_name         = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
   network_security_group_name = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
 }
+resource "azurerm_network_security_rule" "allow_outbound_puppet_from_permanent_agent_2_to_puppetmaster" {
+  name              = "allow-outbound-puppet-from-permanent-agent-2-to-puppetmaster"
+  priority          = 3605
+  direction         = "Outbound"
+  access            = "Allow"
+  protocol          = "Tcp"
+  source_port_range = "*"
+  source_address_prefixes = [
+    azurerm_linux_virtual_machine.agent_2_trusted_ci_jenkins_io_jenkins_sponsored.private_ip_address,
+  ]
+  destination_port_range      = "8140" # Puppet over TLS
+  destination_address_prefix  = azurerm_public_ip.puppet_jenkins_io.ip_address
+  resource_group_name         = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
+  network_security_group_name = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
+}
 ####################################################################################
 ## Public DNS records
 ####################################################################################
