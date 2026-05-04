@@ -216,6 +216,7 @@ resource "azurerm_network_security_rule" "allow_outbound_nfs_from_permanent_agen
   network_security_group_name = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
 }
 resource "azurerm_network_security_rule" "allow_outbound_puppet_from_permanent_agent_2_to_puppetmaster" {
+  provider          = azurerm.jenkins-sponsored
   name              = "allow-outbound-puppet-from-permanent-agent-2-to-puppetmaster"
   priority          = 3605
   direction         = "Outbound"
