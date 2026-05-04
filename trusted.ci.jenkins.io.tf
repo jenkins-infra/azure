@@ -12,6 +12,21 @@ module "trusted_ci_jenkins_io_letsencrypt" {
     module.trusted_ci_jenkins_io_sponsored.controller_service_principal_id,
   ]
 }
+resource "azurerm_dns_a_record" "trusted_ci_controller" {
+  name                = "@" # Child zone: no CNAME possible!
+  zone_name           = module.trusted_ci_jenkins_io_letsencrypt.zone_name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  records             = [module.trusted_ci_jenkins_io_sponsored.controller_private_ipv4]
+}
+resource "azurerm_dns_a_record" "assets_trusted_ci_controller" {
+  name                = "assets"
+  zone_name           = module.trusted_ci_jenkins_io_letsencrypt.zone_name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  records             = [module.trusted_ci_jenkins_io_sponsored.controller_private_ipv4]
+}
+
 ####################################################################################
 ## Resources for the Controller VM in the sponsored subscription
 ####################################################################################
@@ -309,22 +324,4 @@ resource "azurerm_role_assignment" "trusted_controller_vnet_jenkins_sponsored_re
   scope              = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.id
   role_definition_id = azurerm_role_definition.trusted_ci_jenkins_io_controller_vnet_sponsored_reader.role_definition_resource_id
   principal_id       = module.trusted_ci_jenkins_io_sponsored.controller_service_principal_id
-}
-
-####################################################################################
-## Public DNS records in the CDF subscription
-####################################################################################
-resource "azurerm_dns_a_record" "trusted_ci_controller" {
-  name                = "@" # Child zone: no CNAME possible!
-  zone_name           = module.trusted_ci_jenkins_io_letsencrypt.zone_name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 60
-  records             = [module.trusted_ci_jenkins_io_sponsored.controller_private_ipv4]
-}
-resource "azurerm_dns_a_record" "assets_trusted_ci_controller" {
-  name                = "assets"
-  zone_name           = module.trusted_ci_jenkins_io_letsencrypt.zone_name
-  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-  ttl                 = 60
-  records             = [module.trusted_ci_jenkins_io_sponsored.controller_private_ipv4]
 }
