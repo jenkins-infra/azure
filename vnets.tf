@@ -22,9 +22,6 @@ data "azurerm_resource_group" "cert_ci_jenkins_io_sponsored" {
   provider = azurerm.jenkins-sponsored
   name     = "cert-ci-jenkins-io-sponsored"
 }
-data "azurerm_resource_group" "trusted_ci_jenkins_io" {
-  name = "trusted-ci-jenkins-io"
-}
 data "azurerm_resource_group" "trusted_ci_jenkins_io_sponsored" {
   provider = azurerm.jenkins-sponsored
   name     = "trusted-ci-jenkins-io-sponsored"
@@ -60,10 +57,6 @@ data "azurerm_virtual_network" "cert_ci_jenkins_io_sponsored" {
   provider            = azurerm.jenkins-sponsored
   name                = "${data.azurerm_resource_group.cert_ci_jenkins_io_sponsored.name}-vnet"
   resource_group_name = data.azurerm_resource_group.cert_ci_jenkins_io_sponsored.name
-}
-data "azurerm_virtual_network" "trusted_ci_jenkins_io" {
-  name                = "trusted-ci-jenkins-io-vnet"
-  resource_group_name = data.azurerm_resource_group.trusted_ci_jenkins_io.name
 }
 data "azurerm_virtual_network" "trusted_ci_jenkins_io_sponsored" {
   provider            = azurerm.jenkins-sponsored
@@ -114,11 +107,6 @@ data "azurerm_subnet" "cert_ci_jenkins_io_sponsored_ephemeral_agents" {
   name                 = "${data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.name}-ephemeral-agents"
   virtual_network_name = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.name
   resource_group_name  = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.resource_group_name
-}
-data "azurerm_subnet" "trusted_ci_jenkins_io_controller" {
-  name                 = "${data.azurerm_virtual_network.trusted_ci_jenkins_io.name}-controller"
-  virtual_network_name = data.azurerm_virtual_network.trusted_ci_jenkins_io.name
-  resource_group_name  = data.azurerm_resource_group.trusted_ci_jenkins_io.name
 }
 data "azurerm_subnet" "trusted_ci_jenkins_io_sponsored_ephemeral_agents" {
   provider             = azurerm.jenkins-sponsored
