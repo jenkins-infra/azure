@@ -144,6 +144,9 @@ resource "local_file" "jenkins_infra_data_report" {
         "ipv4" = azurerm_dns_a_record.privatek8s_private.records,
       }
     },
+    "dockerhubmirror.azurecr.io" = {
+      "private_ip_addresses" = module.certcijenkinsiosponsored_acr_pe.private_endpoint_nic_ip_addresses,
+    },
     "admin_public_ips" = local.admin_public_ips,
   })
   filename = "${path.module}/jenkins-infra-data-reports/azure.json"
