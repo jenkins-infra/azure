@@ -311,3 +311,258 @@ module "privatek8s_sponsored_acr_pe" {
 
   default_tags = local.default_tags
 }
+
+###################################################################################
+# Ressources from the Kubernetes provider
+###################################################################################
+resource "kubernetes_storage_class" "privatek8s_sponsored_statically_provisioned" {
+  provider = kubernetes.privatek8s-sponsored
+  metadata {
+    name = "statically-provisioned"
+  }
+  storage_provisioner    = "disk.csi.azure.com"
+  reclaim_policy         = "Retain"
+  allow_volume_expansion = true
+}
+
+resource "kubernetes_namespace" "privatek8s_sponsored" {
+  for_each = toset(["release-ci-jenkins-io", "infra-ci-jenkins-io", "release-ci-jenkins-io-agents", "data-storage-jenkins-io"])
+  provider = kubernetes.privatek8s-sponsored
+  metadata {
+    name = each.key
+    labels = {
+      name = each.key
+    }
+  }
+}
+
+resource "kubernetes_secret" "privatek8s_sponsored_data_storage_jenkins_io_storage_account" {
+  provider = kubernetes.privatek8s-sponsored
+
+  metadata {
+    name      = "data-storage-jenkins-io-storage-account"
+    namespace = kubernetes_namespace.privatek8s_sponsored["data-storage-jenkins-io"].metadata[0].name
+  }
+
+  data = {
+    azurestorageaccountname = azurerm_storage_account.data_storage_jenkins_io.name
+    azurestorageaccountkey  = azurerm_storage_account.data_storage_jenkins_io.primary_access_key
+  }
+
+  type = "Opaque"
+}
+
+resource "kubernetes_persistent_volume" "privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage" {
+  provider = kubernetes.privatek8s-sponsored
+  metadata {
+    name = "release-ci-jenkins-io-agents-data-storage"
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_storage_share.data_storage_jenkins_io.quota}Gi"
+    }
+    access_modes                     = ["ReadWriteMany"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.privatek8s_sponsored_statically_provisioned.id
+    # Ensure that only the designated PVC can claim this PV (to avoid injection as PV are not namespaced)
+    claim_ref {
+      # NS of the PVC
+      namespace = kubernetes_namespace.privatek8s_sponsored["release-ci-jenkins-io-agents"].metadata[0].name
+      name      = "data-storage-jenkins-io"
+    }
+    mount_options = [
+      "nconnect=4", # Mandatory value (4) for Premium Azure File Share NFS 4.1. Increasing require using NetApp NFS instead ($$$)
+      "noresvport", # ref. https://linux.die.net/man/5/nfs
+      "actimeo=10", # Data is changed quite often
+      "cto",        # Ensure data consistency at the cost of slower I/O
+    ]
+    persistent_volume_source {
+      csi {
+        driver  = "file.csi.azure.com"
+        fs_type = "ext4"
+        # `volumeHandle` must be unique on the cluster for this volume and must looks like: "{resource-group-name}#{account-name}#{file-share-name}"
+        volume_handle = "${azurerm_storage_account.data_storage_jenkins_io.resource_group_name}#${azurerm_storage_account.data_storage_jenkins_io.name}#${azurerm_storage_share.data_storage_jenkins_io.name}"
+        read_only     = false
+        volume_attributes = {
+          protocol       = "nfs"
+          resourceGroup  = azurerm_storage_account.data_storage_jenkins_io.resource_group_name
+          shareName      = azurerm_storage_share.data_storage_jenkins_io.name
+          storageAccount = azurerm_storage_account.data_storage_jenkins_io.name
+        }
+        node_stage_secret_ref {
+          name      = kubernetes_secret.privatek8s_sponsored_data_storage_jenkins_io_storage_account.metadata[0].name
+          namespace = kubernetes_secret.privatek8s_sponsored_data_storage_jenkins_io_storage_account.metadata[0].namespace
+        }
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage" {
+  provider = kubernetes.privatek8s-sponsored
+  metadata {
+    name      = "data-storage-jenkins-io"
+    namespace = kubernetes_namespace.privatek8s_sponsored["release-ci-jenkins-io-agents"].metadata[0].name
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage.metadata[0].name
+    storage_class_name = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage.spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage.spec[0].capacity.storage
+      }
+    }
+  }
+}
+
+resource "kubernetes_persistent_volume" "privatek8s_sponsored_infra_ci_jenkins_io_data" {
+  provider = kubernetes.privatek8s-sponsored
+
+  metadata {
+    name = "infra-ci-jenkins-io-data"
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_managed_disk.infra_ci_jenkins_io_data_sponsored.disk_size_gb}Gi"
+    }
+    access_modes                     = ["ReadWriteOnce"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.privatek8s_sponsored_statically_provisioned.id
+    persistent_volume_source {
+      csi {
+        driver        = "disk.csi.azure.com"
+        volume_handle = azurerm_managed_disk.infra_ci_jenkins_io_data_sponsored.id
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "privatek8s_sponsored_infra_ci_jenkins_io_data" {
+  provider = kubernetes.privatek8s-sponsored
+
+  metadata {
+    name      = "infra-ci-jenkins-io-data"
+    namespace = kubernetes_namespace.privatek8s_sponsored["infra-ci-jenkins-io"].metadata.0.name
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.privatek8s_sponsored_infra_ci_jenkins_io_data.spec.0.access_modes
+    volume_name        = kubernetes_persistent_volume.privatek8s_sponsored_infra_ci_jenkins_io_data.metadata.0.name
+    storage_class_name = kubernetes_persistent_volume.privatek8s_sponsored_infra_ci_jenkins_io_data.spec.0.storage_class_name
+    resources {
+      requests = {
+        storage = kubernetes_persistent_volume.privatek8s_sponsored_infra_ci_jenkins_io_data.spec.0.capacity.storage
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume" "privatek8s_sponsored_release_ci_jenkins_io_data" {
+  provider = kubernetes.privatek8s-sponsored
+
+  metadata {
+    name = "release-ci-jenkins-io-data"
+  }
+  spec {
+    capacity = {
+      storage = "${azurerm_managed_disk.release_ci_jenkins_io_data_sponsored.disk_size_gb}Gi"
+    }
+    access_modes                     = ["ReadWriteOnce"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class.privatek8s_statically_provisioned.id
+    persistent_volume_source {
+      csi {
+        driver        = "disk.csi.azure.com"
+        volume_handle = azurerm_managed_disk.release_ci_jenkins_io_data_sponsored.id
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim" "privatek8s_sponsored_release_ci_jenkins_io_data" {
+  provider = kubernetes.privatek8s-sponsored
+
+  metadata {
+    name      = "release-ci-jenkins-io-data"
+    namespace = kubernetes_namespace.privatek8s_sponsored["release-ci-jenkins-io"].metadata.0.name
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_data.spec.0.access_modes
+    volume_name        = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_data.metadata.0.name
+    storage_class_name = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_data.spec.0.storage_class_name
+    resources {
+      requests = {
+        storage = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_data.spec.0.capacity.storage
+      }
+    }
+  }
+}
+
+###################################################################################
+## Workload Identity Resources
+###################################################################################
+resource "kubernetes_service_account" "privatek8s_sponsored_infra_ci_jenkins_io_controller" {
+  provider = kubernetes.privatek8s-sponsored
+
+  metadata {
+    name      = "infra-ci-jenkins-io-controller"
+    namespace = kubernetes_namespace.privatek8s_sponsored["infra-ci-jenkins-io"].metadata[0].name
+
+    annotations = {
+      "azure.workload.identity/client-id" = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller_sponsored.client_id,
+    }
+  }
+}
+resource "azurerm_federated_identity_credential" "privatek8s_sponsored_infra_ci_jenkins_io_controller" {
+  provider = azurerm.jenkins-sponsored
+
+  name                      = "privatek8s-${kubernetes_service_account.privatek8s_sponsored_infra_ci_jenkins_io_controller.metadata[0].name}"
+  audience                  = ["api://AzureADTokenExchange"]
+  issuer                    = azurerm_kubernetes_cluster.privatek8s_sponsored.oidc_issuer_url
+  user_assigned_identity_id = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller_sponsored.id
+  subject                   = "system:serviceaccount:${kubernetes_namespace.privatek8s_sponsored["infra-ci-jenkins-io"].metadata[0].name}:${kubernetes_service_account.privatek8s_sponsored_infra_ci_jenkins_io_controller.metadata[0].name}"
+}
+resource "kubernetes_service_account" "privatek8s_sponsored_release_ci_jenkins_io_controller" {
+  provider = kubernetes.privatek8s-sponsored
+
+  metadata {
+    name      = "release-ci-jenkins-io-controller"
+    namespace = kubernetes_namespace.privatek8s_sponsored["release-ci-jenkins-io"].metadata[0].name
+
+    annotations = {
+      "azure.workload.identity/client-id" = azurerm_user_assigned_identity.release_ci_jenkins_io_controller_sponsored.client_id,
+    }
+  }
+}
+resource "kubernetes_service_account" "privatek8s_sponsored_release_ci_jenkins_io_agents" {
+  provider = kubernetes.privatek8s-sponsored
+
+  metadata {
+    name      = "release-ci-jenkins-io-agents"
+    namespace = kubernetes_namespace.privatek8s_sponsored["release-ci-jenkins-io-agents"].metadata[0].name
+
+    annotations = {
+      "azure.workload.identity/client-id" = azurerm_user_assigned_identity.release_ci_jenkins_io_agents_sponsored.client_id,
+    }
+  }
+}
+resource "azurerm_federated_identity_credential" "privatek8s_sponsored_release_ci_jenkins_io_agents" {
+  provider = azurerm.jenkins-sponsored
+
+  name                      = "privatek8s-${kubernetes_service_account.privatek8s_sponsored_release_ci_jenkins_io_agents.metadata[0].name}"
+  audience                  = ["api://AzureADTokenExchange"]
+  issuer                    = azurerm_kubernetes_cluster.privatek8s_sponsored.oidc_issuer_url
+  user_assigned_identity_id = azurerm_user_assigned_identity.release_ci_jenkins_io_agents_sponsored.id
+  subject                   = "system:serviceaccount:${kubernetes_namespace.privatek8s_sponsored["release-ci-jenkins-io-agents"].metadata[0].name}:${kubernetes_service_account.privatek8s_sponsored_release_ci_jenkins_io_agents.metadata[0].name}"
+}
+
+# Configure the jenkins-infra/kubernetes-management admin service account
+module "privatek8s_sponsored_admin_sa" {
+  providers = {
+    kubernetes = kubernetes.privatek8s-sponsored
+  }
+  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
+  cluster_name               = azurerm_kubernetes_cluster.privatek8s_sponsored.name
+  cluster_hostname           = local.aks_clusters_outputs["privatek8s-sponsored"].cluster_hostname
+  cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.privatek8s_sponsored.kube_config.0.cluster_ca_certificate
+}
+output "privatek8s_sponsoredadmin_sa_kubeconfig" {
+  sensitive = true
+  value     = module.privatek8s_sponsored_admin_sa.kubeconfig
+}
