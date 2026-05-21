@@ -6,7 +6,6 @@
 # Used later by the load balancer deployed on the cluster
 # Use case is to allow incoming webhooks
 resource "azurerm_public_ip" "privatek8s_sponsored_public" {
-  provider            = azurerm.jenkins-sponsored
   name                = "public-privatek8s-sponsored"
   resource_group_name = azurerm_resource_group.prod_public_ips.name
   location            = var.location
@@ -15,7 +14,6 @@ resource "azurerm_public_ip" "privatek8s_sponsored_public" {
   tags                = local.default_tags
 }
 resource "azurerm_management_lock" "privatek8s_sponsored_public" {
-  provider   = azurerm.jenkins-sponsored
   name       = "privatek8s-sponsored-public"
   scope      = azurerm_public_ip.privatek8s_sponsored_public.id
   lock_level = "CanNotDelete"
@@ -52,7 +50,7 @@ resource "azurerm_dns_a_record" "privatek8s_sponsored_private" {
 ########################################################################################################
 resource "azurerm_resource_group" "privatek8s_sponsored" {
   provider = azurerm.jenkins-sponsored
-  name     = local.aks_clusters["privatek8s-sponsored"].name
+  name     = "privatek8s-aks-sponsored"
   location = var.location
   tags     = local.default_tags
 }
