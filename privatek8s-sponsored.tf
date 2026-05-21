@@ -70,6 +70,8 @@ resource "azurerm_kubernetes_cluster" "privatek8s_sponsored" {
   role_based_access_control_enabled   = true
   oidc_issuer_enabled                 = true
   workload_identity_enabled           = true
+  automatic_upgrade_channel           = "node-image"
+  node_os_upgrade_channel             = "NodeImage"
 
   image_cleaner_interval_hours = 48
 
@@ -105,7 +107,7 @@ resource "azurerm_kubernetes_cluster" "privatek8s_sponsored" {
     max_count            = 3 # for upgrade
     vnet_subnet_id       = data.azurerm_subnet.privatek8s_sponsored_app.id
     tags                 = local.default_tags
-    zones                = [1, 2] # Many zones to ensure it is always able to provide machines in the region. Note: Zone 3 is not allowed for system pool.
+    zones                = [2, 3] # Many zones to ensure it is always able to provide machines in the region. Note: Zone 3 is not allowed for system pool.
   }
 
   tags = local.default_tags
