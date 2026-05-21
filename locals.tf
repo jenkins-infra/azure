@@ -64,6 +64,12 @@ locals {
       # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
       pod_cidr = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
     },
+    "privatek8s-sponsored" = {
+      name               = "privatek8s-sponsored",
+      kubernetes_version = "1.33.5",
+      # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
+      pod_cidr = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
+    },
     "publick8s" = {
       name               = "publick8s",
       kubernetes_version = "1.33.5",
@@ -316,6 +322,9 @@ locals {
     },
     "privatek8s" = {
       cluster_hostname = "https://${azurerm_kubernetes_cluster.privatek8s.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
+    },
+    "privatek8s-sponsored" = {
+      cluster_hostname = "https://${azurerm_kubernetes_cluster.privatek8s_sponsored.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
     },
     "publick8s" = {
       cluster_hostname = "https://${azurerm_kubernetes_cluster.publick8s.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name

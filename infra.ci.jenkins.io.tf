@@ -109,6 +109,12 @@ resource "azurerm_role_assignment" "infra_ci_jenkins_io_controller_disk_reader" 
   role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_disk_reader.role_definition_resource_id
   principal_id       = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
 }
+resource "azurerm_role_assignment" "infra_ci_jenkins_io_controller_sponsored_disk_reader" {
+  provider           = azurerm.jenkins-sponsored
+  scope              = azurerm_resource_group.infra_ci_jenkins_io_controller.id
+  role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_disk_reader.role_definition_resource_id
+  principal_id       = azurerm_kubernetes_cluster.privatek8s_sponsored.identity[0].principal_id
+}
 
 # TODO: cleanup the 3 resources below on infraci.jenkins.io-agents-2 cleanup (using the same UAID)
 ## Identity assigned to agents workloads (allowing them to reach resources without any Azure credential)
@@ -333,6 +339,7 @@ resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infrac
 }
 
 # Allow infra.ci sponsored ephemeral agents to reach privatek8s cluster
+# TODO: remove as azureVM uses SSH launcher now
 resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_jenkins_sponsored_to_privatek8s" {
   provider               = azurerm.jenkins-sponsored
   name                   = "allow-outbound-https-from-infraci-agents-jenkins-sponsored-to-privatek8s"

@@ -144,6 +144,18 @@ resource "local_file" "jenkins_infra_data_report" {
         "ipv4" = azurerm_dns_a_record.privatek8s_private.records,
       }
     },
+    "privatek8s-sponsored" = {
+      hostname           = local.aks_clusters_outputs["privatek8s-sponsored"].cluster_hostname,
+      kubernetes_version = local.aks_clusters["privatek8s-sponsored"].kubernetes_version,
+      # Outbound IPs are in azure-net (NAT gateway outbound IPs
+      public_inbound_lb = {
+        "public_ip_name"    = azurerm_public_ip.privatek8s_sponsored_public.name,
+        "public_ip_rg_name" = azurerm_public_ip.privatek8s_sponsored_public.resource_group_name,
+      }
+      private_inbound_ips = {
+        "ipv4" = azurerm_dns_a_record.privatek8s_sponsored_private.records,
+      }
+    },
     "dockerhubmirror.azurecr.io" = {
       "private_ip_addresses" = module.certcijenkinsiosponsored_acr_pe.private_endpoint_nic_ip_addresses,
     },
