@@ -128,7 +128,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_linuxpool"
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 3
-  zones                 = [1, 2]
+  zones                 = [2] # Only one zone available - ref. https://github.com/jenkins-infra/azure/pull/1460/changes#r3281970045
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsored_app.id
 
   lifecycle {
