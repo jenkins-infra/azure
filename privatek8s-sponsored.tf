@@ -103,11 +103,11 @@ resource "azurerm_kubernetes_cluster" "privatek8s_sponsored" {
     orchestrator_version = local.aks_clusters["privatek8s-sponsored"].kubernetes_version
     kubelet_disk_type    = "OS"
     auto_scaling_enabled = true
-    min_count            = 2 # for best practices
-    max_count            = 3 # for upgrade
+    min_count            = 2
+    max_count            = 3
     vnet_subnet_id       = data.azurerm_subnet.privatek8s_sponsored_app.id
     tags                 = local.default_tags
-    zones                = [2, 3] # Many zones to ensure it is always able to provide machines in the region. Note: Zone 3 is not allowed for system pool.
+    zones                = [2] # Only one zone available - ref. https://github.com/jenkins-infra/azure/pull/1460/changes#r3281970045
   }
 
   tags = local.default_tags
@@ -128,7 +128,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_linuxpool"
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 3
-  zones                 = [2] # Only one zone available - ref. https://github.com/jenkins-infra/azure/pull/1460/changes#r3281970045
+  zones                 = [1, 2]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsored_app.id
 
   lifecycle {
