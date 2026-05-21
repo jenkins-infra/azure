@@ -128,7 +128,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_linuxpool"
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 3
-  zones                 = [1, 2]
+  zones                 = [2] # https://github.com/jenkins-infra/azure/pull/1458/changes#r3282193453
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsored_app.id
 
   lifecycle {
@@ -153,7 +153,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_infra_ci_j
   auto_scaling_enabled  = true
   min_count             = 1
   max_count             = 2
-  zones                 = [2, 3]
+  zones                 = [1, 2] # https://github.com/jenkins-infra/azure/pull/1458/changes#r3282196193
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsored_infra_ci_jenkins_io_controller.id
 
   node_taints = [
@@ -182,7 +182,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci
   auto_scaling_enabled  = true
   min_count             = 1
   max_count             = 2
-  zones                 = [2, 3]
+  zones                 = [1, 2] # https://github.com/jenkins-infra/azure/pull/1458/changes#r3282199055
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsored_release_ci_jenkins_io_controller.id
 
   node_taints = [
@@ -211,7 +211,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 3
-  zones                 = [1, 2]
+  zones                 = [2] # https://github.com/jenkins-infra/azure/pull/1458/changes#r3282201958
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsored_release_ci_jenkins_io_agents.id
   node_taints = [
     "jenkins=release.ci.jenkins.io:NoSchedule",
@@ -240,7 +240,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 3
-  zones                 = [1, 2]
+  zones                 = [2] # https://github.com/jenkins-infra/azure/pull/1458/changes#r3282188706
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsored_release_ci_jenkins_io_agents.id
   node_taints = [
     "os=windows:NoSchedule",
