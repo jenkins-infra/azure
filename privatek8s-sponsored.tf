@@ -235,12 +235,12 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci
   #
   # Last solution stop using Windows Node Pool in favor of Azure VM agents.
   #####
-  vm_size = "Standard_D4ads_v5" # Generation 1 VM
+  vm_size = "Standard_D4s_v3" # Generation 1 VM
   upgrade_settings {
     max_surge = "10%"
   }
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
+  os_disk_size_gb       = 32 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dsv3-series?tabs=sizestoragelocal
   orchestrator_version  = local.aks_clusters["privatek8s-sponsored"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s_sponsored.id
   os_type               = "Windows"
@@ -248,7 +248,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 3
-  zones                 = [2] # https://github.com/jenkins-infra/azure/pull/1458/changes#r3282188706
+  zones                 = [1]
   vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsored_release_ci_jenkins_io_agents.id
   node_taints = [
     "os=windows:NoSchedule",
