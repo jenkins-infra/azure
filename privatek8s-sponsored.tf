@@ -289,3 +289,25 @@ resource "azurerm_role_assignment" "privatek8s_sponsored_publicip_networkcontrib
   principal_id                     = azurerm_kubernetes_cluster.privatek8s_sponsored.identity[0].principal_id
   skip_service_principal_aad_check = true
 }
+
+# Allow access to the private Azure Container Registry through an Azure Endpoint NIC
+module "privatek8s_sponsored_acr_pe" {
+  source = "./modules/azure-container-registry-private-links"
+
+  providers = {
+    azurerm     = azurerm.jenkins-sponsored
+    azurerm.acr = azurerm
+  }
+
+  name = "privatek8ssponsored"
+
+  acr_name     = azurerm_container_registry.dockerhub_mirror.name
+  acr_location = azurerm_container_registry.dockerhub_mirror.location
+  acr_rg_name  = azurerm_container_registry.dockerhub_mirror.resource_group_name
+
+  subnet_name  = data.azurerm_subnet.privatek8s_sponsored_commons.name
+  vnet_name    = data.azurerm_virtual_network.privatek8s_sponsored.name
+  vnet_rg_name = data.azurerm_virtual_network.privatek8s_sponsored.resource_group_name
+
+  default_tags = local.default_tags
+}
