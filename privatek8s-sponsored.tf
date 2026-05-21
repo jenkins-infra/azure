@@ -70,6 +70,8 @@ resource "azurerm_kubernetes_cluster" "privatek8s_sponsored" {
   role_based_access_control_enabled   = true
   oidc_issuer_enabled                 = true
   workload_identity_enabled           = true
+  automatic_upgrade_channel           = "node-image"
+  node_os_upgrade_channel             = "NodeImage"
 
   image_cleaner_interval_hours = 48
 
