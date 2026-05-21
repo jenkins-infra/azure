@@ -52,7 +52,7 @@ resource "azurerm_dns_a_record" "privatek8s_sponsored_private" {
 ########################################################################################################
 resource "azurerm_resource_group" "privatek8s_sponsored" {
   provider = azurerm.jenkins-sponsored
-  name     = local.aks_clusters["privatek8s-sponsored"].name
+  name     = "privatek8s-aks-sponsored"
   location = var.location
   tags     = local.default_tags
 }
