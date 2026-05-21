@@ -227,12 +227,20 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci
 resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci_jenkins_io_agents_windows_2022" {
   provider = azurerm.jenkins-sponsored
   name     = "w2022" # 6 char. max on Windows, only letters and numbers
-  vm_size  = "Standard_D4ads_v7"
+  #####
+  # Note: we must stay on Generation 1 VMs (_v5 families max.) because Generation 2 requires Windows 2025.
+  # Despite MS documentation: https://learn.microsoft.com/en-us/azure/aks/generation-2-vms?tabs=windows-node-pool#create-a-node-pool-with-a-gen-2-vm
+  # the Terraform azurerm provider does not allow the custom "header" technique: https://github.com/hashicorp/terraform-provider-azurerm/issues/31526
+  # And of course Windows 2025 is not available until https://github.com/hashicorp/terraform-provider-azurerm/issues/31036 is done.
+  #
+  # Last solution stop using Windows Node Pool in favor of Azure VM agents.
+  #####
+  vm_size = "Standard_D4ads_v5" # Generation 1 VM
   upgrade_settings {
     max_surge = "10%"
   }
   os_disk_type          = "Ephemeral"
-  os_disk_size_gb       = 220 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/sizes/general-purpose/dadsv7-series?tabs=sizestoragelocal
+  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
   orchestrator_version  = local.aks_clusters["privatek8s-sponsored"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s_sponsored.id
   os_type               = "Windows"
