@@ -1,48 +1,6 @@
 ###################################################################################
 # Ressources for infra.ci.jenkins.io in the CDF subscription
 ###################################################################################
-resource "azurerm_resource_group" "infra_ci_jenkins_io_controller" {
-  name     = "infra-ci-jenkins-io-controller"
-  location = var.location
-  tags     = local.default_tags
-}
-resource "azurerm_managed_disk" "infra_ci_jenkins_io_data" {
-  name                 = "infra-ci-jenkins-io-data"
-  location             = azurerm_resource_group.infra_ci_jenkins_io_controller.location
-  resource_group_name  = azurerm_resource_group.infra_ci_jenkins_io_controller.name
-  storage_account_type = "StandardSSD_ZRS"
-  create_option        = "Empty"
-  disk_size_gb         = 64
-  tags                 = local.default_tags
-}
-resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_controller" {
-  location            = azurerm_resource_group.infra_ci_jenkins_io_controller.location
-  name                = "infracijenkinsiocontroller"
-  resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_controller.name
-}
-# Azure VM agents requires controller to read the resource group where VM images are stored
-resource "azurerm_role_assignment" "infra_ci_jenkins_io_allow_packer_sponsored" {
-  scope                = azurerm_resource_group.packer_images_sponsored["prod"].id
-  role_definition_name = "Reader"
-  principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id
-}
-# Required to allow AKS CSI driver to access the Azure disk
-resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_disk_reader" {
-  name  = "ReadInfraCIDisk"
-  scope = azurerm_resource_group.infra_ci_jenkins_io_controller.id
-
-  permissions {
-    actions = [
-      "Microsoft.Compute/disks/read",
-      "Microsoft.Compute/disks/write",
-    ]
-  }
-}
-resource "azurerm_role_assignment" "infra_ci_jenkins_io_controller_disk_reader" {
-  scope              = azurerm_resource_group.infra_ci_jenkins_io_controller.id
-  role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_disk_reader.role_definition_resource_id
-  principal_id       = azurerm_kubernetes_cluster.privatek8s.identity[0].principal_id
-}
 # Required to allow azcopy sync of contributors.jenkins.io File Share
 module "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer" {
   source                     = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
@@ -97,25 +55,6 @@ module "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer" {
   file_share_id              = azurerm_storage_share.plugins_jenkins_io.id
   storage_account_id         = azurerm_storage_account.plugins_jenkins_io.id
   default_tags               = local.default_tags
-}
-
-## Identity assigned to agents workloads (allowing them to reach resources without any Azure credential)
-resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_agents" {
-  location            = var.location
-  name                = "infra-ci-jenkins-io-agents"
-  resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_controller.name
-}
-# The Controller identity must be able to operate this identity to assign it to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
-resource "azurerm_role_assignment" "infra_ci_jenkins_io_operate_agents_identity" {
-  scope                = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents.id
-  role_definition_name = "Managed Identity Operator"
-  principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id
-}
-resource "azurerm_role_assignment" "infra_ci_jenkins_io_agents_write_buildsreports_share" {
-  scope = azurerm_storage_account.builds_reports_jenkins_io.id
-  # Allow writing
-  role_definition_name = "Storage File Data Privileged Contributor"
-  principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents.principal_id
 }
 # Resources for updatecli jobs in infra.ci.jenkins.io
 resource "azurerm_resource_group" "updatecli_infra_ci_jenkins_io" {
@@ -246,13 +185,6 @@ resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_agents_jenkins_sp
   resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_sponsored_commons.name
 }
 # The Controller identity must be able to operate this identity to assign it to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
-resource "azurerm_role_assignment" "infra_ci_jenkins_io_operate_agents_identity_jenkins_sponsored" {
-  provider = azurerm.jenkins-sponsored
-
-  scope                = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents_jenkins_sponsored.id
-  role_definition_name = "Managed Identity Operator"
-  principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id
-}
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_sponsored_operate_agents_identity_sponsored" {
   provider = azurerm.jenkins-sponsored
 
@@ -280,13 +212,6 @@ resource "azurerm_role_definition" "infra_ci_jenkins_io_controller_vnet_sponsore
     actions = ["Microsoft.Network/virtualNetworks/read"]
   }
 }
-resource "azurerm_role_assignment" "infra_ci_jenkins_io_controller_vnet_sponsored_reader" {
-  provider = azurerm.jenkins-sponsored
-
-  scope              = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.id
-  role_definition_id = azurerm_role_definition.infra_ci_jenkins_io_controller_vnet_sponsored_reader.role_definition_resource_id
-  principal_id       = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id
-}
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_controller_sponsored_vnet_sponsored_reader" {
   provider = azurerm.jenkins-sponsored
 
@@ -313,7 +238,6 @@ module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   )
   controller_service_principal_ids = [
     azurerm_user_assigned_identity.infra_ci_jenkins_io_controller_sponsored.principal_id,
-    azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id,
   ]
   storage_account_name = "infraciagentssponso" # Max 24 chars
 
