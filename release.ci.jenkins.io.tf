@@ -143,10 +143,6 @@ resource "azurerm_role_definition" "release_ci_jenkins_io_controller_disk_reader
     ]
   }
 }
-moved {
-  from = azurerm_role_assignment.infra_ci_jenkins_io_controller_sponsored_disk_reader
-  to   = azurerm_role_assignment.release_ci_jenkins_io_controller_disk_reader_sponsored
-}
 resource "azurerm_role_assignment" "release_ci_jenkins_io_controller_disk_reader_sponsored" {
   provider = azurerm.jenkins-sponsored
 
