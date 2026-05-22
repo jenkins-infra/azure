@@ -274,13 +274,25 @@ module "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   ephemeral_agents_subnet_name     = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.name
   use_vnet_common_nsg              = true
   controller_ips                   = compact([module.trusted_ci_jenkins_io_sponsored.controller_public_ipv4])
-  controller_service_principal_id  = module.trusted_ci_jenkins_io_sponsored.controller_service_principal_id
+  controller_service_principal_ids = [module.trusted_ci_jenkins_io_sponsored.controller_service_principal_id]
   default_tags                     = local.default_tags
   storage_account_name             = "trustedciagentssponso" # Max 24 chars
 
   jenkins_infra_ips = {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   }
+}
+moved {
+  from = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_contributor_in_ephemeral_agent_resourcegroup
+  to   = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_contributor_in_ephemeral_agent_resourcegroup["f20710fa-1a96-40a3-bbce-4548d4bec5a0"]
+}
+moved {
+  from = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_io_manage_net_interfaces_subnet_ephemeral_agents
+  to   = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_io_manage_net_interfaces_subnet_ephemeral_agents["f20710fa-1a96-40a3-bbce-4548d4bec5a0"]
+}
+moved {
+  from = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_network_contributor_in_ephemeral_agent_resourcegroup
+  to   = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_network_contributor_in_ephemeral_agent_resourcegroup["f20710fa-1a96-40a3-bbce-4548d4bec5a0"]
 }
 resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored_write_reports_share" {
   provider = azurerm.jenkins-sponsored

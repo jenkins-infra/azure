@@ -253,7 +253,7 @@ module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   ephemeral_agents_subnet_name     = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.name
   nsg_rg_name                      = azurerm_resource_group.infra_ci_jenkins_io_sponsored_commons.name
   controller_ips                   = data.azurerm_subnet.privatek8s_infra_ci_controller_tier.address_prefixes # Pod IPs: controller IP may change in the pods IP subnet
-  controller_service_principal_id  = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id
+  controller_service_principal_ids = [azurerm_user_assigned_identity.infra_ci_jenkins_io_controller.principal_id]
   storage_account_name             = "infraciagentssponso" # Max 24 chars
 
   default_tags = local.default_tags
@@ -262,7 +262,18 @@ module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   }
 }
-
+moved {
+  from = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_contributor_in_ephemeral_agent_resourcegroup
+  to   = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_contributor_in_ephemeral_agent_resourcegroup["f84875cc-d0bd-4d94-b237-99f7669a655a"]
+}
+moved {
+  from = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_io_manage_net_interfaces_subnet_ephemeral_agents
+  to   = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_io_manage_net_interfaces_subnet_ephemeral_agents["f84875cc-d0bd-4d94-b237-99f7669a655a"]
+}
+moved {
+  from = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_network_contributor_in_ephemeral_agent_resourcegroup
+  to   = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_network_contributor_in_ephemeral_agent_resourcegroup["f84875cc-d0bd-4d94-b237-99f7669a655a"]
+}
 # Allow infra.ci sponsored ephemeral agents to reach packer VMs with SSH on aws
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_jenkins_sponsored_to_aws_packer" {
   provider               = azurerm.jenkins-sponsored

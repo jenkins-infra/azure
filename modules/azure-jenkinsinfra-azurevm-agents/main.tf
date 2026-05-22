@@ -195,37 +195,25 @@ resource "azurerm_network_security_rule" "deny_all_inbound_from_vnet_to_ephemera
 ## Azure Active Directory Resources to allow controller spawning ephemeral agents
 ####################################################################################
 resource "azurerm_role_assignment" "controller_contributor_in_ephemeral_agent_resourcegroup" {
+  for_each = toset(var.controller_service_principal_ids)
+
   scope                = azurerm_resource_group.ephemeral_agents.id
   role_definition_name = "Virtual Machine Contributor"
-  principal_id         = var.controller_service_principal_id
+  principal_id         = each.key
 }
 resource "azurerm_role_assignment" "controller_io_manage_net_interfaces_subnet_ephemeral_agents" {
+  for_each = toset(var.controller_service_principal_ids)
+
   scope                = data.azurerm_subnet.ephemeral_agents.id
   role_definition_name = "Virtual Machine Contributor"
-  principal_id         = var.controller_service_principal_id
+  principal_id         = each.key
 }
 resource "azurerm_role_assignment" "controller_network_contributor_in_ephemeral_agent_resourcegroup" {
+  for_each = toset(var.controller_service_principal_ids)
+
   scope                = azurerm_resource_group.ephemeral_agents.id
   role_definition_name = "Network Contributor"
-  principal_id         = var.controller_service_principal_id
-}
-resource "azurerm_role_assignment" "additional_identities_contributor_in_ephemeral_agent_resourcegroup" {
-  count                = length(var.additional_identities)
-  scope                = azurerm_resource_group.ephemeral_agents.id
-  role_definition_name = "Virtual Machine Contributor"
-  principal_id         = var.additional_identities[count.index]
-}
-resource "azurerm_role_assignment" "additional_identities_io_manage_net_interfaces_subnet_ephemeral_agents" {
-  count                = length(var.additional_identities)
-  scope                = data.azurerm_subnet.ephemeral_agents.id
-  role_definition_name = "Virtual Machine Contributor"
-  principal_id         = var.additional_identities[count.index]
-}
-resource "azurerm_role_assignment" "additional_identities_network_contributor_in_ephemeral_agent_resourcegroup" {
-  count                = length(var.additional_identities)
-  scope                = azurerm_resource_group.ephemeral_agents.id
-  role_definition_name = "Network Contributor"
-  principal_id         = var.additional_identities[count.index]
+  principal_id         = each.key
 }
 
 ####################################################################################
