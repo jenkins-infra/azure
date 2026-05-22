@@ -40,9 +40,6 @@ resource "local_file" "jenkins_infra_data_report" {
       "controller_service_account" = kubernetes_service_account.privatek8s_sponsored_release_ci_jenkins_io_controller.metadata[0].name,
       "controller_pvc"             = kubernetes_persistent_volume_claim.privatek8s_sponsored_release_ci_jenkins_io_data.metadata[0].name,
       "agents_kubernetes_clusters" = {
-        "privatek8s" = {
-          "agents_service_account" = kubernetes_service_account.privatek8s_release_ci_jenkins_io_agents.metadata[0].name,
-        }
         "privatek8s-sponsored" = {
           "agents_service_account" = kubernetes_service_account.privatek8s_sponsored_release_ci_jenkins_io_agents.metadata[0].name,
         }
