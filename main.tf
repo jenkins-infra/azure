@@ -10,6 +10,13 @@ resource "azurerm_resource_group" "prod_public_ips" {
   location = var.location
   tags     = local.default_tags
 }
+# Resource groups used to store (and lock) our public IPs
+resource "azurerm_resource_group" "prod_public_ips_sponsored" {
+  provider = azurerm.jenkins-sponsored
+  name     = "prod-public-ips-sponsored"
+  location = var.location
+  tags     = local.default_tags
+}
 
 data "azurerm_client_config" "current" {
 }

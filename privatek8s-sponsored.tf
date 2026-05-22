@@ -2,18 +2,21 @@
 # Resources in other Resource Groups ("RG") in the CDF subscription
 # which lifecycle are not bound directly to the cluster and its RG.
 ########################################################################################################
-
 # Used later by the load balancer deployed on the cluster
 # Use case is to allow incoming webhooks
 resource "azurerm_public_ip" "privatek8s_sponsored_public" {
-  name                = "public-privatek8s-sponsored"
-  resource_group_name = azurerm_resource_group.prod_public_ips.name
-  location            = var.location
+  provider = azurerm.jenkins-sponsored
+
+  name                = "privatek8s-sponsored-public"
+  resource_group_name = azurerm_resource_group.prod_public_ips_sponsored.name
+  location            = azurerm_resource_group.prod_public_ips_sponsored.location
   allocation_method   = "Static"
   sku                 = "Standard" # Needed to fix the error "PublicIPAndLBSkuDoNotMatch"
   tags                = local.default_tags
 }
 resource "azurerm_management_lock" "privatek8s_sponsored_public" {
+  provider = azurerm.jenkins-sponsored
+
   name       = "privatek8s-sponsored-public"
   scope      = azurerm_public_ip.privatek8s_sponsored_public.id
   lock_level = "CanNotDelete"
@@ -272,7 +275,7 @@ resource "azurerm_role_assignment" "privatek8s_sponsored_subnets_networkcontribu
     data.azurerm_subnet.privatek8s_sponsored_infra_ci_jenkins_io_controller.id,
     data.azurerm_subnet.privatek8s_sponsored_release_ci_jenkins_io_agents.id,
     data.azurerm_subnet.privatek8s_sponsored_release_ci_jenkins_io_controller.id,
-
+    data.azurerm_subnet.privatek8s_sponsored_commons.id,
   ])
   scope                            = each.key
   role_definition_name             = "Network Contributor"
@@ -282,7 +285,7 @@ resource "azurerm_role_assignment" "privatek8s_sponsored_subnets_networkcontribu
 
 # Allow cluster to manage the public IP privatek8s-sponsored
 # It is used for managing the public IP of the LB of the public ingress controller
-resource "azurerm_role_assignment" "privatek8s_sponsored_publicip_networkcontributor" {
+resource "azurerm_role_assignment" "privatek8s_sponsored_publicip_sponsored_networkcontributor" {
   provider                         = azurerm.jenkins-sponsored
   scope                            = azurerm_public_ip.privatek8s_sponsored_public.id
   role_definition_name             = "Network Contributor"
