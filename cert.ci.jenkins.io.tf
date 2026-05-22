@@ -82,13 +82,25 @@ module "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   ephemeral_agents_subnet_name     = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.name
   nsg_rg_name                      = azurerm_resource_group.cert_ci_jenkins_io_controller_jenkins_sponsored.name
   controller_ips                   = compact([module.cert_ci_jenkins_io.controller_public_ipv4])
-  controller_service_principal_id  = module.cert_ci_jenkins_io.controller_service_principal_id
+  controller_service_principal_ids = [module.cert_ci_jenkins_io.controller_service_principal_id]
   default_tags                     = local.default_tags
   storage_account_name             = "certciagentssub" # Max 24 chars
 
   jenkins_infra_ips = {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   }
+}
+moved {
+  from = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_contributor_in_ephemeral_agent_resourcegroup
+  to   = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_contributor_in_ephemeral_agent_resourcegroup["257e10fb-5356-4c9a-91fc-c340fca2291a"]
+}
+moved {
+  from = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_io_manage_net_interfaces_subnet_ephemeral_agents
+  to   = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_io_manage_net_interfaces_subnet_ephemeral_agents["257e10fb-5356-4c9a-91fc-c340fca2291a"]
+}
+moved {
+  from = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_network_contributor_in_ephemeral_agent_resourcegroup
+  to   = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_network_contributor_in_ephemeral_agent_resourcegroup["257e10fb-5356-4c9a-91fc-c340fca2291a"]
 }
 resource "azurerm_resource_group" "cert_ci_jenkins_io_controller_jenkins_sponsored" {
   provider = azurerm.jenkins-sponsored
