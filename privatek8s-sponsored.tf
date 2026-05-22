@@ -272,7 +272,7 @@ resource "azurerm_role_assignment" "privatek8s_sponsored_subnets_networkcontribu
     data.azurerm_subnet.privatek8s_sponsored_infra_ci_jenkins_io_controller.id,
     data.azurerm_subnet.privatek8s_sponsored_release_ci_jenkins_io_agents.id,
     data.azurerm_subnet.privatek8s_sponsored_release_ci_jenkins_io_controller.id,
-
+    data.azurerm_subnet.privatek8s_sponsored_commons.id,
   ])
   scope                            = each.key
   role_definition_name             = "Network Contributor"
