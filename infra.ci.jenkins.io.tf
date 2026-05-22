@@ -262,6 +262,18 @@ module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   }
 }
+moved {
+  from = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_contributor_in_ephemeral_agent_resourcegroup["f84875cc-d0bd-4d94-b237-99f7669a655a"]
+  to   = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_contributor_in_ephemeral_agent_resourcegroup[0]
+}
+moved {
+  from = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_io_manage_net_interfaces_subnet_ephemeral_agents["f84875cc-d0bd-4d94-b237-99f7669a655a"]
+  to   = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_io_manage_net_interfaces_subnet_ephemeral_agents[0]
+}
+moved {
+  from = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_network_contributor_in_ephemeral_agent_resourcegroup["f84875cc-d0bd-4d94-b237-99f7669a655a"]
+  to   = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_network_contributor_in_ephemeral_agent_resourcegroup[0]
+}
 # Allow infra.ci sponsored ephemeral agents to reach packer VMs with SSH on aws
 resource "azurerm_network_security_rule" "allow_outbound_ssh_from_infraci_agents_jenkins_sponsored_to_aws_packer" {
   provider               = azurerm.jenkins-sponsored

@@ -282,6 +282,18 @@ module "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   }
 }
+moved {
+  from = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_contributor_in_ephemeral_agent_resourcegroup["f20710fa-1a96-40a3-bbce-4548d4bec5a0"]
+  to   = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_contributor_in_ephemeral_agent_resourcegroup[0]
+}
+moved {
+  from = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_io_manage_net_interfaces_subnet_ephemeral_agents["f20710fa-1a96-40a3-bbce-4548d4bec5a0"]
+  to   = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_io_manage_net_interfaces_subnet_ephemeral_agents[0]
+}
+moved {
+  from = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_network_contributor_in_ephemeral_agent_resourcegroup["f20710fa-1a96-40a3-bbce-4548d4bec5a0"]
+  to   = module.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.azurerm_role_assignment.controller_network_contributor_in_ephemeral_agent_resourcegroup[0]
+}
 resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored_write_reports_share" {
   provider = azurerm.jenkins-sponsored
   scope    = azurerm_storage_account.reports_jenkins_io.id
