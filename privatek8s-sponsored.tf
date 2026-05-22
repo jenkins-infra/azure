@@ -466,7 +466,7 @@ resource "kubernetes_persistent_volume" "privatek8s_sponsored_release_ci_jenkins
     }
     access_modes                     = ["ReadWriteOnce"]
     persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = kubernetes_storage_class.privatek8s_statically_provisioned.id
+    storage_class_name               = kubernetes_storage_class.privatek8s_sponsored_statically_provisioned.id
     persistent_volume_source {
       csi {
         driver        = "disk.csi.azure.com"
