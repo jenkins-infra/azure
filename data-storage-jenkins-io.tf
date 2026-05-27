@@ -29,12 +29,12 @@ resource "azurerm_storage_account" "data_storage_jenkins_io" {
       [
         # Required for using the resource
         data.azurerm_subnet.publick8s.id,
-        # Allows release.ci.jenkins.io agents to access the mount
-        data.azurerm_subnet.privatek8s_release_tier.id,
       ],
+      # Required for populating the resource from release.ci agents
+      local.app_subnets["release.ci.jenkins.io"].agents,
       # Required for managing the resource
       local.app_subnets["infra.ci.jenkins.io"].agents,
-      # Required for populating the resource
+      # Required for populating the resource from trusted.ci agents
       local.app_subnets["trusted.ci.jenkins.io"].agents,
     )
     bypass = ["Metrics", "Logging", "AzureServices"]
