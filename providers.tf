@@ -13,14 +13,6 @@ provider "azurerm" {
 }
 
 provider "kubernetes" {
-  alias                  = "privatek8s"
-  host                   = local.aks_clusters_outputs.privatek8s.cluster_hostname
-  client_certificate     = base64decode(azurerm_kubernetes_cluster.privatek8s.kube_config.0.client_certificate)
-  client_key             = base64decode(azurerm_kubernetes_cluster.privatek8s.kube_config.0.client_key)
-  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.privatek8s.kube_config.0.cluster_ca_certificate)
-}
-
-provider "kubernetes" {
   alias                  = "privatek8s-sponsored"
   host                   = local.aks_clusters_outputs["privatek8s-sponsored"].cluster_hostname
   client_certificate     = base64decode(azurerm_kubernetes_cluster.privatek8s_sponsored.kube_config.0.client_certificate)
