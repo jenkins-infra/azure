@@ -233,7 +233,6 @@ module "infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   ephemeral_agents_subnet_name     = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.name
   nsg_rg_name                      = azurerm_resource_group.infra_ci_jenkins_io_sponsored_commons.name
   controller_ips = concat(
-    data.azurerm_subnet.privatek8s_infra_ci_controller_tier.address_prefixes,                 # Controller pod requests are using SNAT (changing internal outbound IPs) to reach the other subnet
     data.azurerm_subnet.privatek8s_sponsored_infra_ci_jenkins_io_controller.address_prefixes, # Controller pod requests are using SNAT (changing internal outbound IPs) to reach the other subnet
   )
   controller_service_principal_ids = [
@@ -321,26 +320,6 @@ resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infrac
   destination_address_prefix  = "*"
   resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
-}
-
-# Allow infra.ci sponsored ephemeral agents to reach privatek8s cluster
-# TODO: remove as azureVM uses SSH launcher now
-resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_jenkins_sponsored_to_privatek8s" {
-  provider               = azurerm.jenkins-sponsored
-  name                   = "allow-outbound-https-from-infraci-agents-jenkins-sponsored-to-privatek8s"
-  priority               = 4085
-  direction              = "Outbound"
-  access                 = "Allow"
-  protocol               = "Tcp"
-  source_port_range      = "*"
-  destination_port_range = "443"
-  source_address_prefixes = [
-    data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
-  ]
-  # TODO: restrict to required resources only
-  destination_address_prefixes = [data.azurerm_subnet.privatek8s_tier.address_prefix]
-  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
-  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
 }
 
 # Allow infra.ci sponsored ephemeral agents to reach publick8s cluster
