@@ -141,26 +141,6 @@ data "azurerm_subnet" "trusted_ci_jenkins_io_sponsored_controller" {
   virtual_network_name = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.name
   resource_group_name  = data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.resource_group_name
 }
-data "azurerm_subnet" "privatek8s_tier" {
-  name                 = "privatek8s-tier"
-  resource_group_name  = data.azurerm_resource_group.private.name
-  virtual_network_name = data.azurerm_virtual_network.private.name
-}
-data "azurerm_subnet" "privatek8s_release_tier" {
-  name                 = "privatek8s-release-tier"
-  resource_group_name  = data.azurerm_resource_group.private.name
-  virtual_network_name = data.azurerm_virtual_network.private.name
-}
-data "azurerm_subnet" "privatek8s_infra_ci_controller_tier" {
-  name                 = "privatek8s-infraci-ctrl-tier"
-  resource_group_name  = data.azurerm_resource_group.private.name
-  virtual_network_name = data.azurerm_virtual_network.private.name
-}
-data "azurerm_subnet" "privatek8s_release_ci_controller_tier" {
-  name                 = "privatek8s-releaseci-ctrl-tier"
-  resource_group_name  = data.azurerm_resource_group.private.name
-  virtual_network_name = data.azurerm_virtual_network.private.name
-}
 data "azurerm_subnet" "privatek8s_sponsored_commons" {
   provider             = azurerm.jenkins-sponsored
   name                 = "privatek8s-sponsored-commons"
