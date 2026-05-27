@@ -335,14 +335,27 @@ locals {
 
   app_subnets = {
     "release.ci.jenkins.io" = {
-      "controller" = [data.azurerm_subnet.privatek8s_release_ci_controller_tier.id],
+      "controller" = [
+        # CDF subscription
+        data.azurerm_subnet.privatek8s_release_ci_controller_tier.id,
+        # Sponsored subscription
+        data.azurerm_subnet.privatek8s_sponsored_release_ci_jenkins_io_controller.id,
+      ],
       "agents" = [
-        # Container agents
+        # CDF subscription
         data.azurerm_subnet.privatek8s_release_tier.id,
+        # Sponsored subscription
+        data.azurerm_subnet.privatek8s_sponsored_release_ci_jenkins_io_agents.id,
+
       ],
     },
     "infra.ci.jenkins.io" = {
-      "controller" = [data.azurerm_subnet.privatek8s_infra_ci_controller_tier.id],
+      "controller" = [
+        # CDF subscription
+        data.azurerm_subnet.privatek8s_infra_ci_controller_tier.id,
+        # Sponsored subscription
+        data.azurerm_subnet.privatek8s_sponsored_infra_ci_jenkins_io_controller.id,
+      ],
       "agents" = [
         # VM agents (Jenkins Sponsored subscription)
         data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.id,
