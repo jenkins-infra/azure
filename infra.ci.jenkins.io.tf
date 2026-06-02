@@ -322,7 +322,41 @@ resource "azurerm_network_security_rule" "allow_outbound_winrm_https_from_infrac
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
 }
 
-# Allow infra.ci sponsored ephemeral agents to reach publick8s cluster
+# Allow infra.ci sponsored ephemeral agents to reach our AKS clusters private endpoints
+resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_sponsored_to_privatek8s_sponsored" {
+  provider               = azurerm.jenkins-sponsored
+  name                   = "allow-outbound-https-from-infraci-agents-sponsored-to-privatek8s-sponsored"
+  priority               = 4084
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "443"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
+  ]
+  # TODO: restrict to required resources only
+  destination_address_prefixes = data.azurerm_subnet.privatek8s_sponsored_app.address_prefixes
+  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+}
+resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_sponsored_to_infraciagents1" {
+  provider               = azurerm.jenkins-sponsored
+  name                   = "allow-outbound-https-from-infraci-agents-sponsored-to-infraciagents1"
+  priority               = 4085
+  direction              = "Outbound"
+  access                 = "Allow"
+  protocol               = "Tcp"
+  source_port_range      = "*"
+  destination_port_range = "443"
+  source_address_prefixes = [
+    data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
+  ]
+  # TODO: restrict to required resources only
+  destination_address_prefixes = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_kubernetes_agents.address_prefixes
+  resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
+  network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+}
 resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_jenkins_sponsored_to_publick8s" {
   provider               = azurerm.jenkins-sponsored
   name                   = "allow-outbound-https-from-infraci-agents-jenkins-sponsored-to-publick8s"
