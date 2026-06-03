@@ -87,7 +87,7 @@ resource "azurerm_managed_disk" "agent_2_trusted_ci_jenkins_io_data_jenkins_spon
   zone                 = azurerm_linux_virtual_machine.agent_2_trusted_ci_jenkins_io_jenkins_sponsored.zone
   storage_account_type = "PremiumV2_LRS"
   create_option        = "Empty"
-  disk_size_gb         = "580"
+  disk_size_gb         = "620"
 
   tags = local.default_tags
 }
