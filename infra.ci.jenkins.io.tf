@@ -421,7 +421,7 @@ module "infracijenkinsio_sponsored_acr_pe" {
 ## Allow access to/from ACR endpoint
 resource "azurerm_network_security_rule" "allow_out_https_from_infra_ephemeral_agents_jenkins_sponsored_to_acr" {
   provider               = azurerm.jenkins-sponsored
-  count                  = var.terratest ? 0 : 1
+  count                  = var.environment == "staging" ? 0 : 1
   name                   = "allow-out-https-from-ephemeral-agents-jenkins-sponsored-to-acr"
   priority               = 4050
   direction              = "Outbound"
@@ -438,7 +438,7 @@ resource "azurerm_network_security_rule" "allow_out_https_from_infra_ephemeral_a
 }
 resource "azurerm_network_security_rule" "allow_in_https_from_infra_ephemeral_agents_jenkins_sponsored_to_acr" {
   provider               = azurerm.jenkins-sponsored
-  count                  = var.terratest ? 0 : 1
+  count                  = var.environment == "staging" ? 0 : 1
   name                   = "allow-in-https-from-ephemeral-agents-jenkins-sponsored-to-acr"
   priority               = 4050
   direction              = "Inbound"

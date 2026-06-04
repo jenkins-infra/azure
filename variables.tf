@@ -3,8 +3,7 @@ variable "location" {
   default = "East US 2"
 }
 
-variable "terratest" {
-  type        = bool
-  description = "value"
-  default     = false
+variable "environment" {
+  type    = string
+  default = "staging"
 }
