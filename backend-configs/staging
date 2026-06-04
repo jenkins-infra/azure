@@ -1,0 +1,5 @@
+resource_group_name  = "tf-remote-state-azure-staging-JUOIvL"
+storage_account_name = "azurestagingjuoivl"
+container_name       = "azurestagingjuoivl"
+client_id            = "138edea5-c829-4a94-8a5b-ace146e7109a"
+# client_secret      = "" # Specified through the env. variable $TF_BACKEND_ARM_CLIENT_SECRET

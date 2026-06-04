@@ -16,30 +16,45 @@ See also https://github.com/jenkins-infra/azure-net for all global network relat
 
 In order to use this repository to provision the Jenkins infrastructure on azure, you need:
 
-* An `Azure` account
+* An `Azure` account (with the proper roles and permissions)
 * The requirements (of the shared tools) listed at link:https://github.com/jenkins-infra/shared-tools/tree/main/terraform#requirements[shared-tools/terraform#requirements]
-* The link:https://developer.hashicorp.com/terraform/language/settings/backends/azurerm[Terraform AzureRM Backend Configuration] on a local file named `backend-config`:
-** The content can be retrieved from the outputs of the link:{private_repo_url}[(private) repository {private_repo_name}]
-** This file (`backend-config`) is git-ignored
-
-* The git command line to allow cloning the repository and its submodule link:https://github.com/jenkins-infra/shared-tools[shared-tools]
-** This repository has submodules. Once you cloned the repository, execute the following command to obtain the shared tools:
+* The link:https://github.com/jenkins-infra/shared-tools[shared-tools] common repository as a git submodule should be initialized and up-to-date:
+** On a freshly cloned Terraform repository, execute the following command to obtain the shared tools:
 
 [source,bash]
 ----
 git submodule update --init --recursive
 ----
 
+** Otherwise you should update to to the latest `main` branch:
+
+[source,bash]
+----
+cd ./.shared-tools
+git pull origin main
+cd ../
+----
+
+* The Azure Credential Secret value to allow the Terraform AzureRM Backend to access remote Azure storage:
+** Must be specified in the environment variable `TF_BACKEND_ARM_CLIENT_SECRET`
+** The secret value should never be written in clear (not in a text file, not in the terminal). For instance on macOS, store it in your Keychain access and set the variable with `export TF_BACKEND_ARM_CLIENT_SECRET="$(security find-generic-password -a jenkins-tf-azure-backend-arm-secret -w)"`
+
 * Routing to database (private endpoints and private DNSes):
 ** VPN access is required with routing to the database subnets set up to your user
 ** As there are no public DNS, set up your local `/etc/hosts` (check the `providers.tf` for details)
+
+* If you intend to work with the production, the environment variable `TF_VAR_environment` must be set:
+
+[source,bash]
+----
+export TF_VAR_environment=production
+----
 
 == HowTo
 
 === Provision
 
 IMPORTANT: Don't blindly execute the terraform code located in this repository on your own account as it may lead your account bill to significantly increase.
-
 
 Once you've fulfilled the <<Requirements>>, you may execute any command from https://github.com/jenkins-infra/shared-tools/blob/main/terraform/README.adoc#available-commands by adding the correct flag `--directory` pointing to `.shared-tools/terraform/`:
 
