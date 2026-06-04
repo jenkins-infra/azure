@@ -1,0 +1,5 @@
+resource_group_name  = "tf-remote-state-azure-production-F9aVLU"
+storage_account_name = "azureproductionf9avlu"
+container_name       = "azureproductionf9avlu"
+client_id            = "d27888ee-8bb4-4851-b498-176312527517"
+# client_secret      = "" # Specified through the env. variable $TF_BACKEND_ARM_CLIENT_SECRET

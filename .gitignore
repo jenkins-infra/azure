@@ -8,7 +8,6 @@
 .tf-prepare/
 .tf-remote-state-enabled
 .terraform
-backend-config
 terraform-plan-output.txt
 tfplan
 # temporary and local test

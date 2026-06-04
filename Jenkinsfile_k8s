@@ -8,10 +8,7 @@ terraform(
       clientSecretVariable: 'ARM_CLIENT_SECRET',
       tenantIdVariable: 'ARM_TENANT_ID',
     ),
-    file(
-      credentialsId: 'staging-terraform-azure-backend-config',
-      variable: 'BACKEND_CONFIG_FILE',
-    ),
+    string(variable: 'TF_BACKEND_ARM_CLIENT_SECRET', credentialsId:'staging-terraform-azure-backend-config-arm-secret'),
   ],
   productionCredentials: [
     azureServicePrincipal(
@@ -21,10 +18,7 @@ terraform(
       clientSecretVariable: 'ARM_CLIENT_SECRET',
       tenantIdVariable: 'ARM_TENANT_ID',
     ),
-    file(
-      credentialsId: 'production-terraform-azure-backend-config',
-      variable: 'BACKEND_CONFIG_FILE',
-    ),
+    string(variable: 'TF_BACKEND_ARM_CLIENT_SECRET', credentialsId:'production-terraform-azure-backend-config-arm-secret'),
   ],
   publishReports: ['jenkins-infra-data-reports/azure.json'],
 )
