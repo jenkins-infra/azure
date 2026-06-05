@@ -190,3 +190,4 @@ output "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer_application_c
 output "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
   sensitive = true
   value     = module.infraci_reportsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
+}
