@@ -29,7 +29,7 @@ end_dates:
       secret: "STATS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
       terraform_output: "infraci_statsjenkinsio_fileshare_serviceprincipal_writer_application_client_password"
     infraci_reportsjenkinsio_fileshare_serviceprincipal_writer:
-      end_date: "2026-06-09T00:00:00Z"
+      end_date: "2026-09-03T00:00:00Z"
       service: "reports.jenkins.io"
       secret: "REPORTS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
       terraform_output: "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer_application_client_password"
