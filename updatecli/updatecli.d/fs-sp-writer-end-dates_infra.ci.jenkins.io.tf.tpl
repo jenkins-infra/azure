@@ -67,7 +67,9 @@ actions:
         > You'll have to ensure that `{{ $val.secret }}` is updated with this new password
         > in https://github.com/jenkins-infra/charts-secrets/blob/main/config/infra.ci.jenkins.io/jenkins-secrets.yaml.
 
-        If you don't, the build of {{ $val.service }} on infra.ci.jenkins.io won't be able to update the website content anymore.
+        The new password value, once the PR is merged and deployed, can be retrieved with:
+        ```
+        terraform output -raw {{ $val.terraform_output }}
       labels:
         - terraform
         - "{{ $val.service }}"
