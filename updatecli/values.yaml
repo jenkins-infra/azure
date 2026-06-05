@@ -12,22 +12,27 @@ end_dates:
       end_date: "2026-08-09T00:00:00Z"
       service: "contributors.jenkins.io"
       secret: "CONTRIBUTORS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
+      terraform_output: "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer_application_client_password"
     infraci_docsjenkinsio_fileshare_serviceprincipal_writer:
       end_date: "2026-08-31T00:00:00Z"
       service: "docs.jenkins.io"
       secret: "DOCS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
+      terraform_output: "infraci_docsjenkinsio_fileshare_serviceprincipal_writer_application_client_password"
     infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer:
       end_date: "2026-08-09T00:00:00Z"
       service: "plugins.jenkins.io"
       secret: "INFRACI_PLUGINSJENKINSIO_FILESHARE_SERVICE_PRINCIPAL_WRITER_PASSWORD"
+      terraform_output: "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer_application_client_password"
     infraci_statsjenkinsio_fileshare_serviceprincipal_writer:
       end_date: "2026-08-09T00:00:00Z"
       service: "stats.jenkins.io"
       secret: "STATS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
+      terraform_output: "infraci_statsjenkinsio_fileshare_serviceprincipal_writer_application_client_password"
     infraci_reportsjenkinsio_fileshare_serviceprincipal_writer:
       end_date: "2026-06-09T00:00:00Z"
       service: "reports.jenkins.io"
       secret: "REPORTS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
+      terraform_output: "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer_application_client_password"
 updatecli_end_dates:
   infra.ci.jenkins.io:
     custom_hcl_key: resource.azuread_application_password.updatecli_infra_ci_jenkins_io.end_date
