@@ -85,7 +85,8 @@ Error: Backend configuration changed
 
 Remove the local Terraform state and re-initialize:
 
-```bash
+[source,bash]
+----
 rm -rf ./.terraform
-export TF_VAR_environment="production"
 make --directory=.shared-tools/terraform prepare
+----
