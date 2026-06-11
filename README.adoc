@@ -74,3 +74,19 @@ A usual change to this repository looks like the following:
 * Edit the Terraform project files
 * Run the command `make --directory=.shared-tools/terraform validate` again to ensure that your changes are OK
 * Commit, push and open a pull request to let the Jenkins pipeline run the test + plan (as per https://github.com/jenkins-infra/shared-tools/blob/main/terraform/README.adoc#jenkins-pipeline)
+
+== FAQ / Troubleshooting
+
+=== `Error: Backend configuration changed`
+
+If you see this when running `make --directory=.shared-tools/terraform prepare`:
+
+Error: Backend configuration changed
+
+Remove the local Terraform state and re-initialize:
+
+[source,bash]
+----
+rm -rf ./.terraform
+make --directory=.shared-tools/terraform prepare
+----

@@ -63,6 +63,10 @@ actions:
 
         After merging this PR, a new password will be generated.
 
+        > [!WARNING]
+        > **Before merging**, ensure you have all [prerequisites](https://github.com/jenkins-infra/azure#requirements) and can complete the full rotation immediately.
+        > Merging rotates the credential — if you don't update charts-secrets promptly, website deployments will fail.
+
         > [!IMPORTANT]
         > You'll have to ensure that `{{ $val.secret }}` is updated with this new password
         > in https://github.com/jenkins-infra/charts-secrets/blob/main/config/infra.ci.jenkins.io/jenkins-secrets.yaml.
