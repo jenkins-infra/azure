@@ -29,31 +29,6 @@ resource "azurerm_key_vault" "prodreleasecore" {
     virtual_network_subnet_ids = local.app_subnets["release.ci.jenkins.io"].agents
   }
 
-  # releasecore Entra Application
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = "b6d73004-673f-4099-aa80-30e6e9dae314"
-
-    certificate_permissions = [
-      "Get",
-      "List",
-      "GetIssuers",
-      "ListIssuers",
-    ]
-
-    key_permissions = [
-      "Get",
-      "List",
-      "Decrypt",
-      "Verify",
-      "Encrypt",
-    ]
-    secret_permissions = [
-      "Get",
-      "List",
-    ]
-  }
-
   # Agents UAID (credential-less)
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
