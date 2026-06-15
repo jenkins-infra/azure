@@ -53,6 +53,31 @@ resource "azurerm_key_vault" "prodreleasecore" {
       "List",
     ]
   }
+
+  # Agents UAID (credential-less)
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = azurerm_user_assigned_identity.release_ci_jenkins_io_agents_sponsored.principal_id
+
+    certificate_permissions = [
+      "Get",
+      "List",
+      "GetIssuers",
+      "ListIssuers",
+    ]
+
+    key_permissions = [
+      "Get",
+      "List",
+      "Decrypt",
+      "Verify",
+      "Encrypt",
+    ]
+    secret_permissions = [
+      "Get",
+      "List",
+    ]
+  }
 }
 ###################################################################################
 # Ressources for release.ci.jenkins.io sponsored subscription
@@ -116,5 +141,13 @@ resource "azurerm_role_assignment" "release_ci_jenkins_io_azurevm_agents_write_b
   scope = azurerm_storage_account.builds_reports_jenkins_io.id
   # Allow writing
   role_definition_name = "Storage File Data Privileged Contributor"
+  principal_id         = azurerm_user_assigned_identity.release_ci_jenkins_io_agents_sponsored.principal_id
+}
+resource "azurerm_role_assignment" "release_ci_jenkins_io_agents_read_prodreleasecore_vault" {
+  provider = azurerm.jenkins-sponsored
+
+  scope = azurerm_key_vault.prodreleasecore.id
+  # Allow reading (not sufficient: check access policies on the Vault)
+  role_definition_name = "Reader"
   principal_id         = azurerm_user_assigned_identity.release_ci_jenkins_io_agents_sponsored.principal_id
 }
