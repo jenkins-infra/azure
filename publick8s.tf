@@ -77,8 +77,9 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
 
   default_node_pool {
     name                         = "linuxpool"
-    only_critical_addons_enabled = false               # We run our workloads along the system workloads
-    vm_size                      = "Standard_D4pds_v5" # 4 vCPU, 16 GB RAM, local disk: 150 GB and 19000 IOPS
+    temporary_name_for_rotation  = "tempsystem"
+    only_critical_addons_enabled = true # We run our workloads along the system workloads
+    vm_size                      = "Standard_D2pds_v5"
     upgrade_settings {
       drain_timeout_in_minutes = 5 # If a pod cannot be evicted in less than 5 min, then upgrades fails
       max_surge                = 1 # Upgrade node one by one to avoid services to go down (when only 2 replicas)
@@ -86,15 +87,43 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     os_sku               = "AzureLinux"
     kubelet_disk_type    = "OS"
     os_disk_type         = "Ephemeral"
-    os_disk_size_gb      = 150 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/dpsv5-dpdsv5-series#dpdsv5-series (depends on the instance size)
+    os_disk_size_gb      = 75 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/sizes/general-purpose/dpdsv5-series?tabs=sizestoragelocal
     orchestrator_version = local.aks_clusters["publick8s"].kubernetes_version
     auto_scaling_enabled = true
-    min_count            = 3
+    min_count            = 2
     max_count            = 5
     vnet_subnet_id       = data.azurerm_subnet.publick8s.id
     tags                 = local.default_tags
     zones                = [1, 2, 3]
     # No custom node_taints
+  }
+
+  tags = local.default_tags
+}
+
+resource "azurerm_kubernetes_cluster_node_pool" "publick8s_linuxapps" {
+  name    = "linuxapps" # 12 char. max on Linux, only letters and numbers
+  vm_size = "Standard_D4pds_v5"
+
+  upgrade_settings {
+    drain_timeout_in_minutes = 5 # If a pod cannot be evicted in less than 5 min, then upgrades fails
+    max_surge                = 1 # Upgrade node one by one to avoid services to go down (when only 2 replicas)
+  }
+  os_disk_type          = "Ephemeral"
+  kubelet_disk_type     = "OS"
+  os_sku                = "AzureLinux"
+  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/sizes/general-purpose/dpdsv5-series?tabs=sizestoragelocal
+  orchestrator_version  = local.aks_clusters["publick8s"].kubernetes_version
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s.id
+  auto_scaling_enabled  = true
+  min_count             = 2
+  max_count             = 5
+  zones                 = [1, 2, 3]
+  vnet_subnet_id        = data.azurerm_subnet.publick8s.id
+  # No custom node_taints
+
+  lifecycle {
+    ignore_changes = [node_count]
   }
 
   tags = local.default_tags
