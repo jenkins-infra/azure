@@ -202,7 +202,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci
 resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci_jenkins_io_agents_linux" {
   provider = azurerm.jenkins-sponsored
   name     = "releacilinux" # 12 char. max on Linux, only letters and numbers
-  vm_size  = "Standard_D8ads_v7"
+  vm_size  = "Standard_D8ds_v7"
   upgrade_settings {
     max_surge = "10%"
   }
