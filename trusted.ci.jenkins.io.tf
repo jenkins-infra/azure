@@ -194,10 +194,8 @@ resource "azurerm_private_endpoint" "publick8s_updates_jenkins_io_for_trustedci_
 resource "azurerm_private_dns_a_record" "updates_jenkins_io_sponsored" {
   provider = azurerm.jenkins-sponsored
 
-  name      = "updates.jenkins.io"                                            # Expected full record name: updates.jenkins.io.privatelink.azurecr.io
-  zone_name = module.trustedcijenkinsiosponsored_acr_pe.private_dns_zone_name # This existing zone already associated to the vnet
-  # Must be the same as the private zone (otherwise: 404 when applying)
-  resource_group_name = module.trustedcijenkinsiosponsored_acr_pe.private_dns_zone_resource_group_name
+  name                = "updates.jenkins.io"                                          # Expected full record name: updates.jenkins.io.privatelink.azurecr.io
+  private_dns_zone_id = module.trustedcijenkinsiosponsored_acr_pe.private_dns_zone_id # This existing zone already associated to the vnet
   ttl                 = 60
   records             = [azurerm_private_endpoint.publick8s_updates_jenkins_io_for_trustedci_sponsored.private_service_connection[0].private_ip_address]
 }

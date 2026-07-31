@@ -55,10 +55,9 @@ resource "azurerm_private_dns_zone" "dockerhub_mirror" {
 resource "azurerm_private_dns_zone_virtual_network_link" "dockerhub_mirror" {
   provider = azurerm
   # Private DNS zone name is static: we can only have one per RG
-  name                  = "privatelink.azurecr.io"
-  resource_group_name   = data.azurerm_virtual_network.target.resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.dockerhub_mirror.name
-  virtual_network_id    = data.azurerm_virtual_network.target.id
+  name                = "privatelink.azurecr.io"
+  private_dns_zone_id = azurerm_private_dns_zone.dockerhub_mirror.id
+  virtual_network_id  = data.azurerm_virtual_network.target.id
 
   registration_enabled = true
   tags                 = var.default_tags
