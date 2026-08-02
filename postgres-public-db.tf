@@ -69,8 +69,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "public_db_pgsql" {
     "private-vnet"                   = data.azurerm_virtual_network.private.id,
     "infracijenkinsiosponsored-vnet" = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.id,
   }
-  name                  = "${each.key}-to-publicdbpgsql"
-  resource_group_name   = data.azurerm_resource_group.public.name
-  private_dns_zone_name = azurerm_private_dns_zone.public_db_pgsql.name
-  virtual_network_id    = each.value
+  name                = "${each.key}-to-publicdbpgsql"
+  private_dns_zone_id = azurerm_private_dns_zone.public_db_pgsql.id
+  virtual_network_id  = each.value
 }

@@ -75,6 +75,10 @@ resource "azurerm_kubernetes_cluster" "publick8s" {
     type = "SystemAssigned"
   }
 
+  node_provisioning_profile {
+    default_node_pools = "Auto"
+  }
+
   default_node_pool {
     name                         = "linuxpool"
     temporary_name_for_rotation  = "tempsystem"

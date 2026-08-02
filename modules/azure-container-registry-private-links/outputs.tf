@@ -15,7 +15,3 @@ output "private_dns_zone_id" {
 output "private_dns_zone_name" {
   value = azurerm_private_dns_zone.dockerhub_mirror.name
 }
-
-output "private_dns_zone_resource_group_name" {
-  value = azurerm_private_dns_zone.dockerhub_mirror.resource_group_name
-}
