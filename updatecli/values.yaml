@@ -14,7 +14,7 @@ end_dates:
       secret: "CONTRIBUTORS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
       terraform_output: "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer_application_client_password"
     infraci_docsjenkinsio_fileshare_serviceprincipal_writer:
-      end_date: "2026-08-31T00:00:00Z"
+      end_date: "2026-11-21T00:00:00Z"
       service: "docs.jenkins.io"
       secret: "DOCS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
       terraform_output: "infraci_docsjenkinsio_fileshare_serviceprincipal_writer_application_client_password"
