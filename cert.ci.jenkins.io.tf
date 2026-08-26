@@ -80,7 +80,7 @@ module "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   ephemeral_agents_network_rg_name = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.resource_group_name
   ephemeral_agents_network_name    = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.virtual_network_name
   ephemeral_agents_subnet_name     = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.name
-  nsg_rg_name                      = azurerm_resource_group.cert_ci_jenkins_io_controller_jenkins_sponsored.name
+  use_vnet_common_nsg              = true
   controller_ips                   = compact([module.cert_ci_jenkins_io.controller_public_ipv4])
   controller_service_principal_ids = [module.cert_ci_jenkins_io.controller_service_principal_id]
   default_tags                     = local.default_tags
@@ -152,36 +152,21 @@ module "certcijenkinsiosponsored_acr_pe" {
 
   default_tags = local.default_tags
 }
-## Allow access to/from ACR endpoint
-resource "azurerm_network_security_rule" "allow_out_https_from_cert_vnet_to_acr" {
+####################################################################################
+## Common resources (endpoint, DNS, etc.) in the sponsored subscription
+####################################################################################
+resource "azurerm_resource_group" "cert_ci_jenkins_io_sponsored_commons" {
   provider = azurerm.jenkins-sponsored
-
-  name                         = "allow-out-https-from-vnet-to-acr"
-  priority                     = 4051
-  direction                    = "Outbound"
-  access                       = "Allow"
-  protocol                     = "Tcp"
-  source_port_range            = "*"
-  destination_port_range       = "443"
-  source_address_prefixes      = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.address_space
-  destination_address_prefixes = split(",", module.certcijenkinsiosponsored_acr_pe.private_endpoint_nic_ip_addresses)
-  resource_group_name          = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
-  network_security_group_name  = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+  name     = "cert-ci-jenkins-io-sponsored-commons"
+  location = var.location
+  tags     = local.default_tags
 }
-resource "azurerm_network_security_rule" "allow_in_https_from_cert_vnet_to_acr" {
+# Managed in jenkins-infra/azure-net with vnet and subnets
+data "azurerm_network_security_group" "cert_ci_jenkins_io_sponsored_vnet" {
   provider = azurerm.jenkins-sponsored
 
-  name                         = "allow-in-https-from-vnet-to-acr"
-  priority                     = 4051
-  direction                    = "Inbound"
-  access                       = "Allow"
-  protocol                     = "Tcp"
-  source_port_range            = "*"
-  destination_port_range       = "443"
-  source_address_prefixes      = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.address_space
-  destination_address_prefixes = split(",", module.certcijenkinsiosponsored_acr_pe.private_endpoint_nic_ip_addresses)
-  resource_group_name          = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
-  network_security_group_name  = module.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
+  name                = "cert-ci-jenkins-io-sponsored-vnet"
+  resource_group_name = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.resource_group_name
 }
 
 ####################################################################################
