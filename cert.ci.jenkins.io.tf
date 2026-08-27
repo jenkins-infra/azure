@@ -39,7 +39,7 @@ module "cert_ci_jenkins_io" {
   }
 
   controller_service_principal_ids = [
-    data.azuread_service_principal.terraform_production.object_id,
+    data.azuread_service_principal.terraform_production.object_id, # terraform-production Service Principal, used by the CI system
   ]
   controller_packer_rg_ids = [
     azurerm_resource_group.packer_images_sponsored["prod"].id,
@@ -202,7 +202,7 @@ resource "azurerm_network_security_rule" "allow_in_https_from_cert_sponsored_vne
 resource "azuread_application" "cert_ci_jenkins_io_acr_dockerhub_mirror" {
   display_name = "cert-ci-jenkins-io-acr-dockerhub-mirror"
   owners = [
-    data.azuread_service_principal.terraform_production.client_id,
+    data.azuread_service_principal.terraform_production.object_id, # terraform-production Service Principal, used by the CI system
   ]
   tags = [for key, value in local.default_tags : "${key}:${value}"]
   required_resource_access {
@@ -220,7 +220,6 @@ resource "azuread_application" "cert_ci_jenkins_io_acr_dockerhub_mirror" {
 resource "azuread_application_password" "cert_ci_jenkins_io_acr_dockerhub_mirror" {
   application_id = azuread_application.cert_ci_jenkins_io_acr_dockerhub_mirror.id
   display_name   = "cert-ci-jenkins-io-acr-dockerhub-mirror"
-  # end_date       = "2026-11-22T00:00:00Z"
 }
 resource "azurerm_role_assignment" "certpush_to_acr" {
   count                            = var.environment == "staging" ? 0 : 1

@@ -64,9 +64,7 @@ resource "azurerm_resource_group" "updatecli_infra_ci_jenkins_io" {
 resource "azuread_application" "updatecli_infra_ci_jenkins_io" {
   display_name = "updatecli_infra.ci.jenkins.io"
   owners = [
-    # Commenting out to migrate to new AzureAD provider
-    # data.azuread_service_principal.terraform_production.id,
-    "b847a030-25e1-4791-ad04-9e8484d87bce",
+    data.azuread_service_principal.terraform_production.object_id, # terraform-production Service Principal, used by the CI system
   ]
   tags = [for key, value in local.default_tags : "${key}:${value}"]
   required_resource_access {
