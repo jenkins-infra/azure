@@ -217,13 +217,6 @@ resource "azuread_application" "cert_ci_jenkins_io_acr_dockerhub_mirror" {
     homepage_url = "https://cert.ci.jenkins.io/manage/credentials/store/system/domain/_/credential/azure-container-registry-push/"
   }
 }
-# resource "azuread_service_principal" "cert_ci_jenkins_io_acr_dockerhub_mirror" {
-#   client_id                    = azuread_application.cert_ci_jenkins_io_acr_dockerhub_mirror.client_id
-#   app_role_assignment_required = false
-#   owners = [
-#     data.azuread_service_principal.terraform_production.id,
-#   ]
-# }
 resource "azuread_application_password" "cert_ci_jenkins_io_acr_dockerhub_mirror" {
   application_id = azuread_application.cert_ci_jenkins_io_acr_dockerhub_mirror.id
   display_name   = "cert-ci-jenkins-io-acr-dockerhub-mirror"
