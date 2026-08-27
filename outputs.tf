@@ -191,3 +191,11 @@ output "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer_application_c
   sensitive = true
   value     = module.infraci_reportsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
+output "cert_ci_jenkins_io_acr_docker_username" {
+  value = azuread_service_principal.cert_ci_jenkins_io_acr_dockerhub_mirror.object_id
+}
+# Credential to set up in cert.ci.jenkins.io
+output "cert_ci_jenkins_io_acr_docker_password" {
+  sensitive = true
+  value     = azuread_application_password.cert_ci_jenkins_io_acr_dockerhub_mirror.value
+}

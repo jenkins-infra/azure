@@ -217,13 +217,22 @@ resource "azuread_application" "cert_ci_jenkins_io_acr_dockerhub_mirror" {
     homepage_url = "https://cert.ci.jenkins.io/manage/credentials/store/system/domain/_/credential/azure-container-registry-push/"
   }
 }
+resource "azuread_service_principal" "cert_ci_jenkins_io_acr_dockerhub_mirror" {
+  client_id                    = azuread_application.cert_ci_jenkins_io_acr_dockerhub_mirror.client_id
+  app_role_assignment_required = false
+  owners = [
+    data.azuread_service_principal.terraform_production.object_id, # terraform-production Service Principal, used by the CI system
+  ]
+}
 resource "azuread_application_password" "cert_ci_jenkins_io_acr_dockerhub_mirror" {
   application_id = azuread_application.cert_ci_jenkins_io_acr_dockerhub_mirror.id
   display_name   = "cert-ci-jenkins-io-acr-dockerhub-mirror"
 }
 resource "azurerm_role_assignment" "certpush_to_acr" {
-  count                            = var.environment == "staging" ? 0 : 1
-  principal_id                     = azuread_application.cert_ci_jenkins_io_acr_dockerhub_mirror.client_id
+  provider = azurerm.jenkins-sponsored
+
+  # count                            = var.environment == "staging" ? 0 : 1
+  principal_id                     = azuread_service_principal.cert_ci_jenkins_io_acr_dockerhub_mirror.object_id
   role_definition_name             = "AcrPush"
   scope                            = azurerm_container_registry.dockerhub_mirror.id
   skip_service_principal_aad_check = true
