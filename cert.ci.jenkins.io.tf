@@ -199,6 +199,43 @@ resource "azurerm_network_security_rule" "allow_in_https_from_cert_sponsored_vne
   resource_group_name          = data.azurerm_network_security_group.cert_ci_jenkins_io_sponsored_vnet.resource_group_name
   network_security_group_name  = data.azurerm_network_security_group.cert_ci_jenkins_io_sponsored_vnet.name
 }
+resource "azuread_application" "cert_ci_jenkins_io_acr_dockerhub_mirror" {
+  display_name = "cert-ci-jenkins-io-acr-dockerhub-mirror"
+  owners = [
+    data.azuread_service_principal.terraform_production.client_id,
+  ]
+  tags = [for key, value in local.default_tags : "${key}:${value}"]
+  required_resource_access {
+    resource_app_id = "00000003-0000-0000-c000-000000000000" # Microsoft Graph
+
+    resource_access {
+      id   = "e1fe6dd8-ba31-4d61-89e7-88639da4683d" # User.Read
+      type = "Scope"
+    }
+  }
+  web {
+    homepage_url = "https://cert.ci.jenkins.io/manage/credentials/store/system/domain/_/credential/azure-container-registry-push/"
+  }
+}
+# resource "azuread_service_principal" "cert_ci_jenkins_io_acr_dockerhub_mirror" {
+#   client_id                    = azuread_application.cert_ci_jenkins_io_acr_dockerhub_mirror.client_id
+#   app_role_assignment_required = false
+#   owners = [
+#     data.azuread_service_principal.terraform_production.id,
+#   ]
+# }
+resource "azuread_application_password" "cert_ci_jenkins_io_acr_dockerhub_mirror" {
+  application_id = azuread_application.cert_ci_jenkins_io_acr_dockerhub_mirror.id
+  display_name   = "cert-ci-jenkins-io-acr-dockerhub-mirror"
+  # end_date       = "2026-11-22T00:00:00Z"
+}
+resource "azurerm_role_assignment" "certpush_to_acr" {
+  count                            = var.environment == "staging" ? 0 : 1
+  principal_id                     = azuread_application.cert_ci_jenkins_io_acr_dockerhub_mirror.client_id
+  role_definition_name             = "AcrPush"
+  scope                            = azurerm_container_registry.dockerhub_mirror.id
+  skip_service_principal_aad_check = true
+}
 
 ####################################################################################
 ## Public DNS records in the CDF subscription

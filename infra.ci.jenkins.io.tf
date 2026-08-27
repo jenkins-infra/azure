@@ -453,6 +453,18 @@ resource "azurerm_network_security_rule" "allow_in_https_from_infra_ephemeral_ag
   resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
 }
+#### Allow provided Principal IDs to push images to the registry
+moved {
+  from = azurerm_role_assignment.push_to_acr
+  to   = azurerm_role_assignment.infra_ci_jenkins_io_push_to_acr
+}
+resource "azurerm_role_assignment" "infra_ci_jenkins_io_push_to_acr" {
+  count                            = var.environment == "staging" ? 0 : 1
+  principal_id                     = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents_jenkins_sponsored.principal_id
+  role_definition_name             = "AcrPush"
+  scope                            = azurerm_container_registry.dockerhub_mirror.id
+  skip_service_principal_aad_check = true
+}
 
 ## Vault
 resource "azurerm_key_vault" "infra_ci_jenkins_io_vault" {

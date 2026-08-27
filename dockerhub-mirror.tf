@@ -108,12 +108,3 @@ resource "azurerm_container_registry_cache_rule" "mirror_cache_rules" {
   target_repo           = each.value.target
   credential_set_id     = azurerm_container_registry_credential_set.dockerhub.id
 }
-
-#### Allow provided Principal IDs to push images to the registry
-resource "azurerm_role_assignment" "push_to_acr" {
-  count                            = var.environment == "staging" ? 0 : 1
-  principal_id                     = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents_jenkins_sponsored.principal_id
-  role_definition_name             = "AcrPush"
-  scope                            = azurerm_container_registry.dockerhub_mirror.id
-  skip_service_principal_aad_check = true
-}
