@@ -192,7 +192,7 @@ output "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer_application_c
   value     = module.infraci_reportsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
 output "cert_ci_jenkins_io_acr_docker_username" {
-  value = azuread_service_principal.cert_ci_jenkins_io_acr_dockerhub_mirror.object_id
+  value = azuread_service_principal.cert_ci_jenkins_io_acr_dockerhub_mirror.client_id
 }
 # Credential to set up in cert.ci.jenkins.io
 output "cert_ci_jenkins_io_acr_docker_password" {
