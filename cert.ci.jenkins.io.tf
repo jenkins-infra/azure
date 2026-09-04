@@ -90,17 +90,11 @@ module "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes
   }
 }
-resource "azurerm_resource_group" "cert_ci_jenkins_io_controller_jenkins_sponsored" {
-  provider = azurerm.jenkins-sponsored
-  name     = module.cert_ci_jenkins_io.controller_resourcegroup_name # Same name on both subscriptions
-  location = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.location
-  tags     = local.default_tags
-}
 resource "azurerm_user_assigned_identity" "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   provider            = azurerm.jenkins-sponsored
-  location            = azurerm_resource_group.cert_ci_jenkins_io_controller_jenkins_sponsored.location
+  location            = azurerm_resource_group.cert_ci_jenkins_io_sponsored_commons.location
   name                = "cert-ci-jenkins-io-agents-sponsored"
-  resource_group_name = azurerm_resource_group.cert_ci_jenkins_io_controller_jenkins_sponsored.name
+  resource_group_name = azurerm_resource_group.cert_ci_jenkins_io_sponsored_commons.name
 }
 # The Controller identity must be able to operate this identity to assign it to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
 resource "azurerm_role_assignment" "cert_ci_jenkins_io_operate_agent_identity_jenkins_sponsored" {
