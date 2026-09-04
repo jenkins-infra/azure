@@ -123,6 +123,12 @@ data "azurerm_subnet" "cert_ci_jenkins_io_sponsored_commons" {
   virtual_network_name = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.name
   resource_group_name  = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.resource_group_name
 }
+data "azurerm_subnet" "cert_ci_jenkins_io_sponsored_controller" {
+  provider             = azurerm.jenkins-sponsored
+  name                 = "${data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.name}-controller"
+  virtual_network_name = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.name
+  resource_group_name  = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.resource_group_name
+}
 data "azurerm_subnet" "trusted_ci_jenkins_io_sponsored_ephemeral_agents" {
   provider             = azurerm.jenkins-sponsored
   name                 = "${data.azurerm_virtual_network.trusted_ci_jenkins_io_sponsored.name}-ephemeral-agents"
