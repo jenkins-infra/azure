@@ -55,14 +55,14 @@ resource "azurerm_dns_a_record" "cert_ci_jenkins_io" {
   zone_name           = module.cert_ci_jenkins_io_letsencrypt.zone_name
   resource_group_name = module.cert_ci_jenkins_io_letsencrypt.zone_rg_name
   ttl                 = 60
-  records             = [module.cert_ci_jenkins_io.controller_private_ipv4]
+  records             = [module.cert_ci_jenkins_io_sponsored.controller_private_ipv4]
 }
 resource "azurerm_dns_a_record" "assets_cert_ci_jenkins_io" {
   name                = "assets"
   zone_name           = module.cert_ci_jenkins_io_letsencrypt.zone_name
   resource_group_name = module.cert_ci_jenkins_io_letsencrypt.zone_rg_name
   ttl                 = 60
-  records             = [module.cert_ci_jenkins_io.controller_private_ipv4]
+  records             = [module.cert_ci_jenkins_io_sponsored.controller_private_ipv4]
 }
 
 ####################################################################################
