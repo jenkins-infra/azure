@@ -9,46 +9,8 @@ module "cert_ci_jenkins_io_letsencrypt" {
   dns_rg_name      = data.azurerm_resource_group.proddns_jenkinsio.name
   parent_zone_name = data.azurerm_dns_zone.jenkinsio.name
   principal_ids = [
-    module.cert_ci_jenkins_io.controller_service_principal_id,
     module.cert_ci_jenkins_io_sponsored.controller_service_principal_id,
   ]
-}
-module "cert_ci_jenkins_io" {
-  source = "./modules/azure-jenkinsinfra-controller"
-
-  providers = {
-    azurerm     = azurerm
-    azurerm.dns = azurerm
-    azuread     = azuread
-  }
-
-  service_fqdn                 = module.cert_ci_jenkins_io_letsencrypt.zone_name
-  location                     = data.azurerm_resource_group.cert_ci_jenkins_io.location
-  admin_username               = local.admin_username
-  admin_ssh_publickey          = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDDpxwvySus2OWViWfJ02XMYr+Qa/uPADhjt/4el2SmEf7NlJXzq5vc8imcw8YxQZKwuuKJhonlTYTpk1Cjka4bJKWNOSQ8+Kx0O2ZnNjKn3ZETWJB90bZXHVqbrNHDtu6lN6S/yRW9Q+6fuDbHBW0MXWI8Lsv+bU5v8Zll6m62rc00/I/IT9c1TX1qjCtjf5XHMFw7nVxQiTX2Zf5UKG3RI7mkCMDIvx2H9kXdzM8jtYwATZPHKHuLzffARmvy1FpNPVuLLEGYE3hljP82rll1WZbbl1ZrhjzbFUUYO4fsA7AOQHWhHiVLvtnreB269JOl/ZkHgk37zcdwJMkqKpqoEbjP9z8PURf5uMA7TiDGcpgcFMzoaFk1ueqoHM2JaM2AZQAkPhbUfT7MSOFYRx91OEg5pg5N17zNeaBM6fyxl3v7mkxSOTkKlzjAXPRyo7XsosUVQ4qb4DfsAAJ0Rynts2olRQLEzJku0ZxbbXotuoppI8HivRl7PoTsAASJRpc="
-  controller_network_name      = data.azurerm_virtual_network.cert_ci_jenkins_io.name
-  controller_network_rg_name   = data.azurerm_resource_group.cert_ci_jenkins_io.name
-  controller_subnet_name       = data.azurerm_subnet.cert_ci_jenkins_io_controller.name
-  controller_data_disk_size_gb = 128
-  controller_vm_size           = "Standard_B2s"
-  default_tags                 = local.default_tags
-  dns_zone_name                = module.cert_ci_jenkins_io_letsencrypt.zone_name
-  dns_resourcegroup_name       = module.cert_ci_jenkins_io_letsencrypt.zone_rg_name
-
-  jenkins_infra_ips = {
-    ldap_ipv4         = azurerm_public_ip.publick8s_ips["publick8s-ldap-ipv4"].ip_address,
-    puppet_ipv4       = azurerm_public_ip.puppet_jenkins_io.ip_address,
-    privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes,
-  }
-
-  controller_service_principal_ids = [
-    data.azuread_service_principal.terraform_production.object_id, # terraform-production Service Principal, used by the CI system
-  ]
-  controller_packer_rg_ids = [
-    azurerm_resource_group.packer_images_sponsored["prod"].id,
-  ]
-
-  agent_ip_prefixes = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.address_prefixes
 }
 resource "azurerm_dns_a_record" "cert_ci_jenkins_io" {
   name                = "@" # Child zone: no CNAME possible!
@@ -113,24 +75,6 @@ module "cert_ci_jenkins_io_sponsored" {
 }
 
 ####################################################################################
-## Agents resources in the CDF subscription
-####################################################################################
-# Required to allow controller to check for subnets inside the virtual network
-resource "azurerm_role_definition" "cert_ci_jenkins_io_vnet_reader" {
-  name  = "read-cert-ci-jenkins-io-vnet"
-  scope = data.azurerm_virtual_network.cert_ci_jenkins_io.id
-
-  permissions {
-    actions = ["Microsoft.Network/virtualNetworks/read"]
-  }
-}
-resource "azurerm_role_assignment" "cert_ci_jenkins_io_controller_vnet_reader" {
-  scope              = data.azurerm_virtual_network.cert_ci_jenkins_io.id
-  role_definition_id = azurerm_role_definition.cert_ci_jenkins_io_vnet_reader.role_definition_resource_id
-  principal_id       = module.cert_ci_jenkins_io.controller_service_principal_id
-}
-
-####################################################################################
 ## Agents resources in the sponsored subscription
 ####################################################################################
 module "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
@@ -139,18 +83,16 @@ module "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored" {
   }
   source = "./modules/azure-jenkinsinfra-azurevm-agents"
 
-  service_fqdn                     = module.cert_ci_jenkins_io.service_fqdn
-  service_short_stripped_name      = module.cert_ci_jenkins_io.service_short_stripped_name
+  service_fqdn                     = module.cert_ci_jenkins_io_sponsored.service_fqdn
+  service_short_stripped_name      = module.cert_ci_jenkins_io_sponsored.service_short_stripped_name
   ephemeral_agents_network_rg_name = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.resource_group_name
   ephemeral_agents_network_name    = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.virtual_network_name
   ephemeral_agents_subnet_name     = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.name
   use_vnet_common_nsg              = true
   controller_ips = compact([
-    module.cert_ci_jenkins_io.controller_public_ipv4,
     module.cert_ci_jenkins_io_sponsored.controller_public_ipv4,
   ])
   controller_service_principal_ids = [
-    module.cert_ci_jenkins_io.controller_service_principal_id,
     module.cert_ci_jenkins_io_sponsored.controller_service_principal_id,
   ]
   default_tags         = local.default_tags
@@ -165,13 +107,6 @@ resource "azurerm_user_assigned_identity" "cert_ci_jenkins_io_azurevm_agents_jen
   location            = azurerm_resource_group.cert_ci_jenkins_io_sponsored_commons.location
   name                = "cert-ci-jenkins-io-agents-sponsored"
   resource_group_name = azurerm_resource_group.cert_ci_jenkins_io_sponsored_commons.name
-}
-# The Controller identity must be able to operate this identity to assign it to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
-resource "azurerm_role_assignment" "cert_ci_jenkins_io_operate_agent_identity_jenkins_sponsored" {
-  provider             = azurerm.jenkins-sponsored
-  scope                = azurerm_user_assigned_identity.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.id
-  role_definition_name = "Managed Identity Operator"
-  principal_id         = module.cert_ci_jenkins_io.controller_service_principal_id
 }
 # The Sponsored Controller identity must be able to operate this identity to assign it to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
 resource "azurerm_role_assignment" "cert_ci_jenkins_io_sponsored_operate_agent_identity_jenkins_sponsored" {
@@ -195,12 +130,6 @@ resource "azurerm_role_definition" "cert_ci_jenkins_io_controller_vnet_sponsored
   permissions {
     actions = ["Microsoft.Network/virtualNetworks/read"]
   }
-}
-resource "azurerm_role_assignment" "cert_controller_vnet_jenkins_sponsored_reader" {
-  provider           = azurerm.jenkins-sponsored
-  scope              = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.id
-  role_definition_id = azurerm_role_definition.cert_ci_jenkins_io_controller_vnet_sponsored_reader.role_definition_resource_id
-  principal_id       = module.cert_ci_jenkins_io.controller_service_principal_id
 }
 resource "azurerm_role_assignment" "cert_sponsored_controller_vnet_jenkins_sponsored_reader" {
   provider           = azurerm.jenkins-sponsored
