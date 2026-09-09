@@ -270,6 +270,45 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci
   tags = local.default_tags
 }
 
+resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci_jenkins_io_agents_windows_2025" {
+  provider = azurerm.jenkins-sponsored
+  name     = "w2025" # 6 char. max on Windows, only letters and numbers
+  #####
+  # Note: we must stay on Generation 1 VMs (_v5 families max.) because Generation 2 requires Windows 2025.
+  # Despite MS documentation: https://learn.microsoft.com/en-us/azure/aks/generation-2-vms?tabs=windows-node-pool#create-a-node-pool-with-a-gen-2-vm
+  # the Terraform azurerm provider does not allow the custom "header" technique: https://github.com/hashicorp/terraform-provider-azurerm/issues/31526
+  # And of course Windows 2025 is not available until https://github.com/hashicorp/terraform-provider-azurerm/issues/31036 is done.
+  #
+  # Last solution stop using Windows Node Pool in favor of Azure VM agents.
+  #####
+  vm_size = "Standard_D8s_v3" # Generation 1 VM
+  upgrade_settings {
+    max_surge = "10%"
+  }
+  os_disk_type          = "Ephemeral"
+  os_disk_size_gb       = 64 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dsv3-series?tabs=sizestoragelocal
+  orchestrator_version  = local.aks_clusters["privatek8s-sponsored"].kubernetes_version
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s_sponsored.id
+  os_type               = "Windows"
+  os_sku                = "Windows2025"
+  auto_scaling_enabled  = true
+  min_count             = 0
+  max_count             = 3
+  zones                 = [1]
+  vnet_subnet_id        = data.azurerm_subnet.privatek8s_sponsored_release_ci_jenkins_io_agents.id
+  node_taints = [
+    "os=windows:NoSchedule",
+    "jenkins=release.ci.jenkins.io:NoSchedule",
+    "version=windows2025:NoSchedule",
+  ]
+
+  lifecycle {
+    ignore_changes = [node_count]
+  }
+
+  tags = local.default_tags
+}
+
 # Allow cluster to manage network resources in the privatek8s_tier subnet
 # It is used for managing the LBs of the public and private ingress controllers
 resource "azurerm_role_assignment" "privatek8s_sponsored_subnets_networkcontributor" {
