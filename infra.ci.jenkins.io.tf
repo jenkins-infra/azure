@@ -3,7 +3,7 @@
 ###################################################################################
 # Required to allow azcopy sync of contributors.jenkins.io File Share
 module "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer" {
-  source                     = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+  source                     = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
   service_fqdn               = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
   active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url       = "https://github.com/jenkins-infra/azure"
@@ -14,7 +14,7 @@ module "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer" {
 }
 # Required to allow azcopy sync of docs.jenkins.io File Share
 module "infraci_docsjenkinsio_fileshare_serviceprincipal_writer" {
-  source                     = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+  source                     = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
   service_fqdn               = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
   active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url       = "https://github.com/jenkins-infra/azure"
@@ -25,7 +25,7 @@ module "infraci_docsjenkinsio_fileshare_serviceprincipal_writer" {
 }
 # Required to allow azcopy sync of stats.jenkins.io File Share
 module "infraci_statsjenkinsio_fileshare_serviceprincipal_writer" {
-  source                     = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+  source                     = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
   service_fqdn               = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
   active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url       = "https://github.com/jenkins-infra/azure"
@@ -36,7 +36,7 @@ module "infraci_statsjenkinsio_fileshare_serviceprincipal_writer" {
 }
 # Required to allow azcopy sync to the reports.jenkins.io File Share
 module "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer" {
-  source                     = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+  source                     = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
   service_fqdn               = "infraci-reportsjenkinsio-fileshare_serviceprincipal_writer"
   active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url       = "https://github.com/jenkins-infra/azure"
@@ -47,7 +47,7 @@ module "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer" {
 }
 # Required to allow azcopy sync of plugins.jenkins.io File Share
 module "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer" {
-  source                     = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+  source                     = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
   service_fqdn               = "infraci-pluginsjenkinsio-fileshare_serviceprincipal_writer"
   active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url       = "https://github.com/jenkins-infra/azure"
