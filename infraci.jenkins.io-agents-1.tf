@@ -151,7 +151,7 @@ resource "kubernetes_namespace_v1" "infracijenkinsio_agents_1_infra_ci_jenkins_i
     }
   }
 }
-resource "kubernetes_service_account" "infracijenkinsio_agents_1_infra_ci_jenkins_io_agents" {
+resource "kubernetes_service_account_v1" "infracijenkinsio_agents_1_infra_ci_jenkins_io_agents" {
   provider = kubernetes.infracijenkinsio_agents_1
 
   metadata {
@@ -165,11 +165,11 @@ resource "kubernetes_service_account" "infracijenkinsio_agents_1_infra_ci_jenkin
 }
 resource "azurerm_federated_identity_credential" "infracijenkinsio_agents_1_infra_ci_jenkins_io_agents" {
   provider                  = azurerm.jenkins-sponsored
-  name                      = "infracijenkinsio-agents-1-${kubernetes_service_account.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}"
+  name                      = "infracijenkinsio-agents-1-${kubernetes_service_account_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}"
   audience                  = ["api://AzureADTokenExchange"]
   issuer                    = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.oidc_issuer_url
   user_assigned_identity_id = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents_jenkins_sponsored.id
-  subject                   = "system:serviceaccount:${kubernetes_namespace_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}:${kubernetes_service_account.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}"
+  subject                   = "system:serviceaccount:${kubernetes_namespace_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}:${kubernetes_service_account_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}"
 }
 
 #Configure the jenkins-infra/kubernetes-management admin service account

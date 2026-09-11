@@ -12,7 +12,7 @@ resource "local_file" "jenkins_infra_data_report" {
     },
     "infra.ci.jenkins.io" = {
       "controller_namespace"       = kubernetes_namespace_v1.privatek8s_sponsored["infra-ci-jenkins-io"].metadata[0].name,
-      "controller_service_account" = kubernetes_service_account.privatek8s_sponsored_infra_ci_jenkins_io_controller.metadata[0].name,
+      "controller_service_account" = kubernetes_service_account_v1.privatek8s_sponsored_infra_ci_jenkins_io_controller.metadata[0].name,
       "controller_pvc"             = kubernetes_persistent_volume_claim.privatek8s_sponsored_infra_ci_jenkins_io_data.metadata[0].name,
       "agents_azure_vms_sponsored" = {
         "resource_group_name"         = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_resource_group_name,
@@ -31,17 +31,17 @@ resource "local_file" "jenkins_infra_data_report" {
               pods_quota = 150,
             },
           },
-          "agents_service_account" = kubernetes_service_account.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name,
+          "agents_service_account" = kubernetes_service_account_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name,
         },
       },
     },
     "release.ci.jenkins.io" = {
       "controller_namespace"       = kubernetes_namespace_v1.privatek8s_sponsored["release-ci-jenkins-io"].metadata[0].name,
-      "controller_service_account" = kubernetes_service_account.privatek8s_sponsored_release_ci_jenkins_io_controller.metadata[0].name,
+      "controller_service_account" = kubernetes_service_account_v1.privatek8s_sponsored_release_ci_jenkins_io_controller.metadata[0].name,
       "controller_pvc"             = kubernetes_persistent_volume_claim.privatek8s_sponsored_release_ci_jenkins_io_data.metadata[0].name,
       "agents_kubernetes_clusters" = {
         "privatek8s-sponsored" = {
-          "agents_service_account" = kubernetes_service_account.privatek8s_sponsored_release_ci_jenkins_io_agents.metadata[0].name,
+          "agents_service_account" = kubernetes_service_account_v1.privatek8s_sponsored_release_ci_jenkins_io_agents.metadata[0].name,
         }
         "persistentVolumeClaims" = {
           "data-storage-jenkins-io" = {

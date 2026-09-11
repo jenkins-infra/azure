@@ -97,3 +97,47 @@ import {
   id = "statically-provisioned"
   to = kubernetes_storage_class_v1.publick8s_statically_provisioned
 }
+
+removed {
+  from = kubernetes_service_account.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  id = "jenkins-infra-agents/jenkins-infra-agent"
+  to = kubernetes_service_account_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents
+}
+
+removed {
+  from = kubernetes_service_account.privatek8s_sponsored_infra_ci_jenkins_io_controller
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  id = "infra-ci-jenkins-io/infra-ci-jenkins-io-controller"
+  to = kubernetes_service_account_v1.privatek8s_sponsored_infra_ci_jenkins_io_controller
+}
+
+removed {
+  from = kubernetes_service_account.privatek8s_sponsored_release_ci_jenkins_io_controller
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  id = "release-ci-jenkins-io/release-ci-jenkins-io-controller"
+  to = kubernetes_service_account_v1.privatek8s_sponsored_release_ci_jenkins_io_controller
+}
+
+removed {
+  from = kubernetes_service_account.privatek8s_sponsored_release_ci_jenkins_io_agents
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  id = "release-ci-jenkins-io-agents/release-ci-jenkins-io-agents"
+  to = kubernetes_service_account_v1.privatek8s_sponsored_release_ci_jenkins_io_agents
+}

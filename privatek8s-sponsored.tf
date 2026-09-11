@@ -504,7 +504,7 @@ resource "kubernetes_persistent_volume_claim" "privatek8s_sponsored_release_ci_j
 ###################################################################################
 ## Workload Identity Resources
 ###################################################################################
-resource "kubernetes_service_account" "privatek8s_sponsored_infra_ci_jenkins_io_controller" {
+resource "kubernetes_service_account_v1" "privatek8s_sponsored_infra_ci_jenkins_io_controller" {
   provider = kubernetes.privatek8s-sponsored
 
   metadata {
@@ -519,13 +519,13 @@ resource "kubernetes_service_account" "privatek8s_sponsored_infra_ci_jenkins_io_
 resource "azurerm_federated_identity_credential" "privatek8s_sponsored_infra_ci_jenkins_io_controller" {
   provider = azurerm.jenkins-sponsored
 
-  name                      = "privatek8s-${kubernetes_service_account.privatek8s_sponsored_infra_ci_jenkins_io_controller.metadata[0].name}"
+  name                      = "privatek8s-${kubernetes_service_account_v1.privatek8s_sponsored_infra_ci_jenkins_io_controller.metadata[0].name}"
   audience                  = ["api://AzureADTokenExchange"]
   issuer                    = azurerm_kubernetes_cluster.privatek8s_sponsored.oidc_issuer_url
   user_assigned_identity_id = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller_sponsored.id
-  subject                   = "system:serviceaccount:${kubernetes_namespace_v1.privatek8s_sponsored["infra-ci-jenkins-io"].metadata[0].name}:${kubernetes_service_account.privatek8s_sponsored_infra_ci_jenkins_io_controller.metadata[0].name}"
+  subject                   = "system:serviceaccount:${kubernetes_namespace_v1.privatek8s_sponsored["infra-ci-jenkins-io"].metadata[0].name}:${kubernetes_service_account_v1.privatek8s_sponsored_infra_ci_jenkins_io_controller.metadata[0].name}"
 }
-resource "kubernetes_service_account" "privatek8s_sponsored_release_ci_jenkins_io_controller" {
+resource "kubernetes_service_account_v1" "privatek8s_sponsored_release_ci_jenkins_io_controller" {
   provider = kubernetes.privatek8s-sponsored
 
   metadata {
@@ -537,7 +537,7 @@ resource "kubernetes_service_account" "privatek8s_sponsored_release_ci_jenkins_i
     }
   }
 }
-resource "kubernetes_service_account" "privatek8s_sponsored_release_ci_jenkins_io_agents" {
+resource "kubernetes_service_account_v1" "privatek8s_sponsored_release_ci_jenkins_io_agents" {
   provider = kubernetes.privatek8s-sponsored
 
   metadata {
@@ -552,11 +552,11 @@ resource "kubernetes_service_account" "privatek8s_sponsored_release_ci_jenkins_i
 resource "azurerm_federated_identity_credential" "privatek8s_sponsored_release_ci_jenkins_io_agents" {
   provider = azurerm.jenkins-sponsored
 
-  name                      = "privatek8s-${kubernetes_service_account.privatek8s_sponsored_release_ci_jenkins_io_agents.metadata[0].name}"
+  name                      = "privatek8s-${kubernetes_service_account_v1.privatek8s_sponsored_release_ci_jenkins_io_agents.metadata[0].name}"
   audience                  = ["api://AzureADTokenExchange"]
   issuer                    = azurerm_kubernetes_cluster.privatek8s_sponsored.oidc_issuer_url
   user_assigned_identity_id = azurerm_user_assigned_identity.release_ci_jenkins_io_agents_sponsored.id
-  subject                   = "system:serviceaccount:${kubernetes_namespace_v1.privatek8s_sponsored["release-ci-jenkins-io-agents"].metadata[0].name}:${kubernetes_service_account.privatek8s_sponsored_release_ci_jenkins_io_agents.metadata[0].name}"
+  subject                   = "system:serviceaccount:${kubernetes_namespace_v1.privatek8s_sponsored["release-ci-jenkins-io-agents"].metadata[0].name}:${kubernetes_service_account_v1.privatek8s_sponsored_release_ci_jenkins_io_agents.metadata[0].name}"
 }
 
 # Configure the jenkins-infra/kubernetes-management admin service account
