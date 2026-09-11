@@ -141,3 +141,62 @@ import {
   id = "release-ci-jenkins-io-agents/release-ci-jenkins-io-agents"
   to = kubernetes_service_account_v1.privatek8s_sponsored_release_ci_jenkins_io_agents
 }
+
+removed {
+  from = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  id = "release-ci-jenkins-io-agents-data-storage"
+  to = kubernetes_persistent_volume_v1.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage
+}
+
+removed {
+  from = kubernetes_persistent_volume.privatek8s_sponsored_infra_ci_jenkins_io_data
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  id = "infra-ci-jenkins-io-data"
+  to = kubernetes_persistent_volume_v1.privatek8s_sponsored_infra_ci_jenkins_io_data
+}
+
+removed {
+  from = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_data
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  id = "release-ci-jenkins-io-data"
+  to = kubernetes_persistent_volume_v1.privatek8s_sponsored_release_ci_jenkins_io_data
+}
+
+removed {
+  from = kubernetes_persistent_volume.publick8s_azurefiles
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  for_each = local.aks_clusters["publick8s"].azurefile_volumes
+
+  id = each.key
+  to = kubernetes_persistent_volume_v1.publick8s_azurefiles[each.key]
+}
+
+removed {
+  from = kubernetes_persistent_volume.publick8s_datadisks
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  for_each = local.aks_clusters["publick8s"].azuredisk_volumes
+
+  id = element(split("/", each.value.disk_id), "-1")
+  to = kubernetes_persistent_volume_v1.publick8s_datadisks[each.key]
+}

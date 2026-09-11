@@ -359,7 +359,7 @@ resource "kubernetes_secret" "privatek8s_sponsored_data_storage_jenkins_io_stora
   type = "Opaque"
 }
 
-resource "kubernetes_persistent_volume" "privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage" {
+resource "kubernetes_persistent_volume_v1" "privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage" {
   provider = kubernetes.privatek8s-sponsored
   metadata {
     name = "release-ci-jenkins-io-agents-data-storage"
@@ -411,18 +411,18 @@ resource "kubernetes_persistent_volume_claim" "privatek8s_sponsored_release_ci_j
     namespace = kubernetes_namespace_v1.privatek8s_sponsored["release-ci-jenkins-io-agents"].metadata[0].name
   }
   spec {
-    access_modes       = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage.spec[0].access_modes
-    volume_name        = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage.metadata[0].name
-    storage_class_name = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage.spec[0].storage_class_name
+    access_modes       = kubernetes_persistent_volume_v1.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage.spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume_v1.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage.metadata[0].name
+    storage_class_name = kubernetes_persistent_volume_v1.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage.spec[0].storage_class_name
     resources {
       requests = {
-        storage = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage.spec[0].capacity.storage
+        storage = kubernetes_persistent_volume_v1.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage.spec[0].capacity.storage
       }
     }
   }
 }
 
-resource "kubernetes_persistent_volume" "privatek8s_sponsored_infra_ci_jenkins_io_data" {
+resource "kubernetes_persistent_volume_v1" "privatek8s_sponsored_infra_ci_jenkins_io_data" {
   provider = kubernetes.privatek8s-sponsored
 
   metadata {
@@ -451,17 +451,17 @@ resource "kubernetes_persistent_volume_claim" "privatek8s_sponsored_infra_ci_jen
     namespace = kubernetes_namespace_v1.privatek8s_sponsored["infra-ci-jenkins-io"].metadata.0.name
   }
   spec {
-    access_modes       = kubernetes_persistent_volume.privatek8s_sponsored_infra_ci_jenkins_io_data.spec.0.access_modes
-    volume_name        = kubernetes_persistent_volume.privatek8s_sponsored_infra_ci_jenkins_io_data.metadata.0.name
-    storage_class_name = kubernetes_persistent_volume.privatek8s_sponsored_infra_ci_jenkins_io_data.spec.0.storage_class_name
+    access_modes       = kubernetes_persistent_volume_v1.privatek8s_sponsored_infra_ci_jenkins_io_data.spec.0.access_modes
+    volume_name        = kubernetes_persistent_volume_v1.privatek8s_sponsored_infra_ci_jenkins_io_data.metadata.0.name
+    storage_class_name = kubernetes_persistent_volume_v1.privatek8s_sponsored_infra_ci_jenkins_io_data.spec.0.storage_class_name
     resources {
       requests = {
-        storage = kubernetes_persistent_volume.privatek8s_sponsored_infra_ci_jenkins_io_data.spec.0.capacity.storage
+        storage = kubernetes_persistent_volume_v1.privatek8s_sponsored_infra_ci_jenkins_io_data.spec.0.capacity.storage
       }
     }
   }
 }
-resource "kubernetes_persistent_volume" "privatek8s_sponsored_release_ci_jenkins_io_data" {
+resource "kubernetes_persistent_volume_v1" "privatek8s_sponsored_release_ci_jenkins_io_data" {
   provider = kubernetes.privatek8s-sponsored
 
   metadata {
@@ -490,12 +490,12 @@ resource "kubernetes_persistent_volume_claim" "privatek8s_sponsored_release_ci_j
     namespace = kubernetes_namespace_v1.privatek8s_sponsored["release-ci-jenkins-io"].metadata.0.name
   }
   spec {
-    access_modes       = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_data.spec.0.access_modes
-    volume_name        = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_data.metadata.0.name
-    storage_class_name = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_data.spec.0.storage_class_name
+    access_modes       = kubernetes_persistent_volume_v1.privatek8s_sponsored_release_ci_jenkins_io_data.spec.0.access_modes
+    volume_name        = kubernetes_persistent_volume_v1.privatek8s_sponsored_release_ci_jenkins_io_data.metadata.0.name
+    storage_class_name = kubernetes_persistent_volume_v1.privatek8s_sponsored_release_ci_jenkins_io_data.spec.0.storage_class_name
     resources {
       requests = {
-        storage = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_data.spec.0.capacity.storage
+        storage = kubernetes_persistent_volume_v1.privatek8s_sponsored_release_ci_jenkins_io_data.spec.0.capacity.storage
       }
     }
   }
