@@ -177,7 +177,7 @@ module "infracijenkinsio_agents_1_admin_sa" {
   providers = {
     kubernetes = kubernetes.infracijenkinsio_agents_1
   }
-  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
+  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa-v2"
   cluster_name               = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.name
   cluster_hostname           = local.aks_clusters_outputs.infracijenkinsio_agents_1.cluster_hostname
   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.kube_config.0.cluster_ca_certificate

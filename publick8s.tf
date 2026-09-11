@@ -200,7 +200,7 @@ module "publick8s_admin_sa" {
   providers = {
     kubernetes = kubernetes.publick8s
   }
-  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
+  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa-v2"
   cluster_name               = azurerm_kubernetes_cluster.publick8s.name
   cluster_hostname           = local.aks_clusters_outputs.publick8s.cluster_hostname
   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.publick8s.kube_config.0.cluster_ca_certificate
