@@ -191,6 +191,13 @@ output "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer_application_c
   sensitive = true
   value     = module.infraci_reportsjenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
+output "infraci_cronjobs_datastorage_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.infraci_cronjobs_datastorage_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
+}
+output "infraci_cronjobs_datastorage_fileshare_serviceprincipal_writer_application_client_password" {
+  sensitive = true
+  value     = module.infraci_cronjobs_datastorage_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
+}
 output "cert_ci_jenkins_io_acr_docker_username" {
   value = azuread_service_principal.cert_ci_jenkins_io_acr_dockerhub_mirror.client_id
 }
