@@ -404,7 +404,7 @@ resource "kubernetes_persistent_volume_v1" "privatek8s_sponsored_release_ci_jenk
     }
   }
 }
-resource "kubernetes_persistent_volume_claim" "privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage" {
+resource "kubernetes_persistent_volume_claim_v1" "privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage" {
   provider = kubernetes.privatek8s-sponsored
   metadata {
     name      = "data-storage-jenkins-io"
@@ -443,7 +443,7 @@ resource "kubernetes_persistent_volume_v1" "privatek8s_sponsored_infra_ci_jenkin
     }
   }
 }
-resource "kubernetes_persistent_volume_claim" "privatek8s_sponsored_infra_ci_jenkins_io_data" {
+resource "kubernetes_persistent_volume_claim_v1" "privatek8s_sponsored_infra_ci_jenkins_io_data" {
   provider = kubernetes.privatek8s-sponsored
 
   metadata {
@@ -482,7 +482,7 @@ resource "kubernetes_persistent_volume_v1" "privatek8s_sponsored_release_ci_jenk
     }
   }
 }
-resource "kubernetes_persistent_volume_claim" "privatek8s_sponsored_release_ci_jenkins_io_data" {
+resource "kubernetes_persistent_volume_claim_v1" "privatek8s_sponsored_release_ci_jenkins_io_data" {
   provider = kubernetes.privatek8s-sponsored
 
   metadata {

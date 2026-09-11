@@ -200,3 +200,60 @@ import {
   id = element(split("/", each.value.disk_id), "-1")
   to = kubernetes_persistent_volume_v1.publick8s_datadisks[each.key]
 }
+
+removed {
+  from = kubernetes_persistent_volume_claim.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  id = "release-ci-jenkins-io-agents/data-storage-jenkins-io"
+  to = kubernetes_persistent_volume_claim_v1.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage
+}
+
+removed {
+  from = kubernetes_persistent_volume_claim.privatek8s_sponsored_infra_ci_jenkins_io_data
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  id = "infra-ci-jenkins-io/infra-ci-jenkins-io-data"
+  to = kubernetes_persistent_volume_claim_v1.privatek8s_sponsored_infra_ci_jenkins_io_data
+}
+
+removed {
+  from = kubernetes_persistent_volume_claim.privatek8s_sponsored_release_ci_jenkins_io_data
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  id = "release-ci-jenkins-io/release-ci-jenkins-io-data"
+  to = kubernetes_persistent_volume_claim_v1.privatek8s_sponsored_release_ci_jenkins_io_data
+}
+
+removed {
+  from = kubernetes_persistent_volume_claim.publick8s_azurefiles
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  for_each = local.aks_clusters["publick8s"].azurefile_volumes
+  id       = "${lookup(each.value, "pvc_namespace", each.key)}/${kubernetes_persistent_volume_v1.publick8s_azurefiles[each.key].metadata[0].name}"
+  to       = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles[each.key]
+}
+
+removed {
+  from = kubernetes_persistent_volume_claim.publick8s_datadisks
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  for_each = local.aks_clusters["publick8s"].azuredisk_volumes
+  id       = "${lookup(each.value, "pvc_namespace", each.key)}/${element(split("/", each.value.disk_id), "-1")}"
+  to       = kubernetes_persistent_volume_claim_v1.publick8s_datadisks[each.key]
+}

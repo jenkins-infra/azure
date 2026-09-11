@@ -309,7 +309,7 @@ resource "kubernetes_persistent_volume_v1" "publick8s_azurefiles" {
     }
   }
 }
-resource "kubernetes_persistent_volume_claim" "publick8s_azurefiles" {
+resource "kubernetes_persistent_volume_claim_v1" "publick8s_azurefiles" {
   provider = kubernetes.publick8s
   for_each = local.aks_clusters["publick8s"].azurefile_volumes
 
@@ -356,7 +356,7 @@ resource "kubernetes_persistent_volume_v1" "publick8s_datadisks" {
     }
   }
 }
-resource "kubernetes_persistent_volume_claim" "publick8s_datadisks" {
+resource "kubernetes_persistent_volume_claim_v1" "publick8s_datadisks" {
   provider = kubernetes.publick8s
   for_each = local.aks_clusters["publick8s"].azuredisk_volumes
 
