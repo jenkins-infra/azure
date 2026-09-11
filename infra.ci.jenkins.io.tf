@@ -56,6 +56,18 @@ module "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer" {
   storage_account_id         = azurerm_storage_account.plugins_jenkins_io.id
   default_tags               = local.default_tags
 }
+# Required to allow azcopy sync of plugins.jenkins.io File Share
+module "infraci_cronjobs_datastorage_fileshare_serviceprincipal_writer" {
+  source                  = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+  service_fqdn            = "infraci-cronjobs-datastorage-fileshare_serviceprincipal_writer"
+  active_directory_owners = [data.azuread_service_principal.terraform_production.object_id]
+  active_directory_url    = "https://github.com/jenkins-infra/azure"
+  # TODO: track with updatecli
+  service_principal_end_date = "2026-11-22T00:00:00Z"
+  file_share_id              = azurerm_storage_share.data_storage_jenkins_io.id
+  storage_account_id         = azurerm_storage_account.data_storage_jenkins_io.id
+  default_tags               = local.default_tags
+}
 # Resources for updatecli jobs in infra.ci.jenkins.io
 resource "azurerm_resource_group" "updatecli_infra_ci_jenkins_io" {
   name     = "updatecli-infra-ci-jenkins-io"
