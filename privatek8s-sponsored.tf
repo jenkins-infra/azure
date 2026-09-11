@@ -343,7 +343,7 @@ resource "kubernetes_namespace_v1" "privatek8s_sponsored" {
   }
 }
 
-resource "kubernetes_secret" "privatek8s_sponsored_data_storage_jenkins_io_storage_account" {
+resource "kubernetes_secret_v1" "privatek8s_sponsored_data_storage_jenkins_io_storage_account" {
   provider = kubernetes.privatek8s-sponsored
 
   metadata {
@@ -397,8 +397,8 @@ resource "kubernetes_persistent_volume_v1" "privatek8s_sponsored_release_ci_jenk
           storageAccount = azurerm_storage_account.data_storage_jenkins_io.name
         }
         node_stage_secret_ref {
-          name      = kubernetes_secret.privatek8s_sponsored_data_storage_jenkins_io_storage_account.metadata[0].name
-          namespace = kubernetes_secret.privatek8s_sponsored_data_storage_jenkins_io_storage_account.metadata[0].namespace
+          name      = kubernetes_secret_v1.privatek8s_sponsored_data_storage_jenkins_io_storage_account.metadata[0].name
+          namespace = kubernetes_secret_v1.privatek8s_sponsored_data_storage_jenkins_io_storage_account.metadata[0].namespace
         }
       }
     }

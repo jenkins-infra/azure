@@ -257,3 +257,39 @@ import {
   id       = "${lookup(each.value, "pvc_namespace", each.key)}/${element(split("/", each.value.disk_id), "-1")}"
   to       = kubernetes_persistent_volume_claim_v1.publick8s_datadisks[each.key]
 }
+
+removed {
+  from = kubernetes_secret.privatek8s_sponsored_data_storage_jenkins_io_storage_account
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  id = "data-storage-jenkins-io/data-storage-jenkins-io-storage-account"
+  to = kubernetes_secret_v1.privatek8s_sponsored_data_storage_jenkins_io_storage_account
+}
+
+removed {
+  from = kubernetes_secret.publick8s_azurefiles
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  for_each = toset(sort(distinct(concat(
+    [for key, value in local.aks_clusters["publick8s"].azurefile_volumes : key if can(value["secret_name"])],
+  ))))
+  id = "${local.aks_clusters["publick8s"].azurefile_volumes[each.key].secret_namespace}/${local.aks_clusters["publick8s"].azurefile_volumes[each.key].secret_name}"
+  to = kubernetes_secret_v1.publick8s_azurefiles[each.key]
+}
+
+removed {
+  from = kubernetes_secret.publick8s_azurefile_jenkins_io_storage_account
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  id = "data-storage-jenkins-io/data-storage-jenkins-io-storage-account"
+  to = kubernetes_secret_v1.publick8s_azurefile_jenkins_io_storage_account
+}

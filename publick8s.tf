@@ -224,7 +224,7 @@ resource "kubernetes_namespace_v1" "publick8s_namespaces" {
 }
 
 # PVs (see below) need storage secret keys when using CSI Azure file (as workload identity cannot be used with AKS CSI driver)
-resource "kubernetes_secret" "publick8s_azurefiles" {
+resource "kubernetes_secret_v1" "publick8s_azurefiles" {
   provider = kubernetes.publick8s
   for_each = toset(sort(distinct(concat(
     [for key, value in local.aks_clusters["publick8s"].azurefile_volumes : key if can(value["secret_name"])],
@@ -243,7 +243,7 @@ resource "kubernetes_secret" "publick8s_azurefiles" {
 
   type = "Opaque"
 }
-resource "kubernetes_secret" "publick8s_azurefile_jenkins_io_storage_account" {
+resource "kubernetes_secret_v1" "publick8s_azurefile_jenkins_io_storage_account" {
   provider = kubernetes.publick8s
 
   metadata {
@@ -302,8 +302,8 @@ resource "kubernetes_persistent_volume_v1" "publick8s_azurefiles" {
           shareName     = azurerm_storage_share.data_storage_jenkins_io.name
         })
         node_stage_secret_ref {
-          name      = lookup(each.value, "secret_name", kubernetes_secret.publick8s_azurefile_jenkins_io_storage_account.metadata[0].name)
-          namespace = lookup(each.value, "secret_namespace", kubernetes_secret.publick8s_azurefile_jenkins_io_storage_account.metadata[0].namespace)
+          name      = lookup(each.value, "secret_name", kubernetes_secret_v1.publick8s_azurefile_jenkins_io_storage_account.metadata[0].name)
+          namespace = lookup(each.value, "secret_namespace", kubernetes_secret_v1.publick8s_azurefile_jenkins_io_storage_account.metadata[0].namespace)
         }
       }
     }
