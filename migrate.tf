@@ -75,3 +75,25 @@ import {
   id = "jenkins-infra-agents"
   to = kubernetes_namespace_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents
 }
+
+removed {
+  from = kubernetes_storage_class.privatek8s_sponsored_statically_provisioned
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  id = "statically-provisioned"
+  to = kubernetes_storage_class_v1.privatek8s_sponsored_statically_provisioned
+}
+
+removed {
+  from = kubernetes_storage_class.publick8s_statically_provisioned
+  lifecycle {
+    destroy = false
+  }
+}
+import {
+  id = "statically-provisioned"
+  to = kubernetes_storage_class_v1.publick8s_statically_provisioned
+}

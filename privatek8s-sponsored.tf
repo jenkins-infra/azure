@@ -322,7 +322,7 @@ module "privatek8s_sponsored_acr_pe" {
 ###################################################################################
 # Ressources from the Kubernetes provider
 ###################################################################################
-resource "kubernetes_storage_class" "privatek8s_sponsored_statically_provisioned" {
+resource "kubernetes_storage_class_v1" "privatek8s_sponsored_statically_provisioned" {
   provider = kubernetes.privatek8s-sponsored
   metadata {
     name = "statically-provisioned"
@@ -370,7 +370,7 @@ resource "kubernetes_persistent_volume" "privatek8s_sponsored_release_ci_jenkins
     }
     access_modes                     = ["ReadWriteMany"]
     persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = kubernetes_storage_class.privatek8s_sponsored_statically_provisioned.id
+    storage_class_name               = kubernetes_storage_class_v1.privatek8s_sponsored_statically_provisioned.id
     # Ensure that only the designated PVC can claim this PV (to avoid injection as PV are not namespaced)
     claim_ref {
       # NS of the PVC
@@ -434,7 +434,7 @@ resource "kubernetes_persistent_volume" "privatek8s_sponsored_infra_ci_jenkins_i
     }
     access_modes                     = ["ReadWriteOnce"]
     persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = kubernetes_storage_class.privatek8s_sponsored_statically_provisioned.id
+    storage_class_name               = kubernetes_storage_class_v1.privatek8s_sponsored_statically_provisioned.id
     persistent_volume_source {
       csi {
         driver        = "disk.csi.azure.com"
@@ -473,7 +473,7 @@ resource "kubernetes_persistent_volume" "privatek8s_sponsored_release_ci_jenkins
     }
     access_modes                     = ["ReadWriteOnce"]
     persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = kubernetes_storage_class.privatek8s_sponsored_statically_provisioned.id
+    storage_class_name               = kubernetes_storage_class_v1.privatek8s_sponsored_statically_provisioned.id
     persistent_volume_source {
       csi {
         driver        = "disk.csi.azure.com"

@@ -185,7 +185,7 @@ resource "azurerm_role_assignment" "publick8s_ips_networkcontributor" {
 ################################
 ### Kubernetes Resources below
 ################################
-resource "kubernetes_storage_class" "publick8s_statically_provisioned" {
+resource "kubernetes_storage_class_v1" "publick8s_statically_provisioned" {
   metadata {
     name = "statically-provisioned"
   }
@@ -275,7 +275,7 @@ resource "kubernetes_persistent_volume" "publick8s_azurefiles" {
     }
     access_modes                     = lookup(each.value, "access_modes", ["ReadOnlyMany"])
     persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = kubernetes_storage_class.publick8s_statically_provisioned.id
+    storage_class_name               = kubernetes_storage_class_v1.publick8s_statically_provisioned.id
     # Ensure that only the designated PVC can claim this PV (to avoid injection as PV are not namespaced)
     claim_ref {
       # Default: PV name and NS names are the same (easier to map PVs which are NOT namespaced)
@@ -347,7 +347,7 @@ resource "kubernetes_persistent_volume" "publick8s_datadisks" {
     }
     access_modes                     = ["ReadWriteOnce"]
     persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = kubernetes_storage_class.publick8s_statically_provisioned.id
+    storage_class_name               = kubernetes_storage_class_v1.publick8s_statically_provisioned.id
     persistent_volume_source {
       csi {
         driver        = "disk.csi.azure.com"
