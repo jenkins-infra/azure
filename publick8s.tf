@@ -207,7 +207,7 @@ module "publick8s_admin_sa" {
 }
 
 # PVCs (see below) needs their namespaces
-resource "kubernetes_namespace" "publick8s_namespaces" {
+resource "kubernetes_namespace_v1" "publick8s_namespaces" {
   provider = kubernetes.publick8s
   for_each = toset(sort(distinct(concat(
     [for key, value in local.aks_clusters["publick8s"].azurefile_volumes : lookup(value, "pvc_namespace", key)],
@@ -248,7 +248,7 @@ resource "kubernetes_secret" "publick8s_azurefile_jenkins_io_storage_account" {
 
   metadata {
     name      = "data-storage-jenkins-io-storage-account"
-    namespace = kubernetes_namespace.publick8s_namespaces["data-storage-jenkins-io"].metadata[0].name
+    namespace = kubernetes_namespace_v1.publick8s_namespaces["data-storage-jenkins-io"].metadata[0].name
   }
 
   data = {

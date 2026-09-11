@@ -11,7 +11,7 @@ resource "local_file" "jenkins_infra_data_report" {
       },
     },
     "infra.ci.jenkins.io" = {
-      "controller_namespace"       = kubernetes_namespace.privatek8s_sponsored["infra-ci-jenkins-io"].metadata[0].name,
+      "controller_namespace"       = kubernetes_namespace_v1.privatek8s_sponsored["infra-ci-jenkins-io"].metadata[0].name,
       "controller_service_account" = kubernetes_service_account.privatek8s_sponsored_infra_ci_jenkins_io_controller.metadata[0].name,
       "controller_pvc"             = kubernetes_persistent_volume_claim.privatek8s_sponsored_infra_ci_jenkins_io_data.metadata[0].name,
       "agents_azure_vms_sponsored" = {
@@ -27,7 +27,7 @@ resource "local_file" "jenkins_infra_data_report" {
           "hostname"           = local.aks_clusters_outputs.infracijenkinsio_agents_1.cluster_hostname
           "kubernetes_version" = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
           "agents_namespaces" = {
-            "${kubernetes_namespace.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}" = {
+            "${kubernetes_namespace_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}" = {
               pods_quota = 150,
             },
           },
@@ -36,7 +36,7 @@ resource "local_file" "jenkins_infra_data_report" {
       },
     },
     "release.ci.jenkins.io" = {
-      "controller_namespace"       = kubernetes_namespace.privatek8s_sponsored["release-ci-jenkins-io"].metadata[0].name,
+      "controller_namespace"       = kubernetes_namespace_v1.privatek8s_sponsored["release-ci-jenkins-io"].metadata[0].name,
       "controller_service_account" = kubernetes_service_account.privatek8s_sponsored_release_ci_jenkins_io_controller.metadata[0].name,
       "controller_pvc"             = kubernetes_persistent_volume_claim.privatek8s_sponsored_release_ci_jenkins_io_data.metadata[0].name,
       "agents_kubernetes_clusters" = {
@@ -107,20 +107,20 @@ resource "local_file" "jenkins_infra_data_report" {
         "share_uri" = "/javadoc.jenkins.io/",
         "pvc_name"  = kubernetes_persistent_volume_claim.publick8s_azurefiles["javadoc-jenkins-io"].metadata[0].name,
       },
-      "namespace" = kubernetes_namespace.publick8s_namespaces["javadoc-jenkins-io"].metadata[0].name,
+      "namespace" = kubernetes_namespace_v1.publick8s_namespaces["javadoc-jenkins-io"].metadata[0].name,
     },
     "www.jenkins.io" = {
       "data" = {
         "share_uri" = "/www.jenkins.io/en/",
         "pvc_name"  = kubernetes_persistent_volume_claim.publick8s_azurefiles["www-jenkins-io"].metadata[0].name,
       },
-      "namespace" = kubernetes_namespace.publick8s_namespaces["www-jenkins-io"].metadata[0].name,
+      "namespace" = kubernetes_namespace_v1.publick8s_namespaces["www-jenkins-io"].metadata[0].name,
     },
     "reports.jenkins.io" = {
       "data" = {
         "pvc_name" = kubernetes_persistent_volume_claim.publick8s_azurefiles["reports-jenkins-io"].metadata[0].name,
       },
-      "namespace" = kubernetes_namespace.publick8s_namespaces["reports-jenkins-io"].metadata[0].name,
+      "namespace" = kubernetes_namespace_v1.publick8s_namespaces["reports-jenkins-io"].metadata[0].name,
     },
     "publick8s" = {
       hostname           = azurerm_kubernetes_cluster.publick8s.fqdn,

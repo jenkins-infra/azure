@@ -332,7 +332,7 @@ resource "kubernetes_storage_class" "privatek8s_sponsored_statically_provisioned
   allow_volume_expansion = true
 }
 
-resource "kubernetes_namespace" "privatek8s_sponsored" {
+resource "kubernetes_namespace_v1" "privatek8s_sponsored" {
   for_each = toset(["release-ci-jenkins-io", "infra-ci-jenkins-io", "release-ci-jenkins-io-agents", "data-storage-jenkins-io"])
   provider = kubernetes.privatek8s-sponsored
   metadata {
@@ -348,7 +348,7 @@ resource "kubernetes_secret" "privatek8s_sponsored_data_storage_jenkins_io_stora
 
   metadata {
     name      = "data-storage-jenkins-io-storage-account"
-    namespace = kubernetes_namespace.privatek8s_sponsored["data-storage-jenkins-io"].metadata[0].name
+    namespace = kubernetes_namespace_v1.privatek8s_sponsored["data-storage-jenkins-io"].metadata[0].name
   }
 
   data = {
@@ -374,7 +374,7 @@ resource "kubernetes_persistent_volume" "privatek8s_sponsored_release_ci_jenkins
     # Ensure that only the designated PVC can claim this PV (to avoid injection as PV are not namespaced)
     claim_ref {
       # NS of the PVC
-      namespace = kubernetes_namespace.privatek8s_sponsored["release-ci-jenkins-io-agents"].metadata[0].name
+      namespace = kubernetes_namespace_v1.privatek8s_sponsored["release-ci-jenkins-io-agents"].metadata[0].name
       name      = "data-storage-jenkins-io"
     }
     mount_options = [
@@ -408,7 +408,7 @@ resource "kubernetes_persistent_volume_claim" "privatek8s_sponsored_release_ci_j
   provider = kubernetes.privatek8s-sponsored
   metadata {
     name      = "data-storage-jenkins-io"
-    namespace = kubernetes_namespace.privatek8s_sponsored["release-ci-jenkins-io-agents"].metadata[0].name
+    namespace = kubernetes_namespace_v1.privatek8s_sponsored["release-ci-jenkins-io-agents"].metadata[0].name
   }
   spec {
     access_modes       = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage.spec[0].access_modes
@@ -448,7 +448,7 @@ resource "kubernetes_persistent_volume_claim" "privatek8s_sponsored_infra_ci_jen
 
   metadata {
     name      = "infra-ci-jenkins-io-data"
-    namespace = kubernetes_namespace.privatek8s_sponsored["infra-ci-jenkins-io"].metadata.0.name
+    namespace = kubernetes_namespace_v1.privatek8s_sponsored["infra-ci-jenkins-io"].metadata.0.name
   }
   spec {
     access_modes       = kubernetes_persistent_volume.privatek8s_sponsored_infra_ci_jenkins_io_data.spec.0.access_modes
@@ -487,7 +487,7 @@ resource "kubernetes_persistent_volume_claim" "privatek8s_sponsored_release_ci_j
 
   metadata {
     name      = "release-ci-jenkins-io-data"
-    namespace = kubernetes_namespace.privatek8s_sponsored["release-ci-jenkins-io"].metadata.0.name
+    namespace = kubernetes_namespace_v1.privatek8s_sponsored["release-ci-jenkins-io"].metadata.0.name
   }
   spec {
     access_modes       = kubernetes_persistent_volume.privatek8s_sponsored_release_ci_jenkins_io_data.spec.0.access_modes
@@ -509,7 +509,7 @@ resource "kubernetes_service_account" "privatek8s_sponsored_infra_ci_jenkins_io_
 
   metadata {
     name      = "infra-ci-jenkins-io-controller"
-    namespace = kubernetes_namespace.privatek8s_sponsored["infra-ci-jenkins-io"].metadata[0].name
+    namespace = kubernetes_namespace_v1.privatek8s_sponsored["infra-ci-jenkins-io"].metadata[0].name
 
     annotations = {
       "azure.workload.identity/client-id" = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller_sponsored.client_id,
@@ -523,14 +523,14 @@ resource "azurerm_federated_identity_credential" "privatek8s_sponsored_infra_ci_
   audience                  = ["api://AzureADTokenExchange"]
   issuer                    = azurerm_kubernetes_cluster.privatek8s_sponsored.oidc_issuer_url
   user_assigned_identity_id = azurerm_user_assigned_identity.infra_ci_jenkins_io_controller_sponsored.id
-  subject                   = "system:serviceaccount:${kubernetes_namespace.privatek8s_sponsored["infra-ci-jenkins-io"].metadata[0].name}:${kubernetes_service_account.privatek8s_sponsored_infra_ci_jenkins_io_controller.metadata[0].name}"
+  subject                   = "system:serviceaccount:${kubernetes_namespace_v1.privatek8s_sponsored["infra-ci-jenkins-io"].metadata[0].name}:${kubernetes_service_account.privatek8s_sponsored_infra_ci_jenkins_io_controller.metadata[0].name}"
 }
 resource "kubernetes_service_account" "privatek8s_sponsored_release_ci_jenkins_io_controller" {
   provider = kubernetes.privatek8s-sponsored
 
   metadata {
     name      = "release-ci-jenkins-io-controller"
-    namespace = kubernetes_namespace.privatek8s_sponsored["release-ci-jenkins-io"].metadata[0].name
+    namespace = kubernetes_namespace_v1.privatek8s_sponsored["release-ci-jenkins-io"].metadata[0].name
 
     annotations = {
       "azure.workload.identity/client-id" = azurerm_user_assigned_identity.release_ci_jenkins_io_controller_sponsored.client_id,
@@ -542,7 +542,7 @@ resource "kubernetes_service_account" "privatek8s_sponsored_release_ci_jenkins_i
 
   metadata {
     name      = "release-ci-jenkins-io-agents"
-    namespace = kubernetes_namespace.privatek8s_sponsored["release-ci-jenkins-io-agents"].metadata[0].name
+    namespace = kubernetes_namespace_v1.privatek8s_sponsored["release-ci-jenkins-io-agents"].metadata[0].name
 
     annotations = {
       "azure.workload.identity/client-id" = azurerm_user_assigned_identity.release_ci_jenkins_io_agents_sponsored.client_id,
@@ -556,7 +556,7 @@ resource "azurerm_federated_identity_credential" "privatek8s_sponsored_release_c
   audience                  = ["api://AzureADTokenExchange"]
   issuer                    = azurerm_kubernetes_cluster.privatek8s_sponsored.oidc_issuer_url
   user_assigned_identity_id = azurerm_user_assigned_identity.release_ci_jenkins_io_agents_sponsored.id
-  subject                   = "system:serviceaccount:${kubernetes_namespace.privatek8s_sponsored["release-ci-jenkins-io-agents"].metadata[0].name}:${kubernetes_service_account.privatek8s_sponsored_release_ci_jenkins_io_agents.metadata[0].name}"
+  subject                   = "system:serviceaccount:${kubernetes_namespace_v1.privatek8s_sponsored["release-ci-jenkins-io-agents"].metadata[0].name}:${kubernetes_service_account.privatek8s_sponsored_release_ci_jenkins_io_agents.metadata[0].name}"
 }
 
 # Configure the jenkins-infra/kubernetes-management admin service account
