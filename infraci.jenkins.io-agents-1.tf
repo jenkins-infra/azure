@@ -141,7 +141,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "infracijenkinsio_agents_1_linux
 
   tags = local.default_tags
 }
-resource "kubernetes_namespace" "infracijenkinsio_agents_1_infra_ci_jenkins_io_agents" {
+resource "kubernetes_namespace_v1" "infracijenkinsio_agents_1_infra_ci_jenkins_io_agents" {
   provider = kubernetes.infracijenkinsio_agents_1
 
   metadata {
@@ -151,12 +151,12 @@ resource "kubernetes_namespace" "infracijenkinsio_agents_1_infra_ci_jenkins_io_a
     }
   }
 }
-resource "kubernetes_service_account" "infracijenkinsio_agents_1_infra_ci_jenkins_io_agents" {
+resource "kubernetes_service_account_v1" "infracijenkinsio_agents_1_infra_ci_jenkins_io_agents" {
   provider = kubernetes.infracijenkinsio_agents_1
 
   metadata {
     name      = "jenkins-infra-agent"
-    namespace = kubernetes_namespace.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name
+    namespace = kubernetes_namespace_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name
 
     annotations = {
       "azure.workload.identity/client-id" = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents_jenkins_sponsored.client_id
@@ -165,11 +165,11 @@ resource "kubernetes_service_account" "infracijenkinsio_agents_1_infra_ci_jenkin
 }
 resource "azurerm_federated_identity_credential" "infracijenkinsio_agents_1_infra_ci_jenkins_io_agents" {
   provider                  = azurerm.jenkins-sponsored
-  name                      = "infracijenkinsio-agents-1-${kubernetes_service_account.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}"
+  name                      = "infracijenkinsio-agents-1-${kubernetes_service_account_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}"
   audience                  = ["api://AzureADTokenExchange"]
   issuer                    = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.oidc_issuer_url
   user_assigned_identity_id = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents_jenkins_sponsored.id
-  subject                   = "system:serviceaccount:${kubernetes_namespace.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}:${kubernetes_service_account.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}"
+  subject                   = "system:serviceaccount:${kubernetes_namespace_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}:${kubernetes_service_account_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}"
 }
 
 #Configure the jenkins-infra/kubernetes-management admin service account
@@ -177,7 +177,7 @@ module "infracijenkinsio_agents_1_admin_sa" {
   providers = {
     kubernetes = kubernetes.infracijenkinsio_agents_1
   }
-  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa"
+  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa-v2"
   cluster_name               = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.name
   cluster_hostname           = local.aks_clusters_outputs.infracijenkinsio_agents_1.cluster_hostname
   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.kube_config.0.cluster_ca_certificate

@@ -11,9 +11,9 @@ resource "local_file" "jenkins_infra_data_report" {
       },
     },
     "infra.ci.jenkins.io" = {
-      "controller_namespace"       = kubernetes_namespace.privatek8s_sponsored["infra-ci-jenkins-io"].metadata[0].name,
-      "controller_service_account" = kubernetes_service_account.privatek8s_sponsored_infra_ci_jenkins_io_controller.metadata[0].name,
-      "controller_pvc"             = kubernetes_persistent_volume_claim.privatek8s_sponsored_infra_ci_jenkins_io_data.metadata[0].name,
+      "controller_namespace"       = kubernetes_namespace_v1.privatek8s_sponsored["infra-ci-jenkins-io"].metadata[0].name,
+      "controller_service_account" = kubernetes_service_account_v1.privatek8s_sponsored_infra_ci_jenkins_io_controller.metadata[0].name,
+      "controller_pvc"             = kubernetes_persistent_volume_claim_v1.privatek8s_sponsored_infra_ci_jenkins_io_data.metadata[0].name,
       "agents_azure_vms_sponsored" = {
         "resource_group_name"         = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_resource_group_name,
         "network_resource_group_name" = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_network_rg_name,
@@ -27,26 +27,26 @@ resource "local_file" "jenkins_infra_data_report" {
           "hostname"           = local.aks_clusters_outputs.infracijenkinsio_agents_1.cluster_hostname
           "kubernetes_version" = local.aks_clusters["infracijenkinsio_agents_1"].kubernetes_version
           "agents_namespaces" = {
-            "${kubernetes_namespace.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}" = {
+            "${kubernetes_namespace_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}" = {
               pods_quota = 150,
             },
           },
-          "agents_service_account" = kubernetes_service_account.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name,
+          "agents_service_account" = kubernetes_service_account_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name,
         },
       },
     },
     "release.ci.jenkins.io" = {
-      "controller_namespace"       = kubernetes_namespace.privatek8s_sponsored["release-ci-jenkins-io"].metadata[0].name,
-      "controller_service_account" = kubernetes_service_account.privatek8s_sponsored_release_ci_jenkins_io_controller.metadata[0].name,
-      "controller_pvc"             = kubernetes_persistent_volume_claim.privatek8s_sponsored_release_ci_jenkins_io_data.metadata[0].name,
+      "controller_namespace"       = kubernetes_namespace_v1.privatek8s_sponsored["release-ci-jenkins-io"].metadata[0].name,
+      "controller_service_account" = kubernetes_service_account_v1.privatek8s_sponsored_release_ci_jenkins_io_controller.metadata[0].name,
+      "controller_pvc"             = kubernetes_persistent_volume_claim_v1.privatek8s_sponsored_release_ci_jenkins_io_data.metadata[0].name,
       "agents_kubernetes_clusters" = {
         "privatek8s-sponsored" = {
-          "agents_service_account" = kubernetes_service_account.privatek8s_sponsored_release_ci_jenkins_io_agents.metadata[0].name,
+          "agents_service_account" = kubernetes_service_account_v1.privatek8s_sponsored_release_ci_jenkins_io_agents.metadata[0].name,
         }
         "persistentVolumeClaims" = {
           "data-storage-jenkins-io" = {
             "share_uri" = "/",
-            "pvc_name"  = kubernetes_persistent_volume_claim.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage.metadata[0].name,
+            "pvc_name"  = kubernetes_persistent_volume_claim_v1.privatek8s_sponsored_release_ci_jenkins_io_agents_data_storage.metadata[0].name,
           }
         }
       }
@@ -64,37 +64,37 @@ resource "local_file" "jenkins_infra_data_report" {
     "get.jenkins.io" = {
       "mirrorbits" = {
         "share_uri" = "/get.jenkins.io/mirrorbits/",
-        "pvc_name"  = kubernetes_persistent_volume_claim.publick8s_azurefiles["get-jenkins-io"].metadata[0].name,
+        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["get-jenkins-io"].metadata[0].name,
       },
       "httpd" = {
         "share_uri" = "/get.jenkins.io/mirrorbits/",
-        "pvc_name"  = kubernetes_persistent_volume_claim.publick8s_azurefiles["get-jenkins-io"].metadata[0].name,
+        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["get-jenkins-io"].metadata[0].name,
       },
       "geoipdata" = {
         "share_uri" = "/get.jenkins.io/geoipdata/",
-        "pvc_name"  = kubernetes_persistent_volume_claim.publick8s_azurefiles["get-jenkins-io"].metadata[0].name,
+        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["get-jenkins-io"].metadata[0].name,
       }
     },
     "updates.jenkins.io" = {
       "content" = {
         "share_uri" = "/updates.jenkins.io/content/",
-        "pvc_name"  = kubernetes_persistent_volume_claim.publick8s_azurefiles["updates-jenkins-io"].metadata[0].name,
+        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["updates-jenkins-io"].metadata[0].name,
       },
       "redirections" = {
         "share_uri" = "/updates.jenkins.io/redirections/",
-        "pvc_name"  = kubernetes_persistent_volume_claim.publick8s_azurefiles["updates-jenkins-io"].metadata[0].name,
+        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["updates-jenkins-io"].metadata[0].name,
       },
       "geoipdata" = {
         "share_uri" = "/updates.jenkins.io/geoipdata/",
-        "pvc_name"  = kubernetes_persistent_volume_claim.publick8s_azurefiles["updates-jenkins-io"].metadata[0].name,
+        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["updates-jenkins-io"].metadata[0].name,
       }
     },
     "ldap.jenkins.io" = {
       "data" = {
-        "pvc_name" = kubernetes_persistent_volume_claim.publick8s_datadisks["ldap-jenkins-io"].metadata[0].name,
+        "pvc_name" = kubernetes_persistent_volume_claim_v1.publick8s_datadisks["ldap-jenkins-io"].metadata[0].name,
       },
       "backup" = {
-        "pvc_name" = kubernetes_persistent_volume_claim.publick8s_azurefiles["ldap-jenkins-io-backup"].metadata[0].name,
+        "pvc_name" = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["ldap-jenkins-io-backup"].metadata[0].name,
       },
     },
     "puppet.jenkins.io" = {
@@ -105,22 +105,22 @@ resource "local_file" "jenkins_infra_data_report" {
     "javadoc.jenkins.io" = {
       "data" = {
         "share_uri" = "/javadoc.jenkins.io/",
-        "pvc_name"  = kubernetes_persistent_volume_claim.publick8s_azurefiles["javadoc-jenkins-io"].metadata[0].name,
+        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["javadoc-jenkins-io"].metadata[0].name,
       },
-      "namespace" = kubernetes_namespace.publick8s_namespaces["javadoc-jenkins-io"].metadata[0].name,
+      "namespace" = kubernetes_namespace_v1.publick8s_namespaces["javadoc-jenkins-io"].metadata[0].name,
     },
     "www.jenkins.io" = {
       "data" = {
         "share_uri" = "/www.jenkins.io/en/",
-        "pvc_name"  = kubernetes_persistent_volume_claim.publick8s_azurefiles["www-jenkins-io"].metadata[0].name,
+        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["www-jenkins-io"].metadata[0].name,
       },
-      "namespace" = kubernetes_namespace.publick8s_namespaces["www-jenkins-io"].metadata[0].name,
+      "namespace" = kubernetes_namespace_v1.publick8s_namespaces["www-jenkins-io"].metadata[0].name,
     },
     "reports.jenkins.io" = {
       "data" = {
-        "pvc_name" = kubernetes_persistent_volume_claim.publick8s_azurefiles["reports-jenkins-io"].metadata[0].name,
+        "pvc_name" = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["reports-jenkins-io"].metadata[0].name,
       },
-      "namespace" = kubernetes_namespace.publick8s_namespaces["reports-jenkins-io"].metadata[0].name,
+      "namespace" = kubernetes_namespace_v1.publick8s_namespaces["reports-jenkins-io"].metadata[0].name,
     },
     "publick8s" = {
       hostname           = azurerm_kubernetes_cluster.publick8s.fqdn,
