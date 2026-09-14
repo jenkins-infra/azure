@@ -1,8 +1,3 @@
-# Retrieving end dates from updatecli values, easier location to track and update them
-data "local_file" "locals_yaml" {
-  filename = "updatecli/values.yaml"
-}
-
 locals {
   public_db_pgsql_admin_login = "psqladmin${random_password.public_db_pgsql_admin_login.result}"
 
@@ -28,10 +23,10 @@ locals {
     hlemeur   = ["82.67.38.76"],
   }
 
+  locals_data = yamldecode(file("${path.module}/locals-data.yaml"))
+
   # TODO: track with updatecli
-  external_services = {
-    "archives.jenkins.io" = "46.101.121.132",
-  }
+  external_services = local.locals_data.external_services
 
   # Ref. https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-githubs-ip-addresses
   # Only IPv4
@@ -322,7 +317,8 @@ locals {
     },
   }
 
-  end_dates = yamldecode(data.local_file.locals_yaml.content).end_dates
+  # Retrieving end dates from updatecli values, easier location to track and update them
+  end_dates = yamldecode(file("${path.module}/updatecli/values.yaml")).end_dates
 
   app_subnets = {
     "release.ci.jenkins.io" = {
