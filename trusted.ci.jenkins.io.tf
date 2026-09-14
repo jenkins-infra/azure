@@ -71,6 +71,7 @@ module "trusted_ci_jenkins_io_sponsored" {
   agent_ip_prefixes = concat(
     data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.address_prefixes,
     data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_permanent_agents.address_prefixes,
+    ["${local.external_services["census.jenkins.io"]}/32"],
   )
 }
 
