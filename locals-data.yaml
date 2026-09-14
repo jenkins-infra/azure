@@ -1,0 +1,6 @@
+---
+# Data tracked by updatecli and read by the Terraform HCL locals.tf
+# as HCL Golang parser used in updatecli does not work with nested maps/objects
+external_services:
+  # TODO: track with updatecli
+  archives.jenkins.io: "46.101.121.132"
