@@ -152,7 +152,6 @@ locals {
     "publick8s-public-ipv4" = "IPv4" # Ingress for HTTP services
     "publick8s-public-ipv6" = "IPv6" # Ingress for HTTP services
     "publick8s-ldap-ipv4"   = "IPv4" # LDAP for its own LB (cannot share public IP across LBs)
-    "publick8s-test-ipv4"   = "IPv4" # Test for https://github.com/jenkins-infra/helpdesk/issues/5215 prerequisites
   }
 }
 resource "azurerm_public_ip" "publick8s_ips" {
