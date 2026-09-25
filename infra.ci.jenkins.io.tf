@@ -3,7 +3,7 @@
 ###################################################################################
 # Required to allow azcopy sync of contributors.jenkins.io File Share
 module "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer" {
-  source                     = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+  source                     = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
   service_fqdn               = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
   active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url       = "https://github.com/jenkins-infra/azure"
@@ -14,7 +14,7 @@ module "infraci_contributorsjenkinsio_fileshare_serviceprincipal_writer" {
 }
 # Required to allow azcopy sync of docs.jenkins.io File Share
 module "infraci_docsjenkinsio_fileshare_serviceprincipal_writer" {
-  source                     = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+  source                     = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
   service_fqdn               = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
   active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url       = "https://github.com/jenkins-infra/azure"
@@ -25,7 +25,7 @@ module "infraci_docsjenkinsio_fileshare_serviceprincipal_writer" {
 }
 # Required to allow azcopy sync of stats.jenkins.io File Share
 module "infraci_statsjenkinsio_fileshare_serviceprincipal_writer" {
-  source                     = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+  source                     = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
   service_fqdn               = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
   active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url       = "https://github.com/jenkins-infra/azure"
@@ -36,7 +36,7 @@ module "infraci_statsjenkinsio_fileshare_serviceprincipal_writer" {
 }
 # Required to allow azcopy sync to the reports.jenkins.io File Share
 module "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer" {
-  source                     = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+  source                     = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
   service_fqdn               = "infraci-reportsjenkinsio-fileshare_serviceprincipal_writer"
   active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url       = "https://github.com/jenkins-infra/azure"
@@ -47,13 +47,25 @@ module "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer" {
 }
 # Required to allow azcopy sync of plugins.jenkins.io File Share
 module "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer" {
-  source                     = "./.shared-tools/terraform/modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+  source                     = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
   service_fqdn               = "infraci-pluginsjenkinsio-fileshare_serviceprincipal_writer"
   active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url       = "https://github.com/jenkins-infra/azure"
   service_principal_end_date = local.end_dates.infra_ci_jenkins_io.infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer.end_date
   file_share_id              = azurerm_storage_share.plugins_jenkins_io.id
   storage_account_id         = azurerm_storage_account.plugins_jenkins_io.id
+  default_tags               = local.default_tags
+}
+# Required to allow azcopy sync of plugins.jenkins.io File Share
+module "infraci_cronjobs_datastorage_fileshare_serviceprincipal_writer" {
+  source                  = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+  service_fqdn            = "infraci-cronjobs-datastorage-fileshare_serviceprincipal_writer"
+  active_directory_owners = [data.azuread_service_principal.terraform_production.object_id]
+  active_directory_url    = "https://github.com/jenkins-infra/azure"
+  # TODO: track with updatecli
+  service_principal_end_date = "2026-11-22T00:00:00Z"
+  file_share_id              = azurerm_storage_share.data_storage_jenkins_io.id
+  storage_account_id         = azurerm_storage_account.data_storage_jenkins_io.id
   default_tags               = local.default_tags
 }
 # Resources for updatecli jobs in infra.ci.jenkins.io
