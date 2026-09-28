@@ -273,15 +273,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci
 resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci_jenkins_io_agents_windows_2025" {
   provider = azurerm.jenkins-sponsored
   name     = "w2025" # 6 char. max on Windows, only letters and numbers
-  #####
-  # Note: we must stay on Generation 1 VMs (_v5 families max.) because Generation 2 requires Windows 2025.
-  # Despite MS documentation: https://learn.microsoft.com/en-us/azure/aks/generation-2-vms?tabs=windows-node-pool#create-a-node-pool-with-a-gen-2-vm
-  # the Terraform azurerm provider does not allow the custom "header" technique: https://github.com/hashicorp/terraform-provider-azurerm/issues/31526
-  # And of course Windows 2025 is not available until https://github.com/hashicorp/terraform-provider-azurerm/issues/31036 is done.
-  #
-  # Last solution stop using Windows Node Pool in favor of Azure VM agents.
-  #####
-  vm_size = "Standard_D8s_v3" # Generation 1 VM
+  vm_size = "Standard_D8s_v6"
   upgrade_settings {
     max_surge = "10%"
   }
