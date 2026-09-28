@@ -283,6 +283,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s_sponsored.id
   os_type               = "Windows"
   os_sku                = "Windows2025"
+  fips_enabled          = true
   auto_scaling_enabled  = true
   min_count             = 0
   max_count             = 3
