@@ -273,11 +273,11 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci
 resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci_jenkins_io_agents_windows_2025" {
   provider = azurerm.jenkins-sponsored
   name     = "w2025" # 6 char. max on Windows, only letters and numbers
-  vm_size = "Standard_D8s_v5"  # last generation of this VM family with ephemeral disk
+  vm_size = "Standard_D8s_v7"  # no ephemeral disk
   upgrade_settings {
     max_surge = "10%"
   }
-  os_disk_type          = "Ephemeral"
+  os_disk_type          = "Managed"
   os_disk_size_gb       = 64 # Ref. Cache storage size at https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dsv3-series?tabs=sizestoragelocal
   orchestrator_version  = local.aks_clusters["privatek8s-sponsored"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.privatek8s_sponsored.id
