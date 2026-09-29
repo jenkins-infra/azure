@@ -295,6 +295,10 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci
     "version=windows2025:NoSchedule",
   ]
 
+  windows_profile {
+    outbound_nat_enabled = true
+  }
+
   lifecycle {
     ignore_changes = [node_count]
   }
