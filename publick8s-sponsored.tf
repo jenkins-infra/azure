@@ -2,7 +2,7 @@ resource "azurerm_resource_group" "publick8s_sponsored" {
   provider = azurerm.jenkins-sponsored
 
   name     = "publick8s_sponsored"
-  location = var.location
+  location = "Sweden Central"
   tags     = local.default_tags
 }
 
