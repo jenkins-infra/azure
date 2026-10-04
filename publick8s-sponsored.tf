@@ -96,7 +96,7 @@ resource "azurerm_kubernetes_cluster" "publick8s_sponsored" {
     os_sku               = "AzureLinux"
     kubelet_disk_type    = "OS"
     os_disk_type         = "Ephemeral"
-    os_disk_size_gb      = 75 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/sizes/general-purpose/dpdsv5-series?tabs=sizestoragelocal
+    os_disk_size_gb      = 110 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/sizes/general-purpose/dpdsv6-series?tabs=sizestoragelocal
     orchestrator_version = local.aks_clusters["publick8s_sponsored"].kubernetes_version
     auto_scaling_enabled = true
     min_count            = 2
@@ -123,7 +123,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "publick8s_sponsored_linuxapps" 
   os_disk_type          = "Ephemeral"
   kubelet_disk_type     = "OS"
   os_sku                = "AzureLinux"
-  os_disk_size_gb       = 150 # Ref. Cache storage size at https://learn.microsoft.com/fr-fr/azure/virtual-machines/sizes/general-purpose/dpdsv5-series?tabs=sizestoragelocal
+  os_disk_size_gb       = 220 # https://learn.microsoft.com/fr-fr/azure/virtual-machines/sizes/general-purpose/dpdsv6-series?tabs=sizestoragelocal
   orchestrator_version  = local.aks_clusters["publick8s_sponsored"].kubernetes_version
   kubernetes_cluster_id = azurerm_kubernetes_cluster.publick8s_sponsored.id
   auto_scaling_enabled  = true
