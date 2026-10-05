@@ -10,7 +10,7 @@ data "azurerm_resource_group" "public" {
 }
 data "azurerm_resource_group" "public_sponsored" {
   provider = azurerm.jenkins-sponsored
-  name = "public_sponsored"
+  name = "public-sponsored"
 }
 data "azurerm_resource_group" "private" {
   name = "private"
@@ -86,7 +86,7 @@ data "azurerm_subnet" "private_vnet_data_tier" {
 }
 data "azurerm_subnet" "publick8s_sponsored" {
   provider             = azurerm.jenkins-sponsored
-  name                 = "publick8s_sponsored"
+  name                 = "publick8s-sponsored"
   resource_group_name  = data.azurerm_resource_group.public_sponsored.name
   virtual_network_name = data.azurerm_virtual_network.public_sponsored.name
 }
