@@ -431,3 +431,13 @@ module "publick8s_acr_pe" {
 
   default_tags = local.default_tags
 }
+
+# TODO: to be removed
+resource "azurerm_public_ip" "test_helpdesk5215" {
+  name                = "publick8s-test-helpdesk5215"
+  location            = azurerm_resource_group.publick8s.location
+  resource_group_name = azurerm_resource_group.publick8s.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  tags                = local.default_tags
+}
