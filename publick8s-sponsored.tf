@@ -182,19 +182,19 @@ resource "azurerm_public_ip" "publick8s_test_helpdesk5215" {
   tags                = local.default_tags
 }
 
-moved {
-  from = azurerm_management_lock.publick8s_ips["publick8s-test-helpdesk5215"]
-  to   = azurerm_management_lock.publick8s_test_helpdesk5215
-}
+# moved {
+#   from = azurerm_management_lock.publick8s_ips["publick8s-test-helpdesk5215"]
+#   to   = azurerm_management_lock.publick8s_test_helpdesk5215
+# }
 
-resource "azurerm_management_lock" "publick8s_test_helpdesk5215" {
-  provider = azurerm.jenkins-sponsored
+# resource "azurerm_management_lock" "publick8s_test_helpdesk5215" {
+#   provider = azurerm.jenkins-sponsored
 
-  name       = "publick8s-test-helpdesk5215"
-  scope      = azurerm_public_ip.publick8s_test_helpdesk5215.id
-  lock_level = "CanNotDelete"
-  notes      = "Locked because this is a sensitive resource that should not be removed when publick8s-sponsored cluster is re-created"
-}
+#   name       = "publick8s-test-helpdesk5215"
+#   scope      = azurerm_public_ip.publick8s_test_helpdesk5215.id
+#   lock_level = "CanNotDelete"
+#   notes      = "Locked because this is a sensitive resource that should not be removed when publick8s-sponsored cluster is re-created"
+# }
 
 # resource "azurerm_management_lock" "publick8s_sponsored_ips" {
 #   provider = azurerm.jenkins-sponsored
