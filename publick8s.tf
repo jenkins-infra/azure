@@ -149,9 +149,9 @@ resource "azurerm_role_assignment" "publick8s_subnets_networkcontributor" {
 # Using a pre-determined public IP eases DNS setup and changes, but requires cluster to have the "Network Contributor" role on the IP.
 locals {
   publick8s_public_ips = {
-    "publick8s-public-ipv4"       = "IPv4" # Ingress for HTTP services
-    "publick8s-public-ipv6"       = "IPv6" # Ingress for HTTP services
-    "publick8s-ldap-ipv4"         = "IPv4" # LDAP for its own LB (cannot share public IP across LBs)
+    "publick8s-public-ipv4" = "IPv4" # Ingress for HTTP services
+    "publick8s-public-ipv6" = "IPv6" # Ingress for HTTP services
+    "publick8s-ldap-ipv4"   = "IPv4" # LDAP for its own LB (cannot share public IP across LBs)
   }
 }
 resource "azurerm_public_ip" "publick8s_ips" {

@@ -158,16 +158,16 @@ resource "azurerm_role_assignment" "publick8s_sponsored_subnets_networkcontribut
 # Using a pre-determined public IP eases DNS setup and changes, but requires cluster to have the "Network Contributor" role on the IP.
 locals {
   publick8s_sponsored_public_ips = {
-    # "publick8s-sponsored-public-ipv4" = "IPv4" # Ingress for HTTP services
-    # "publick8s-sponsored-public-ipv6" = "IPv6" # Ingress for HTTP services
-    # "publick8s-sponsored-ldap-ipv4"   = "IPv4" # LDAP for its own LB (cannot share public IP across LBs)
-    "publick8s-sponsored-test-helpdesk5215"     = "IPv4" # Temporary IP for the "Public IP verification" part of https://github.com/jenkins-infra/helpdesk/issues/5215
+    "publick8s-sponsored-public-ipv4"       = "IPv4" # Ingress for HTTP services
+    "publick8s-sponsored-public-ipv6"       = "IPv6" # Ingress for HTTP services
+    "publick8s-sponsored-ldap-ipv4"         = "IPv4" # LDAP for its own LB (cannot share public IP across LBs)
+    "publick8s-sponsored-test-helpdesk5215" = "IPv4" # Temporary IP for the "Public IP verification" part of https://github.com/jenkins-infra/helpdesk/issues/5215
   }
 }
 
 moved {
   from = azurerm_public_ip.publick8s_ips["publick8s-test-helpdesk5215"]
-  to = azurerm_public_ip.publick8s_sponsored_ips["publick8s-sponsored-test-helpdesk5215"]
+  to   = azurerm_public_ip.publick8s_sponsored_ips["publick8s-sponsored-test-helpdesk5215"]
 }
 
 resource "azurerm_public_ip" "publick8s_sponsored_ips" {
@@ -186,7 +186,7 @@ resource "azurerm_public_ip" "publick8s_sponsored_ips" {
 
 moved {
   from = azurerm_management_lock.publick8s_ips["publick8s-test-helpdesk5215"]
-  to = azurerm_management_lock.publick8s_sponsored_ips["publick8s-sponsored-test-helpdesk5215"]
+  to   = azurerm_management_lock.publick8s_sponsored_ips["publick8s-sponsored-test-helpdesk5215"]
 }
 
 resource "azurerm_management_lock" "publick8s_sponsored_ips" {
@@ -202,7 +202,7 @@ resource "azurerm_management_lock" "publick8s_sponsored_ips" {
 
 moved {
   from = azurerm_role_assignment.publick8s_sponsored_test_helpdesk5215_networkcontributor
-  to = azurerm_role_assignment.publick8s_sponsored_ips_networkcontributor["publick8s-sponsored-test-helpdesk5215"]
+  to   = azurerm_role_assignment.publick8s_sponsored_ips_networkcontributor["publick8s-sponsored-test-helpdesk5215"]
 }
 
 resource "azurerm_role_assignment" "publick8s_sponsored_ips_networkcontributor" {
