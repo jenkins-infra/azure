@@ -174,7 +174,7 @@ resource "azurerm_public_ip" "publick8s_test_helpdesk5215" {
   provider = azurerm.jenkins-sponsored
 
   name                = "publick8s-test-helpdesk5215"
-  resource_group_name = azurerm_resource_group.prod_public_ips_sponsored.name
+  resource_group_name = azurerm_resource_group.prod_public_ips.name
   location            = var.location
   ip_version          = "IPv4"
   allocation_method   = "Static"
