@@ -208,6 +208,8 @@ resource "azurerm_management_lock" "publick8s_test_helpdesk5215" {
 # }
 
 resource "azurerm_role_assignment" "publick8s_sponsored_test_helpdesk5215_networkcontributor" {
+  provider = azurerm.jenkins-sponsored
+
   scope                = azurerm_public_ip.publick8s_test_helpdesk5215.id
   role_definition_name = "Network Contributor"
   principal_id         = azurerm_kubernetes_cluster.publick8s_sponsored.identity[0].principal_id
