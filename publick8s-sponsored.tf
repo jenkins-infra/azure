@@ -165,9 +165,14 @@ locals {
   }
 }
 
-moved {
-  from = azurerm_public_ip.publick8s_ips["publick8s-test-helpdesk5215"]
-  to   = azurerm_public_ip.publick8s_test_helpdesk5215
+# moved {
+#   from = azurerm_public_ip.publick8s_ips["publick8s-test-helpdesk5215"]
+#   to   = azurerm_public_ip.publick8s_test_helpdesk5215
+# }
+
+import {
+  to = azurerm_public_ip.publick8s_test_helpdesk5215
+  id = "/subscriptions/1e7d5219-acbc-4495-8629-bdbb22e9b3ed/resourceGroups/prod-public-ips-sponsored/providers/Microsoft.Network/publicIPAddresses/publick8s-test-helpdesk5215"
 }
 
 resource "azurerm_public_ip" "publick8s_test_helpdesk5215" {
