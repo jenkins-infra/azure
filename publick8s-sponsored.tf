@@ -163,6 +163,15 @@ locals {
     "publick8s-sponsored-ldap-ipv4"   = "IPv4" # LDAP for its own LB (cannot share public IP across LBs)
   }
 }
+
+resource "azurerm_role_assignment" "publick8s_sponsored_test_helpdesk5215_networkcontributor" {
+  scope                = azurerm_public_ip.publick8s_test_helpdesk5215.id
+  role_definition_name = "Network Contributor"
+  principal_id         = azurerm_kubernetes_cluster.publick8s_sponsored.identity[0].principal_id
+
+  skip_service_principal_aad_check = true
+}
+
 # resource "azurerm_public_ip" "publick8s_sponsored_ips" {
 #   provider = azurerm.jenkins-sponsored
 
