@@ -158,53 +158,64 @@ resource "azurerm_role_assignment" "publick8s_sponsored_subnets_networkcontribut
 # Using a pre-determined public IP eases DNS setup and changes, but requires cluster to have the "Network Contributor" role on the IP.
 locals {
   publick8s_sponsored_public_ips = {
-    "publick8s-sponsored-public-ipv4" = "IPv4" # Ingress for HTTP services
-    "publick8s-sponsored-public-ipv6" = "IPv6" # Ingress for HTTP services
-    "publick8s-sponsored-ldap-ipv4"   = "IPv4" # LDAP for its own LB (cannot share public IP across LBs)
+    # "publick8s-sponsored-public-ipv4" = "IPv4" # Ingress for HTTP services
+    # "publick8s-sponsored-public-ipv6" = "IPv6" # Ingress for HTTP services
+    # "publick8s-sponsored-ldap-ipv4"   = "IPv4" # LDAP for its own LB (cannot share public IP across LBs)
+    "publick8s-sponsored-test-helpdesk5215"     = "IPv4" # Temporary IP for the "Public IP verification" part of https://github.com/jenkins-infra/helpdesk/issues/5215
   }
 }
 
-resource "azurerm_role_assignment" "publick8s_sponsored_test_helpdesk5215_networkcontributor" {
-  scope                = azurerm_public_ip.publick8s_ips["publick8s-test-helpdesk5215"].id
-  role_definition_name = "Network Contributor"
-  principal_id         = azurerm_kubernetes_cluster.publick8s_sponsored.identity[0].principal_id
-
-  skip_service_principal_aad_check = true
+moved {
+  from = azurerm_public_ip.publick8s_ips["publick8s-test-helpdesk5215"]
+  to = azurerm_public_ip.publick8s_sponsored_ips["publick8s-sponsored-test-helpdesk5215"]
 }
 
-# resource "azurerm_public_ip" "publick8s_sponsored_ips" {
-#   provider = azurerm.jenkins-sponsored
+resource "azurerm_public_ip" "publick8s_sponsored_ips" {
+  provider = azurerm.jenkins-sponsored
 
-#   for_each = local.publick8s_public_ips
+  for_each = local.publick8s_sponsored_public_ips
 
-#   name                = each.key
-#   resource_group_name = azurerm_resource_group.prod_public_ips.name
-#   location            = var.location
-#   ip_version          = each.value
-#   allocation_method   = "Static"
-#   sku                 = "Standard"
-#   tags                = local.default_tags
-# }
-# resource "azurerm_management_lock" "publick8s_ips" {
-#   provider = azurerm.jenkins-sponsored
+  name                = each.key
+  resource_group_name = azurerm_resource_group.prod_public_ips_sponsored.name
+  location            = var.location
+  ip_version          = each.value
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  tags                = local.default_tags
+}
 
-#   for_each = local.publick8s_public_ips
+moved {
+  from = azurerm_management_lock.publick8s_ips["publick8s-test-helpdesk5215"]
+  to = azurerm_management_lock.publick8s_sponsored_ips["publick8s-sponsored-test-helpdesk5215"]
+}
 
-#   name       = each.key
-#   scope      = azurerm_public_ip.publick8s_ips[each.key].id
-#   lock_level = "CanNotDelete"
-#   notes      = "Locked because this is a sensitive resource that should not be removed when publick8s cluster is re-created"
-# }
-# resource "azurerm_role_assignment" "publick8s_ips_networkcontributor" {
-#   provider = azurerm.jenkins-sponsored
+resource "azurerm_management_lock" "publick8s_sponsored_ips" {
+  provider = azurerm.jenkins-sponsored
 
-#   for_each = local.publick8s_public_ips
+  for_each = local.publick8s_sponsored_public_ips
 
-#   scope                            = azurerm_public_ip.publick8s_ips[each.key].id
-#   role_definition_name             = "Network Contributor"
-#   principal_id                     = azurerm_kubernetes_cluster.publick8s.identity[0].principal_id
-#   skip_service_principal_aad_check = true
-# }
+  name       = each.key
+  scope      = azurerm_public_ip.publick8s_sponsored_public_ips[each.key].id
+  lock_level = "CanNotDelete"
+  notes      = "Locked because this is a sensitive resource that should not be removed when publick8s cluster is re-created"
+}
+
+moved {
+  from = azurerm_role_assignment.publick8s_sponsored_test_helpdesk5215_networkcontributor
+  to = azurerm_role_assignment.publick8s_sponsored_ips_networkcontributor["publick8s-sponsored-test-helpdesk5215"]
+}
+
+resource "azurerm_role_assignment" "publick8s_sponsored_ips_networkcontributor" {
+  provider = azurerm.jenkins-sponsored
+
+  for_each = local.publick8s_sponsored_public_ips
+
+  name                             = each.key
+  scope                            = azurerm_public_ip.publick8s_sponsored_public_ips[each.key].id
+  role_definition_name             = "Network Contributor"
+  principal_id                     = azurerm_kubernetes_cluster.publick8s_sponsored.identity[0].principal_id
+  skip_service_principal_aad_check = true
+}
 
 # ################################
 # ### Kubernetes Resources below
