@@ -237,6 +237,200 @@ module "publick8s_sponsored_acr_pe" {
   default_tags = local.default_tags
 }
 
+# PVCs (see below) needs their namespaces
+resource "kubernetes_namespace_v1" "publick8s_sponsored_namespaces" {
+  provider = kubernetes.publick8s_sponsored
+  for_each = toset(sort(distinct(concat(
+    [for key, value in local.aks_clusters.publick8s_sponsored.azurefile_volumes : lookup(value, "pvc_namespace", key)],
+    [for key, value in local.aks_clusters.publick8s_sponsored.azuredisk_volumes : lookup(value, "pvc_namespace", key)],
+    ["data-storage-jenkins-io"],
+  ))))
+
+  metadata {
+    name = each.key
+    labels = {
+      name = each.key
+    }
+  }
+}
+
+# PVs (see below) need storage secret keys when using CSI Azure file (as workload identity cannot be used with AKS CSI driver)
+resource "kubernetes_secret_v1" "publick8s_sponsored_azurefiles" {
+  provider = kubernetes.publick8s_sponsored
+  for_each = toset(sort(distinct(concat(
+    [for key, value in local.aks_clusters.publick8s_sponsored.azurefile_volumes : key if can(value["secret_name"])],
+  ))))
+
+  metadata {
+    name      = local.aks_clusters.publick8s_sponsored.azurefile_volumes[each.key].secret_name
+    namespace = local.aks_clusters.publick8s_sponsored.azurefile_volumes[each.key].secret_namespace
+  }
+
+  data = {
+    # Convention: secret name and storage account name are the same (it is namespaced and it makes no sense to duplicate on a given NS for many PVCs: we reuse)
+    azurestorageaccountname = local.aks_clusters.publick8s_sponsored.azurefile_volumes[each.key].secret_name
+    azurestorageaccountkey  = local.aks_clusters.publick8s_sponsored.azurefile_volumes[each.key].storage_account_key
+  }
+
+  type = "Opaque"
+}
+resource "kubernetes_secret_v1" "publick8s_sponsored_azurefile_jenkins_io_storage_account" {
+  provider = kubernetes.publick8s_sponsored
+
+  metadata {
+    name      = "data-storage-jenkins-io-storage-account"
+    namespace = kubernetes_namespace_v1.publick8s_sponsored_namespaces["data-storage-jenkins-io"].metadata[0].name
+  }
+
+  data = {
+    azurestorageaccountname = azurerm_storage_account.data_storage_jenkins_io.name
+    azurestorageaccountkey  = azurerm_storage_account.data_storage_jenkins_io.primary_access_key
+  }
+
+  type = "Opaque"
+}
+
+# We assume usage of the "big" NFS data storage as default (unless the local specifies other values for edge cases)
+# Note: when deleting a PV, you have to remove the 'metadata.finalizers' key (usually when deletion is stuck)
+resource "kubernetes_persistent_volume_v1" "publick8s_sponsored_azurefiles" {
+  provider = kubernetes.publick8s_sponsored
+  for_each = local.aks_clusters.publick8s_sponsored.azurefile_volumes
+
+  metadata {
+    # Same name as the namespace (easier to map PVs which are NOT namespaced)
+    name = each.key
+  }
+  spec {
+    capacity = {
+      storage = "${lookup(each.value, "capacity", azurerm_storage_share.data_storage_jenkins_io.quota)}Gi"
+    }
+    access_modes                     = lookup(each.value, "access_modes", ["ReadOnlyMany"])
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class_v1.publick8s_sponsored_statically_provisioned.id
+    # Ensure that only the designated PVC can claim this PV (to avoid injection as PV are not namespaced)
+    claim_ref {
+      # Default: PV name and NS names are the same (easier to map PVs which are NOT namespaced)
+      # But we allow using a custom PVC namespace when the key (e.?g. the PV name) differs
+      namespace = lookup(each.value, "pvc_namespace", each.key)
+      name      = each.key
+    }
+    mount_options = lookup(each.value, "mount_options", [
+      "nconnect=4", # Mandatory value (4) for Premium Azure File Share NFS 4.1. Increasing require using NetApp NFS instead ($$$)
+      "noresvport", # ref. https://linux.die.net/man/5/nfs
+      "actimeo=10", # Data is changed quite often
+      "cto",        # Ensure data consistency at the cost of slower I/O
+    ])
+    persistent_volume_source {
+      csi {
+        driver  = "file.csi.azure.com"
+        fs_type = "ext4"
+        # `volumeHandle` must be unique on the cluster for this volume and must looks like: "{resource-group-name}#{account-name}#{file-share-name}"
+        volume_handle = lookup(each.value, "volume_handle", "${azurerm_storage_account.data_storage_jenkins_io.resource_group_name}#${azurerm_storage_account.data_storage_jenkins_io.name}#${azurerm_storage_share.data_storage_jenkins_io.name}")
+        read_only     = lookup(each.value, "read_only", true)
+        volume_attributes = lookup(each.value, "volume_attributes", {
+          protocol      = "nfs"
+          resourceGroup = azurerm_storage_account.data_storage_jenkins_io.resource_group_name
+          shareName     = azurerm_storage_share.data_storage_jenkins_io.name
+        })
+        node_stage_secret_ref {
+          name      = lookup(each.value, "secret_name", kubernetes_secret_v1.publick8s_sponsored_azurefile_jenkins_io_storage_account.metadata[0].name)
+          namespace = lookup(each.value, "secret_namespace", kubernetes_secret_v1.publick8s_sponsored_azurefile_jenkins_io_storage_account.metadata[0].namespace)
+        }
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim_v1" "publick8s_sponsored_azurefiles" {
+  provider = kubernetes.publick8s_sponsored
+  for_each = local.aks_clusters.publick8s_sponsored.azurefile_volumes
+
+  metadata {
+    # Mapping 1:1 with PV and PVC using names (to allow claim_ref to work on PV)
+    name = kubernetes_persistent_volume_v1.publick8s_sponsored_azurefiles[each.key].metadata[0].name
+    # Default: PV name and NS names are the same (easier to map PVs which are NOT namespaced)
+    # But we allow using a custom PVC namespace when the key (e.?g. the PV name) differs
+    namespace = lookup(each.value, "pvc_namespace", each.key)
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume_v1.publick8s_sponsored_azurefiles[each.key].spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume_v1.publick8s_sponsored_azurefiles[each.key].metadata[0].name
+    storage_class_name = kubernetes_persistent_volume_v1.publick8s_sponsored_azurefiles[each.key].spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = kubernetes_persistent_volume_v1.publick8s_sponsored_azurefiles[each.key].spec[0].capacity.storage
+      }
+    }
+  }
+}
+
+# Note: when deleting a PV, you have to remove the 'metadata.finalizers' key (usually when deletion is stuck)
+resource "kubernetes_persistent_volume_v1" "publick8s_sponsored_datadisks" {
+  provider = kubernetes.publick8s_sponsored
+  for_each = local.aks_clusters.publick8s_sponsored.azuredisk_volumes
+
+  metadata {
+    # Disk name is the last element from the Azure ID string
+    name = element(split("/", each.value.disk_id), "-1")
+  }
+  spec {
+    capacity = {
+      storage = "${each.value.disk_size}Gi"
+    }
+    access_modes                     = ["ReadWriteOnce"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class_v1.publick8s_sponsored_statically_provisioned.id
+    persistent_volume_source {
+      csi {
+        driver        = "disk.csi.azure.com"
+        volume_handle = each.value.disk_id
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim_v1" "publick8s_sponsored_datadisks" {
+  provider = kubernetes.publick8s_sponsored
+  for_each = local.aks_clusters.publick8s_sponsored.azuredisk_volumes
+
+  metadata {
+    # Disk name is the last element from the Azure ID string
+    name = element(split("/", each.value.disk_id), "-1")
+    # Default: PV name and NS names are the same (easier to map PVs which are NOT namespaced)
+    # But we allow using a custom PVC namespace when the key (e.?g. the PV name) differs
+    namespace = lookup(each.value, "pvc_namespace", each.key)
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume_v1.publick8s_sponsored_datadisks[each.key].spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume_v1.publick8s_sponsored_datadisks[each.key].metadata.0.name
+    storage_class_name = kubernetes_persistent_volume_v1.publick8s_sponsored_datadisks[each.key].spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = kubernetes_persistent_volume_v1.publick8s_sponsored_datadisks[each.key].spec[0].capacity.storage
+      }
+    }
+  }
+}
+# Permissions/Role required to allow AKS CSI driver to access the Azure disk
+resource "azurerm_role_definition" "publick8s_sponsored_datadisks" {
+  for_each = local.aks_clusters.publick8s_sponsored.azuredisk_volumes
+
+  name  = "publick8s-sponsored-read-disk-${each.key}"
+  scope = each.value.disk_rg_id
+
+  permissions {
+    actions = [
+      "Microsoft.Compute/disks/read",
+      "Microsoft.Compute/disks/write",
+    ]
+  }
+}
+resource "azurerm_role_assignment" "publick8s_sponsored_datadisks" {
+  for_each = local.aks_clusters.publick8s_sponsored.azuredisk_volumes
+
+  scope              = each.value.disk_rg_id
+  role_definition_id = azurerm_role_definition.publick8s_sponsored_datadisks[each.key].role_definition_resource_id
+  principal_id       = azurerm_kubernetes_cluster.publick8s_sponsored.identity[0].principal_id
+}
+
 # # Retrieve effective outbound IPs
 # data "azurerm_public_ip" "publick8s_sponsored_lb_outbound" {
 #   ## Disable this resource when running in terratest
