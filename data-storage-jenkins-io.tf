@@ -47,3 +47,37 @@ resource "azurerm_storage_share" "data_storage_jenkins_io" {
   quota              = 750   # Minimum size of premium is 100 - https://learn.microsoft.com/en-us/azure/storage/files/understanding-billing#provisioning-method
   enabled_protocol   = "NFS" # Require a Premium Storage Account
 }
+
+# Dedicated Stroage account (and file share) to separate its update from the big all-in-one NFS above
+resource "azurerm_storage_account" "geoipdb_jenkins_io" {
+  name                              = "geoipdbjenkinsio"
+  resource_group_name               = azurerm_resource_group.data_storage_jenkins_io.name
+  location                          = azurerm_resource_group.data_storage_jenkins_io.location
+  account_tier                      = "Standard"
+  account_replication_type          = "ZRS"
+  account_kind                      = "StorageV2"
+  https_traffic_only_enabled        = true
+  min_tls_version                   = "TLS1_2"
+  infrastructure_encryption_enabled = true
+
+  # Restrict access to only infra.ci.jenkins.io (which updates the GeoIP DB) and publick8s cluster (which uses the GeoIP DB)
+  network_rules {
+    default_action = "Deny"
+    virtual_network_subnet_ids = concat(
+      [
+        # Required for using the resource
+        data.azurerm_subnet.publick8s.id,
+      ],
+      # Required for populating the resource from infra-cronjobs
+      local.app_subnets["infra.ci.jenkins.io"].agents,
+    )
+    bypass = ["Metrics", "Logging", "AzureServices"]
+  }
+
+  tags = local.default_tags
+}
+resource "azurerm_storage_share" "geoipdb_jenkins_io" {
+  name               = "geoipdb-jenkins-io"
+  storage_account_id = azurerm_storage_account.geoipdb_jenkins_io.id
+  quota              = 1 # Minimum possible (in Gb). GeoIP database set weight around 120Mb. We only pay for space used (and transactions) for blobs.
+}
