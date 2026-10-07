@@ -69,7 +69,7 @@ resource "azurerm_kubernetes_cluster" "publick8s_sponsored" {
     max_count            = 5
     vnet_subnet_id       = data.azurerm_subnet.publick8s_sponsored.id
     tags                 = local.default_tags
-    zones                = [1, 2, 3]
+    zones                = [1, 2]
     # No custom node_taints
   }
 
