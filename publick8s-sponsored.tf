@@ -426,6 +426,7 @@ resource "azurerm_role_definition" "publick8s_sponsored_datadisks" {
 resource "azurerm_role_assignment" "publick8s_sponsored_datadisks" {
   for_each = local.aks_clusters.publick8s_sponsored.azuredisk_volumes
 
+  name               = "publick8s-sponsored-read-disk-${each.key}"
   scope              = each.value.disk_rg_id
   role_definition_id = azurerm_role_definition.publick8s_sponsored_datadisks[each.key].role_definition_resource_id
   principal_id       = azurerm_kubernetes_cluster.publick8s_sponsored.identity[0].principal_id
