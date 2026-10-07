@@ -334,6 +334,9 @@ locals {
     "publick8s" = {
       cluster_hostname = "https://${azurerm_kubernetes_cluster.publick8s.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
     },
+    "publick8s-sponsored" = {
+      cluster_hostname = "https://${azurerm_kubernetes_cluster.publick8s_sponsored.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
+    },
   }
 
   # Retrieving end dates from updatecli values, easier location to track and update them
