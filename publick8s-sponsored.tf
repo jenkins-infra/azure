@@ -186,3 +186,59 @@ resource "azurerm_role_assignment" "publick8s_sponsored_ips_networkcontributor" 
   principal_id                     = azurerm_kubernetes_cluster.publick8s_sponsored.identity[0].principal_id
   skip_service_principal_aad_check = true
 }
+
+################################
+### Kubernetes Resources below
+################################
+resource "kubernetes_storage_class_v1" "publick8s_sponsored_statically_provisioned" {
+  metadata {
+    name = "statically-provisioned"
+  }
+  storage_provisioner    = "disk.csi.azure.com"
+  reclaim_policy         = "Retain"
+  provider               = kubernetes.publick8s_sponsored
+  allow_volume_expansion = true
+}
+
+# Configure the jenkins-infra/kubernetes-management admin service account
+module "publick8s_sponsored_admin_sa" {
+  providers = {
+    kubernetes = kubernetes.publick8s_sponsored
+  }
+  source                     = "./.shared-tools/terraform/modules/kubernetes-admin-sa-v2"
+  cluster_name               = azurerm_kubernetes_cluster.publick8s_sponsored.name
+  cluster_hostname           = local.aks_clusters_outputs.publick8s_sponsored.cluster_hostname
+  cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.publick8s_sponsored.kube_config.0.cluster_ca_certificate
+}
+
+# Allow access to the private Azure Container Registry through an Azure Endpoint NIC
+module "publick8s_sponsored_acr_pe" {
+  source = "./modules/azure-container-registry-private-links"
+
+  providers = {
+    azurerm     = azurerm.jenkins-sponsored
+    azurerm.acr = azurerm
+  }
+
+  name = "publick8s-sponsored"
+
+  acr_name     = azurerm_container_registry.dockerhub_mirror.name
+  acr_location = azurerm_container_registry.dockerhub_mirror.location
+  acr_rg_name  = azurerm_container_registry.dockerhub_mirror.resource_group_name
+
+  subnet_name  = data.azurerm_subnet.publick8s_sponsored.name
+  vnet_name    = data.azurerm_virtual_network.public.name
+  vnet_rg_name = data.azurerm_virtual_network.public.resource_group_name
+
+  default_tags = local.default_tags
+}
+
+# Retrieve effective outbound IPs
+data "azurerm_public_ip" "publick8s_sponsored_lb_outbound" {
+  ## Disable this resource when running in terratest
+  # to avoid the error "The "for_each" set includes values derived from resource attributes that cannot be determined until apply"
+  for_each = var.environment == "staging" ? toset([]) : toset(concat(flatten(azurerm_kubernetes_cluster.publick8s_sponsored.network_profile[*].load_balancer_profile[*].effective_outbound_ips)))
+
+  name                = element(split("/", each.key), "-1")
+  resource_group_name = azurerm_kubernetes_cluster.publick8s_sponsored.node_resource_group
+}
