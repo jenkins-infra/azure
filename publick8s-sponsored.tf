@@ -95,7 +95,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "publick8s_sponsored_linuxapps" 
   auto_scaling_enabled  = true
   min_count             = 2
   max_count             = 5
-  zones                 = [1, 2, 3]
+  zones                 = [1, 2]
   vnet_subnet_id        = data.azurerm_subnet.publick8s_sponsored.id
   # No custom node_taints
 
