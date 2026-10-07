@@ -59,7 +59,7 @@ resource "azurerm_kubernetes_cluster" "infracijenkinsio_agents_1" {
     max_count            = 3 # for upgrade
     vnet_subnet_id       = data.azurerm_subnet.infra_ci_jenkins_io_sponsored_kubernetes_agents.id
     tags                 = local.default_tags
-    zones                = local.aks_clusters.compute_zones_sponsored.system_pool
+    zones                = local.aks_clusters.compute_zones.system_pool
   }
 
   tags = local.default_tags
