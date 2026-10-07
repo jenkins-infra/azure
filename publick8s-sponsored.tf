@@ -6,6 +6,34 @@ resource "azurerm_resource_group" "publick8s_sponsored" {
   tags     = local.default_tags
 }
 
+resource "azurerm_dns_a_record" "public_publick8_sponsored" {
+  name                = "public.publick8s_sponsored"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  records             = [azurerm_public_ip.publick8s_sponsored_ips["temp-publick8s-public-ipv4"].ip_address]
+  tags                = local.default_tags
+}
+
+resource "azurerm_dns_aaaa_record" "public_publick8s_sponsored" {
+  name                = "public.publick8s_sponsored"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  records             = [azurerm_public_ip.publick8s_sponsored_ips["temp-publick8s-public-ipv6"].ip_address]
+  tags                = local.default_tags
+}
+
+# TODO: uncomment when private-nginx-ingress has been deployed on publick8s-sponsored
+# resource "azurerm_dns_a_record" "private_publick8s_sponsored" {
+#   name                = "private.publick8s_sponsored"
+#   zone_name           = data.azurerm_dns_zone.jenkinsio.name
+#   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+#   ttl                 = 60
+#   records             = ["????"] # External IP of the private-nginx ingress LoadBalancer, created by https://github.com/jenkins-infra/kubernetes-management/???
+#   tags                = local.default_tags
+# }
+
 resource "azurerm_kubernetes_cluster" "publick8s_sponsored" {
   provider = azurerm.jenkins-sponsored
 
@@ -115,6 +143,45 @@ resource "azurerm_role_assignment" "publick8s_sponsored_subnets_networkcontribut
     data.azurerm_subnet.publick8s_sponsored.id, # Node pool
   ])
   scope                            = each.key
+  role_definition_name             = "Network Contributor"
+  principal_id                     = azurerm_kubernetes_cluster.publick8s_sponsored.identity[0].principal_id
+  skip_service_principal_aad_check = true
+}
+
+# Each public load balancer used by this cluster is setup with a locked public IP.
+# Using a pre-determined public IP eases DNS setup and changes, but requires cluster to have the "Network Contributor" role on the IP.
+resource "azurerm_public_ip" "publick8s_sponsored_ips" {
+  provider = azurerm.jenkins-sponsored
+
+  for_each = local.aks_clusters.publick8s_sponsored.public_ips
+
+  name                = each.key
+  resource_group_name = azurerm_resource_group.prod_public_ips_sponsored.name
+  location            = var.location
+  ip_version          = each.value
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  tags                = local.default_tags
+}
+
+# TODO: uncomment when final IPs are ready
+# resource "azurerm_management_lock" "publick8s_sponsored_ips" {
+#  provider = azurerm.jenkins-sponsored
+#
+#   for_each = local.aks_clusters.publick8s_sponsored.public_ips
+#
+#   name       = each.key
+#   scope      = azurerm_public_ip.publick8s_sponsored_ips[each.key].id
+#   lock_level = "CanNotDelete"
+#   notes      = "Locked because this is a sensitive resource that should not be removed when publick8s cluster is re-created"
+# }
+
+resource "azurerm_role_assignment" "publick8s_sponsored_ips_networkcontributor" {
+  provider = azurerm.jenkins-sponsored
+
+  for_each = local.aks_clusters.publick8s_sponsored.public_ips
+
+  scope                            = azurerm_public_ip.publick8s_sponsored_ips[each.key].id
   role_definition_name             = "Network Contributor"
   principal_id                     = azurerm_kubernetes_cluster.publick8s_sponsored.identity[0].principal_id
   skip_service_principal_aad_check = true
