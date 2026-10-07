@@ -186,3 +186,7 @@ resource "azurerm_role_assignment" "publick8s_sponsored_ips_networkcontributor" 
   principal_id                     = azurerm_kubernetes_cluster.publick8s_sponsored.identity[0].principal_id
   skip_service_principal_aad_check = true
 }
+moved {
+  from = azurerm_public_ip.publick8s_ips["publick8s-test-ddu-1-ipv4"]
+  to   = azurerm_public_ip.publick8s_sponsored_ips["publick8s-test-ddu-1-ipv4"]
+}
