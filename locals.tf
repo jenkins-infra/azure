@@ -278,7 +278,7 @@ locals {
           secret_namespace    = "stats-jenkins-io",
           storage_account_key = azurerm_storage_account.stats_jenkins_io.primary_access_key,
         },
-      }
+      },
       azuredisk_volumes = {
         "ldap-jenkins-io" = {
           disk_id    = "${azurerm_managed_disk.ldap_jenkins_io_data.id}",
@@ -290,7 +290,13 @@ locals {
           disk_size  = "${azurerm_managed_disk.weekly_ci_jenkins_io.disk_size_gb}",
           disk_rg_id = "${azurerm_resource_group.weekly_ci_jenkins_io.id}",
         }
-      }
+      },
+      public_ips = {
+        "publick8s-public-ipv4"     = "IPv4", # Ingress for HTTP services
+        "publick8s-public-ipv6"     = "IPv6", # Ingress for HTTP services
+        "publick8s-ldap-ipv4"       = "IPv4", # LDAP for its own LB (cannot share public IP across LBs)
+        "publick8s-test-ddu-1-ipv4" = "IPv4", # Test public IPv4 to check behavior when moving across Azure providers (subscriptions)
+      },
     },
     "publick8s_sponsored" = {
       name               = "publick8s-sponsored",
@@ -300,6 +306,11 @@ locals {
         "10.100.0.0/14",       # 10.100.0.1 - 10.103.255.255
         "fd12:3456:789a::/64", # Dual stack is required to provide public IPv6 LBs
       ],
+      public_ips = {
+        # "publick8s-public-ipv4" = "IPv4", # Ingress for HTTP services
+        # "publick8s-public-ipv6" = "IPv6", # Ingress for HTTP services
+        # "publick8s-ldap-ipv4"   = "IPv4", # LDAP for its own LB (cannot share public IP across LBs)
+      },
     },
     "compute_zones" = {
       system_pool = [1, 2], # Note: Zone 3 is not allowed for system pool.

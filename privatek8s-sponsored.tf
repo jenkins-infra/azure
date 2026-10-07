@@ -233,8 +233,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci
 
 resource "azurerm_kubernetes_cluster_node_pool" "privatek8s_sponsored_release_ci_jenkins_io_agents_windows_2025" {
   provider = azurerm.jenkins-sponsored
-  name     = "w2025" # 6 char. max on Windows, only letters and numbers
-  vm_size = "Standard_D8s_v7"  # no ephemeral disk
+  name     = "w2025"           # 6 char. max on Windows, only letters and numbers
+  vm_size  = "Standard_D8s_v7" # no ephemeral disk
   upgrade_settings {
     max_surge = "10%"
   }
