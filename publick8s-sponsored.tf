@@ -156,7 +156,7 @@ resource "azurerm_public_ip" "publick8s_sponsored_ips" {
   for_each = local.aks_clusters.publick8s_sponsored.public_ips
 
   name                = each.key
-  resource_group_name = azurerm_resource_group.prod_public_ips_sponsored.name
+  resource_group_name = azurerm_resource_group.prod_publick8s_ips_sponsored.name
   location            = var.location
   ip_version          = each.value
   allocation_method   = "Static"
