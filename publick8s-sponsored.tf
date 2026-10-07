@@ -210,6 +210,10 @@ module "publick8s_sponsored_admin_sa" {
   cluster_hostname           = local.aks_clusters_outputs.publick8s_sponsored.cluster_hostname
   cluster_ca_certificate_b64 = azurerm_kubernetes_cluster.publick8s_sponsored.kube_config.0.cluster_ca_certificate
 }
+output "publick8s_sponsored_admin_sa_kubeconfig" {
+  sensitive = true
+  value     = module.publick8s_sponsored_admin_sa.kubeconfig
+}
 
 # Allow access to the private Azure Container Registry through an Azure Endpoint NIC
 module "publick8s_sponsored_acr_pe" {
