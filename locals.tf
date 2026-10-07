@@ -334,7 +334,7 @@ locals {
     "publick8s" = {
       cluster_hostname = "https://${azurerm_kubernetes_cluster.publick8s.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
     },
-    "publick8s-sponsored" = {
+    "publick8s_sponsored" = {
       cluster_hostname = "https://${azurerm_kubernetes_cluster.publick8s_sponsored.fqdn}:443", # Cannot use the kubeconfig host as it provides a private DNS name
     },
   }
