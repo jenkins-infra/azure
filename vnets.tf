@@ -10,7 +10,7 @@ data "azurerm_resource_group" "public" {
 }
 data "azurerm_resource_group" "public_sponsored" {
   provider = azurerm.jenkins-sponsored
-  name = "public-sponsored"
+  name     = "public-sponsored"
 }
 data "azurerm_resource_group" "private" {
   name = "private"

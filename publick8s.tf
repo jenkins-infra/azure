@@ -147,15 +147,8 @@ resource "azurerm_role_assignment" "publick8s_subnets_networkcontributor" {
 
 # Each public load balancer used by this cluster is setup with a locked public IP.
 # Using a pre-determined public IP eases DNS setup and changes, but requires cluster to have the "Network Contributor" role on the IP.
-locals {
-  publick8s_public_ips = {
-    "publick8s-public-ipv4" = "IPv4" # Ingress for HTTP services
-    "publick8s-public-ipv6" = "IPv6" # Ingress for HTTP services
-    "publick8s-ldap-ipv4"   = "IPv4" # LDAP for its own LB (cannot share public IP across LBs)
-  }
-}
 resource "azurerm_public_ip" "publick8s_ips" {
-  for_each = local.publick8s_public_ips
+  for_each = local.aks_clusters.publick8s.public_ips
 
   name                = each.key
   resource_group_name = azurerm_resource_group.prod_public_ips.name
@@ -166,7 +159,7 @@ resource "azurerm_public_ip" "publick8s_ips" {
   tags                = local.default_tags
 }
 resource "azurerm_management_lock" "publick8s_ips" {
-  for_each = local.publick8s_public_ips
+  for_each = local.aks_clusters.publick8s.public_ips
 
   name       = each.key
   scope      = azurerm_public_ip.publick8s_ips[each.key].id
@@ -174,7 +167,7 @@ resource "azurerm_management_lock" "publick8s_ips" {
   notes      = "Locked because this is a sensitive resource that should not be removed when publick8s cluster is re-created"
 }
 resource "azurerm_role_assignment" "publick8s_ips_networkcontributor" {
-  for_each = local.publick8s_public_ips
+  for_each = local.aks_clusters.publick8s.public_ips
 
   scope                            = azurerm_public_ip.publick8s_ips[each.key].id
   role_definition_name             = "Network Contributor"
