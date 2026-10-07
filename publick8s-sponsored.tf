@@ -227,7 +227,7 @@ module "publick8s_sponsored_acr_pe" {
   acr_rg_name  = azurerm_container_registry.dockerhub_mirror.resource_group_name
 
   subnet_name  = data.azurerm_subnet.publick8s_sponsored.name
-  vnet_name    = data.azurerm_virtual_network.public_sponsored
+  vnet_name    = data.azurerm_virtual_network.public_sponsored.name
   vnet_rg_name = data.azurerm_virtual_network.public_sponsored.resource_group_name
 
   default_tags = local.default_tags
