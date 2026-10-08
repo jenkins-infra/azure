@@ -79,39 +79,3 @@ resource "azurerm_managed_disk" "ldap_jenkins_io_sponsored_data" {
   disk_size_gb = 8
   tags         = local.default_tags
 }
-resource "azurerm_storage_account" "ldap_jenkins_io_sponsored" {
-  provider = kubernetes.publick8s_sponsored
-
-  name                              = "ldapjenkinsiosponsored"
-  resource_group_name               = azurerm_resource_group.ldap_jenkins_io_sponsored.name
-  location                          = azurerm_resource_group.ldap_jenkins_io_sponsored.location
-  account_tier                      = "Standard"
-  account_replication_type          = "ZRS"
-  account_kind                      = "StorageV2"
-  https_traffic_only_enabled        = true
-  min_tls_version                   = "TLS1_2" # default value, needed for tfsec
-  infrastructure_encryption_enabled = true     # LDAP data is sensitive, even if password are encrypted
-
-  network_rules {
-    default_action = "Deny"
-    virtual_network_subnet_ids = concat(
-      [
-        # Required for using the resource
-        data.azurerm_subnet.publick8s_sponsored.id,
-      ],
-      # Required for managing the resource
-      local.app_subnets["infra.ci.jenkins.io"].agents,
-    )
-    bypass = ["AzureServices"]
-  }
-
-  tags = local.default_tags
-}
-resource "azurerm_storage_share" "ldap_jenkins_io_sponsored_backups" {
-  provider = kubernetes.publick8s_sponsored
-
-  name               = "ldap"
-  storage_account_id = azurerm_storage_account.ldap_jenkins_io_sponsored.id
-  # Unless this is a Premium Storage, we only pay for the storage we consume
-  quota = 10
-}
