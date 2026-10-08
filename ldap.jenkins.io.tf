@@ -55,7 +55,7 @@ resource "azurerm_storage_share" "ldap_jenkins_io_backups" {
 ## Sponsored subscription
 
 resource "azurerm_resource_group" "ldap_jenkins_io_sponsored" {
-  provider = kubernetes.publick8s_sponsored
+  provider = azurerm.jenkins-sponsored
 
   name     = "ldap-jenkins-io-sponsored"
   location = var.location
@@ -63,7 +63,7 @@ resource "azurerm_resource_group" "ldap_jenkins_io_sponsored" {
 }
 
 resource "azurerm_managed_disk" "ldap_jenkins_io_sponsored_data" {
-  provider = kubernetes.publick8s_sponsored
+  provider = azurerm.jenkins-sponsored
 
   name                = "ldap-jenkins-io-sponsored-data"
   location            = azurerm_resource_group.ldap_jenkins_io_sponsored.location

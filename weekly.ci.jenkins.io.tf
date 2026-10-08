@@ -15,13 +15,13 @@ resource "azurerm_managed_disk" "weekly_ci_jenkins_io" {
 ## Sponsored
 
 resource "azurerm_resource_group" "weekly_ci_jenkins_io_sponsored" {
-  provider = kubernetes.publick8s_sponsored
+  provider = azurerm.jenkins-sponsored
 
   name     = "weekly-ci-jenkins-io-sponsored"
   location = var.location
 }
 resource "azurerm_managed_disk" "weekly_ci_jenkins_io_sponsored" {
-  provider = kubernetes.publick8s_sponsored
+  provider = azurerm.jenkins-sponsored
 
   name                 = "weekly-ci-jenkins-io-sponsored"
   location             = azurerm_resource_group.weekly_ci_jenkins_io_sponsored.location
