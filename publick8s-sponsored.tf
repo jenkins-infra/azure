@@ -363,73 +363,73 @@ resource "kubernetes_persistent_volume_claim_v1" "publick8s_sponsored_azurefiles
   }
 }
 
-# # Note: when deleting a PV, you have to remove the 'metadata.finalizers' key (usually when deletion is stuck)
-# resource "kubernetes_persistent_volume_v1" "publick8s_sponsored_datadisks" {
-#   provider = kubernetes.publick8s_sponsored
-#   for_each = local.aks_clusters.publick8s_sponsored.azuredisk_volumes
+# Note: when deleting a PV, you have to remove the 'metadata.finalizers' key (usually when deletion is stuck)
+resource "kubernetes_persistent_volume_v1" "publick8s_sponsored_datadisks" {
+  provider = kubernetes.publick8s_sponsored
+  for_each = local.aks_clusters.publick8s_sponsored.azuredisk_volumes
 
-#   metadata {
-#     # Disk name is the last element from the Azure ID string
-#     name = element(split("/", each.value.disk_id), "-1")
-#   }
-#   spec {
-#     capacity = {
-#       storage = "${each.value.disk_size}Gi"
-#     }
-#     access_modes                     = ["ReadWriteOnce"]
-#     persistent_volume_reclaim_policy = "Retain"
-#     storage_class_name               = kubernetes_storage_class_v1.publick8s_sponsored_statically_provisioned.id
-#     persistent_volume_source {
-#       csi {
-#         driver        = "disk.csi.azure.com"
-#         volume_handle = each.value.disk_id
-#       }
-#     }
-#   }
-# }
-# resource "kubernetes_persistent_volume_claim_v1" "publick8s_sponsored_datadisks" {
-#   provider = kubernetes.publick8s_sponsored
-#   for_each = local.aks_clusters.publick8s_sponsored.azuredisk_volumes
+  metadata {
+    # Disk name is the last element from the Azure ID string
+    name = element(split("/", each.value.disk_id), "-1")
+  }
+  spec {
+    capacity = {
+      storage = "${each.value.disk_size}Gi"
+    }
+    access_modes                     = ["ReadWriteOnce"]
+    persistent_volume_reclaim_policy = "Retain"
+    storage_class_name               = kubernetes_storage_class_v1.publick8s_sponsored_statically_provisioned.id
+    persistent_volume_source {
+      csi {
+        driver        = "disk.csi.azure.com"
+        volume_handle = each.value.disk_id
+      }
+    }
+  }
+}
+resource "kubernetes_persistent_volume_claim_v1" "publick8s_sponsored_datadisks" {
+  provider = kubernetes.publick8s_sponsored
+  for_each = local.aks_clusters.publick8s_sponsored.azuredisk_volumes
 
-#   metadata {
-#     # Disk name is the last element from the Azure ID string
-#     name = element(split("/", each.value.disk_id), "-1")
-#     # Default: PV name and NS names are the same (easier to map PVs which are NOT namespaced)
-#     # But we allow using a custom PVC namespace when the key (e.?g. the PV name) differs
-#     namespace = lookup(each.value, "pvc_namespace", each.key)
-#   }
-#   spec {
-#     access_modes       = kubernetes_persistent_volume_v1.publick8s_sponsored_datadisks[each.key].spec[0].access_modes
-#     volume_name        = kubernetes_persistent_volume_v1.publick8s_sponsored_datadisks[each.key].metadata.0.name
-#     storage_class_name = kubernetes_persistent_volume_v1.publick8s_sponsored_datadisks[each.key].spec[0].storage_class_name
-#     resources {
-#       requests = {
-#         storage = kubernetes_persistent_volume_v1.publick8s_sponsored_datadisks[each.key].spec[0].capacity.storage
-#       }
-#     }
-#   }
-# }
-# # Permissions/Role required to allow AKS CSI driver to access the Azure disk
-# resource "azurerm_role_definition" "publick8s_sponsored_datadisks" {
-#   for_each = local.aks_clusters.publick8s_sponsored.azuredisk_volumes
+  metadata {
+    # Disk name is the last element from the Azure ID string
+    name = element(split("/", each.value.disk_id), "-1")
+    # Default: PV name and NS names are the same (easier to map PVs which are NOT namespaced)
+    # But we allow using a custom PVC namespace when the key (e.?g. the PV name) differs
+    namespace = lookup(each.value, "pvc_namespace", each.key)
+  }
+  spec {
+    access_modes       = kubernetes_persistent_volume_v1.publick8s_sponsored_datadisks[each.key].spec[0].access_modes
+    volume_name        = kubernetes_persistent_volume_v1.publick8s_sponsored_datadisks[each.key].metadata.0.name
+    storage_class_name = kubernetes_persistent_volume_v1.publick8s_sponsored_datadisks[each.key].spec[0].storage_class_name
+    resources {
+      requests = {
+        storage = kubernetes_persistent_volume_v1.publick8s_sponsored_datadisks[each.key].spec[0].capacity.storage
+      }
+    }
+  }
+}
+# Permissions/Role required to allow AKS CSI driver to access the Azure disk
+resource "azurerm_role_definition" "publick8s_sponsored_datadisks" {
+  for_each = local.aks_clusters.publick8s_sponsored.azuredisk_volumes
 
-#   name  = "publick8s-sponsored-read-disk-${each.key}"
-#   scope = each.value.disk_rg_id
+  name  = "publick8s-sponsored-read-disk-${each.key}"
+  scope = each.value.disk_rg_id
 
-#   permissions {
-#     actions = [
-#       "Microsoft.Compute/disks/read",
-#       "Microsoft.Compute/disks/write",
-#     ]
-#   }
-# }
-# resource "azurerm_role_assignment" "publick8s_sponsored_datadisks" {
-#   for_each = local.aks_clusters.publick8s_sponsored.azuredisk_volumes
+  permissions {
+    actions = [
+      "Microsoft.Compute/disks/read",
+      "Microsoft.Compute/disks/write",
+    ]
+  }
+}
+resource "azurerm_role_assignment" "publick8s_sponsored_datadisks" {
+  for_each = local.aks_clusters.publick8s_sponsored.azuredisk_volumes
 
-#   scope              = each.value.disk_rg_id
-#   role_definition_id = azurerm_role_definition.publick8s_sponsored_datadisks[each.key].role_definition_resource_id
-#   principal_id       = azurerm_kubernetes_cluster.publick8s_sponsored.identity[0].principal_id
-# }
+  scope              = each.value.disk_rg_id
+  role_definition_id = azurerm_role_definition.publick8s_sponsored_datadisks[each.key].role_definition_resource_id
+  principal_id       = azurerm_kubernetes_cluster.publick8s_sponsored.identity[0].principal_id
+}
 
 # # Retrieve effective outbound IPs
 # data "azurerm_public_ip" "publick8s_sponsored_lb_outbound" {
