@@ -532,8 +532,6 @@ locals {
       #     disk_id    = "${azurerm_managed_disk.weekly_ci_jenkins_io.id}",
       #     disk_size  = "${azurerm_managed_disk.weekly_ci_jenkins_io.disk_size_gb}",
       #     disk_rg_id = "${azurerm_resource_group.weekly_ci_jenkins_io.id}",
-      #   }
-      # }
     },
     "compute_zones" = {
       system_pool = [1, 2], # Note: Zone 3 is not allowed for system pool.
