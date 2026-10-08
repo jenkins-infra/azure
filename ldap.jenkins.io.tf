@@ -55,12 +55,16 @@ resource "azurerm_storage_share" "ldap_jenkins_io_backups" {
 ## Sponsored subscription
 
 resource "azurerm_resource_group" "ldap_jenkins_io_sponsored" {
+  provider = kubernetes.publick8s_sponsored
+
   name     = "ldap-jenkins-io-sponsored"
   location = var.location
   tags     = local.default_tags
 }
 
 resource "azurerm_managed_disk" "ldap_jenkins_io_sponsored_data" {
+  provider = kubernetes.publick8s_sponsored
+
   name                = "ldap-jenkins-io-sponsored-data"
   location            = azurerm_resource_group.ldap_jenkins_io_sponsored.location
   resource_group_name = azurerm_resource_group.ldap_jenkins_io_sponsored.name
@@ -76,6 +80,8 @@ resource "azurerm_managed_disk" "ldap_jenkins_io_sponsored_data" {
   tags         = local.default_tags
 }
 resource "azurerm_storage_account" "ldap_jenkins_io_sponsored" {
+  provider = kubernetes.publick8s_sponsored
+
   name                              = "ldapjenkinsiosponsored"
   resource_group_name               = azurerm_resource_group.ldap_jenkins_io_sponsored.name
   location                          = azurerm_resource_group.ldap_jenkins_io_sponsored.location
@@ -102,6 +108,8 @@ resource "azurerm_storage_account" "ldap_jenkins_io_sponsored" {
   tags = local.default_tags
 }
 resource "azurerm_storage_share" "ldap_jenkins_io_sponsored_backups" {
+  provider = kubernetes.publick8s_sponsored
+
   name               = "ldap"
   storage_account_id = azurerm_storage_account.ldap_jenkins_io_sponsored.id
   # Unless this is a Premium Storage, we only pay for the storage we consume
