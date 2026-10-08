@@ -51,3 +51,31 @@ resource "azurerm_storage_share" "ldap_jenkins_io_backups" {
   # Unless this is a Premium Storage, we only pay for the storage we consume
   quota = 10
 }
+
+## Sponsored subscription
+
+resource "azurerm_resource_group" "ldap_jenkins_io_sponsored" {
+  provider = azurerm.jenkins-sponsored
+
+  name     = "ldap-jenkins-io-sponsored"
+  location = var.location
+  tags     = local.default_tags
+}
+
+resource "azurerm_managed_disk" "ldap_jenkins_io_sponsored_data" {
+  provider = azurerm.jenkins-sponsored
+
+  name                = "ldap-jenkins-io-sponsored-data"
+  location            = azurerm_resource_group.ldap_jenkins_io_sponsored.location
+  resource_group_name = azurerm_resource_group.ldap_jenkins_io_sponsored.name
+  # ZRS to ensure we can move service across AZs
+  # Standard because it is enough for LDAP's IOPS and I/O bandwidth
+  # Ref. https://azure.microsoft.com/en-us/pricing/details/managed-disks/
+  storage_account_type = "StandardSSD_ZRS"
+  create_option        = "Empty"
+  # LDAP data set is between 300 and 500 Mb
+  # Class E1 (4G) only allow 7800 paid transactions per hour, while LDAP may peak at 8500 sometimes so E2 it is
+  # Ref. https://azure.microsoft.com/en-us/pricing/details/managed-disks/
+  disk_size_gb = 8
+  tags         = local.default_tags
+}
