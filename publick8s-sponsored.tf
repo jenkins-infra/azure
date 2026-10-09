@@ -24,15 +24,14 @@ resource "azurerm_dns_aaaa_record" "public_publick8s_sponsored" {
   tags                = local.default_tags
 }
 
-# TODO: uncomment when private-nginx-ingress has been deployed on publick8s-sponsored
-# resource "azurerm_dns_a_record" "private_publick8s_sponsored" {
-#   name                = "private.publick8s_sponsored"
-#   zone_name           = data.azurerm_dns_zone.jenkinsio.name
-#   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
-#   ttl                 = 60
-#   records             = ["????"] # External IP of the private-nginx ingress LoadBalancer, created by https://github.com/jenkins-infra/kubernetes-management/???
-#   tags                = local.default_tags
-# }
+resource "azurerm_dns_a_record" "private_publick8s_sponsored" {
+  name                = "private.publick8s_sponsored"
+  zone_name           = data.azurerm_dns_zone.jenkinsio.name
+  resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
+  ttl                 = 60
+  records             = ["10.7.0.11"] # External IP of the private-nginx ingress LoadBalancer, created by https://github.com/jenkins-infra/kubernetes-management/blob/3ccdafd0749a6340c9ee281b20fc9648326cc0c4/clusters/publick8s-sponsored.yaml#L74-L80
+  tags                = local.default_tags
+}
 
 resource "azurerm_kubernetes_cluster" "publick8s_sponsored" {
   provider = azurerm.jenkins-sponsored
