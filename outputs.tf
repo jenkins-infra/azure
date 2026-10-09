@@ -131,6 +131,15 @@ resource "local_file" "jenkins_infra_data_report" {
         "ipv6" = [for id, pip in data.azurerm_public_ip.publick8s_lb_outbound : pip.ip_address if !can(cidrnetmask("${pip.ip_address}/32"))],
       },
     },
+    "publick8s-sponsored" = {
+      hostname           = azurerm_kubernetes_cluster.publick8s_sponsored.fqdn,
+      kubernetes_version = local.aks_clusters.publick8s_sponsored.kubernetes_version
+      pod_cidrs          = concat(flatten(azurerm_kubernetes_cluster.publick8s_sponsored.network_profile[*].pod_cidrs)),
+      lb_outbound_ips = {
+        "ipv4" = [for id, pip in data.azurerm_public_ip.publick8s_sponsored_lb_outbound : pip.ip_address if can(cidrnetmask("${pip.ip_address}/32"))],
+        "ipv6" = [for id, pip in data.azurerm_public_ip.publick8s_sponsored_lb_outbound : pip.ip_address if !can(cidrnetmask("${pip.ip_address}/32"))],
+      },
+    },
     "privatek8s-sponsored" = {
       hostname           = local.aks_clusters_outputs["privatek8s-sponsored"].cluster_hostname,
       kubernetes_version = local.aks_clusters["privatek8s-sponsored"].kubernetes_version,
