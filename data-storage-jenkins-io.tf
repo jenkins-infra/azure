@@ -29,6 +29,7 @@ resource "azurerm_storage_account" "data_storage_jenkins_io" {
       [
         # Required for using the resource
         data.azurerm_subnet.publick8s.id,
+        data.azurerm_subnet.publick8s_sponsored.id,
       ],
       # Required for populating the resource from release.ci agents
       local.app_subnets["release.ci.jenkins.io"].agents,
@@ -67,6 +68,7 @@ resource "azurerm_storage_account" "geoipdb_jenkins_io" {
       [
         # Required for using the resource
         data.azurerm_subnet.publick8s.id,
+        data.azurerm_subnet.publick8s_sponsored.id,
       ],
       # Required for populating the resource from infra-cronjobs
       local.app_subnets["infra.ci.jenkins.io"].agents,
