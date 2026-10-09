@@ -65,6 +65,7 @@ resource "azurerm_private_dns_zone" "public_db_pgsql" {
 resource "azurerm_private_dns_zone_virtual_network_link" "public_db_pgsql" {
   for_each = {
     "public-vnet"                    = data.azurerm_virtual_network.public.id,
+    "public-sponsored-vnet"          = data.azurerm_virtual_network.public_sponsored.id,
     "publicdb-vnet"                  = data.azurerm_virtual_network.public_db.id,
     "private-vnet"                   = data.azurerm_virtual_network.private.id,
     "infracijenkinsiosponsored-vnet" = data.azurerm_virtual_network.infra_ci_jenkins_io_sponsored.id,
