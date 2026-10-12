@@ -23,7 +23,7 @@ resource "azurerm_resource_group" "weekly_ci_jenkins_io_sponsored" {
 resource "azurerm_managed_disk" "weekly_ci_jenkins_io_sponsored" {
   provider = azurerm.jenkins-sponsored
 
-  name                 = "weekly-ci-jenkins-io-sponsored"
+  name                 = "weekly-ci-jenkins-io"
   location             = azurerm_resource_group.weekly_ci_jenkins_io_sponsored.location
   resource_group_name  = azurerm_resource_group.weekly_ci_jenkins_io_sponsored.name
   storage_account_type = "StandardSSD_ZRS"
