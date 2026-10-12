@@ -569,12 +569,12 @@ locals {
         },
       },
       azuredisk_volumes = {
-        "ldap-jenkins-io-sponsored" = {
+        "ldap-jenkins-io" = {
           disk_id    = "${azurerm_managed_disk.ldap_jenkins_io_sponsored_data.id}",
           disk_size  = "${azurerm_managed_disk.ldap_jenkins_io_sponsored_data.disk_size_gb}",
           disk_rg_id = "${azurerm_resource_group.ldap_jenkins_io_sponsored.id}",
         }
-        "weekly-ci-jenkins-io-sponsored" = {
+        "weekly-ci-jenkins-io" = {
           disk_id    = "${azurerm_managed_disk.weekly_ci_jenkins_io_sponsored.id}",
           disk_size  = "${azurerm_managed_disk.weekly_ci_jenkins_io_sponsored.disk_size_gb}",
           disk_rg_id = "${azurerm_resource_group.weekly_ci_jenkins_io_sponsored.id}",
