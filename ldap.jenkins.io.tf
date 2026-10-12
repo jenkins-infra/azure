@@ -66,7 +66,7 @@ resource "azurerm_resource_group" "ldap_jenkins_io_sponsored" {
 resource "azurerm_managed_disk" "ldap_jenkins_io_sponsored_data" {
   provider = azurerm.jenkins-sponsored
 
-  name                = "ldap-jenkins-io-sponsored-data"
+  name                = "ldap-jenkins-io-data"
   location            = azurerm_resource_group.ldap_jenkins_io_sponsored.location
   resource_group_name = azurerm_resource_group.ldap_jenkins_io_sponsored.name
   # ZRS to ensure we can move service across AZs
