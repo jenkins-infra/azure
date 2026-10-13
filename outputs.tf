@@ -71,8 +71,7 @@ resource "local_file" "jenkins_infra_data_report" {
         "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["get-jenkins-io"].metadata[0].name,
       },
       "geoipdata" = {
-        "share_uri" = "/get.jenkins.io/geoipdata/",
-        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["get-jenkins-io"].metadata[0].name,
+        "pvc_name" = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["geoipdb-get-jenkins-io"].metadata[0].name,
       }
     },
     "updates.jenkins.io" = {
@@ -85,8 +84,7 @@ resource "local_file" "jenkins_infra_data_report" {
         "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["updates-jenkins-io"].metadata[0].name,
       },
       "geoipdata" = {
-        "share_uri" = "/updates.jenkins.io/geoipdata/",
-        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["updates-jenkins-io"].metadata[0].name,
+        "pvc_name" = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["geoipdb-updates-jenkins-io"].metadata[0].name,
       }
     },
     "ldap.jenkins.io" = {
