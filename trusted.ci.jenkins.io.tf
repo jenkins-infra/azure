@@ -194,6 +194,19 @@ resource "azurerm_private_endpoint" "publick8s_updates_jenkins_io_for_trustedci_
   }
   tags = local.default_tags
 }
+# TODO: set up a CNAME "updates.jenkins.io.privatelink.azurecr.io" once azurerm_private_dns_a_record.publick8s_updates_jenkins_io_sponsored will be cleaned up to ease future migrations
+moved {
+  from = azurerm_private_dns_a_record.updates_jenkins_io_sponsored
+  to   = azurerm_private_dns_a_record.publick8s_updates_jenkins_io_sponsored
+}
+resource "azurerm_private_dns_a_record" "publick8s_updates_jenkins_io_sponsored" {
+  provider = azurerm.jenkins-sponsored
+
+  name                = "updates.jenkins.io"                                          # Expected full record name: updates.jenkins.io.privatelink.azurecr.io
+  private_dns_zone_id = module.trustedcijenkinsiosponsored_acr_pe.private_dns_zone_id # This existing zone already associated to the vnet
+  ttl                 = 60
+  records             = [azurerm_private_endpoint.publick8s_updates_jenkins_io_for_trustedci_sponsored.private_service_connection[0].private_ip_address]
+}
 #################################################################################################
 # updates.jenkins.io's mirrorbits CLI Kubernetes Service (internal LB) - Sponsored Subscription
 #################################################################################################
@@ -226,26 +239,13 @@ resource "azurerm_private_endpoint" "publick8s_sponsored_mirrorbitscli_updates_j
   }
   tags = local.default_tags
 }
-# TODO: set up a CNAME "updates.jenkins.io.privatelink.azurecr.io" once azurerm_private_dns_a_record.publick8s_updates_jenkins_io_sponsored will be cleaned up to ease future migrations
-moved {
-  from = azurerm_private_dns_a_record.updates_jenkins_io_sponsored
-  to   = azurerm_private_dns_a_record.publick8s_updates_jenkins_io_sponsored
-}
-resource "azurerm_private_dns_a_record" "publick8s_updates_jenkins_io_sponsored" {
-  provider = azurerm.jenkins-sponsored
-
-  name                = "updates.jenkins.io"                                          # Expected full record name: updates.jenkins.io.privatelink.azurecr.io
-  private_dns_zone_id = module.trustedcijenkinsiosponsored_acr_pe.private_dns_zone_id # This existing zone already associated to the vnet
-  ttl                 = 60
-  records             = [azurerm_private_endpoint.publick8s_updates_jenkins_io_for_trustedci_sponsored.private_service_connection[0].private_ip_address]
-}
 resource "azurerm_private_dns_a_record" "publick8s_sponsored_updates_jenkins_io_sponsored" {
   provider = azurerm.jenkins-sponsored
 
   name                = "publick8s-sponsored.updates.jenkins.io"                      # Expected full record name: publick8s-sponsored.updates.jenkins.io.privatelink.azurecr.io
   private_dns_zone_id = module.trustedcijenkinsiosponsored_acr_pe.private_dns_zone_id # This existing zone already associated to the vnet
   ttl                 = 60
-  records             = [azurerm_private_endpoint.publick8s_updates_jenkins_io_for_trustedci_sponsored.private_service_connection[0].private_ip_address]
+  records             = [azurerm_private_endpoint.publick8s_sponsored_mirrorbitscli_updates_jenkins_io.private_service_connection[0].private_ip_address]
 }
 ## Allow access to/from UC Private Endpoint
 resource "azurerm_network_security_rule" "allow_in_many_from_trusted_agents_sponsored_to_uc" {
@@ -285,6 +285,46 @@ resource "azurerm_network_security_rule" "allow_out_from_trusted_agents_sponsore
     data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_permanent_agents.address_prefixes,
   )
   destination_address_prefix  = azurerm_private_endpoint.publick8s_updates_jenkins_io_for_trustedci_sponsored.private_service_connection[0].private_ip_address
+  resource_group_name         = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
+  network_security_group_name = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
+}
+resource "azurerm_network_security_rule" "allow_in_many_from_trusted_agents_sponsored_to_uc_sponsored" {
+  provider = azurerm.jenkins-sponsored
+
+  name              = "allow-in-many-from-trusted-agents-sponsored-to-uc-sponsored"
+  priority          = 4055
+  direction         = "Inbound"
+  access            = "Allow"
+  protocol          = "Tcp"
+  source_port_range = "*"
+  destination_port_ranges = [
+    "3390", # mirrorbits CLI (content)
+  ]
+  source_address_prefixes = concat(
+    data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.address_prefixes,
+    data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_permanent_agents.address_prefixes,
+  )
+  destination_address_prefix  = azurerm_private_endpoint.publick8s_sponsored_mirrorbitscli_updates_jenkins_io.private_service_connection[0].private_ip_address
+  resource_group_name         = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
+  network_security_group_name = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
+}
+resource "azurerm_network_security_rule" "allow_out_from_trusted_agents_sponsored_to_uc_sponsored" {
+  provider = azurerm.jenkins-sponsored
+
+  name              = "allow-out-from-trusted-agents-sponsored-to-uc-sponsored"
+  priority          = 4055
+  direction         = "Outbound"
+  access            = "Allow"
+  protocol          = "Tcp"
+  source_port_range = "*"
+  destination_port_ranges = [
+    "3390", # mirrorbits CLI (content)
+  ]
+  source_address_prefixes = concat(
+    data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.address_prefixes,
+    data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_permanent_agents.address_prefixes,
+  )
+  destination_address_prefix  = azurerm_private_endpoint.publick8s_sponsored_mirrorbitscli_updates_jenkins_io.private_service_connection[0].private_ip_address
   resource_group_name         = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
   network_security_group_name = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
 }
