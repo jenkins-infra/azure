@@ -33,7 +33,8 @@ resource "azurerm_storage_account" "builds_reports_jenkins_io" {
       # Required for populating the resource
       local.app_subnets["cert.ci.jenkins.io"].agents,
     )
-    bypass = ["AzureServices"]
+    ip_rules = []
+    bypass   = ["AzureServices"]
   }
 
   tags = {
@@ -46,5 +47,5 @@ resource "azurerm_storage_share" "builds_reports_jenkins_io" {
   name               = "builds-reports-jenkins-io"
   storage_account_id = azurerm_storage_account.builds_reports_jenkins_io.id
   # Less than 50Mb of files
-  quota = 1
+  quota = 5
 }
