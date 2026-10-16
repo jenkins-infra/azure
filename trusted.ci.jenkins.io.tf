@@ -201,7 +201,7 @@ resource "azurerm_private_dns_cname_record" "updates_jenkins_io_sponsored" {
   name                = "updates.jenkins.io"
   private_dns_zone_id = module.trustedcijenkinsiosponsored_acr_pe.private_dns_zone_id # This existing zone already associated to the vnet
   ttl                 = 60
-  record              = "publick8s.updates.jenkins.io"
+  record              = "publick8s.updates.jenkins.io.privatelink.azurecr.io"
 
   # TODO: remove once applied (only added to ensure full order)
   depends_on = [azurerm_private_dns_a_record.publick8s_updates_jenkins_io_sponsored]
