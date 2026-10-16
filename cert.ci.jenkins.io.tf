@@ -262,8 +262,6 @@ resource "azurerm_storage_account" "cert_ci_jenkins_io_sponsored" {
   network_rules {
     default_action = "Deny"
     virtual_network_subnet_ids = concat(
-      # Required for managing and populating content
-      local.app_subnets["infra.ci.jenkins.io"].agents,
       # Required for populating and using content
       local.app_subnets["cert.ci.jenkins.io"].agents,
     )
