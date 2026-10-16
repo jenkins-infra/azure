@@ -243,3 +243,50 @@ resource "azurerm_role_assignment" "certpush_to_acr" {
   scope                            = azurerm_container_registry.dockerhub_mirror.id
   skip_service_principal_aad_check = true
 }
+
+########################################################################################
+# Used for storing artifact caches (Maven, Grapes, etc.) close to the agents
+########################################################################################
+resource "azurerm_storage_account" "cert_ci_jenkins_io_sponsored" {
+  provider = azurerm.jenkins-sponsored
+
+  name                       = "certcijenkinsiosponsored"
+  resource_group_name        = azurerm_resource_group.cert_ci_jenkins_io_sponsored_commons.name
+  location                   = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.location # CLose the the agents (may be different than the RG)
+  account_tier               = "Standard"
+  account_replication_type   = "ZRS"
+  account_kind               = "StorageV2"
+  https_traffic_only_enabled = true
+  min_tls_version            = "TLS1_2"
+
+  network_rules {
+    default_action = "Deny"
+    virtual_network_subnet_ids = concat(
+      # Required for managing and populating content
+      local.app_subnets["infra.ci.jenkins.io"].agents,
+      # Required for populating and using content
+      local.app_subnets["cert.ci.jenkins.io"].agents,
+    )
+    ip_rules = []
+    bypass   = ["AzureServices"]
+  }
+
+  tags = {
+    scope = "terraform-managed"
+  }
+}
+resource "azurerm_storage_share" "cache_cert_ci_jenkins_io_sponsored" {
+  provider = azurerm.jenkins-sponsored
+
+  name               = "cache-cert-ci-jenkins-io"
+  storage_account_id = azurerm_storage_account.cert_ci_jenkins_io_sponsored.id
+  quota              = 10
+}
+resource "azurerm_role_assignment" "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored_write_cache_share" {
+  provider = azurerm.jenkins-sponsored
+
+  scope = azurerm_storage_account.cert_ci_jenkins_io_sponsored.id
+  # Allow writing
+  role_definition_name = "Storage File Data Privileged Contributor"
+  principal_id         = azurerm_user_assigned_identity.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
+}
