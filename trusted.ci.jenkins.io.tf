@@ -194,15 +194,23 @@ resource "azurerm_private_endpoint" "publick8s_updates_jenkins_io_for_trustedci_
   }
   tags = local.default_tags
 }
-# TODO: set up a CNAME "updates.jenkins.io.privatelink.azurecr.io" once azurerm_private_dns_a_record.publick8s_updates_jenkins_io_sponsored will be cleaned up to ease future migrations
-moved {
-  from = azurerm_private_dns_a_record.updates_jenkins_io_sponsored
-  to   = azurerm_private_dns_a_record.publick8s_updates_jenkins_io_sponsored
+
+resource "azurerm_private_dns_cname_record" "updates_jenkins_io_sponsored" {
+  provider = azurerm.jenkins-sponsored
+
+  name                = "updates.jenkins.io"
+  private_dns_zone_id = module.trustedcijenkinsiosponsored_acr_pe.private_dns_zone_id # This existing zone already associated to the vnet
+  ttl                 = 60
+  record              = "publick8s.updates.jenkins.io"
+
+  # TODO: remove once applied (only added to ensure full order)
+  depends_on = [azurerm_private_dns_a_record.publick8s_updates_jenkins_io_sponsored]
 }
+
 resource "azurerm_private_dns_a_record" "publick8s_updates_jenkins_io_sponsored" {
   provider = azurerm.jenkins-sponsored
 
-  name                = "updates.jenkins.io"                                          # Expected full record name: updates.jenkins.io.privatelink.azurecr.io
+  name                = "publick8s.updates.jenkins.io"
   private_dns_zone_id = module.trustedcijenkinsiosponsored_acr_pe.private_dns_zone_id # This existing zone already associated to the vnet
   ttl                 = 60
   records             = [azurerm_private_endpoint.publick8s_updates_jenkins_io_for_trustedci_sponsored.private_service_connection[0].private_ip_address]
