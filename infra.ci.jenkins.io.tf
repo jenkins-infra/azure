@@ -369,7 +369,7 @@ resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephe
 }
 resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_jenkins_sponsored_to_publick8s_sponsored" {
   provider               = azurerm.jenkins-sponsored
-  name                   = "allow-outbound-https-from-infraci-agents-jenkins-sponsored-to-publick8s-sponsored"
+  name                   = "allow-outbound-https-from-infraci-agents-sponsored-to-publick8s-sponsored"
   priority               = 4087
   direction              = "Outbound"
   access                 = "Allow"
