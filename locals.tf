@@ -338,7 +338,7 @@ locals {
         }
       },
       public_ips = {
-        "publick8s-public-ipv4" = "IPv4", # Ingress for HTTP services
+        # "publick8s-public-ipv4" = "IPv4", # Ingress for HTTP services
         # "publick8s-public-ipv6" = "IPv6", # Ingress for HTTP services
         "publick8s-ldap-ipv4" = "IPv4", # LDAP for its own LB (cannot share public IP across LBs)
       },
@@ -352,9 +352,9 @@ locals {
         "fd12:3456:789a::/64", # Dual stack is required to provide public IPv6 LBs
       ],
       public_ips = {
-        "temp-publick8s-public-ipv4" = "IPv4", # Ingress for HTTP services
-        "publick8s-public-ipv6"      = "IPv6", # Ingress for HTTP services
-        "publick8s-ldap-ipv4"        = "IPv4", # LDAP for its own LB (cannot share public IP across LBs)
+        "publick8s-public-ipv4" = "IPv4", # Ingress for HTTP services
+        "publick8s-public-ipv6" = "IPv6", # Ingress for HTTP services
+        "publick8s-ldap-ipv4"   = "IPv4", # LDAP for its own LB (cannot share public IP across LBs)
       },
       azurefile_volumes = {
         "get-jenkins-io"                = {},
