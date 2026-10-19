@@ -7,7 +7,7 @@ resource "azurerm_resource_group" "publick8s_sponsored" {
 }
 
 resource "azurerm_dns_a_record" "public_publick8_sponsored" {
-  name                = "public.publick8s_sponsored"
+  name                = "public.publick8s-sponsored"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
@@ -16,7 +16,7 @@ resource "azurerm_dns_a_record" "public_publick8_sponsored" {
 }
 
 resource "azurerm_dns_aaaa_record" "public_publick8s_sponsored" {
-  name                = "public.publick8s_sponsored"
+  name                = "public.publick8s-sponsored"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
@@ -25,7 +25,7 @@ resource "azurerm_dns_aaaa_record" "public_publick8s_sponsored" {
 }
 
 resource "azurerm_dns_a_record" "private_publick8s_sponsored" {
-  name                = "private.publick8s_sponsored"
+  name                = "private.publick8s-sponsored"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
