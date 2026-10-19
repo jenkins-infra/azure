@@ -10,7 +10,8 @@ resource "azurerm_resource_group" "prod_public_ips" {
   location = var.location
   tags     = local.default_tags
 }
-# Resource groups used to store (and lock) our public IPs for publick8s
+# TODO: migrate the content of this RG to prod_public_ips_sponsored below
+# Resource groups used to store (and lock) our public IPs for privatek8s-sponsored
 resource "azurerm_resource_group" "prod_publick8s_ips_sponsored" {
   provider = azurerm.jenkins-sponsored
   name     = "prod-public-ips" # Same name to avoid Public IP to complain when moved

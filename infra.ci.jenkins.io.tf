@@ -367,10 +367,10 @@ resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephe
   resource_group_name          = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
 }
-resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_jenkins_sponsored_to_publick8s" {
+resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephemeral_agents_jenkins_sponsored_to_publick8s_sponsored" {
   provider               = azurerm.jenkins-sponsored
-  name                   = "allow-outbound-https-from-infraci-agents-jenkins-sponsored-to-publick8s"
-  priority               = 4086
+  name                   = "allow-outbound-https-from-infraci-agents-jenkins-sponsored-to-publick8s-sponsored"
+  priority               = 4087
   direction              = "Outbound"
   access                 = "Allow"
   protocol               = "Tcp"
@@ -379,10 +379,10 @@ resource "azurerm_network_security_rule" "allow_outbound_https_from_infraci_ephe
   source_address_prefixes = [
     data.azurerm_subnet.infra_ci_jenkins_io_sponsored_ephemeral_agents.address_prefix
   ]
-  # TODO: restrict to required resources only
-  # publick8s is a dual-stack cluster, filtering on IPv4 only
+  # TODO: restrict to only the API endpoint
+  # publick8s-sponsored is a dual-stack cluster, filtering on IPv4 only
   destination_address_prefixes = [
-    for ip in data.azurerm_subnet.publick8s.address_prefixes : ip if can(cidrnetmask(ip))
+    for ip in data.azurerm_subnet.publick8s_sponsored.address_prefixes : ip if can(cidrnetmask(ip))
   ]
   resource_group_name         = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_rg_name
   network_security_group_name = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
