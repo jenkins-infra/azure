@@ -57,7 +57,7 @@ module "cert_ci_jenkins_io_sponsored" {
   dns_resourcegroup_name       = module.cert_ci_jenkins_io_letsencrypt.zone_rg_name
 
   jenkins_infra_ips = {
-    ldap_ipv4         = azurerm_public_ip.publick8s_ips["publick8s-ldap-ipv4"].ip_address,
+    ldap_ipv4         = azurerm_public_ip.publick8s_sponsored_ips["publick8s-ldap-ipv4"].ip_address,
     puppet_ipv4       = azurerm_public_ip.puppet_jenkins_io.ip_address,
     privatevpn_subnet = data.azurerm_subnet.private_vnet_data_tier.address_prefixes,
   }
