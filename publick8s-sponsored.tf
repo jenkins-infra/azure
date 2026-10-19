@@ -7,25 +7,25 @@ resource "azurerm_resource_group" "publick8s_sponsored" {
 }
 
 resource "azurerm_dns_a_record" "public_publick8_sponsored" {
-  name                = "public.publick8s_sponsored"
+  name                = "public.publick8s-sponsored"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
-  records             = [azurerm_public_ip.publick8s_sponsored_ips["temp-publick8s-public-ipv4"].ip_address]
+  records             = [azurerm_public_ip.publick8s_sponsored_ips["publick8s-public-ipv4"].ip_address]
   tags                = local.default_tags
 }
 
 resource "azurerm_dns_aaaa_record" "public_publick8s_sponsored" {
-  name                = "public.publick8s_sponsored"
+  name                = "public.publick8s-sponsored"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
-  records             = [azurerm_public_ip.publick8s_sponsored_ips["temp-publick8s-public-ipv6"].ip_address]
+  records             = [azurerm_public_ip.publick8s_sponsored_ips["publick8s-public-ipv6"].ip_address]
   tags                = local.default_tags
 }
 
 resource "azurerm_dns_a_record" "private_publick8s_sponsored" {
-  name                = "private.publick8s_sponsored"
+  name                = "private.publick8s-sponsored"
   zone_name           = data.azurerm_dns_zone.jenkinsio.name
   resource_group_name = data.azurerm_resource_group.proddns_jenkinsio.name
   ttl                 = 60
