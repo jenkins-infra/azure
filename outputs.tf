@@ -64,35 +64,35 @@ resource "local_file" "jenkins_infra_data_report" {
     "get.jenkins.io" = {
       "mirrorbits" = {
         "share_uri" = "/get.jenkins.io/mirrorbits/",
-        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["get-jenkins-io"].metadata[0].name,
+        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_sponsored_azurefiles["get-jenkins-io"].metadata[0].name,
       },
       "httpd" = {
         "share_uri" = "/get.jenkins.io/mirrorbits/",
-        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["get-jenkins-io"].metadata[0].name,
+        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_sponsored_azurefiles["get-jenkins-io"].metadata[0].name,
       },
       "geoipdata" = {
-        "pvc_name" = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["geoipdb-get-jenkins-io"].metadata[0].name,
+        "pvc_name" = kubernetes_persistent_volume_claim_v1.publick8s_sponsored_azurefiles["geoipdb-get-jenkins-io"].metadata[0].name,
       }
     },
     "updates.jenkins.io" = {
       "content" = {
         "share_uri" = "/updates.jenkins.io/content/",
-        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["updates-jenkins-io"].metadata[0].name,
+        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_sponsored_azurefiles["updates-jenkins-io"].metadata[0].name,
       },
       "redirections" = {
         "share_uri" = "/updates.jenkins.io/redirections/",
-        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["updates-jenkins-io"].metadata[0].name,
+        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_sponsored_azurefiles["updates-jenkins-io"].metadata[0].name,
       },
       "geoipdata" = {
-        "pvc_name" = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["geoipdb-updates-jenkins-io"].metadata[0].name,
+        "pvc_name" = kubernetes_persistent_volume_claim_v1.publick8s_sponsored_azurefiles["geoipdb-updates-jenkins-io"].metadata[0].name,
       }
     },
     "ldap.jenkins.io" = {
       "data" = {
-        "pvc_name" = kubernetes_persistent_volume_claim_v1.publick8s_datadisks["ldap-jenkins-io"].metadata[0].name,
+        "pvc_name" = kubernetes_persistent_volume_claim_v1.publick8s_sponsored_datadisks["ldap-jenkins-io"].metadata[0].name,
       },
       "backup" = {
-        "pvc_name" = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["ldap-jenkins-io-backup"].metadata[0].name,
+        "pvc_name" = kubernetes_persistent_volume_claim_v1.publick8s_sponsored_azurefiles["ldap-jenkins-io-backup"].metadata[0].name,
       },
     },
     "puppet.jenkins.io" = {
@@ -103,31 +103,22 @@ resource "local_file" "jenkins_infra_data_report" {
     "javadoc.jenkins.io" = {
       "data" = {
         "share_uri" = "/javadoc.jenkins.io/",
-        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["javadoc-jenkins-io"].metadata[0].name,
+        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_sponsored_azurefiles["javadoc-jenkins-io"].metadata[0].name,
       },
-      "namespace" = kubernetes_namespace_v1.publick8s_namespaces["javadoc-jenkins-io"].metadata[0].name,
+      "namespace" = kubernetes_namespace_v1.publick8s_sponsored_namespaces["javadoc-jenkins-io"].metadata[0].name,
     },
     "www.jenkins.io" = {
       "data" = {
         "share_uri" = "/www.jenkins.io/en/",
-        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["www-jenkins-io"].metadata[0].name,
+        "pvc_name"  = kubernetes_persistent_volume_claim_v1.publick8s_sponsored_azurefiles["www-jenkins-io"].metadata[0].name,
       },
-      "namespace" = kubernetes_namespace_v1.publick8s_namespaces["www-jenkins-io"].metadata[0].name,
+      "namespace" = kubernetes_namespace_v1.publick8s_sponsored_namespaces["www-jenkins-io"].metadata[0].name,
     },
     "reports.jenkins.io" = {
       "data" = {
-        "pvc_name" = kubernetes_persistent_volume_claim_v1.publick8s_azurefiles["reports-jenkins-io"].metadata[0].name,
+        "pvc_name" = kubernetes_persistent_volume_claim_v1.publick8s_sponsored_azurefiles["reports-jenkins-io"].metadata[0].name,
       },
-      "namespace" = kubernetes_namespace_v1.publick8s_namespaces["reports-jenkins-io"].metadata[0].name,
-    },
-    "publick8s" = {
-      hostname           = azurerm_kubernetes_cluster.publick8s.fqdn,
-      kubernetes_version = local.aks_clusters["publick8s"].kubernetes_version
-      pod_cidrs          = concat(flatten(azurerm_kubernetes_cluster.publick8s.network_profile[*].pod_cidrs)),
-      lb_outbound_ips = {
-        "ipv4" = [for id, pip in data.azurerm_public_ip.publick8s_lb_outbound : pip.ip_address if can(cidrnetmask("${pip.ip_address}/32"))],
-        "ipv6" = [for id, pip in data.azurerm_public_ip.publick8s_lb_outbound : pip.ip_address if !can(cidrnetmask("${pip.ip_address}/32"))],
-      },
+      "namespace" = kubernetes_namespace_v1.publick8s_sponsored_namespaces["reports-jenkins-io"].metadata[0].name,
     },
     "publick8s-sponsored" = {
       hostname           = azurerm_kubernetes_cluster.publick8s_sponsored.fqdn,

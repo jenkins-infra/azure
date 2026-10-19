@@ -163,17 +163,16 @@ resource "azurerm_public_ip" "publick8s_sponsored_ips" {
   tags                = local.default_tags
 }
 
-# TODO: uncomment when final IPs are ready
-# resource "azurerm_management_lock" "publick8s_sponsored_ips" {
-#  provider = azurerm.jenkins-sponsored
-#
-#   for_each = local.aks_clusters.publick8s_sponsored.public_ips
-#
-#   name       = each.key
-#   scope      = azurerm_public_ip.publick8s_sponsored_ips[each.key].id
-#   lock_level = "CanNotDelete"
-#   notes      = "Locked because this is a sensitive resource that should not be removed when publick8s cluster is re-created"
-# }
+resource "azurerm_management_lock" "publick8s_sponsored_ips" {
+  provider = azurerm.jenkins-sponsored
+
+  for_each = local.aks_clusters.publick8s_sponsored.public_ips
+
+  name       = each.key
+  scope      = azurerm_public_ip.publick8s_sponsored_ips[each.key].id
+  lock_level = "CanNotDelete"
+  notes      = "Locked because this is a sensitive resource that should not be removed when publick8s-sponsored cluster is re-created"
+}
 
 resource "azurerm_role_assignment" "publick8s_sponsored_ips_networkcontributor" {
   provider = azurerm.jenkins-sponsored
