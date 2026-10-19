@@ -165,54 +165,6 @@ resource "azurerm_network_security_rule" "allow_in_https_from_trusted_sponsored_
   network_security_group_name  = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
 }
 #################################################################################################
-# updates.jenkins.io's mirrorbits CLI Kubernetes Service (internal LB) - CDF Subscription
-#################################################################################################
-data "azurerm_private_link_service" "publick8s_mirrorbitscli_updates_jenkins_io" {
-  # TODO: track with updatecli from https://github.com/jenkins-infra/kubernetes-management/config/publick8s_updates-jenkins-io.yaml
-  name                = "publick8s-updates.jenkins.io"
-  resource_group_name = azurerm_kubernetes_cluster.publick8s.node_resource_group
-}
-resource "azurerm_private_endpoint" "publick8s_updates_jenkins_io_for_trustedci_sponsored" {
-  provider = azurerm.jenkins-sponsored
-
-  name = "${data.azurerm_private_link_service.publick8s_mirrorbitscli_updates_jenkins_io.name}-for-trustedci-sponsored"
-
-  location            = var.location
-  resource_group_name = azurerm_resource_group.trusted_ci_jenkins_io_sponsored_commons.name
-  subnet_id           = data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_commons.id
-
-  custom_network_interface_name = "${data.azurerm_private_link_service.publick8s_mirrorbitscli_updates_jenkins_io.name}-for-trustedci-sponsored"
-
-  private_service_connection {
-    name                           = "${data.azurerm_private_link_service.publick8s_mirrorbitscli_updates_jenkins_io.name}-for-trustedci-sponsored"
-    private_connection_resource_id = data.azurerm_private_link_service.publick8s_mirrorbitscli_updates_jenkins_io.id
-    is_manual_connection           = false
-  }
-  private_dns_zone_group {
-    name                 = module.trustedcijenkinsiosponsored_acr_pe.private_dns_zone_name
-    private_dns_zone_ids = [module.trustedcijenkinsiosponsored_acr_pe.private_dns_zone_id]
-  }
-  tags = local.default_tags
-}
-
-resource "azurerm_private_dns_cname_record" "updates_jenkins_io_sponsored" {
-  provider = azurerm.jenkins-sponsored
-
-  name                = "updates.jenkins.io"
-  private_dns_zone_id = module.trustedcijenkinsiosponsored_acr_pe.private_dns_zone_id # This existing zone already associated to the vnet
-  ttl                 = 60
-  record              = azurerm_private_dns_a_record.publick8s_sponsored_updates_jenkins_io_sponsored.fqdn
-}
-
-resource "azurerm_private_dns_a_record" "publick8s_updates_jenkins_io_sponsored" {
-  provider = azurerm.jenkins-sponsored
-
-  name                = "publick8s.updates.jenkins.io"
-  private_dns_zone_id = module.trustedcijenkinsiosponsored_acr_pe.private_dns_zone_id # This existing zone already associated to the vnet
-  ttl                 = 60
-  records             = [azurerm_private_endpoint.publick8s_updates_jenkins_io_for_trustedci_sponsored.private_service_connection[0].private_ip_address]
-}
-#################################################################################################
 # updates.jenkins.io's mirrorbits CLI Kubernetes Service (internal LB) - Sponsored Subscription
 #################################################################################################
 data "azurerm_private_link_service" "publick8s_sponsored_mirrorbitscli_updates_jenkins_io" {
@@ -252,46 +204,13 @@ resource "azurerm_private_dns_a_record" "publick8s_sponsored_updates_jenkins_io_
   ttl                 = 60
   records             = [azurerm_private_endpoint.publick8s_sponsored_mirrorbitscli_updates_jenkins_io.private_service_connection[0].private_ip_address]
 }
-## Allow access to/from UC Private Endpoint
-resource "azurerm_network_security_rule" "allow_in_many_from_trusted_agents_sponsored_to_uc" {
+resource "azurerm_private_dns_cname_record" "updates_jenkins_io_sponsored" {
   provider = azurerm.jenkins-sponsored
 
-  name              = "allow-in-many-from-trusted-agents-sponsored-to-uc"
-  priority          = 4054
-  direction         = "Inbound"
-  access            = "Allow"
-  protocol          = "Tcp"
-  source_port_range = "*"
-  destination_port_ranges = [
-    "3390", # mirrorbits CLI (content)
-  ]
-  source_address_prefixes = concat(
-    data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.address_prefixes,
-    data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_permanent_agents.address_prefixes,
-  )
-  destination_address_prefix  = azurerm_private_endpoint.publick8s_updates_jenkins_io_for_trustedci_sponsored.private_service_connection[0].private_ip_address
-  resource_group_name         = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
-  network_security_group_name = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
-}
-resource "azurerm_network_security_rule" "allow_out_from_trusted_agents_sponsored_to_uc" {
-  provider = azurerm.jenkins-sponsored
-
-  name              = "allow-out-from-trusted-agents-sponsored-to-uc"
-  priority          = 4054
-  direction         = "Outbound"
-  access            = "Allow"
-  protocol          = "Tcp"
-  source_port_range = "*"
-  destination_port_ranges = [
-    "3390", # mirrorbits CLI (content)
-  ]
-  source_address_prefixes = concat(
-    data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_ephemeral_agents.address_prefixes,
-    data.azurerm_subnet.trusted_ci_jenkins_io_sponsored_permanent_agents.address_prefixes,
-  )
-  destination_address_prefix  = azurerm_private_endpoint.publick8s_updates_jenkins_io_for_trustedci_sponsored.private_service_connection[0].private_ip_address
-  resource_group_name         = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.resource_group_name
-  network_security_group_name = data.azurerm_network_security_group.trusted_ci_jenkins_io_sponsored_vnet.name
+  name                = "updates.jenkins.io"
+  private_dns_zone_id = module.trustedcijenkinsiosponsored_acr_pe.private_dns_zone_id # This existing zone already associated to the vnet
+  ttl                 = 60
+  record              = azurerm_private_dns_a_record.publick8s_sponsored_updates_jenkins_io_sponsored.fqdn
 }
 resource "azurerm_network_security_rule" "allow_in_many_from_trusted_agents_sponsored_to_uc_sponsored" {
   provider = azurerm.jenkins-sponsored
