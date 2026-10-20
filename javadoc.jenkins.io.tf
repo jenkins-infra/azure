@@ -25,8 +25,6 @@ resource "azurerm_storage_account" "javadoc_jenkins_io" {
     default_action = "Deny"
     virtual_network_subnet_ids = concat(
       [
-        # Required for using the resource
-        data.azurerm_subnet.publick8s.id,
         data.azurerm_subnet.publick8s_sponsored.id,
       ],
       # Required for managing the resource
