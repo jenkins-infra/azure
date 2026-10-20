@@ -35,11 +35,6 @@ data "azurerm_resource_group" "privatek8s_sponsored" {
 ################################################################################
 ## Virtual Networks
 ################################################################################
-# Defined in https://github.com/jenkins-infra/azure-net/blob/main/vnets.tf
-data "azurerm_virtual_network" "public" {
-  name                = "${data.azurerm_resource_group.public.name}-vnet"
-  resource_group_name = data.azurerm_resource_group.public.name
-}
 data "azurerm_virtual_network" "public_sponsored" {
   provider            = azurerm.jenkins-sponsored
   name                = "${data.azurerm_resource_group.public_sponsored.name}-vnet"

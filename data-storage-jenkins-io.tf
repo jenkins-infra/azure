@@ -27,8 +27,6 @@ resource "azurerm_storage_account" "data_storage_jenkins_io" {
     # Only NFS share means only private network access - https://learn.microsoft.com/en-us/azure/storage/files/files-nfs-protocol#security-and-networking
     virtual_network_subnet_ids = concat(
       [
-        # Required for using the resource
-        data.azurerm_subnet.publick8s.id,
         data.azurerm_subnet.publick8s_sponsored.id,
       ],
       # Required for populating the resource from release.ci agents
@@ -66,8 +64,6 @@ resource "azurerm_storage_account" "geoipdb_jenkins_io" {
     default_action = "Deny"
     virtual_network_subnet_ids = concat(
       [
-        # Required for using the resource
-        data.azurerm_subnet.publick8s.id,
         data.azurerm_subnet.publick8s_sponsored.id,
       ],
       # Required for populating the resource from infra-cronjobs
