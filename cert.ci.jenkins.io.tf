@@ -262,12 +262,19 @@ resource "azurerm_storage_account" "cert_ci_jenkins_io_sponsored" {
   network_rules {
     default_action = "Deny"
     virtual_network_subnet_ids = concat(
-      # Required for populating content
-      local.app_subnets["infra.ci.jenkins.io"].agents,
-      # Required for using content
+      # Required for populating and using content
       local.app_subnets["cert.ci.jenkins.io"].agents,
     )
-    ip_rules = []
+    # TODO: track infra.ci.jenkins.io outbound IPs with updatecli, https://reports.jenkins.io/jenkins-infra-data-reports/azure-net.json
+    # Required for populating content from infra.ci.jenkins.io
+    ip_rules = [
+      "20.57.120.46",
+      "52.179.141.53",
+      "20.186.168.195",
+      "20.65.112.39",
+      "20.97.161.208",
+      "52.251.34.201",
+    ]
     bypass   = ["AzureServices"]
   }
 
