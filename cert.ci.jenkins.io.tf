@@ -262,7 +262,9 @@ resource "azurerm_storage_account" "cert_ci_jenkins_io_sponsored" {
   network_rules {
     default_action = "Deny"
     virtual_network_subnet_ids = concat(
-      # Required for populating and using content
+      # Required for populating content
+      local.app_subnets["infra.ci.jenkins.io"].agents,
+      # Required for using content
       local.app_subnets["cert.ci.jenkins.io"].agents,
     )
     ip_rules = []
@@ -287,4 +289,12 @@ resource "azurerm_role_assignment" "cert_ci_jenkins_io_azurevm_agents_jenkins_sp
   # Allow writing
   role_definition_name = "Storage File Data Privileged Contributor"
   principal_id         = azurerm_user_assigned_identity.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
+}
+resource "azurerm_role_assignment" "infra_ci_jenkins_io_agents_jenkins_sponsored_write_cache_share" {
+  provider = azurerm.jenkins-sponsored
+
+  scope = azurerm_storage_account.cert_ci_jenkins_io_sponsored.id
+  # Allow writing
+  role_definition_name = "Storage File Data Privileged Contributor"
+  principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents_jenkins_sponsored.principal_id
 }
