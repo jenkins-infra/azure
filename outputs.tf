@@ -196,6 +196,9 @@ output "infraci_cronjobs_geoipdb_fileshare_serviceprincipal_writer_application_c
   sensitive = true
   value     = module.infraci_cronjobs_geoipdb_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
+output "infraci_certcijenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.infraci_certcijenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
+}
 output "infraci_certcijenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
   sensitive = true
   value     = module.infraci_certcijenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
