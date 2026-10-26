@@ -33,6 +33,11 @@ end_dates:
       service: "reports.jenkins.io"
       secret: "REPORTS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
       terraform_output: "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer_application_client_password"
+    infraci_certcijenkinsio_fileshare_serviceprincipal_writer:
+      end_date: "2027-01-26T00:00:00Z"
+      service: "cert.jenkins.io maven cacher"
+      secret: "CERTCI_MAVEN_CACHER_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
+      terraform_output: "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer_application_client_password"
 updatecli_end_dates:
   infra.ci.jenkins.io:
     custom_hcl_key: resource.azuread_application_password.updatecli_infra_ci_jenkins_io.end_date
