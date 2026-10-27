@@ -49,13 +49,13 @@ locals {
   aks_clusters = {
     "infracijenkinsio_agents_1" = {
       name               = "infracijenkinsio-agents-1",
-      kubernetes_version = "1.34.7",
+      kubernetes_version = "1.34.11",
       # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
       pod_cidr = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
     },
     "privatek8s-sponsored" = {
       name               = "privatek8s-sponsored",
-      kubernetes_version = "1.34.7",
+      kubernetes_version = "1.34.11",
       # https://learn.microsoft.com/en-us/azure/aks/concepts-network-azure-cni-overlay#pods
       pod_cidr = "10.100.0.0/14", # 10.100.0.1 - 10.103.255.255
     },
