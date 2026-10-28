@@ -73,6 +73,10 @@ resource "azurerm_kubernetes_cluster" "publick8s_sponsored" {
     type = "SystemAssigned"
   }
 
+  upgrade_override {
+    force_upgrade_enabled = false
+  }
+
   node_provisioning_profile {
     default_node_pools = "Auto"
   }
