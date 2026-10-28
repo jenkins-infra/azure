@@ -95,6 +95,10 @@ resource "azurerm_kubernetes_cluster" "privatek8s_sponsored" {
     default_node_pools = "Auto"
   }
 
+  upgrade_override {
+    force_upgrade_enabled = false
+  }
+
   default_node_pool {
     name                         = "syspool"
     only_critical_addons_enabled = true                # This property is the only valid way to add the "CriticalAddonsOnly=true:NoSchedule" taint to the default node pool
