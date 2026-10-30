@@ -258,6 +258,7 @@ resource "azurerm_storage_account" "cert_ci_jenkins_io_sponsored" {
   account_kind               = "StorageV2"
   https_traffic_only_enabled = true
   min_tls_version            = "TLS1_2"
+  public_network_access      = "Enabled"
 
   network_rules {
     default_action = "Deny"
