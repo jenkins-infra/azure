@@ -1,5 +1,7 @@
 terraform(
   cronTriggerExpression: env.BRANCH_IS_PRIMARY ? '@daily' : '',
+  // Run on VM agents on the principal branch to avoid killing container agent when self-upgrading (AKS cluster 'infraciagent*')
+  agentLabel: env.BRANCH_IS_PRIMARY ? 'linux-arm64' : 'jnlp-linux-arm64',
   stagingCredentials: [
     azureServicePrincipal(
       credentialsId: 'staging-terraform-azure-serviceprincipal',
