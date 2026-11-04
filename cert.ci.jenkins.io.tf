@@ -276,7 +276,7 @@ resource "azurerm_storage_account" "cert_ci_jenkins_io_sponsored" {
       "20.97.161.208",
       "52.251.34.201",
     ]
-    bypass   = ["AzureServices"]
+    bypass = ["AzureServices"]
   }
 
   tags = {
@@ -299,7 +299,7 @@ resource "azurerm_role_assignment" "cert_ci_jenkins_io_azurevm_agents_jenkins_sp
   principal_id         = azurerm_user_assigned_identity.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
 }
 module "infraci_certcijenkinsio_fileshare_serviceprincipal_writer" {
-  source = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+  source                     = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
   service_fqdn               = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
   active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url       = "https://github.com/jenkins-infra/azure"
