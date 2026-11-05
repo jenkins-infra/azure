@@ -194,6 +194,13 @@ resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_agents_jenkins_sp
   name                = "infra-ci-jenkins-io-sponsored-agents"
   resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_sponsored_commons.name
 }
+resource "azurerm_user_assigned_identity" "infra_ci_jenkins_io_maven_cacher_agents_jenkins_sponsored" {
+  provider = azurerm.jenkins-sponsored
+
+  location            = var.location
+  name                = "infra-ci-jenkins-io-sponsored-maven-cacher-agents"
+  resource_group_name = azurerm_resource_group.infra_ci_jenkins_io_sponsored_commons.name
+}
 # The Controller identity must be able to operate this identity to assign it to VM agents - https://plugins.jenkins.io/azure-vm-agents/#plugin-content-roles-required-by-feature
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_sponsored_operate_agents_identity_sponsored" {
   provider = azurerm.jenkins-sponsored

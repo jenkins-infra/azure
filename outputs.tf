@@ -32,6 +32,15 @@ resource "local_file" "jenkins_infra_data_report" {
             },
           },
           "agents_service_account" = kubernetes_service_account_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name,
+          "maven_cacher" = {
+            "oidc_issuer_url"        = azurerm_kubernetes_cluster.infracijenkinsio_agents_1.oidc_issuer_url,
+            "user_assigned_identity" = azurerm_user_assigned_identity.infra_ci_jenkins_io_maven_cacher_agents_jenkins_sponsored.id,
+            "agents_namespaces" = {
+              "${kubernetes_namespace_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_maven_cacher_agents.metadata[0].name}" = {
+                pods_quota = 150,
+              },
+            },
+          }
         },
       },
     },

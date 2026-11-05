@@ -176,6 +176,37 @@ resource "azurerm_federated_identity_credential" "infracijenkinsio_agents_1_infr
   subject                   = "system:serviceaccount:${kubernetes_namespace_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}:${kubernetes_service_account_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_agents.metadata[0].name}"
 }
 
+resource "kubernetes_namespace_v1" "infracijenkinsio_agents_1_infra_ci_jenkins_io_maven_cacher_agents" {
+  provider = kubernetes.infracijenkinsio_agents_1
+
+  metadata {
+    name = "maven-cacher-agents"
+    labels = {
+      name = "maven-cacher-agents"
+    }
+  }
+}
+resource "kubernetes_service_account_v1" "infracijenkinsio_agents_1_infra_ci_jenkins_io_maven_cacher_agents" {
+  provider = kubernetes.infracijenkinsio_agents_1
+
+  metadata {
+    name      = "maven-cacher-agent"
+    namespace = kubernetes_namespace_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_maven_cacher_agents.metadata[0].name
+
+    annotations = {
+      "azure.workload.identity/client-id" = azurerm_user_assigned_identity.infra_ci_jenkins_io_maven_cacher_agents_jenkins_sponsored.client_id
+    }
+  }
+}
+resource "azurerm_federated_identity_credential" "infracijenkinsio_agents_1_infra_ci_jenkins_io_maven_cacher_agents" {
+  provider = azurerm.jenkins-sponsored
+  name                      = "infracijenkinsio-agents-1-${kubernetes_service_account_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_maven_cacher_agents.metadata[0].name}"
+  audience                  = ["api://AzureADTokenExchange"]
+  issuer                    = azurerm_kubernetes_cluster.privatek8s_sponsored.oidc_issuer_url
+  user_assigned_identity_id = azurerm_user_assigned_identity.infra_ci_jenkins_io_maven_cacher_agents_jenkins_sponsored.id
+  subject                   = "system:serviceaccount:${kubernetes_namespace_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_maven_cacher_agents.metadata[0].name}:${kubernetes_service_account_v1.infracijenkinsio_agents_1_infra_ci_jenkins_io_maven_cacher_agents.metadata[0].name}"
+}
+
 #Configure the jenkins-infra/kubernetes-management admin service account
 module "infracijenkinsio_agents_1_admin_sa" {
   providers = {
