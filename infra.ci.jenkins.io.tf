@@ -406,6 +406,15 @@ resource "azurerm_network_security_rule" "allow_outbound_postgres_from_infraci_e
   network_security_group_name  = module.infra_ci_jenkins_io_azurevm_agents_jenkins_sponsored.ephemeral_agents_nsg_name
 }
 
+# Allow to read from US East 2 cache fileshare
+resource "azurerm_role_assignment" "infra_ci_jenkins_io_agents_jenkins_sponsored_cache_east_us_2_fileshare_reader" {
+  provider = azurerm.jenkins-sponsored
+
+  scope = azurerm_storage_account.cache_east_us_2.id
+  role_definition_name = "Storage File Data Privileged Reader"
+  principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents_jenkins_sponsored.principal_id
+}
+
 # Allow access to the private Azure Container Registry through an Azure Endpoint NIC
 module "infracijenkinsio_sponsored_acr_pe" {
   source = "./modules/azure-container-registry-private-links"
