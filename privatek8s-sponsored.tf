@@ -574,3 +574,62 @@ output "privatek8s_sponsoredadmin_sa_kubeconfig" {
   sensitive = true
   value     = module.privatek8s_sponsored_admin_sa.kubeconfig
 }
+
+####################################################################################
+## Common resources (endpoint, DNS, etc.) in the sponsored subscription
+####################################################################################
+resource "azurerm_resource_group" "privatek8s_sponsored_commons" {
+  provider = azurerm.jenkins-sponsored
+  name     = "privatek8s-sponsored-commons"
+  location = var.location
+  tags     = local.default_tags
+}
+
+########################################################################################
+# Used for storing artifact caches (Maven, etc.) close to the agents
+########################################################################################
+resource "azurerm_storage_account" "privatek8s_sponsored_cache" {
+  provider = azurerm.jenkins-sponsored
+
+  name                       = "privatek8ssponsoredcache"
+  resource_group_name        = azurerm_resource_group.privatek8s_sponsored_commons.name
+  location                   = data.azurerm_virtual_network.privatek8s_sponsored.location # CLose the the agents (may be different than the RG)
+  account_tier               = "Standard"
+  account_replication_type   = "ZRS"
+  account_kind               = "StorageV2"
+  https_traffic_only_enabled = true
+  min_tls_version            = "TLS1_2"
+  public_network_access      = "Enabled"
+
+  network_rules {
+    default_action = "Deny"
+    virtual_network_subnet_ids = concat(
+      # Required for populating and using content
+      local.app_subnets["infra.ci.jenkins.io"].agents,
+      local.app_subnets["release.ci.jenkins.io"].agents,
+      local.app_subnets["trusted.ci.jenkins.io"].agents,
+    )
+    bypass = ["AzureServices"]
+  }
+
+  tags = {
+    scope = "terraform-managed"
+  }
+}
+resource "azurerm_storage_share" "privatek8s_sponsored_cache" {
+  provider = azurerm.jenkins-sponsored
+
+  name               = "privatek8s-sponsored-cache"
+  storage_account_id = azurerm_storage_account.privatek8s_sponsored_cache.id
+  quota              = 10
+}
+module "infraci_privatek8ssponsoredcache_fileshare_serviceprincipal_writer" {
+  source                     = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+  service_fqdn               = "infra-ci-privatek8s-sponsored-cache-fileshare-serviceprincipal-writer"
+  active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
+  active_directory_url       = "https://github.com/jenkins-infra/azure"
+  service_principal_end_date = local.end_dates.infra_ci_jenkins_io.infraci_privatek8ssponsoredcache_fileshare_serviceprincipal_writer.end_date
+  file_share_id              = azurerm_storage_share.privatek8s_sponsored_cache.id
+  storage_account_id         = azurerm_storage_account.privatek8s_sponsored_cache.id
+  default_tags               = local.default_tags
+}

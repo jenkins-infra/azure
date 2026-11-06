@@ -211,3 +211,10 @@ output "cert_ci_jenkins_io_acr_docker_password" {
   sensitive = true
   value     = azuread_application_password.cert_ci_jenkins_io_acr_dockerhub_mirror.value
 }
+output "infraci_privatek8ssponsoredcache_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.infraci_privatek8ssponsoredcache_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
+}
+output "infraci_privatek8ssponsoredcache_fileshare_serviceprincipal_writer_application_client_password" {
+  sensitive = true
+  value     = module.infraci_privatek8ssponsoredcache_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
+}
