@@ -154,11 +154,11 @@ data "azurerm_network_security_group" "cert_ci_jenkins_io_sponsored_vnet" {
   resource_group_name = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.resource_group_name
 }
 
-# Allow to read from US East 2 cache fileshare
-resource "azurerm_role_assignment" "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored_cache_east_us_2_fileshare_reader" {
+# Allow to read from Sweden Central cache fileshare
+resource "azurerm_role_assignment" "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored_cache_sweden_central_fileshare_reader" {
   provider = azurerm.jenkins-sponsored
 
-  scope = azurerm_storage_account.cache_east_us_2.id
+  scope = azurerm_storage_account.cache_sweden_central.id
   role_definition_name = "Storage File Data Privileged Reader"
   principal_id         = azurerm_user_assigned_identity.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
 }
