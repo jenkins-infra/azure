@@ -244,67 +244,12 @@ resource "azurerm_role_assignment" "certpush_to_acr" {
   skip_service_principal_aad_check = true
 }
 
-########################################################################################
-# Used for storing artifact caches (Maven, Grapes, etc.) close to the agents
-########################################################################################
-resource "azurerm_storage_account" "cert_ci_jenkins_io_sponsored" {
+# Read access to Sweden Central cache fileshare
+resource "azurerm_role_assignment" "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored_jenkins_io_east_us_2_fileshare_reader" {
   provider = azurerm.jenkins-sponsored
 
-  name                       = "certcijenkinsiosponsored"
-  resource_group_name        = azurerm_resource_group.cert_ci_jenkins_io_sponsored_commons.name
-  location                   = data.azurerm_virtual_network.cert_ci_jenkins_io_sponsored.location # CLose the the agents (may be different than the RG)
-  account_tier               = "Standard"
-  account_replication_type   = "ZRS"
-  account_kind               = "StorageV2"
-  https_traffic_only_enabled = true
-  min_tls_version            = "TLS1_2"
-  public_network_access      = "Enabled"
-
-  network_rules {
-    default_action = "Deny"
-    virtual_network_subnet_ids = concat(
-      # Required for populating and using content
-      local.app_subnets["cert.ci.jenkins.io"].agents,
-    )
-    # TODO: track infra.ci.jenkins.io outbound IPs with updatecli, https://reports.jenkins.io/jenkins-infra-data-reports/azure-net.json
-    # Required for populating content from infra.ci.jenkins.io
-    ip_rules = [
-      "20.57.120.46",
-      "52.179.141.53",
-      "20.186.168.195",
-      "20.65.112.39",
-      "20.97.161.208",
-      "52.251.34.201",
-    ]
-    bypass = ["AzureServices"]
-  }
-
-  tags = {
-    scope = "terraform-managed"
-  }
-}
-resource "azurerm_storage_share" "cache_cert_ci_jenkins_io_sponsored" {
-  provider = azurerm.jenkins-sponsored
-
-  name               = "cache-cert-ci-jenkins-io"
-  storage_account_id = azurerm_storage_account.cert_ci_jenkins_io_sponsored.id
-  quota              = 10
-}
-resource "azurerm_role_assignment" "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored_write_cache_share" {
-  provider = azurerm.jenkins-sponsored
-
-  scope = azurerm_storage_account.cert_ci_jenkins_io_sponsored.id
+  scope = azurerm_storage_account.jenkins_io_east_us_2.id
   # Allow writing
-  role_definition_name = "Storage File Data Privileged Contributor"
+  role_definition_name = "Storage File Data Privileged Reader"
   principal_id         = azurerm_user_assigned_identity.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
-}
-module "infraci_certcijenkinsio_fileshare_serviceprincipal_writer" {
-  source                     = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
-  service_fqdn               = "infra-ci-jenkins-io-fileshare_serviceprincipal_writer"
-  active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
-  active_directory_url       = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date = local.end_dates.infra_ci_jenkins_io.infraci_certcijenkinsio_fileshare_serviceprincipal_writer.end_date
-  file_share_id              = azurerm_storage_share.cache_cert_ci_jenkins_io_sponsored.id
-  storage_account_id         = azurerm_storage_account.cert_ci_jenkins_io_sponsored.id
-  default_tags               = local.default_tags
 }

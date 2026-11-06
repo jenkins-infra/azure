@@ -196,13 +196,6 @@ output "infraci_cronjobs_geoipdb_fileshare_serviceprincipal_writer_application_c
   sensitive = true
   value     = module.infraci_cronjobs_geoipdb_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
-output "infraci_certcijenkinsio_fileshare_serviceprincipal_writer_application_client_id" {
-  value = module.infraci_certcijenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
-}
-output "infraci_certcijenkinsio_fileshare_serviceprincipal_writer_application_client_password" {
-  sensitive = true
-  value     = module.infraci_certcijenkinsio_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
-}
 output "cert_ci_jenkins_io_acr_docker_username" {
   value = azuread_service_principal.cert_ci_jenkins_io_acr_dockerhub_mirror.client_id
 }
@@ -210,4 +203,19 @@ output "cert_ci_jenkins_io_acr_docker_username" {
 output "cert_ci_jenkins_io_acr_docker_password" {
   sensitive = true
   value     = azuread_application_password.cert_ci_jenkins_io_acr_dockerhub_mirror.value
+}
+# Caches
+output "jenkins_io_east_us_2_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.jenkins_io_east_us_2_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
+}
+output "jenkins_io_east_us_2_fileshare_serviceprincipal_writer_application_client_password" {
+  sensitive = true
+  value     = module.jenkins_io_east_us_2_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
+}
+output "jenkins_io_sweden_central_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.jenkins_io_sweden_central_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
+}
+output "jenkins_io_sweden_central_fileshare_serviceprincipal_writer_application_client_password" {
+  sensitive = true
+  value     = module.jenkins_io_sweden_central_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }

@@ -335,3 +335,13 @@ resource "azurerm_role_assignment" "trusted_controller_vnet_jenkins_sponsored_re
   role_definition_id = azurerm_role_definition.trusted_ci_jenkins_io_controller_vnet_sponsored_reader.role_definition_resource_id
   principal_id       = module.trusted_ci_jenkins_io_sponsored.controller_service_principal_id
 }
+
+# Read access to US East 2 cache fileshare
+resource "azurerm_role_assignment" "trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored_jenkins_io_east_us_2_fileshare_reader" {
+  provider = azurerm.jenkins-sponsored
+
+  scope = azurerm_storage_account.jenkins_io_east_us_2.id
+  # Allow writing
+  role_definition_name = "Storage File Data Privileged Reader"
+  principal_id         = azurerm_user_assigned_identity.trusted_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
+}
