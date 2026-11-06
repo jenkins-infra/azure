@@ -205,17 +205,17 @@ output "cert_ci_jenkins_io_acr_docker_password" {
   value     = azuread_application_password.cert_ci_jenkins_io_acr_dockerhub_mirror.value
 }
 # Caches
-output "jenkins_io_east_us_2_fileshare_serviceprincipal_writer_application_client_id" {
-  value = module.jenkins_io_east_us_2_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
+output "cache_east_us_2_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.cache_east_us_2_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
-output "jenkins_io_east_us_2_fileshare_serviceprincipal_writer_application_client_password" {
+output "cache_east_us_2_fileshare_serviceprincipal_writer_application_client_password" {
   sensitive = true
-  value     = module.jenkins_io_east_us_2_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
+  value     = module.cache_east_us_2_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }
-output "jenkins_io_sweden_central_fileshare_serviceprincipal_writer_application_client_id" {
-  value = module.jenkins_io_sweden_central_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
+output "cache_sweden_central_fileshare_serviceprincipal_writer_application_client_id" {
+  value = module.cache_sweden_central_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_id
 }
-output "jenkins_io_sweden_central_fileshare_serviceprincipal_writer_application_client_password" {
+output "cache_sweden_central_fileshare_serviceprincipal_writer_application_client_password" {
   sensitive = true
-  value     = module.jenkins_io_sweden_central_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
+  value     = module.cache_sweden_central_fileshare_serviceprincipal_writer.fileshare_serviceprincipal_writer_application_client_password
 }

@@ -33,17 +33,17 @@ end_dates:
       service: "reports.jenkins.io"
       secret: "REPORTS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
       terraform_output: "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer_application_client_password"
-  jenkins_io_caches:
-    jenkins_io_east_us_2_fileshare_serviceprincipal_writer:
+  regional_caches:
+    cache_east_us_2_fileshare_serviceprincipal_writer:
       end_date: "2027-02-05T00:00:00Z"
-      service: "jenkins-io-east-us-2 fileshare writer"
-      secret: "JENKINS_IO_EAST_US_2_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
-      terraform_output: "jenkins_io_east_us_2_fileshare_serviceprincipal_writer_application_client_password"
-    jenkins_io_sweden_central_fileshare_serviceprincipal_writer:
+      service: "cache-east-us-2 fileshare writer"
+      secret: "CACHE_EAST_UR_2_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
+      terraform_output: "cache_east_us_2_fileshare_serviceprincipal_writer_application_client_password"
+    cache_sweden_central_fileshare_serviceprincipal_writer:
       end_date: "2027-02-05T00:00:00Z"
-      service: "jenkins-io-sweden-central fileshare writer"
-      secret: "JENKINS_IO_SWEDEN_CENTRAL_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
-      terraform_output: "jenkins_io_sweden_central_fileshare_serviceprincipal_writer_application_client_password"
+      service: "cache-sweden-central fileshare writer"
+      secret: "CACHE_SWEDEN_CENTRAL_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
+      terraform_output: "cache_sweden_central_fileshare_serviceprincipal_writer_application_client_password"
 updatecli_end_dates:
   infra.ci.jenkins.io:
     custom_hcl_key: resource.azuread_application_password.updatecli_infra_ci_jenkins_io.end_date

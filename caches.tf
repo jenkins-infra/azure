@@ -1,19 +1,19 @@
 #############################################################################################
 # Used for storing artifact caches (Maven, Grapes, etc.) close to the agents (one per region)
 #############################################################################################
-resource "azurerm_resource_group" "jenkins_io_caches" {
+resource "azurerm_resource_group" "regional_caches" {
   provider = azurerm.jenkins-sponsored
-  name     = "jenkins-io-caches"
+  name     = "regional-caches"
   location = var.location
   tags     = local.default_tags
 }
 
 # East US 2
-resource "azurerm_storage_account" "jenkins_io_east_us_2" {
+resource "azurerm_storage_account" "cache_east_us_2" {
   provider = azurerm.jenkins-sponsored
 
-  name                       = "jenkinsioeastus2"
-  resource_group_name        = azurerm_resource_group.jenkins_io_caches.name
+  name                       = "cacheeastus2"
+  resource_group_name        = azurerm_resource_group.regional_caches.name
   location                   = "East US 2"
   account_tier               = "Standard"
   account_replication_type   = "ZRS"
@@ -37,30 +37,30 @@ resource "azurerm_storage_account" "jenkins_io_east_us_2" {
     scope = "terraform-managed"
   }
 }
-resource "azurerm_storage_share" "jenkins_io_east_us_2" {
+resource "azurerm_storage_share" "cache_east_us_2" {
   provider = azurerm.jenkins-sponsored
 
-  name               = "jenkins-io-east-us-2"
-  storage_account_id = azurerm_storage_account.jenkins_io_east_us_2.id
+  name               = "cache-east-us-2"
+  storage_account_id = azurerm_storage_account.cache_east_us_2.id
   quota              = 10
 }
-module "jenkins_io_east_us_2_fileshare_serviceprincipal_writer" {
+module "cache_east_us_2_fileshare_serviceprincipal_writer" {
   source                     = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
-  service_fqdn               = "jenkins-io-east-us-2-fileshare-serviceprincipal-writer"
+  service_fqdn               = "cache-east-us-2-fileshare-serviceprincipal-writer"
   active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url       = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date = local.end_dates.jenkins_io_caches.jenkins_io_east_us_2_fileshare_serviceprincipal_writer.end_date
-  file_share_id              = azurerm_storage_share.jenkins_io_east_us_2.id
-  storage_account_id         = azurerm_storage_account.jenkins_io_east_us_2.id
+  service_principal_end_date = local.end_dates.regional_caches.cache_east_us_2_fileshare_serviceprincipal_writer.end_date
+  file_share_id              = azurerm_storage_share.cache_east_us_2.id
+  storage_account_id         = azurerm_storage_account.cache_east_us_2.id
   default_tags               = local.default_tags
 }
 
 # Sweden Central (for cert.ci.jenkins.io)
-resource "azurerm_storage_account" "jenkins_io_sweden_central" {
+resource "azurerm_storage_account" "cache_sweden_central" {
   provider = azurerm.jenkins-sponsored
 
-  name                       = "jenkinsioswedencentral"
-  resource_group_name        = azurerm_resource_group.jenkins_io_caches.name
+  name                       = "cacheswedencentral"
+  resource_group_name        = azurerm_resource_group.regional_caches.name
   location                   = "Sweden Central"
   account_tier               = "Standard"
   account_replication_type   = "ZRS"
@@ -92,20 +92,20 @@ resource "azurerm_storage_account" "jenkins_io_sweden_central" {
     scope = "terraform-managed"
   }
 }
-resource "azurerm_storage_share" "jenkins_io_sweden_central" {
+resource "azurerm_storage_share" "cache_sweden_central" {
   provider = azurerm.jenkins-sponsored
 
-  name               = "jenkins-io-sweden-central"
-  storage_account_id = azurerm_storage_account.jenkins_io_sweden_central.id
+  name               = "cache-sweden-central"
+  storage_account_id = azurerm_storage_account.cache_sweden_central.id
   quota              = 10
 }
-module "jenkins_io_sweden_central_fileshare_serviceprincipal_writer" {
+module "cache_sweden_central_fileshare_serviceprincipal_writer" {
   source                     = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
-  service_fqdn               = "jenkins-io-sweden-central-fileshare-serviceprincipal-writer"
+  service_fqdn               = "cache-sweden-central-fileshare-serviceprincipal-writer"
   active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
   active_directory_url       = "https://github.com/jenkins-infra/azure"
-  service_principal_end_date = local.end_dates.jenkins_io_caches.jenkins_io_sweden_central_fileshare_serviceprincipal_writer.end_date
-  file_share_id              = azurerm_storage_share.jenkins_io_sweden_central.id
-  storage_account_id         = azurerm_storage_account.jenkins_io_sweden_central.id
+  service_principal_end_date = local.end_dates.regional_caches.cache_sweden_central_fileshare_serviceprincipal_writer.end_date
+  file_share_id              = azurerm_storage_share.cache_sweden_central.id
+  storage_account_id         = azurerm_storage_account.cache_sweden_central.id
   default_tags               = local.default_tags
 }

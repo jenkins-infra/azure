@@ -153,6 +153,16 @@ data "azurerm_network_security_group" "cert_ci_jenkins_io_sponsored_vnet" {
   name                = "cert-ci-jenkins-io-sponsored-vnet"
   resource_group_name = data.azurerm_subnet.cert_ci_jenkins_io_sponsored_ephemeral_agents.resource_group_name
 }
+
+# Allow to read from US East 2 cache fileshare
+resource "azurerm_role_assignment" "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored_cache_east_us_2_fileshare_reader" {
+  provider = azurerm.jenkins-sponsored
+
+  scope = azurerm_storage_account.cache_east_us_2.id
+  role_definition_name = "Storage File Data Privileged Reader"
+  principal_id         = azurerm_user_assigned_identity.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
+}
+
 # Allow access to the private Azure Container Registry through an Azure Private Endpoint NIC
 module "certcijenkinsiosponsored_acr_pe" {
   source = "./modules/azure-container-registry-private-links"
@@ -242,13 +252,4 @@ resource "azurerm_role_assignment" "certpush_to_acr" {
   role_definition_name             = "AcrPush"
   scope                            = azurerm_container_registry.dockerhub_mirror.id
   skip_service_principal_aad_check = true
-}
-
-# Read access to Sweden Central cache fileshare
-resource "azurerm_role_assignment" "cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored_jenkins_io_east_us_2_fileshare_reader" {
-  provider = azurerm.jenkins-sponsored
-
-  scope = azurerm_storage_account.jenkins_io_east_us_2.id
-  role_definition_name = "Storage File Data Privileged Reader"
-  principal_id         = azurerm_user_assigned_identity.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
 }

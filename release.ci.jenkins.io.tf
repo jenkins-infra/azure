@@ -118,19 +118,21 @@ resource "azurerm_role_assignment" "release_ci_jenkins_io_azurevm_agents_write_b
   role_definition_name = "Storage File Data Privileged Contributor"
   principal_id         = azurerm_user_assigned_identity.release_ci_jenkins_io_agents_sponsored.principal_id
 }
+
+# Allow to read from US East 2 cache fileshare
+resource "azurerm_role_assignment" "release_ci_jenkins_io_agents_sponsored_cache_east_us_2_fileshare_reader" {
+  provider = azurerm.jenkins-sponsored
+
+  scope = azurerm_storage_account.cache_east_us_2.id
+  role_definition_name = "Storage File Data Privileged Reader"
+  principal_id         = azurerm_user_assigned_identity.release_ci_jenkins_io_agents_sponsored.principal_id
+}
+
 resource "azurerm_role_assignment" "release_ci_jenkins_io_agents_read_prodreleasecore_vault" {
   provider = azurerm.jenkins-sponsored
 
   scope = azurerm_key_vault.prodreleasecore.id
   # Allow reading (not sufficient: check access policies on the Vault)
   role_definition_name = "Reader"
-  principal_id         = azurerm_user_assigned_identity.release_ci_jenkins_io_agents_sponsored.principal_id
-}
-
-resource "azurerm_role_assignment" "release_ci_jenkins_io_agents_sponsored_jenkins_io_east_us_2_fileshare_reader" {
-  provider = azurerm.jenkins-sponsored
-
-  scope = azurerm_storage_account.jenkins_io_east_us_2.id
-  role_definition_name = "Storage File Data Privileged Reader"
   principal_id         = azurerm_user_assigned_identity.release_ci_jenkins_io_agents_sponsored.principal_id
 }
