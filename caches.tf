@@ -8,7 +8,6 @@ resource "azurerm_resource_group" "regional_caches" {
   tags     = local.default_tags
 }
 
-# East US 2
 resource "azurerm_storage_account" "cache_east_us_2" {
   provider = azurerm.jenkins-sponsored
 
@@ -55,7 +54,6 @@ module "cache_east_us_2_fileshare_serviceprincipal_writer" {
   default_tags               = local.default_tags
 }
 
-# Sweden Central (for cert.ci.jenkins.io)
 resource "azurerm_storage_account" "cache_sweden_central" {
   provider = azurerm.jenkins-sponsored
 
