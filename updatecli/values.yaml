@@ -37,7 +37,7 @@ end_dates:
     cache_east_us_2_fileshare_serviceprincipal_writer:
       end_date: "2027-02-05T00:00:00Z"
       service: "cache-east-us-2 fileshare writer"
-      secret: "CACHE_EAST_UR_2_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
+      secret: "CACHE_EAST_US_2_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
       terraform_output: "cache_east_us_2_fileshare_serviceprincipal_writer_application_client_password"
     cache_sweden_central_fileshare_serviceprincipal_writer:
       end_date: "2027-02-05T00:00:00Z"
