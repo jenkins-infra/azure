@@ -58,12 +58,11 @@ module "infraci_pluginsjenkinsio_fileshare_serviceprincipal_writer" {
 }
 # Required to allow infra.ci.jenkins.io to update the GeoIP DB
 module "infraci_cronjobs_geoipdb_fileshare_serviceprincipal_writer" {
-  source                  = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
-  service_fqdn            = "infraci-cronjobs-geoipdb-fileshare_serviceprincipal_writer"
-  active_directory_owners = [data.azuread_service_principal.terraform_production.object_id]
-  active_directory_url    = "https://github.com/jenkins-infra/azure"
-  # TODO: track with updatecli
-  service_principal_end_date = "2027-01-07T00:00:00Z"
+  source                     = "./modules/azure-jenkinsinfra-fileshare-serviceprincipal-writer"
+  service_fqdn               = "infraci-cronjobs-geoipdb-fileshare_serviceprincipal_writer"
+  active_directory_owners    = [data.azuread_service_principal.terraform_production.object_id]
+  active_directory_url       = "https://github.com/jenkins-infra/azure"
+  service_principal_end_date = local.end_dates.infra_ci_jenkins_io.infraci_cronjobs_geoipdb_fileshare_serviceprincipal_writer.end_date
   file_share_id              = azurerm_storage_share.geoipdb_jenkins_io.id
   storage_account_id         = azurerm_storage_account.geoipdb_jenkins_io.id
   default_tags               = local.default_tags
