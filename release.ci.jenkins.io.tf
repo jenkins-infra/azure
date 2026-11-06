@@ -127,12 +127,10 @@ resource "azurerm_role_assignment" "release_ci_jenkins_io_agents_read_prodreleas
   principal_id         = azurerm_user_assigned_identity.release_ci_jenkins_io_agents_sponsored.principal_id
 }
 
-# Read access to US East 2 cache fileshare
 resource "azurerm_role_assignment" "release_ci_jenkins_io_agents_sponsored_jenkins_io_east_us_2_fileshare_reader" {
   provider = azurerm.jenkins-sponsored
 
   scope = azurerm_storage_account.jenkins_io_east_us_2.id
-  # Allow writing
   role_definition_name = "Storage File Data Privileged Reader"
   principal_id         = azurerm_user_assigned_identity.release_ci_jenkins_io_agents_sponsored.principal_id
 }

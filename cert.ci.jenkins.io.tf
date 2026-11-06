@@ -249,7 +249,6 @@ resource "azurerm_role_assignment" "cert_ci_jenkins_io_azurevm_agents_jenkins_sp
   provider = azurerm.jenkins-sponsored
 
   scope = azurerm_storage_account.jenkins_io_east_us_2.id
-  # Allow writing
   role_definition_name = "Storage File Data Privileged Reader"
   principal_id         = azurerm_user_assigned_identity.cert_ci_jenkins_io_azurevm_agents_jenkins_sponsored.principal_id
 }
