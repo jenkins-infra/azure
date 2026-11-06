@@ -33,6 +33,11 @@ end_dates:
       service: "reports.jenkins.io"
       secret: "REPORTS_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
       terraform_output: "infraci_reportsjenkinsio_fileshare_serviceprincipal_writer_application_client_password"
+    infraci_cronjobs_geoipdb_fileshare_serviceprincipal_writer:
+      end_date: "2027-01-07T00:00:00Z"
+      service: "updates.jenkins.io && get.jenkins.io"
+      secret: "GEOIPDBSTORAGE_SERVICE_PRINCIPAL_WRITER_CLIENT_SECRET"
+      terraform_output: "infraci_cronjobs_geoipdb_fileshare_serviceprincipal_writer_application_client_password"
   regional_caches:
     cache_east_us_2_fileshare_serviceprincipal_writer:
       end_date: "2027-02-05T00:00:00Z"
