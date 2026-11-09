@@ -73,8 +73,7 @@ resource "azurerm_storage_account" "cache_sweden_central" {
       # Required for using content
       local.app_subnets["cert.ci.jenkins.io"].agents,
     )
-    # TODO: track infra.ci.jenkins.io outbound IPs with updatecli, https://reports.jenkins.io/jenkins-infra-data-reports/azure-net.json
-    # Required for populating content from infra.ci.jenkins.io
+    # Required for populating content from infra.ci.jenkins.io agents
     ip_rules = [
       "20.57.120.46",
       "52.179.141.53",
