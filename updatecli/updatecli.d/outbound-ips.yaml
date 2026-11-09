@@ -21,6 +21,11 @@ sources:
     transformers:
       - trimprefix: "["
       - trimsuffix: "]"
+      - replacer:
+          from: " "
+          to: "\",\n      \""
+      - addprefix: "[\n      \""
+      - addsuffix: "\",\n    ]"
 
 targets:
   updateSwedenCentralCache:
