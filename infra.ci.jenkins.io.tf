@@ -102,7 +102,7 @@ resource "azuread_service_principal" "updatecli_infra_ci_jenkins_io" {
 resource "azuread_application_password" "updatecli_infra_ci_jenkins_io" {
   application_id = azuread_application.updatecli_infra_ci_jenkins_io.id
   display_name   = "updatecli_infra.ci.jenkins.io-tf-managed"
-  end_date       = "2026-11-22T00:00:00Z"
+  end_date       = "2027-02-12T00:00:00Z"
 }
 resource "azurerm_role_definition" "vm_images_reader" {
   name  = "ReadVMImages"
@@ -409,7 +409,7 @@ resource "azurerm_network_security_rule" "allow_outbound_postgres_from_infraci_e
 resource "azurerm_role_assignment" "infra_ci_jenkins_io_agents_jenkins_sponsored_cache_east_us_2_fileshare_reader" {
   provider = azurerm.jenkins-sponsored
 
-  scope = azurerm_storage_account.cache_east_us_2.id
+  scope                = azurerm_storage_account.cache_east_us_2.id
   role_definition_name = "Storage File Data Privileged Reader"
   principal_id         = azurerm_user_assigned_identity.infra_ci_jenkins_io_agents_jenkins_sponsored.principal_id
 }
