@@ -17,7 +17,8 @@ sources:
     kind: json
     spec:
       file: https://reports.jenkins.io/jenkins-infra-data-reports/azure-net.json
-      key: .infra\.ci\.jenkins\.io.outbound_ips
+      engine: dasel/v3
+      key: $this["infra.ci.jenkins.io"].outbound_ips
     transformers:
       - trimprefix: "["
       - trimsuffix: "]"
